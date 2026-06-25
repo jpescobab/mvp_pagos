@@ -1,0 +1,22 @@
+core_modules:
+  - auth
+  - users
+  - roles_permissions
+  - estructura_capj
+  - workflow
+  - documents
+  - audit
+  - notifications
+  - parameters
+  - integrations
+  - indicators
+  - reporting
+functional_modules:
+  - pagos_proveedores
+  - presupuesto
+  - adquisiciones
+  - mantenimiento
+  - recursos_humanos
+  - servicios_contratados
+  - consumo_electrico
+  - informes_razonados

@@ -1,0 +1,37 @@
+indicators:
+  - code: UF
+    name: Unidad de Fomento
+    type: unidad_reajustable
+    value_periodicity: diaria
+    publication_periodicity: tramo_mensual
+    default_source: CMF
+    monthly_job_day: 10
+  - code: USD
+    name: Dólar observado
+    type: moneda
+    value_periodicity: diaria
+    publication_periodicity: diaria_habil
+    default_source: CMF
+    daily_job: true
+    fallback_policy: configurable
+  - code: UTM
+    name: Unidad Tributaria Mensual
+    type: unidad_tributaria
+    value_periodicity: mensual
+    publication_periodicity: mensual
+    default_source: CMF
+    monthly_job_day: 10
+  - code: UTA
+    name: Unidad Tributaria Anual
+    type: unidad_tributaria
+    value_periodicity: mensual
+    publication_periodicity: mensual
+    default_source: CMF
+    monthly_job_day: 10
+  - code: IPC
+    name: Índice de Precios al Consumidor
+    type: indice
+    value_periodicity: mensual
+    publication_periodicity: mensual
+    default_source: CMF
+    monthly_job_day: 10
