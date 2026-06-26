@@ -17,7 +17,9 @@ return new class extends Migration
             $table->foreignId('current_state_id')->constrained('workflow_states')->restrictOnDelete();
             $table->string('subject_type');
             $table->unsignedBigInteger('subject_id');
-            $table->json('documentos_adjuntos')->nullable();
+            // Sin FK: procurement_modalities se crea en una migración posterior.
+            $table->unsignedBigInteger('modalidad_id')->nullable();
+            $table->decimal('monto', 14, 2)->nullable();
             $table->foreignId('iniciado_por')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('cerrado_en')->nullable();
             $table->timestamps();

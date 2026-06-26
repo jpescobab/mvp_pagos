@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-/**
- * @property list<string>|null $documentos_adjuntos
- */
 class Process extends Model
 {
     protected $fillable = [
@@ -17,7 +16,8 @@ class Process extends Model
         'current_state_id',
         'subject_type',
         'subject_id',
-        'documentos_adjuntos',
+        'modalidad_id',
+        'monto',
         'iniciado_por',
         'cerrado_en',
     ];
@@ -25,7 +25,7 @@ class Process extends Model
     protected function casts(): array
     {
         return [
-            'documentos_adjuntos' => 'array',
+            'monto' => 'decimal:2',
             'cerrado_en' => 'datetime',
         ];
     }
@@ -55,6 +55,14 @@ class Process extends Model
     }
 
     /**
+     * @return BelongsTo<ProcurementModality, $this>
+     */
+    public function modalidad(): BelongsTo
+    {
+        return $this->belongsTo(ProcurementModality::class, 'modalidad_id');
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function iniciadoPor(): BelongsTo
@@ -76,5 +84,21 @@ class Process extends Model
     public function transitionLogs(): HasMany
     {
         return $this->hasMany(WorkflowTransitionLog::class);
+    }
+
+    /**
+     * @return MorphMany<DocumentLink, $this>
+     */
+    public function documentLinks(): MorphMany
+    {
+        return $this->morphMany(DocumentLink::class, 'linkable');
+    }
+
+    /**
+     * @return HasOne<ProcessDocumentChecklist, $this>
+     */
+    public function checklist(): HasOne
+    {
+        return $this->hasOne(ProcessDocumentChecklist::class);
     }
 }

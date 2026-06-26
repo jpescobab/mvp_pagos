@@ -10,13 +10,17 @@ use App\Models\WorkflowTaskAssignment;
 use App\Models\WorkflowTransition;
 use App\Notifications\WorkflowTransitionNotification;
 use App\Services\AuditLogger;
+use App\Services\Documentos\DocumentValidationStatusResolver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 class WorkflowTransitionService
 {
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly DocumentValidationStatusResolver $documentValidationStatusResolver,
+    ) {}
 
     /**
      * The single authorized entry point to change a process's state. No
@@ -61,10 +65,10 @@ class WorkflowTransitionService
             throw WorkflowTransitionException::comentarioRequerido();
         }
 
-        $faltantes = array_values(array_diff(
+        $faltantes = $this->documentValidationStatusResolver->faltantes(
+            $process,
             $transition->documentos_requeridos ?? [],
-            $process->documentos_adjuntos ?? [],
-        ));
+        );
 
         if ($faltantes !== []) {
             throw WorkflowTransitionException::documentosFaltantes($faltantes);

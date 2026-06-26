@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ClientesMedidoresSeeder::class);
 
         $this->call(RolesAndPermissionsSeeder::class);
+        $this->call(DocumentTypesSeeder::class);
 
         // User::factory(10)->create();
 

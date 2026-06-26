@@ -2,6 +2,8 @@
 
 use App\Exceptions\WorkflowTransitionException;
 use App\Models\AuditLog;
+use App\Models\Document;
+use App\Models\DocumentType;
 use App\Models\Funcionario;
 use App\Models\Process;
 use App\Models\User;
@@ -13,6 +15,17 @@ use App\Notifications\WorkflowTransitionNotification;
 use App\Services\Workflow\WorkflowTransitionService;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
+
+function adjuntarDocumentoValidado(Process $proceso, string $codigoTipo): Document
+{
+    $tipo = DocumentType::firstOrCreate(['codigo' => $codigoTipo], ['nombre' => $codigoTipo]);
+    $documento = Document::create(['document_type_id' => $tipo->id]);
+
+    $proceso->documentLinks()->create(['document_id' => $documento->id]);
+    $documento->validations()->create(['estado' => 'valido', 'validado_en' => now()]);
+
+    return $documento;
+}
 
 /**
  * Builds a minimal definition/states/transitions fixture for the tests:
@@ -121,12 +134,45 @@ test('bloquea la transición si falta un documento obligatorio', function () {
     expect($proceso->refresh()->currentState->codigo)->toBe('revision');
 });
 
+test('bloquea la transición si el documento requerido está cargado pero no validado', function () {
+    Permission::create(['name' => 'workflow-test.aprobar']);
+
+    ['definicion' => $definicion, 'revision' => $revision] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $revision);
+
+    $tipo = DocumentType::create(['codigo' => 'cedula_identidad', 'nombre' => 'Cédula de identidad']);
+    $documento = Document::create(['document_type_id' => $tipo->id]);
+    $proceso->documentLinks()->create(['document_id' => $documento->id]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('workflow-test.aprobar');
+
+    expect(fn () => app(WorkflowTransitionService::class)->execute($proceso, 'aprobar', user: $usuario))
+        ->toThrow(WorkflowTransitionException::class);
+
+    expect($proceso->refresh()->currentState->codigo)->toBe('revision');
+});
+
+test('permite la transición cuando el documento requerido está cargado y validado', function () {
+    Permission::create(['name' => 'workflow-test.aprobar']);
+
+    ['definicion' => $definicion, 'revision' => $revision, 'aprobado' => $aprobado] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $revision);
+    adjuntarDocumentoValidado($proceso, 'cedula_identidad');
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('workflow-test.aprobar');
+
+    $resultado = app(WorkflowTransitionService::class)->execute($proceso, 'aprobar', user: $usuario);
+
+    expect($resultado->currentState->codigo)->toBe('aprobado');
+});
+
 test('bloquea la transición si el usuario no tiene el permiso requerido', function () {
     Permission::create(['name' => 'workflow-test.aprobar']);
 
     ['definicion' => $definicion, 'revision' => $revision] = crearWorkflowDePrueba();
     $proceso = crearProcesoDePrueba($definicion, $revision);
-    $proceso->update(['documentos_adjuntos' => ['cedula_identidad']]);
 
     $usuario = User::factory()->create();
 

@@ -1,10 +1,4 @@
-# Spec: workflow-core
-
-## Purpose
-
-Motor de workflow propio que gobierna todo cambio de estado de cualquier proceso de negocio futuro, exclusivamente a través de `WorkflowTransitionService::execute()`.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Controlar transiciones mediante servicio central
 Todo cambio de estado de un proceso SHALL pasar por `WorkflowTransitionService::execute()`. Ningún controlador, job, seeder o componente React SHALL cambiar el estado de un proceso directamente.
@@ -34,11 +28,3 @@ Todo cambio de estado de un proceso SHALL pasar por `WorkflowTransitionService::
 #### Scenario: Bloquear transición si el workflow está inactivo
 - **WHEN** la definición de workflow del proceso tiene `activo = false`
 - **THEN** el sistema bloquea cualquier transición sobre ese proceso
-
-### Requirement: Modelar procesos de forma genérica
-Un `process` SHALL poder asociarse a cualquier entidad de negocio futura mediante una relación polimórfica (`subject_type`/`subject_id`), sin que workflow-core dependa de ningún módulo funcional específico.
-
-#### Scenario: Crear un proceso para una entidad de negocio
-- **WHEN** se crea un proceso para una entidad de negocio en el estado inicial de un workflow activo
-- **THEN** el proceso queda asociado a esa entidad mediante `subject_type`/`subject_id`
-- **AND** queda en el estado marcado como `es_inicial` de su workflow
