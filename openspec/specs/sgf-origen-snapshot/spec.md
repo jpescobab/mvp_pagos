@@ -1,39 +1,37 @@
 # Spec: sgf-origen-snapshot
 
-## Requirement: SGF como dato de origen
+## Purpose
 
-El sistema debe usar información SGF solo como origen, contexto, trazabilidad, reportabilidad y conciliación.
+Capa de evidencia para datos provenientes de SGF: captura y conserva snapshots inmutables de filas y documentos (payload crudo, normalizado, hash, fuente), sin gobernar workflow ni crear casos de pago. SGF es origen, no gobierno.
 
-### Scenario: Importar caso SGF
+## Requirements
 
-Given una fila SGF contiene ID, estado, grupo actual, observaciones, RUT, documento y monto
-When se importa al sistema
-Then se crea o actualiza un `supplier_payment_case`
-And se guarda `sgf_id`
-And se guarda `sgf_status` como referencia externa
-And se guarda `sgf_current_group_raw` como referencia externa
-And no se usa el estado SGF como workflow interno
-And no se usa el grupo SGF como unidad interna
+### Requirement: Registrar cada corrida de importación SGF
+El sistema SHALL registrar cada corrida de importación de filas SGF en `importaciones_sgf`, incluyendo fuente, quién o qué la inició y su resultado, independientemente del mecanismo que haya obtenido las filas.
 
-## Requirement: Conservar snapshot de datos y documentos SGF
+#### Scenario: Iniciar una corrida de importación
+- **WHEN** se inicia una importación de filas SGF
+- **THEN** se crea una `importacion_sgf` con su fuente y momento de inicio
+- **AND** cada fila procesada en esa corrida queda asociada a esa importación
 
-Todo caso SGF debe conservar snapshot de datos y documentos recibidos.
+### Requirement: Conservar snapshot inmutable de cada fila SGF
+El sistema SHALL conservar, por cada fila SGF importada, su payload original, un payload normalizado y el hash del contenido recibido, sin sobrescribir snapshots anteriores del mismo `sgf_id`.
 
-### Scenario: Guardar snapshot SGF
+#### Scenario: Importar una fila SGF
+- **WHEN** se importa una fila SGF con ID, estado, grupo actual, observaciones, RUT y monto
+- **THEN** se crea un `snapshot_sgf` con `payload_crudo`, `payload_normalizado` y el hash del contenido
+- **AND** el `sgf_status` y el `sgf_current_group_raw` quedan guardados solo como referencia externa
+- **AND** no se usa el estado SGF como workflow interno ni el grupo SGF como unidad interna
 
-Given se recibe información desde SGF
-When el sistema importa el caso
-Then guarda `raw_sgf_payload`
-And guarda payload normalizado
-And registra fuente, método de captura, usuario o job
-And calcula hash del contenido recibido
-And vincula el snapshot al caso de pago
+#### Scenario: Reimportar el mismo sgf_id crea un snapshot nuevo
+- **WHEN** se vuelve a importar una fila SGF cuyo `sgf_id` ya tiene un snapshot previo
+- **THEN** se crea un nuevo `snapshot_sgf`
+- **AND** el snapshot anterior no se modifica ni se elimina
 
-### Scenario: Guardar documentos SGF
+### Requirement: Conservar documentos SGF en el expediente documental
+El sistema SHALL registrar los documentos que SGF entrega junto a una fila como documentos reales del expediente (`documentos`/`versiones_documento`), vinculados a su snapshot de origen mediante `snapshots_sgf_documentos`.
 
-Given SGF entrega documentos asociados al caso
-When el sistema los importa
-Then los guarda en el expediente documental
-And marca origen `sgf`
-And registra hash de archivo
-And vincula cada documento al snapshot SGF
+#### Scenario: Vincular un documento SGF a su snapshot
+- **WHEN** una fila SGF importada incluye uno o más documentos
+- **THEN** cada documento se crea como `Documento`/`VersionDocumento` del expediente
+- **AND** se crea un `snapshot_sgf_documento` que vincula ese documento a su `snapshot_sgf`
