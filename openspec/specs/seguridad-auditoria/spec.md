@@ -26,5 +26,5 @@ El sistema SHALL proveer un servicio de auditoría (`AuditLogger`) capaz de regi
 - **THEN** se crea un registro en `audit_logs` con esos datos y el usuario autenticado
 
 #### Scenario: Auditar cambio de estado de workflow
-- **WHEN** `WorkflowTransitionService::execute()` ejecuta una transición de workflow
+- **WHEN** `TransicionWorkflowService::execute()` ejecuta una transición de workflow
 - **THEN** se registra usuario, fecha, estado anterior, estado nuevo, comentario y metadata mediante `AuditLogger`

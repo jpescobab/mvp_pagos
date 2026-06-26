@@ -42,7 +42,7 @@ Notas importantes:
 - Se pretende usar SGF como workflow interno (sus estados/grupos no gobiernan nada interno).
 - Se intenta eliminar trazabilidad, snapshots o auditoría.
 - Se pide automatizar acciones sensibles (pagos, cierres, informes) sin aprobación humana.
-- Se pide saltarse `WorkflowTransitionService` para cambiar un estado.
+- Se pide saltarse `TransicionWorkflowService` para cambiar un estado.
 - Se pide usar Playwright para evadir MFA, CAPTCHA o controles de acceso.
 
 ## Reglas arquitectónicas críticas (de HARNESS_IA.md)
@@ -50,8 +50,8 @@ Notas importantes:
 - **Jerarquía institucional fija**: `instituciones -> jurisdicciones -> cfinancieros -> ccostos`. Gobierna permisos, filtros, reportes y trazabilidad. Las tablas maestras usan `id` interno como PK y código institucional como `unique`.
 - **SGF es origen, no gobierno**: SGF entrega evidencia (`sgf_id`, `sgf_status`, payloads crudos). El sistema propio gobierna workflow, estados, responsables y unidades internas — nunca se mezclan.
 - **Snapshot obligatorio**: todo dato/documento recibido desde SGF o cualquier API externa relevante debe guardar payload original, fuente, fecha, hash, método de captura y usuario/job responsable, vinculado al caso.
-- **Workflow antes que CRUD**: todo cambio de estado pasa exclusivamente por `WorkflowTransitionService::execute()`, que valida módulo activo, transición permitida, permisos, documentos obligatorios, y registra auditoría/notificación/historial. Prohibido cambiar estados desde controladores, jobs, seeders o componentes React.
-- **Un `sgf_id` = un `supplier_payment_case` = un proceso workflow individual.** No crear `payment_submissions` ni lotes de envío.
+- **Workflow antes que CRUD**: todo cambio de estado pasa exclusivamente por `TransicionWorkflowService::execute()`, que valida módulo activo, transición permitida, permisos, documentos obligatorios, y registra auditoría/notificación/historial. Prohibido cambiar estados desde controladores, jobs, seeders o componentes React.
+- **Un `sgf_id` = un `caso_pago_proveedor` = un proceso workflow individual.** No crear `payment_submissions` ni lotes de envío.
 - **Expediente documental variable**: los requisitos documentales dependen de módulo/proceso/modalidad/monto/estado y los entrega el backend. React solo renderiza el checklist recibido; nunca hardcodea requisitos.
 - **API primero**: toda integración externa pasa por la capa transversal (`external_systems`, `external_api_requests`, `external_data_snapshots`, `integration_jobs`). Playwright solo como respaldo autorizado cuando no hay API suficiente, y nunca para evadir controles ni guardar credenciales en Git.
 - **Informes razonados nacen de cortes y snapshots**, nunca de datos vivos cambiantes; siempre terminan con revisión humana antes de publicarse.

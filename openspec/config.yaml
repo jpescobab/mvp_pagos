@@ -17,9 +17,9 @@ context: |
     relevante guarda payload original, fuente, fecha, hash, método de captura y
     usuario/job responsable, vinculado al caso.
   - Workflow antes que CRUD: todo cambio de estado pasa exclusivamente por
-    WorkflowTransitionService::execute(). Prohibido cambiar estados desde controladores,
+    TransicionWorkflowService::execute(). Prohibido cambiar estados desde controladores,
     jobs, seeders o componentes React.
-  - Un sgf_id = un supplier_payment_case = un proceso workflow individual. No crear
+  - Un sgf_id = un caso_pago_proveedor = un proceso workflow individual. No crear
     payment_submissions ni lotes de envío.
   - Expediente documental variable: los requisitos documentales los entrega el backend
     según módulo/proceso/modalidad/monto/estado. React solo renderiza el checklist
@@ -45,7 +45,7 @@ context: |
 
   Detenerse y pedir confirmación humana si una instrucción: usa SGF como workflow
   interno, borra trazabilidad/snapshots/auditoría, automatiza pagos/cierres/informes
-  sin aprobación humana, saltea WorkflowTransitionService, o usa Playwright para evadir
+  sin aprobación humana, saltea TransicionWorkflowService, o usa Playwright para evadir
   controles de acceso.
 
   Orden de implementación: tasks/01_*.md a tasks/10_*.md, en ese orden numérico; cada

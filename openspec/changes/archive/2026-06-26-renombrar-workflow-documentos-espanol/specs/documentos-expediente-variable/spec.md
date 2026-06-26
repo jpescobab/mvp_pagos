@@ -1,10 +1,4 @@
-# Spec: documentos-expediente-variable
-
-## Purpose
-
-Modelo documental real del expediente: catálogo de tipos documentales, documentos versionados con trazabilidad de validación, y una matriz de requisitos configurable por workflow/modalidad/monto/estado que el backend resuelve en un checklist por proceso. React nunca hardcodea requisitos documentales.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Mantener catálogo de tipos documentales reutilizable
 El sistema SHALL mantener un catálogo de `tipos_documento` (código único, nombre, si es obligatorio por defecto, activo) reutilizable por cualquier matriz de requisitos de cualquier módulo funcional futuro.

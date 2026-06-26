@@ -148,27 +148,27 @@ Estas tablas deben existir desde el inicio del proyecto:
 - `parameters`
 - `parameter_values`
 - `parameter_change_logs`
-- `workflow_definitions`
-- `workflow_states`
-- `workflow_transitions`
-- `processes`
-- `workflow_tasks`
-- `workflow_task_assignments`
-- `workflow_transition_logs`
+- `definiciones_workflow`
+- `estados_workflow`
+- `transiciones_workflow`
+- `procesos`
+- `tareas_workflow`
+- `asignaciones_tareas_workflow`
+- `historial_transiciones_workflow`
 - `notifications`
 - `notification_events`
 - `audit_logs`
 - `security_audit_logs`
-- `document_types`
-- `documents`
-- `document_versions`
-- `document_links`
-- `document_validations`
-- `procurement_modalities`
-- `document_requirement_sets`
-- `document_requirements`
-- `process_document_checklists`
-- `process_document_checklist_items`
+- `tipos_documento`
+- `documentos`
+- `versiones_documento`
+- `vinculos_documento`
+- `validaciones_documento`
+- `modalidades_adquisicion`
+- `conjuntos_requisitos_documentales`
+- `requisitos_documentales`
+- `checklists_documentales_proceso`
+- `checklist_documental_proceso_items`
 - `external_systems`
 - `external_api_requests`
 - `external_data_snapshots`
@@ -232,8 +232,8 @@ SGF entrega evidencia de origen; nuestro sistema gobierna la tramitación intern
 
 ### Datos internos que gobiernan el proceso
 
-- `workflow_state_id`
-- `workflow_tasks`
+- `estado_workflow_id`
+- `tareas_workflow`
 - unidades internas
 - roles y permisos
 - responsables internos
@@ -276,7 +276,7 @@ El primer módulo funcional será Pago de Proveedores.
 ### Regla definitiva
 
 ```txt
-Un sgf_id = un supplier_payment_case = un proceso workflow individual
+Un sgf_id = un caso_pago_proveedor = un proceso workflow individual
 ```
 
 No crear:
@@ -287,7 +287,7 @@ No crear:
 
 ### Tablas del módulo
 
-- `supplier_payment_cases`
+- `casos_pago_proveedor`
 - `invoices`
 - `sgf_payment_case_imports`
 - `sgf_payment_case_snapshots`
@@ -317,7 +317,7 @@ No crear:
 
 ## 11. Workflow Core
 
-Todo cambio de estado debe pasar por `WorkflowTransitionService::execute()`.
+Todo cambio de estado debe pasar por `TransicionWorkflowService::execute()`.
 
 El servicio debe validar:
 
