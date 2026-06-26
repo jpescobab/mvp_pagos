@@ -1,10 +1,4 @@
-# Spec: indicadores-economicos-cmf-sii
-
-## Purpose
-
-Importa y conserva con trazabilidad los indicadores económicos oficiales (UF, USD, UTM, UTA, IPC) usados para cálculos, reportes, cortes e informes razonados.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Importar indicadores económicos oficiales
 El sistema SHALL importar y almacenar indicadores económicos desde la API oficial de la CMF (UF, USD, UTM, IPC) y calcular UTA a partir de UTM cuando corresponda, conservando snapshot de origen en cada importación y en cada valor.

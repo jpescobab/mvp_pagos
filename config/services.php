@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'cmf' => [
+        'api_key' => env('CMF_API_KEY'),
+        'base_url' => env('CMF_API_BASE_URL', 'https://api.cmfchile.cl/api-sbifv3/recursos_api'),
+    ],
+
 ];
