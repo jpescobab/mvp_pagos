@@ -26,11 +26,14 @@ class DatabaseSeeder extends Seeder
         $this->call(ProveedoresSeeder::class);
         $this->call(ClientesMedidoresSeeder::class);
 
+        $this->call(RolesAndPermissionsSeeder::class);
+
         // User::factory(10)->create();
 
-        User::factory()->create([
+        $testUser = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+        $testUser->assignRole('superadmin');
     }
 }

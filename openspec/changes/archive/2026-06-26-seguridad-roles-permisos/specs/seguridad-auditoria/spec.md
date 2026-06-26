@@ -1,10 +1,4 @@
-# Spec: seguridad-auditoria
-
-## Purpose
-
-Controla el acceso al sistema mediante roles y permisos (Spatie Permission) y provee un servicio de auditoría genérico y reutilizable para que cualquier dominio registre cambios sensibles.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Controlar acceso por roles y permisos
 El sistema SHALL validar permisos antes de ejecutar una acción autorizable, mediante roles y permisos gestionados con Spatie Permission. El rol `superadmin` SHALL tener acceso total sin necesidad de asignación de permisos individuales.
@@ -28,4 +22,4 @@ El sistema SHALL proveer un servicio de auditoría (`AuditLogger`) capaz de regi
 #### Scenario: Auditar cambio de estado de workflow (pendiente de conexión)
 - **WHEN** un usuario ejecuta una transición de workflow mediante `WorkflowTransitionService`
 - **THEN** se registra usuario, fecha, estado anterior, estado nuevo, comentario y metadata mediante `AuditLogger`
-- **AND** esta conexión se implementa en la tarea de workflow-core, no en la tarea de seguridad
+- **AND** esta conexión se implementa en la tarea de workflow-core, no en esta tarea
