@@ -7,8 +7,7 @@ Paquete listo para subir a la raíz del proyecto Laravel.
 - `AGENTS.md`: instrucciones rápidas para agentes IA.
 - `CLAUDE.md`: instrucciones específicas para Claude Code.
 - `HARNESS_IA.md`: documento rector obligatorio.
-- `openspec/project.md`: contexto general del proyecto.
-- `openspec/principles.md`: principios transversales.
+- `openspec/config.yaml`: configuración del CLI OpenSpec; su sección `context:` resume el harness y se inyecta en todo artefacto generado (proposal, design, tasks, specs).
 - `openspec/specs/*/spec.md`: requisitos OpenSpec por dominio.
 - `tasks/*.md`: tareas implementables en orden recomendado.
 - `docs/*.md`: decisiones, tablas y criterios de diseño.

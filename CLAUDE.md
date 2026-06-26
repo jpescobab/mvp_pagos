@@ -10,15 +10,17 @@ El repositorio parte de `laravel/react-starter-kit` (auth Fortify + Inertia + Re
 
 ## Flujo de trabajo obligatorio (antes de tocar código)
 
-1. Lee [HARNESS_IA.md](HARNESS_IA.md) — documento rector, no negociable.
-2. Lee [openspec/project.md](openspec/project.md) y [openspec/principles.md](openspec/principles.md).
-3. Lee el spec del dominio en `openspec/specs/<dominio>/spec.md` correspondiente a la tarea.
-4. Lee la tarea correspondiente en `tasks/NN_*.md` (se implementan en orden numérico, 01 → 10).
-5. Propón un plan breve antes de implementar.
-6. Implementa migraciones, modelos, services, policies, resources, tests y documentación cuando corresponda.
-7. Ejecuta validaciones (`composer test`, `npm run lint:check`, `npm run types:check`) y reporta cambios.
+El harness (`HARNESS_IA.md`, `AGENTS.md`, este archivo) es el marco de reglas — no negociable. **La implementación de cada tarea se ejecuta a través de OpenSpec** (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`), no escribiendo código a mano por fuera de ese ciclo.
 
-Dominios de specs disponibles en `openspec/specs/`: `core-institucional-capj`, `tablas-maestras-institucionales`, `seguridad-auditoria`, `indicadores-economicos-cmf-sii`, `workflow-core`, `documentos-expediente-variable`, `sgf-origen-snapshot`, `pago-proveedores-sgf`, `integraciones-api-browser-automation`, `reportabilidad-informes-razonados`. Cada uno corresponde 1:1 a una tarea en `tasks/`.
+1. Lee [HARNESS_IA.md](HARNESS_IA.md) — documento rector.
+2. El contexto institucional (jerarquía CAPJ, SGF como origen, workflow antes que CRUD, snapshot obligatorio, stack, etc.) vive en la sección `context:` de [openspec/config.yaml](openspec/config.yaml) y se inyecta automáticamente en todo artefacto que genere OpenSpec (`proposal`, `design`, `tasks`, `specs`) — no hace falta leerlo a mano salvo para auditarlo.
+3. Para cada tarea numerada en `tasks/NN_*.md` (orden 01 → 10), úsala como brief de `/opsx:propose "<contenido de la tarea>"`. Esto genera en `openspec/changes/<nombre>/` un `proposal.md`, `design.md`, una spec delta (formato estructurado OpenSpec) y un `tasks.md`.
+4. Revisa el proposal/design/tasks generado — este es el punto de aprobación humana antes de implementar (equivalente a "proponer un plan breve").
+5. `/opsx:apply` implementa según ese `tasks.md` (migraciones, modelos, services, policies, resources, tests, documentación).
+6. Ejecuta validaciones (`composer test`, `npm run lint:check`, `npm run types:check`) y reporta cambios.
+7. `/opsx:archive` fusiona la spec delta en `openspec/specs/<dominio>/spec.md` (queda en formato estructurado, validable con `openspec validate`) y archiva el change en `openspec/changes/archive/`.
+
+Dominios de specs disponibles en `openspec/specs/`: `core-institucional-capj`, `tablas-maestras-institucionales`, `seguridad-auditoria`, `indicadores-economicos-cmf-sii`, `workflow-core`, `documentos-expediente-variable`, `sgf-origen-snapshot`, `pago-proveedores-sgf`, `integraciones-api-browser-automation`, `reportabilidad-informes-razonados`. Cada uno corresponde 1:1 a una tarea en `tasks/`. A medida que se archive el change de cada tarea, su `spec.md` pasa de prosa libre al formato estructurado del CLI.
 
 ## CLI de OpenSpec y slash commands `/opsx:*`
 
@@ -30,9 +32,9 @@ El CLI `openspec` (paquete `@fission-ai/openspec`, instalado como devDependency)
 
 Notas importantes:
 
-- Los 10 `openspec/specs/*/spec.md` del harness son documentos libres, no el formato estructurado de requisitos que espera el CLI (`openspec list --specs` los reconoce por nombre pero muestra `requirements 0`). Siguen siendo la fuente de verdad; el CLI no los reescribe ni los gobierna.
-- `openspec/project.md` y `openspec/principles.md` **no** se migraron a `openspec/config.yaml` (ese archivo no se creó porque el init corrió en modo no interactivo). Si más adelante se ejecuta `openspec config` para crearlo, mover el contenido relevante a su sección `context:` antes de considerar borrar `project.md` — nunca borrarlo antes de migrar el contenido.
-- `/opsx:propose`, `/opsx:explore`, etc. sirven para cambios ad-hoc no contemplados todavía en `tasks/01..10`. Para el trabajo planificado del harness sigue rigiendo el flujo numerado de `tasks/`; `/opsx:*` no lo reemplaza ni lo reordena.
+- Los `openspec/specs/*/spec.md` que todavía no pasaron por un change archivado siguen en prosa libre (no el formato estructurado que espera el CLI) — `openspec list --specs` los reconoce por nombre pero muestra `requirements 0` hasta que se archiven. Siguen siendo válidos como fuente de verdad mientras tanto.
+- `openspec/project.md` y `openspec/principles.md` se retiraron — su contenido vive ahora en la sección `context:` de `openspec/config.yaml`.
+- `/opsx:explore` además sirve para pensar/investigar antes de proponer, tanto para el trabajo numerado de `tasks/` como para cambios ad-hoc no contemplados en `tasks/01..10`.
 
 ## Detenerse si
 

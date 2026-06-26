@@ -1,28 +1,42 @@
 # Spec: tablas-maestras-institucionales
 
-## Requirement: Incorporar tablas institucionales desde el inicio
+## Purpose
 
-El sistema debe incorporar desde el inicio proveedores, funcionarios, clientes medidores, items, catálogos y asignaciones.
+Modela las tablas maestras institucionales (proveedores, funcionarios, clientes medidores) y el clasificador presupuestario institucional (items, asignaciones, catálogos) sobre las que se apoyan los módulos funcionales — en particular Pago de Proveedores y Consumo Eléctrico.
 
-### Scenario: Crear maestro de proveedores
+## Requirements
 
-Given se registra un proveedor
-When se guarda el registro
-Then el sistema asigna `id` interno
-And conserva `rutproveedor` como identificador institucional único
-And permite asociarlo a casos de pago, documentos y reportes
+### Requirement: Incorporar tablas maestras institucionales desde el inicio
+El sistema SHALL incorporar desde el inicio `proveedores`, `funcionarios` y `clientes_medidores`, cada una con `id` interno y un identificador institucional único.
 
-### Scenario: Crear funcionario
+#### Scenario: Crear maestro de proveedores
+- **WHEN** se registra un proveedor
+- **THEN** el sistema asigna `id` interno
+- **AND** conserva `rutproveedor` como identificador institucional único
+- **AND** permite asociarlo a casos de pago, documentos y reportes
 
-Given se registra un funcionario
-When se guarda el registro
-Then el sistema conserva `rut` único
-And permite relacionarlo opcionalmente con `users`
-And lo asocia a centro de costo y centro financiero cuando corresponda
+#### Scenario: Crear funcionario
+- **WHEN** se registra un funcionario
+- **THEN** el sistema conserva `rut` único
+- **AND** permite relacionarlo opcionalmente con `users`
+- **AND** lo asocia a centro de costo y/o centro financiero cuando corresponda
 
-### Scenario: Registrar cliente medidor
+#### Scenario: Registrar cliente medidor
+- **WHEN** se registra un cliente medidor
+- **THEN** queda asociado opcionalmente a un proveedor de servicio
+- **AND** queda asociado a un centro de costo (`ccosto`) de la jerarquía CAPJ
+- **AND** puede usarse en consumo eléctrico, reportes y trazabilidad
 
-Given existe un proveedor de servicio y un centro de costo
-When se registra un cliente medidor
-Then queda asociado a proveedor y centro de costo
-And puede usarse en consumo eléctrico, reportes y trazabilidad
+### Requirement: Modelar el clasificador presupuestario institucional
+El sistema SHALL modelar `items`, `asignaciones` y `catalogos` como el clasificador presupuestario institucional, donde `asignaciones` y `catalogos` pertenecen directamente a un `item`.
+
+#### Scenario: Registrar una asignación bajo su ítem
+- **WHEN** se registra una asignación presupuestaria
+- **THEN** queda asociada a su ítem mediante `item_id`
+- **AND** su `codigo` es único
+
+#### Scenario: Registrar un catálogo bajo su ítem
+- **WHEN** se registra un catálogo (cuenta presupuestaria utilizable)
+- **THEN** queda asociado a su ítem mediante `item_id`
+- **AND** su `codigo` es único
+- **AND** su disponibilidad para uso se controla con el campo `activo`

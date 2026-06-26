@@ -1,0 +1,52 @@
+schema: spec-driven
+
+context: |
+  CAPJ App Pagos — plataforma institucional de gestión, workflow, trazabilidad,
+  expediente documental y reportabilidad. Complementa sistemas oficiales (SGF, CGU,
+  BancoEstado, SII, CMF, Mercado Público); no los reemplaza ni copia su lógica interna.
+
+  Jerarquía institucional fija: instituciones -> jurisdicciones -> cfinancieros -> ccostos.
+  Gobierna permisos, filtros, reportes y trazabilidad. Las tablas maestras usan id interno
+  como PK y código institucional como unique.
+
+  Reglas no negociables (detalle completo en HARNESS_IA.md, secciones 4-14):
+  - SGF es origen, no gobierno: sgf_id/sgf_status/payloads crudos son evidencia. El
+    workflow, estados, responsables y unidades internas los gobierna el sistema propio;
+    nunca se mezclan con los estados/grupos de SGF.
+  - Snapshot obligatorio: todo dato/documento recibido desde SGF o cualquier API externa
+    relevante guarda payload original, fuente, fecha, hash, método de captura y
+    usuario/job responsable, vinculado al caso.
+  - Workflow antes que CRUD: todo cambio de estado pasa exclusivamente por
+    WorkflowTransitionService::execute(). Prohibido cambiar estados desde controladores,
+    jobs, seeders o componentes React.
+  - Un sgf_id = un supplier_payment_case = un proceso workflow individual. No crear
+    payment_submissions ni lotes de envío.
+  - Expediente documental variable: los requisitos documentales los entrega el backend
+    según módulo/proceso/modalidad/monto/estado. React solo renderiza el checklist
+    recibido, nunca lo hardcodea.
+  - API primero: toda integración externa pasa por external_systems, external_api_requests,
+    external_data_snapshots, integration_jobs. Playwright solo como respaldo autorizado
+    cuando no hay API suficiente, nunca para evadir MFA/CAPTCHA/controles de acceso ni
+    para guardar credenciales/cookies en Git.
+  - Informes razonados nacen de cortes y snapshots, nunca de datos vivos cambiantes;
+    siempre terminan con revisión humana antes de publicarse.
+  - Core no desactivable: auth, roles, estructura CAPJ, workflow, auditoría, documentos,
+    indicadores, integraciones y reportabilidad. Módulos funcionales activables (Pago de
+    Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico,
+    Servicios contratados, Informes razonados) pueden desactivarse sin borrar datos.
+
+  Stack obligatorio: Laravel 13 (PHP ^8.3), PostgreSQL, Inertia 3 + React 19, Spatie
+  Laravel Permission, Sanctum si corresponde, Queue/Scheduler/Process, Laravel Boost.
+  Controladores livianos; Form Requests para validación; Services para lógica de
+  negocio; Policies/Gates/Middleware para autorización; Jobs para procesos pesados;
+  Events/Listeners para efectos secundarios; Resources/Collections hacia React;
+  transacciones en operaciones críticas. Prohibido lógica pesada en controladores o
+  queries complejas en React.
+
+  Detenerse y pedir confirmación humana si una instrucción: usa SGF como workflow
+  interno, borra trazabilidad/snapshots/auditoría, automatiza pagos/cierres/informes
+  sin aprobación humana, saltea WorkflowTransitionService, o usa Playwright para evadir
+  controles de acceso.
+
+  Orden de implementación: tasks/01_*.md a tasks/10_*.md, en ese orden numérico; cada
+  uno corresponde 1:1 a un dominio en openspec/specs/.

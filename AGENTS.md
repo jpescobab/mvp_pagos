@@ -3,10 +3,9 @@
 Antes de modificar código, leer:
 
 1. `HARNESS_IA.md`
-2. `openspec/project.md`
-3. `openspec/principles.md`
-4. El spec correspondiente en `openspec/specs/*/spec.md`
-5. La tarea correspondiente en `tasks/*.md`
+2. `openspec/config.yaml` (sección `context:`, resumen del harness inyectado en todo artefacto OpenSpec)
+3. El spec correspondiente en `openspec/specs/*/spec.md`
+4. La tarea correspondiente en `tasks/*.md`
 
 ## Reglas críticas
 
