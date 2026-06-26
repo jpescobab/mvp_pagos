@@ -1,10 +1,4 @@
-# Spec: pago-proveedores-sgf
-
-## Purpose
-
-Primer módulo funcional activable: convierte la evidencia SGF (tarea 7) en casos de pago gobernados por workflow (tarea 5), con expediente documental (tarea 6) y evidencia de registro CGU/BancoEstado/egreso, sin reemplazar la lógica de esos sistemas oficiales.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Cada sgf_id es un caso de pago individual
 El sistema SHALL tratar cada `sgf_id` como un `caso_pago_proveedor` independiente, con su propio `Proceso` de workflow. Los datos SGF (`sgf_status`, `sgf_current_group_raw`) SHALL conservarse solo como referencia externa, sin gobernar el estado interno del caso.
