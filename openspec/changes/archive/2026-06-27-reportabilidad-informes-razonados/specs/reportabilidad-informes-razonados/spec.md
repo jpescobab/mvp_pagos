@@ -1,10 +1,4 @@
-# Spec: reportabilidad-informes-razonados
-
-## Purpose
-
-Capa de cortes/snapshots de reportabilidad (core, no desactivable) e informes razonados de gestión (módulo funcional activable). Los informes no son cierres contables ni presupuestarios oficiales; son evidencia de gestión, seguimiento y toma de decisiones, siempre con revisión y aprobación humana antes de publicarse. Los informes nacen de cortes y snapshots, nunca de datos vivos cambiantes.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Registrar períodos y cortes de reportabilidad
 El sistema SHALL registrar períodos de reportabilidad (`periodos_reportabilidad`) y, dentro de cada período, cortes (`cortes_reportabilidad`) que comienzan en estado `borrador` y solo pueden publicarse mediante una acción explícita con permiso `reportabilidad.publicar_corte`.

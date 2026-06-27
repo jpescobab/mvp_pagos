@@ -178,10 +178,20 @@ Estas tablas deben existir desde el inicio del proyecto:
 - `ejecuciones_automatizacion_navegador`
 - `pasos_automatizacion_navegador`
 - `artefactos_automatizacion_navegador`
-- `reporting_periods`
-- `reporting_cutoffs`
-- `reporting_cutoff_items`
-- `reporting_snapshots`
+- `periodos_reportabilidad`
+- `cortes_reportabilidad`
+- `cortes_reportabilidad_items`
+- `snapshots_corte_reportabilidad`
+- `definiciones_informe_razonado`
+- `ejecuciones_informe_razonado`
+- `secciones_informe_razonado`
+- `metricas_informe_razonado`
+- `graficos_informe_razonado`
+- `excepciones_informe_razonado`
+- `narrativas_informe_razonado`
+- `snapshots_informe_razonado`
+- `aprobaciones_informe_razonado`
+- `exportaciones_informe_razonado`
 
 ---
 
@@ -418,16 +428,20 @@ Los informes no son cierres contables ni presupuestarios oficiales. Son evidenci
 
 Tablas:
 
-- `management_report_definitions`
-- `management_report_runs`
-- `management_report_sections`
-- `management_report_metrics`
-- `management_report_charts`
-- `management_report_exceptions`
-- `management_report_narratives`
-- `management_report_snapshots`
-- `management_report_approvals`
-- `management_report_exports`
+- `periodos_reportabilidad`
+- `cortes_reportabilidad`
+- `cortes_reportabilidad_items`
+- `snapshots_corte_reportabilidad`
+- `definiciones_informe_razonado`
+- `ejecuciones_informe_razonado`
+- `secciones_informe_razonado`
+- `metricas_informe_razonado`
+- `graficos_informe_razonado`
+- `excepciones_informe_razonado`
+- `narrativas_informe_razonado`
+- `snapshots_informe_razonado`
+- `aprobaciones_informe_razonado`
+- `exportaciones_informe_razonado`
 
 ---
 
