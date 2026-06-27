@@ -169,10 +169,15 @@ Estas tablas deben existir desde el inicio del proyecto:
 - `requisitos_documentales`
 - `checklists_documentales_proceso`
 - `checklist_documental_proceso_items`
-- `external_systems`
-- `external_api_requests`
-- `external_data_snapshots`
-- `integration_jobs`
+- `sistemas_externos`
+- `solicitudes_api_externas`
+- `snapshots_datos_externos`
+- `trabajos_integracion`
+- `conectores_automatizacion_navegador`
+- `perfiles_autenticacion_navegador`
+- `ejecuciones_automatizacion_navegador`
+- `pasos_automatizacion_navegador`
+- `artefactos_automatizacion_navegador`
 - `reporting_periods`
 - `reporting_cutoffs`
 - `reporting_cutoff_items`
@@ -363,14 +368,20 @@ React solo renderiza el checklist que entrega el backend. No debe hardcodear req
 
 Toda integración debe pasar por capa transversal:
 
-- `external_systems`
-- `external_api_requests`
-- `external_data_snapshots`
-- `integration_jobs`
+- `sistemas_externos`
+- `solicitudes_api_externas`
+- `snapshots_datos_externos`
+- `trabajos_integracion`
 
 ### Playwright
 
-Permitido solo para sistemas autorizados sin API suficiente.
+Permitido solo para sistemas autorizados sin API suficiente, registrado en:
+
+- `conectores_automatizacion_navegador`
+- `perfiles_autenticacion_navegador`
+- `ejecuciones_automatizacion_navegador`
+- `pasos_automatizacion_navegador`
+- `artefactos_automatizacion_navegador`
 
 Prohibido:
 

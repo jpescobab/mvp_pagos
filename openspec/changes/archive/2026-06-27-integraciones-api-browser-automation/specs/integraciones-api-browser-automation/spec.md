@@ -1,10 +1,4 @@
-# Spec: integraciones-api-browser-automation
-
-## Purpose
-
-Capa transversal para registrar toda integración con sistemas externos (API primero) y, solo como respaldo autorizado y trazado, automatizaciones Playwright. No gobierna workflow ni reemplaza la lógica de los sistemas oficiales (SGF, CGU, BancoEstado, SII, CMF, Mercado Público); es evidencia y trazabilidad de integración, consumible por los módulos funcionales.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Catalogar sistemas externos
 El sistema SHALL mantener un catálogo de sistemas externos (`sistemas_externos`) con su código único, mecanismo de integración vigente (`api`, `playwright` o `manual`) y estado activo, como base de cualquier integración.

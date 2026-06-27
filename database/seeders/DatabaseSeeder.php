@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(TiposDocumentoSeeder::class);
         $this->call(WorkflowPagoProveedoresSeeder::class);
+        $this->call(IntegracionesSeeder::class);
 
         // User::factory(10)->create();
 

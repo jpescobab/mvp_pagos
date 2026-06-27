@@ -24,8 +24,8 @@ context: |
   - Expediente documental variable: los requisitos documentales los entrega el backend
     según módulo/proceso/modalidad/monto/estado. React solo renderiza el checklist
     recibido, nunca lo hardcodea.
-  - API primero: toda integración externa pasa por external_systems, external_api_requests,
-    external_data_snapshots, integration_jobs. Playwright solo como respaldo autorizado
+  - API primero: toda integración externa pasa por sistemas_externos, solicitudes_api_externas,
+    snapshots_datos_externos, trabajos_integracion. Playwright solo como respaldo autorizado
     cuando no hay API suficiente, nunca para evadir MFA/CAPTCHA/controles de acceso ni
     para guardar credenciales/cookies en Git.
   - Informes razonados nacen de cortes y snapshots, nunca de datos vivos cambiantes;
