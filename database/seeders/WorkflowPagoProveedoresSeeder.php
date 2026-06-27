@@ -15,6 +15,7 @@ class WorkflowPagoProveedoresSeeder extends Seeder
             'pago_proveedores.registrar_cgu',
             'pago_proveedores.pagar',
             'pago_proveedores.anular',
+            'pago_proveedores.registrar_egreso',
         ];
 
         foreach ($permisos as $permiso) {

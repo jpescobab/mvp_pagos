@@ -2,11 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\CasoPagoProveedor;
+use App\Models\EgresoCgu;
 use App\Models\User;
+use App\Policies\CasoPagoProveedorPolicy;
+use App\Policies\EgresoCguPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -40,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        JsonResource::withoutWrapping();
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
@@ -62,6 +69,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(CasoPagoProveedor::class, CasoPagoProveedorPolicy::class);
+        Gate::policy(EgresoCgu::class, EgresoCguPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 
