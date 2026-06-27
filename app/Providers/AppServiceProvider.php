@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCgu;
+use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use App\Policies\CasoPagoProveedorPolicy;
 use App\Policies\EgresoCguPolicy;
+use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
@@ -71,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(CasoPagoProveedor::class, CasoPagoProveedorPolicy::class);
         Gate::policy(EgresoCgu::class, EgresoCguPolicy::class);
+        Gate::policy(ProcesoAdquisicion::class, ProcesoAdquisicionPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

@@ -31,6 +31,8 @@ class DatabaseSeeder extends Seeder
         $this->call(WorkflowPagoProveedoresSeeder::class);
         $this->call(IntegracionesSeeder::class);
         $this->call(WorkflowInformesRazonadosSeeder::class);
+        $this->call(ModalidadesAdquisicionSeeder::class);
+        $this->call(WorkflowAdquisicionesSeeder::class);
 
         // User::factory(10)->create();
 
