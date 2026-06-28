@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Receipt, Wallet } from 'lucide-react';
+import { LayoutGrid, Receipt, ShoppingCart, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,6 +13,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import procesosAdquisicion from '@/routes/adquisiciones/procesos';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { NavItem } from '@/types';
@@ -38,6 +39,14 @@ const pagoProveedoresNavItems: NavItem[] = [
     },
 ];
 
+const adquisicionesNavItems: NavItem[] = [
+    {
+        title: 'Procesos',
+        href: procesosAdquisicion.index(),
+        icon: ShoppingCart,
+    },
+];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -58,6 +67,10 @@ export function AppSidebar() {
                 <NavMain
                     items={pagoProveedoresNavItems}
                     label="Pago de Proveedores"
+                />
+                <NavMain
+                    items={adquisicionesNavItems}
+                    label="Adquisiciones"
                 />
             </SidebarContent>
 
