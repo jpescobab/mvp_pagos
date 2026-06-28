@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { EgresoCgu, Paginated } from '@/types/pago-proveedores';
@@ -55,7 +55,15 @@ export default function EgresosCguIndex() {
                                 </tr>
                             )}
                             {pagina.data.map((egreso) => (
-                                <tr key={egreso.numero_egreso}>
+                                <tr
+                                    key={egreso.id}
+                                    className="cursor-pointer hover:bg-muted/50"
+                                    onClick={() =>
+                                        router.visit(
+                                            egresosCgu.show(egreso.id).url,
+                                        )
+                                    }
+                                >
                                     <td className="px-4 py-2 font-mono text-xs">
                                         {egreso.numero_egreso}
                                     </td>

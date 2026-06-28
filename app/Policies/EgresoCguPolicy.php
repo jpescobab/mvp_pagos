@@ -21,4 +21,9 @@ class EgresoCguPolicy
     {
         return $user->can('pago_proveedores.registrar_egreso');
     }
+
+    public function gestionarDocumentos(User $user, EgresoCgu $egreso): bool
+    {
+        return $user->can('documentos.gestionar');
+    }
 }

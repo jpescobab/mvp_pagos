@@ -19,4 +19,5 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::get('egresos-cgu', [EgresoCguController::class, 'index'])->name('egresos-cgu.index');
     Route::get('egresos-cgu/crear', [EgresoCguController::class, 'create'])->name('egresos-cgu.create');
     Route::post('egresos-cgu', [EgresoCguController::class, 'store'])->name('egresos-cgu.store');
+    Route::get('egresos-cgu/{egresoCgu}', [EgresoCguController::class, 'show'])->name('egresos-cgu.show');
 });

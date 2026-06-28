@@ -100,11 +100,13 @@ export type EgresoCguItem = {
 };
 
 export type EgresoCgu = {
+    id: number;
     numero_egreso: string;
     fecha: string;
     monto_total: string;
     observaciones: string | null;
     items: EgresoCguItem[];
+    documentos?: DocumentoVinculado[];
 };
 
 export type PaginationLink = {

@@ -7,6 +7,7 @@ use App\Http\Requests\PagoProveedores\CrearEgresoCguRequest;
 use App\Http\Resources\PagoProveedores\EgresoCguResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCgu;
+use App\Models\TipoDocumento;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +24,22 @@ class EgresoCguController extends Controller
 
         return Inertia::render('pago-proveedores/egresos-cgu/index', [
             'egresos' => EgresoCguResource::collection($egresos),
+        ]);
+    }
+
+    public function show(EgresoCgu $egresoCgu): Response
+    {
+        Gate::authorize('view', $egresoCgu);
+
+        $egresoCgu->load([
+            'items.caso',
+            'vinculosDocumento.documento.tipoDocumento',
+            'vinculosDocumento.documento.versiones',
+        ]);
+
+        return Inertia::render('pago-proveedores/egresos-cgu/show', [
+            'egreso' => new EgresoCguResource($egresoCgu),
+            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
         ]);
     }
 

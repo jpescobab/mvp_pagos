@@ -3,6 +3,7 @@
 namespace App\Services\Documentos;
 
 use App\Models\Documento;
+use App\Models\EgresoCgu;
 use App\Models\Proceso;
 use App\Models\TipoDocumento;
 use App\Models\User;
@@ -14,9 +15,9 @@ use Illuminate\Support\Facades\Storage;
 
 class GestorDocumentoProceso
 {
-    public function subirYVincular(Proceso $proceso, UploadedFile $archivo, TipoDocumento $tipoDocumento, User $usuario): VinculoDocumento
+    public function subirYVincular(Proceso|EgresoCgu $vinculable, UploadedFile $archivo, TipoDocumento $tipoDocumento, User $usuario): VinculoDocumento
     {
-        return DB::transaction(function () use ($proceso, $archivo, $tipoDocumento, $usuario) {
+        return DB::transaction(function () use ($vinculable, $archivo, $tipoDocumento, $usuario) {
             $documento = Documento::create([
                 'tipo_documento_id' => $tipoDocumento->id,
                 'titulo' => $archivo->getClientOriginalName(),
@@ -35,7 +36,7 @@ class GestorDocumentoProceso
                 'subido_por' => $usuario->id,
             ]);
 
-            return $proceso->vinculosDocumento()->create([
+            return $vinculable->vinculosDocumento()->create([
                 'documento_id' => $documento->id,
                 'activo' => true,
             ]);
