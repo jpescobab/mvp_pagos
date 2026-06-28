@@ -37,3 +37,12 @@ El sistema SHALL definir el permiso `pago_proveedores.vincular_adquisicion`, dis
 - **WHEN** se ejecuta el seeder de roles y permisos del módulo Pago de Proveedores
 - **THEN** el permiso `pago_proveedores.vincular_adquisicion` existe
 - **AND** el rol `admin` lo tiene asignado
+
+
+### Requirement: Permiso core para gestionar documentos del expediente
+El sistema SHALL definir el permiso core `documentos.gestionar` (distinto de los permisos de módulos funcionales), para gobernar quién puede subir y desvincular documentos de un `Proceso`, dado que el expediente documental es infraestructura no desactivable y no pertenece a ningún módulo funcional específico.
+
+#### Scenario: Asignación inicial del permiso
+- **WHEN** se ejecuta `RolesAndPermissionsSeeder`
+- **THEN** el permiso `documentos.gestionar` existe
+- **AND** los roles `superadmin` y `admin` lo tienen asignado

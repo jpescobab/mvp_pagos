@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PagoProveedores;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PagoProveedores\CasoPagoProveedorResource;
 use App\Models\CasoPagoProveedor;
+use App\Models\TipoDocumento;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,11 +37,14 @@ class CasoPagoProveedorController extends Controller
             'proceso.historialTransiciones.estadoDestino',
             'proceso.historialTransiciones.user',
             'proceso.checklist.items',
+            'proceso.vinculosDocumento.documento.tipoDocumento',
+            'proceso.vinculosDocumento.documento.versiones',
             'procesoAdquisicion',
         ]);
 
         return Inertia::render('pago-proveedores/casos/show', [
             'caso' => new CasoPagoProveedorResource($caso),
+            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
         ]);
     }
 }

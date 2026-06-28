@@ -15,6 +15,7 @@ class ProcesoResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'estado_actual' => new EstadoWorkflowResource($this->estadoActual),
             'cerrado_en' => $this->cerrado_en,
             'historial_transiciones' => HistorialTransicionResource::collection($this->whenLoaded('historialTransiciones')),
@@ -30,6 +31,18 @@ class ProcesoResource extends JsonResource
                     'estado_cumplimiento' => $item->estado_cumplimiento,
                 ])->values(),
             ]),
+            'documentos' => $this->whenLoaded(
+                'vinculosDocumento',
+                fn () => $this->vinculosDocumento
+                    ->where('activo', true)
+                    ->map(fn ($vinculo) => [
+                        'vinculo_id' => $vinculo->id,
+                        'documento_id' => $vinculo->documento->id,
+                        'tipo_documento' => $vinculo->documento->tipoDocumento?->nombre,
+                        'nombre_archivo' => $vinculo->documento->versiones->last()?->nombre_archivo,
+                        'estado_vigente' => $vinculo->documento->estadoVigente(),
+                    ])->values(),
+            ),
         ];
     }
 }

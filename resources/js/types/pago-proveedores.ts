@@ -30,12 +30,27 @@ export type Checklist = {
     items: ChecklistItem[];
 };
 
+export type DocumentoVinculado = {
+    vinculo_id: number;
+    documento_id: number;
+    tipo_documento: string | null;
+    nombre_archivo: string | null;
+    estado_vigente: string;
+};
+
+export type TipoDocumentoSeleccionable = {
+    id: number;
+    nombre: string;
+};
+
 export type Proceso = {
+    id: number;
     estado_actual: EstadoWorkflow;
     cerrado_en: string | null;
     historial_transiciones?: HistorialTransicion[];
     transiciones_disponibles: TransicionWorkflow[];
     checklist?: Checklist | null;
+    documentos?: DocumentoVinculado[];
 };
 
 export type ProcesoAdquisicionVinculado = {

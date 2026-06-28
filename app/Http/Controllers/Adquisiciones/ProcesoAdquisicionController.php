@@ -11,6 +11,7 @@ use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\ModalidadAdquisicion;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
+use App\Models\TipoDocumento;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use Illuminate\Http\RedirectResponse;
@@ -58,10 +59,15 @@ class ProcesoAdquisicionController extends Controller
             $this->resolutorChecklist->resolve($proceso->proceso, $conjuntoRequisitos, $request->user());
         }
 
-        $proceso->proceso->load('checklist.items');
+        $proceso->proceso->load([
+            'checklist.items',
+            'vinculosDocumento.documento.tipoDocumento',
+            'vinculosDocumento.documento.versiones',
+        ]);
 
         return Inertia::render('adquisiciones/procesos/show', [
             'proceso' => new ProcesoAdquisicionResource($proceso),
+            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
         ]);
     }
 
