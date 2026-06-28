@@ -12,3 +12,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/pago-proveedores.php';
 require __DIR__.'/adquisiciones.php';
 require __DIR__.'/documentos.php';
+require __DIR__.'/indicadores.php';

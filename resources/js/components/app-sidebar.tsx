@@ -1,5 +1,11 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Receipt, ShoppingCart, Wallet } from 'lucide-react';
+import {
+    LayoutGrid,
+    Receipt,
+    ShoppingCart,
+    TrendingUp,
+    Wallet,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,6 +20,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import procesosAdquisicion from '@/routes/adquisiciones/procesos';
+import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { NavItem } from '@/types';
@@ -23,6 +30,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Indicadores Económicos',
+        href: indicadoresEconomicos.index(),
+        icon: TrendingUp,
     },
 ];
 
