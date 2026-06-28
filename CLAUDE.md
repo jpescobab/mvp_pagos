@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CAPJ App Pagos** es una plataforma institucional de gestión, workflow, trazabilidad, expediente documental y reportabilidad. No reemplaza sistemas oficiales (SGF, CGU, BancoEstado, SII, CMF, Mercado Público): los complementa como capa de control, coordinación y evidencia.
 
-El repositorio parte de `laravel/react-starter-kit` (auth Fortify + Inertia + React ya andando) y se construye encima siguiendo un harness y especificaciones OpenSpec obligatorios. **Hoy solo existe el scaffolding del starter kit** (auth, perfil, settings, dashboard vacío); todo el dominio institucional (CAPJ, workflow, SGF, pagos, indicadores económicos) descrito abajo está por implementarse según `tasks/`.
+El repositorio parte de `laravel/react-starter-kit` (auth Fortify + Inertia + React) y se construye encima siguiendo un harness y especificaciones OpenSpec obligatorios. Las 10 tareas de `tasks/01..10` ya tienen change archivado en `openspec/changes/archive/` (core institucional, tablas maestras, seguridad/roles, indicadores económicos, workflow core, expediente documental, SGF/snapshot, pago de proveedores, integraciones API/Playwright, reportabilidad) más módulos ad-hoc (Adquisiciones, fundación visual). Modelos, services y controladores viven bajo `app/{Models,Services,Http/Controllers}/<Dominio>/` (p. ej. `Services/Workflow`, `Services/Sgf`, `Services/PagoProveedores`, `Services/Adquisiciones`, `Services/InformesRazonados`, `Services/Integraciones`, `Services/Reportabilidad`).
 
 ## Flujo de trabajo obligatorio (antes de tocar código)
 
