@@ -6,6 +6,7 @@ use App\Models\Documento;
 use App\Models\Proceso;
 use App\Models\TipoDocumento;
 use App\Models\User;
+use App\Models\VersionDocumento;
 use App\Models\VinculoDocumento;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,24 @@ class GestorDocumentoProceso
             return $proceso->vinculosDocumento()->create([
                 'documento_id' => $documento->id,
                 'activo' => true,
+            ]);
+        });
+    }
+
+    public function subirNuevaVersion(Documento $documento, UploadedFile $archivo, User $usuario): VersionDocumento
+    {
+        return DB::transaction(function () use ($documento, $archivo, $usuario) {
+            $siguienteNumeroVersion = $documento->versiones()->max('numero_version') + 1;
+            $rutaArchivo = $archivo->store('documentos', 'local');
+
+            return $documento->versiones()->create([
+                'numero_version' => $siguienteNumeroVersion,
+                'ruta_archivo' => $rutaArchivo,
+                'nombre_archivo' => $archivo->getClientOriginalName(),
+                'tipo_mime' => $archivo->getClientMimeType(),
+                'tamano_bytes' => $archivo->getSize(),
+                'hash' => hash_file('sha256', $archivo->getRealPath()),
+                'subido_por' => $usuario->id,
             ]);
         });
     }

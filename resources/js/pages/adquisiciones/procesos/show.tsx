@@ -116,6 +116,84 @@ export default function ProcesoShow() {
         );
     }
 
+    const [errorValidacion, setErrorValidacion] = useState<string | null>(
+        null,
+    );
+    const [documentoARechazar, setDocumentoARechazar] = useState<
+        number | null
+    >(null);
+    const [observacionRechazo, setObservacionRechazo] = useState('');
+
+    function validarDocumento(documentoId: number) {
+        setErrorValidacion(null);
+
+        router.post(
+            documentos.validaciones.store({
+                proceso: proceso.proceso.id,
+                documento: documentoId,
+            }).url,
+            { estado: 'valido' },
+            {
+                preserveScroll: true,
+                onError: (errors) =>
+                    setErrorValidacion(
+                        (errors as Record<string, string>).estado ?? null,
+                    ),
+            },
+        );
+    }
+
+    function confirmarRechazo() {
+        if (documentoARechazar === null) {
+            return;
+        }
+
+        setErrorValidacion(null);
+
+        router.post(
+            documentos.validaciones.store({
+                proceso: proceso.proceso.id,
+                documento: documentoARechazar,
+            }).url,
+            { estado: 'rechazado', observacion: observacionRechazo },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setDocumentoARechazar(null);
+                    setObservacionRechazo('');
+                },
+                onError: (errors) =>
+                    setErrorValidacion(
+                        (errors as Record<string, string>).observacion ??
+                            (errors as Record<string, string>).estado ??
+                            null,
+                    ),
+            },
+        );
+    }
+
+    function subirNuevaVersion(documentoId: number, archivoVersion: File) {
+        setErrorDocumento(null);
+
+        const formData = new FormData();
+        formData.append('archivo', archivoVersion);
+
+        router.post(
+            documentos.versiones.store({
+                proceso: proceso.proceso.id,
+                documento: documentoId,
+            }).url,
+            formData,
+            {
+                preserveScroll: true,
+                onError: (errors) =>
+                    setErrorDocumento(
+                        (errors as Record<string, string>).archivo ?? null,
+                    ),
+            },
+        );
+    }
+
     return (
         <>
             <Head title={`Proceso ${proceso.codigo}`} />
@@ -271,6 +349,12 @@ export default function ProcesoShow() {
                         </p>
                     )}
 
+                    {errorValidacion && (
+                        <p className="text-sm text-destructive">
+                            {errorValidacion}
+                        </p>
+                    )}
+
                     {(proceso.proceso.documentos ?? []).length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                             Sin documentos vinculados todavía.
@@ -308,6 +392,28 @@ export default function ProcesoShow() {
                                             variant="outline"
                                             size="sm"
                                             onClick={() =>
+                                                validarDocumento(
+                                                    doc.documento_id,
+                                                )
+                                            }
+                                        >
+                                            Validar
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                                setDocumentoARechazar(
+                                                    doc.documento_id,
+                                                )
+                                            }
+                                        >
+                                            Rechazar
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
                                                 desvincularDocumento(
                                                     doc.vinculo_id,
                                                 )
@@ -315,6 +421,25 @@ export default function ProcesoShow() {
                                         >
                                             Desvincular
                                         </Button>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            className="w-32 text-xs"
+                                            title="Subir nueva versión"
+                                            onChange={(e) => {
+                                                const archivoVersion =
+                                                    e.target.files?.[0];
+
+                                                if (archivoVersion) {
+                                                    subirNuevaVersion(
+                                                        doc.documento_id,
+                                                        archivoVersion,
+                                                    );
+                                                }
+
+                                                e.target.value = '';
+                                            }}
+                                        />
                                     </div>
                                 </li>
                             ))}
@@ -448,6 +573,48 @@ export default function ProcesoShow() {
                             }
                         >
                             Confirmar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={documentoARechazar !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDocumentoARechazar(null);
+                        setObservacionRechazo('');
+                    }
+                }}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Rechazar documento</DialogTitle>
+                        <DialogDescription>
+                            Indica el motivo del rechazo.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="observacion-rechazo">
+                            Observación
+                        </Label>
+                        <textarea
+                            id="observacion-rechazo"
+                            className="min-h-24 rounded-md border bg-background p-2 text-sm"
+                            value={observacionRechazo}
+                            onChange={(e) =>
+                                setObservacionRechazo(e.target.value)
+                            }
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            disabled={observacionRechazo === ''}
+                            onClick={confirmarRechazo}
+                        >
+                            Confirmar rechazo
                         </Button>
                     </DialogFooter>
                 </DialogContent>

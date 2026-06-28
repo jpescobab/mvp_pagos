@@ -11,6 +11,7 @@ test('el seeder crea los roles y permisos esperados', function () {
     expect(Permission::pluck('name')->sort()->values()->all())->toBe([
         'core_institucional.administrar',
         'documentos.gestionar',
+        'documentos.validar',
         'roles.administrar',
         'tablas_maestras.administrar',
         'usuarios.administrar',

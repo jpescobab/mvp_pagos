@@ -26,6 +26,30 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 - **THEN** se registra un nuevo evento en `validaciones_documento` con el resultado y la observación
 - **AND** el estado vigente del documento pasa a ser el de ese evento
 
+#### Scenario: Validar o rechazar un documento vía HTTP requiere el permiso dedicado
+- **WHEN** un usuario con el permiso `documentos.validar` envía una validación (`valido` o `rechazado`) para un documento vinculado a un proceso
+- **THEN** se crea el evento en `validaciones_documento` con su usuario y fecha
+- **AND** el checklist documental del proceso refleja ese estado en su siguiente resolución
+
+#### Scenario: Rechazar un documento exige una observación
+- **WHEN** se envía una validación con `estado: 'rechazado'` sin `observacion`
+- **THEN** el sistema rechaza la operación sin crear ningún evento
+
+#### Scenario: Usuario sin permiso intenta validar
+- **WHEN** un usuario sin el permiso `documentos.validar` intenta validar o rechazar un documento
+- **THEN** el sistema bloquea la operación
+- **AND** registra el evento de autorización denegada en `security_audit_logs`
+
+#### Scenario: Subir una nueva versión vía HTTP no crea un documento nuevo
+- **WHEN** un usuario con el permiso `documentos.gestionar` sube un archivo válido como nueva versión de un `Documento` ya existente
+- **THEN** se crea una `VersionDocumento` con el siguiente `numero_version` consecutivo
+- **AND** no se crea ningún `Documento` ni `VinculoDocumento` nuevo
+- **AND** el historial de `validaciones_documento` del documento permanece intacto
+
+#### Scenario: Descargar un documento siempre sirve su última versión
+- **WHEN** se descarga un documento que tiene más de una versión
+- **THEN** el sistema sirve el archivo de la versión con el `numero_version` más alto
+
 ### Requirement: Resolver checklist documental por proceso según reglas configurables
 El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee.
 

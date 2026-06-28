@@ -22,6 +22,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'core_institucional.administrar',
             'tablas_maestras.administrar',
             'documentos.gestionar',
+            'documentos.validar',
         ];
 
         foreach ($permissions as $permission) {
@@ -37,6 +38,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'core_institucional.administrar',
             'tablas_maestras.administrar',
             'documentos.gestionar',
+            'documentos.validar',
         ]);
     }
 }

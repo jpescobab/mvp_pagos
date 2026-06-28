@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Documentos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Documentos\SubirDocumentoProcesoRequest;
+use App\Http\Requests\Documentos\SubirNuevaVersionDocumentoRequest;
 use App\Models\Documento;
 use App\Models\Proceso;
 use App\Models\TipoDocumento;
@@ -27,6 +28,19 @@ class DocumentoProcesoController extends Controller
             $proceso,
             $request->file('archivo'),
             $tipoDocumento,
+            $request->user(),
+        );
+
+        return back();
+    }
+
+    public function nuevaVersion(Proceso $proceso, Documento $documento, SubirNuevaVersionDocumentoRequest $request): RedirectResponse
+    {
+        Gate::authorize('gestionarDocumentos', $proceso);
+
+        $this->gestorDocumento->subirNuevaVersion(
+            $documento,
+            $request->file('archivo'),
             $request->user(),
         );
 

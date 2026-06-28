@@ -11,4 +11,9 @@ class ProcesoPolicy
     {
         return $user->can('documentos.gestionar');
     }
+
+    public function validarDocumentos(User $user, Proceso $proceso): bool
+    {
+        return $user->can('documentos.validar');
+    }
 }
