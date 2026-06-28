@@ -33,6 +33,13 @@ class ProcesoAdquisicionResource extends JsonResource
             'monto' => $this->monto,
             'objeto' => $this->objeto,
             'proceso' => new ProcesoResource($this->proceso),
+            'casos_pago_proveedor' => $this->whenLoaded(
+                'casosPagoProveedor',
+                fn () => $this->casosPagoProveedor->map(fn ($caso) => [
+                    'id' => $caso->id,
+                    'sgf_id' => $caso->sgf_id,
+                ])->values(),
+            ),
         ];
     }
 }

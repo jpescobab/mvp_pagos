@@ -13,6 +13,7 @@ class CasoPagoProveedor extends Model
 
     protected $fillable = [
         'sgf_id',
+        'proceso_adquisicion_id',
         'proveedor_id',
         'rut_proveedor',
         'monto',
@@ -33,6 +34,14 @@ class CasoPagoProveedor extends Model
     public function proveedor(): BelongsTo
     {
         return $this->belongsTo(Proveedor::class);
+    }
+
+    /**
+     * @return BelongsTo<ProcesoAdquisicion, $this>
+     */
+    public function procesoAdquisicion(): BelongsTo
+    {
+        return $this->belongsTo(ProcesoAdquisicion::class);
     }
 
     /**

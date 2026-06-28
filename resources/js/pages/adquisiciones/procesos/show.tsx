@@ -134,6 +134,26 @@ export default function ProcesoShow() {
 
                 <section className="space-y-3 rounded-xl border p-4">
                     <h2 className="text-base font-medium">
+                        Casos de pago vinculados
+                    </h2>
+
+                    {proceso.casos_pago_proveedor.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin casos de pago vinculados todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {proceso.casos_pago_proveedor.map((caso) => (
+                                <li key={caso.id} className="py-2 font-mono">
+                                    {caso.sgf_id}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
                         Checklist documental
                     </h2>
 

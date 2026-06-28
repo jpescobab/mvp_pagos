@@ -1,42 +1,4 @@
-# Spec: pago-proveedores-sgf
-
-## Purpose
-
-Primer módulo funcional activable: convierte la evidencia SGF (tarea 7) en casos de pago gobernados por workflow (tarea 5), con expediente documental (tarea 6) y evidencia de registro CGU/BancoEstado/egreso, sin reemplazar la lógica de esos sistemas oficiales.
-
-## Requirements
-
-### Requirement: Cada sgf_id es un caso de pago individual
-El sistema SHALL tratar cada `sgf_id` como un `caso_pago_proveedor` independiente, con su propio `Proceso` de workflow. Los datos SGF (`sgf_status`, `sgf_current_group_raw`) SHALL conservarse solo como referencia externa, sin gobernar el estado interno del caso.
-
-#### Scenario: Crear caso de pago desde un snapshot SGF
-- **WHEN** se importa un `SnapshotSgf` cuyo `sgf_id` no tiene un `caso_pago_proveedor` previo
-- **THEN** se crea un `caso_pago_proveedor`
-- **AND** se crea un `Proceso` asociado en el estado inicial (`importada_desde_sgf`) del workflow "pago_proveedores"
-- **AND** se conservan `sgf_status` y `sgf_current_group_raw` como referencia externa
-
-#### Scenario: Reimportar un sgf_id existente no altera su workflow interno
-- **WHEN** se importa un `SnapshotSgf` cuyo `sgf_id` ya tiene un `caso_pago_proveedor`
-- **THEN** se actualizan los campos de referencia SGF del caso (rut, monto, estado y grupo SGF)
-- **AND** el estado interno del `Proceso` asociado no cambia
-
-### Requirement: No modelar lotes ni envíos iniciales
-El sistema SHALL NOT crear `payment_submissions`, `payment_submission_items` ni un `sgf_submission_id` al importar casos desde SGF.
-
-#### Scenario: Importar sin generar lotes
-- **WHEN** se importan una o más filas SGF como casos de pago
-- **THEN** no se crea ningún registro de lote o envío agrupado
-- **AND** cada caso se gobierna de forma individual por su propio `Proceso`
-
-### Requirement: Registrar CGU, BancoEstado y egreso CGU como evidencia
-El sistema SHALL registrar referencias y respaldos de registro contable CGU, pago BancoEstado y egreso CGU como evidencia de gestión, sin reemplazar la lógica de esos sistemas oficiales.
-
-#### Scenario: Asociar un egreso CGU a uno o más casos
-- **WHEN** se registra un egreso CGU que cubre uno o más casos ya pagados
-- **THEN** se crea un `egreso_cgu`
-- **AND** se asocian los casos correspondientes mediante `egresos_cgu_items`
-- **AND** se puede vincular respaldo documental al egreso mediante `vinculos_documento`
-
+## ADDED Requirements
 
 ### Requirement: Vincular manualmente un caso de pago a un proceso de adquisición
 El sistema SHALL permitir vincular un `caso_pago_proveedor` a un `proceso_adquisicion` mediante una acción manual y explícita, distinta de cualquier transición de workflow. El vínculo SHALL ser opcional (nullable) y SHALL permitir que varios `caso_pago_proveedor` apunten al mismo `proceso_adquisicion`, pero un `caso_pago_proveedor` SHALL apuntar a lo sumo a un `proceso_adquisicion` a la vez.

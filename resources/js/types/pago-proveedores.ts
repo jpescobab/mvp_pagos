@@ -38,6 +38,12 @@ export type Proceso = {
     checklist?: Checklist | null;
 };
 
+export type ProcesoAdquisicionVinculado = {
+    id: number;
+    codigo: string;
+    objeto: string;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -46,6 +52,15 @@ export type CasoPagoProveedor = {
     sgf_status: string | null;
     sgf_current_group_raw: string | null;
     proceso: Proceso;
+    proceso_adquisicion: ProcesoAdquisicionVinculado | null;
+};
+
+export type ProcesoAdquisicionResumen = {
+    id: number;
+    codigo: string;
+    objeto: string;
+    proveedor: string | null;
+    monto: string;
 };
 
 export type CasoSeleccionable = {

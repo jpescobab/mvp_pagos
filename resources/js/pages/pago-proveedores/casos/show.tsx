@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,9 +10,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import casos from '@/routes/pago-proveedores/casos';
-import type { CasoPagoProveedor, TransicionWorkflow } from '@/types/pago-proveedores';
+import type {
+    CasoPagoProveedor,
+    ProcesoAdquisicionResumen,
+    TransicionWorkflow,
+} from '@/types/pago-proveedores';
 
 type PageProps = {
     caso: CasoPagoProveedor;
@@ -52,6 +57,65 @@ export default function CasoShow() {
     }
 
     const historial = [...(caso.proceso.historial_transiciones ?? [])].reverse();
+
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
+    const [resultadosBusqueda, setResultadosBusqueda] = useState<
+        ProcesoAdquisicionResumen[]
+    >([]);
+    const [buscandoAdquisicion, setBuscandoAdquisicion] = useState(false);
+    const [errorVinculo, setErrorVinculo] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (caso.proceso_adquisicion !== null) {
+            return;
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => {
+            setBuscandoAdquisicion(true);
+
+            fetch(
+                `${casos.buscarAdquisiciones.url(caso.id)}?q=${encodeURIComponent(terminoBusqueda)}`,
+                { signal: controller.signal, headers: { Accept: 'application/json' } },
+            )
+                .then((response) => response.json())
+                .then((json: ProcesoAdquisicionResumen[]) =>
+                    setResultadosBusqueda(json),
+                )
+                .catch(() => undefined)
+                .finally(() => setBuscandoAdquisicion(false));
+        }, 300);
+
+        return () => {
+            controller.abort();
+            clearTimeout(timeout);
+        };
+    }, [terminoBusqueda, caso.id, caso.proceso_adquisicion]);
+
+    function vincularAdquisicion(procesoAdquisicionId: number) {
+        setErrorVinculo(null);
+
+        router.post(
+            casos.vincularAdquisicion.store(caso.id).url,
+            { proceso_adquisicion_id: procesoAdquisicionId },
+            {
+                preserveScroll: true,
+                onError: (errors) =>
+                    setErrorVinculo(
+                        (errors as Record<string, string>)
+                            .proceso_adquisicion_id ?? null,
+                    ),
+            },
+        );
+    }
+
+    function desvincularAdquisicion() {
+        setErrorVinculo(null);
+
+        router.delete(casos.vincularAdquisicion.destroy(caso.id).url, {
+            preserveScroll: true,
+        });
+    }
 
     return (
         <>
@@ -117,6 +181,91 @@ export default function CasoShow() {
                                         {transicion.nombre}
                                     </Button>
                                 ),
+                            )}
+                        </div>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Proceso de adquisición vinculado
+                    </h2>
+
+                    {errorVinculo && (
+                        <p className="text-sm text-destructive">
+                            {errorVinculo}
+                        </p>
+                    )}
+
+                    {caso.proceso_adquisicion !== null ? (
+                        <div className="flex items-center justify-between text-sm">
+                            <span>
+                                <span className="font-mono">
+                                    {caso.proceso_adquisicion.codigo}
+                                </span>{' '}
+                                · {caso.proceso_adquisicion.objeto}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={desvincularAdquisicion}
+                            >
+                                Desvincular
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Input
+                                placeholder="Buscar por código, objeto, proveedor o monto…"
+                                value={terminoBusqueda}
+                                onChange={(e) =>
+                                    setTerminoBusqueda(e.target.value)
+                                }
+                            />
+
+                            {buscandoAdquisicion && (
+                                <p className="text-sm text-muted-foreground">
+                                    Buscando…
+                                </p>
+                            )}
+
+                            {!buscandoAdquisicion &&
+                                terminoBusqueda !== '' &&
+                                resultadosBusqueda.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Sin coincidencias.
+                                    </p>
+                                )}
+
+                            {resultadosBusqueda.length > 0 && (
+                                <ul className="divide-y text-sm">
+                                    {resultadosBusqueda.map((resultado) => (
+                                        <li
+                                            key={resultado.id}
+                                            className="flex items-center justify-between py-2"
+                                        >
+                                            <span>
+                                                <span className="font-mono">
+                                                    {resultado.codigo}
+                                                </span>{' '}
+                                                · {resultado.objeto}
+                                                {resultado.proveedor &&
+                                                    ` · ${resultado.proveedor}`}
+                                            </span>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    vincularAdquisicion(
+                                                        resultado.id,
+                                                    )
+                                                }
+                                            >
+                                                Vincular
+                                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
                             )}
                         </div>
                     )}

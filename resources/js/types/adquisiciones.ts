@@ -1,5 +1,10 @@
 import type { Proceso } from '@/types/pago-proveedores';
 
+export type CasoPagoProveedorVinculado = {
+    id: number;
+    sgf_id: string;
+};
+
 export type ProcesoAdquisicion = {
     id: number;
     codigo: string;
@@ -9,6 +14,7 @@ export type ProcesoAdquisicion = {
     monto: string | null;
     objeto: string;
     proceso: Proceso;
+    casos_pago_proveedor: CasoPagoProveedorVinculado[];
 };
 
 export type ModalidadSeleccionable = {

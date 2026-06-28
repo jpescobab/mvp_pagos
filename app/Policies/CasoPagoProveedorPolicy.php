@@ -16,4 +16,9 @@ class CasoPagoProveedorPolicy
     {
         return true;
     }
+
+    public function vincularAdquisicion(User $user, CasoPagoProveedor $caso): bool
+    {
+        return $user->can('pago_proveedores.vincular_adquisicion');
+    }
 }

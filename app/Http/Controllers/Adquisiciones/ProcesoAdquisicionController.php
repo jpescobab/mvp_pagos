@@ -45,6 +45,7 @@ class ProcesoAdquisicionController extends Controller
             'proceso.historialTransiciones.estadoDestino',
             'proceso.historialTransiciones.user',
             'proceso.checklist.items',
+            'casosPagoProveedor',
         ]);
 
         return Inertia::render('adquisiciones/procesos/show', [

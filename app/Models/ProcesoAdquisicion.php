@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class ProcesoAdquisicion extends Model
@@ -56,5 +57,13 @@ class ProcesoAdquisicion extends Model
     public function proceso(): MorphOne
     {
         return $this->morphOne(Proceso::class, 'sujeto');
+    }
+
+    /**
+     * @return HasMany<CasoPagoProveedor, $this>
+     */
+    public function casosPagoProveedor(): HasMany
+    {
+        return $this->hasMany(CasoPagoProveedor::class);
     }
 }

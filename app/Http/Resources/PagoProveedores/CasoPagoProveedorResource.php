@@ -25,6 +25,14 @@ class CasoPagoProveedorResource extends JsonResource
             'sgf_status' => $this->sgf_status,
             'sgf_current_group_raw' => $this->sgf_current_group_raw,
             'proceso' => new ProcesoResource($this->proceso),
+            'proceso_adquisicion' => $this->whenLoaded(
+                'procesoAdquisicion',
+                fn () => $this->procesoAdquisicion === null ? null : [
+                    'id' => $this->procesoAdquisicion->id,
+                    'codigo' => $this->procesoAdquisicion->codigo,
+                    'objeto' => $this->procesoAdquisicion->objeto,
+                ],
+            ),
         ];
     }
 }
