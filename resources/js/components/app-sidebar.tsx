@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     LayoutGrid,
     Receipt,
+    ShieldCheck,
     ShoppingCart,
     TrendingUp,
     Wallet,
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import procesosAdquisicion from '@/routes/adquisiciones/procesos';
+import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
@@ -35,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Indicadores Económicos',
         href: indicadoresEconomicos.index(),
         icon: TrendingUp,
+    },
+    {
+        title: 'Auditoría',
+        href: auditoria.index(),
+        icon: ShieldCheck,
     },
 ];
 

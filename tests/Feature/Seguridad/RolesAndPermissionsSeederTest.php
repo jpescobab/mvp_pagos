@@ -9,6 +9,7 @@ test('el seeder crea los roles y permisos esperados', function () {
 
     expect(Role::pluck('name')->sort()->values()->all())->toBe(['admin', 'superadmin']);
     expect(Permission::pluck('name')->sort()->values()->all())->toBe([
+        'auditoria.ver',
         'core_institucional.administrar',
         'documentos.gestionar',
         'documentos.validar',
