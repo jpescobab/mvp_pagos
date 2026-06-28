@@ -20,6 +20,9 @@ class TiposDocumentoSeeder extends Seeder
             ['codigo' => 'NOTA_CREDITO',  'nombre' => 'Nota de Crédito',            'descripcion' => 'Nota de crédito electrónica',               'es_obligatorio' => false],
             ['codigo' => 'NOTA_DEBITO',   'nombre' => 'Nota de Débito',             'descripcion' => 'Nota de débito electrónica',                'es_obligatorio' => false],
             ['codigo' => 'OTRO',          'nombre' => 'Otro Documento',             'descripcion' => 'Documento complementario no clasificado',    'es_obligatorio' => false],
+            ['codigo' => 'BASES_LICITACION',      'nombre' => 'Bases de Licitación',          'descripcion' => 'Bases administrativas y técnicas del proceso de adquisición', 'es_obligatorio' => false],
+            ['codigo' => 'RESOLUCION_ADJUDICACION', 'nombre' => 'Resolución de Adjudicación', 'descripcion' => 'Resolución que adjudica el proceso de adquisición',           'es_obligatorio' => false],
+            ['codigo' => 'GARANTIA',     'nombre' => 'Garantía',                   'descripcion' => 'Garantía de seriedad de oferta o fiel cumplimiento',          'es_obligatorio' => false],
         ];
 
         foreach ($tipos as $tipo) {

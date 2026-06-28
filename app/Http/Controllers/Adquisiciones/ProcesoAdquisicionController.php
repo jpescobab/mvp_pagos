@@ -7,17 +7,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Adquisiciones\CrearProcesoAdquisicionRequest;
 use App\Http\Resources\Adquisiciones\ProcesoAdquisicionResource;
 use App\Models\Ccosto;
+use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\ModalidadAdquisicion;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
+use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProcesoAdquisicionController extends Controller
 {
+    public function __construct(private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist) {}
+
     public function index(): Response
     {
         Gate::authorize('viewAny', ProcesoAdquisicion::class);
@@ -30,7 +35,7 @@ class ProcesoAdquisicionController extends Controller
         ]);
     }
 
-    public function show(ProcesoAdquisicion $proceso): Response
+    public function show(ProcesoAdquisicion $proceso, Request $request): Response
     {
         Gate::authorize('view', $proceso);
 
@@ -44,9 +49,16 @@ class ProcesoAdquisicionController extends Controller
             'proceso.historialTransiciones.estadoOrigen',
             'proceso.historialTransiciones.estadoDestino',
             'proceso.historialTransiciones.user',
-            'proceso.checklist.items',
             'casosPagoProveedor',
         ]);
+
+        $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'adquisiciones')->first();
+
+        if ($conjuntoRequisitos !== null) {
+            $this->resolutorChecklist->resolve($proceso->proceso, $conjuntoRequisitos, $request->user());
+        }
+
+        $proceso->proceso->load('checklist.items');
 
         return Inertia::render('adquisiciones/procesos/show', [
             'proceso' => new ProcesoAdquisicionResource($proceso),
