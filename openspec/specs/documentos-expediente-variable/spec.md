@@ -41,6 +41,15 @@ El sistema SHALL determinar los documentos requeridos de un proceso según regla
 - **THEN** los `checklist_documental_proceso_items` ya generados conservan el `tipo_requisito` con el que se generaron
 - **AND** solo una nueva resolución del checklist refleja la regla actualizada
 
+#### Scenario: Un item del checklist se vincula al documento real ya subido
+- **WHEN** se resuelve el checklist de un proceso que tiene un `VinculoDocumento` activo cuyo documento coincide en `tipo_documento_id` con un item del checklist
+- **THEN** ese item queda asociado al `documento_id` correspondiente
+- **AND** su `estado_cumplimiento` refleja el estado vigente de ese documento: `cargado` si aún no tiene ningún evento de validación, o el resultado de su última validación (`valido`/`rechazado`)
+
+#### Scenario: Varios documentos del mismo tipo vinculados al proceso
+- **WHEN** existen varios `VinculoDocumento` activos cuyo documento comparte el mismo `tipo_documento_id` exigido por un item
+- **THEN** el item queda asociado al documento vinculado más recientemente
+
 ### Requirement: Vincular documentos a cualquier entidad de negocio
 Un documento SHALL poder vincularse a cualquier entidad mediante `vinculos_documento` polimórfico (`vinculable_type`/`vinculable_id`), sin que el modelo documental dependa de un módulo funcional específico.
 

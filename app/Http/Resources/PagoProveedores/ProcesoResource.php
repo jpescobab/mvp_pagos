@@ -29,6 +29,7 @@ class ProcesoResource extends JsonResource
                     'tipo_documento' => $item->tipoDocumento?->nombre,
                     'tipo_requisito' => $item->tipo_requisito,
                     'estado_cumplimiento' => $item->estado_cumplimiento,
+                    'documento_id' => $item->documento_id,
                 ])->values(),
             ]),
             'documentos' => $this->whenLoaded(

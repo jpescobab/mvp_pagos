@@ -24,6 +24,7 @@ export type ChecklistItem = {
     tipo_documento: string | null;
     tipo_requisito: string;
     estado_cumplimiento: string;
+    documento_id: number | null;
 };
 
 export type Checklist = {

@@ -4,6 +4,7 @@ namespace App\Services\Documentos;
 
 use App\Models\ChecklistDocumentalProceso;
 use App\Models\ConjuntoRequisitosDocumentales;
+use App\Models\Documento;
 use App\Models\Proceso;
 use App\Models\RequisitoDocumental;
 use App\Models\User;
@@ -19,8 +20,9 @@ class ResolutorChecklistDocumentalProceso
     public function resolve(Proceso $proceso, ConjuntoRequisitosDocumentales $conjuntoRequisitos, ?User $user = null): ChecklistDocumentalProceso
     {
         $requisitos = $this->requisitosAplicables($proceso, $conjuntoRequisitos);
+        $documentosPorTipo = $this->documentosVinculadosPorTipo($proceso);
 
-        return DB::transaction(function () use ($proceso, $conjuntoRequisitos, $requisitos, $user) {
+        return DB::transaction(function () use ($proceso, $conjuntoRequisitos, $requisitos, $documentosPorTipo, $user) {
             $checklist = ChecklistDocumentalProceso::updateOrCreate(
                 ['proceso_id' => $proceso->id],
                 [
@@ -33,16 +35,45 @@ class ResolutorChecklistDocumentalProceso
             $checklist->items()->delete();
 
             foreach ($requisitos as $requisito) {
+                $documento = $documentosPorTipo->get($requisito->tipo_documento_id);
+
                 $checklist->items()->create([
                     'requisito_documental_id' => $requisito->id,
                     'tipo_documento_id' => $requisito->tipo_documento_id,
                     'tipo_requisito' => $requisito->tipo_requisito,
-                    'estado_cumplimiento' => 'pendiente',
+                    'documento_id' => $documento?->id,
+                    'estado_cumplimiento' => $this->estadoCumplimiento($documento),
                 ]);
             }
 
             return $checklist->refresh();
         });
+    }
+
+    /**
+     * @return Collection<int, Documento> Documento más reciente vinculado activamente, por tipo_documento_id.
+     */
+    private function documentosVinculadosPorTipo(Proceso $proceso): Collection
+    {
+        return $proceso->vinculosDocumento()
+            ->where('activo', true)
+            ->with('documento')
+            ->get()
+            ->pluck('documento')
+            ->filter()
+            ->sortBy('created_at')
+            ->keyBy('tipo_documento_id');
+    }
+
+    private function estadoCumplimiento(?Documento $documento): string
+    {
+        if ($documento === null) {
+            return 'pendiente';
+        }
+
+        $estadoVigente = $documento->estadoVigente();
+
+        return $estadoVigente === 'pendiente' ? 'cargado' : $estadoVigente;
     }
 
     /**

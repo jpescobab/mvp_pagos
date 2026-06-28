@@ -236,8 +236,24 @@ export default function ProcesoShow() {
                                                 ({item.tipo_requisito})
                                             </span>
                                         </span>
-                                        <span className="text-muted-foreground">
+                                        <span className="flex items-center gap-2 text-muted-foreground">
                                             {item.estado_cumplimiento}
+                                            {item.documento_id !== null && (
+                                                <a
+                                                    href={
+                                                        documentos.descargar({
+                                                            proceso:
+                                                                proceso.proceso
+                                                                    .id,
+                                                            documento:
+                                                                item.documento_id,
+                                                        }).url
+                                                    }
+                                                    className="underline"
+                                                >
+                                                    Ver documento
+                                                </a>
+                                            )}
                                         </span>
                                     </li>
                                 ),

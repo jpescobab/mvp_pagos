@@ -2,6 +2,7 @@
 
 use App\Models\Ccosto;
 use App\Models\ConjuntoRequisitosDocumentales;
+use App\Models\Documento;
 use App\Models\Institucion;
 use App\Models\ModalidadAdquisicion;
 use App\Models\RequisitoDocumental;
@@ -126,4 +127,34 @@ test('abrir el detalle dos veces no duplica los items del checklist', function (
         ->count();
 
     expect($cantidadItems)->toBe($cantidadRequisitosEsperados);
+});
+
+test('un documento de contrato ya vinculado se refleja en el checklist con documento_id y estado cargado', function () {
+    $this->withoutVite();
+    sembrarRequisitosDocumentalesAdquisiciones();
+
+    $proceso = app(ProcesoAdquisicionService::class)->crear([
+        'codigo' => 'ADQ-CHK-004',
+        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
+        'ccosto_id' => crearCcostoDePruebaParaChecklist()->id,
+        'objeto' => 'Compra de equipos de climatización',
+    ]);
+
+    $tipoContrato = TipoDocumento::where('codigo', 'CONTRATO')->first();
+    $documento = Documento::create(['tipo_documento_id' => $tipoContrato->id, 'titulo' => 'contrato-firmado.pdf']);
+    $proceso->proceso->vinculosDocumento()->create(['documento_id' => $documento->id, 'activo' => true]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) use ($documento) {
+        $page->component('adquisiciones/procesos/show', shouldExist: false);
+        $items = $page->toArray()['props']['proceso']['proceso']['checklist']['items'];
+        $itemContrato = collect($items)->firstWhere('tipo_documento', 'Contrato');
+
+        expect($itemContrato['documento_id'])->toBe($documento->id);
+        expect($itemContrato['estado_cumplimiento'])->toBe('cargado');
+    });
 });
