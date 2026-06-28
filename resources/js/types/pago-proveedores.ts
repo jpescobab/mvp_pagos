@@ -31,12 +31,20 @@ export type Checklist = {
     items: ChecklistItem[];
 };
 
+export type ValidacionDocumentoHistorial = {
+    estado: string;
+    observacion: string | null;
+    validado_por: string | null;
+    validado_en: string | null;
+};
+
 export type DocumentoVinculado = {
     vinculo_id: number;
     documento_id: number;
     tipo_documento: string | null;
     nombre_archivo: string | null;
     estado_vigente: string;
+    validaciones: ValidacionDocumentoHistorial[];
 };
 
 export type TipoDocumentoSeleccionable = {

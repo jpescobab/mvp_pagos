@@ -362,10 +362,8 @@ export default function ProcesoShow() {
                     ) : (
                         <ul className="divide-y text-sm">
                             {(proceso.proceso.documentos ?? []).map((doc) => (
-                                <li
-                                    key={doc.vinculo_id}
-                                    className="flex items-center justify-between py-2"
-                                >
+                                <li key={doc.vinculo_id} className="space-y-2 py-2">
+                                <div className="flex items-center justify-between">
                                     <span>
                                         {doc.tipo_documento ??
                                             'Documento sin tipo'}{' '}
@@ -441,6 +439,33 @@ export default function ProcesoShow() {
                                             }}
                                         />
                                     </div>
+                                </div>
+
+                                {doc.validaciones.length > 0 && (
+                                    <ul className="space-y-1 pl-4 text-xs text-muted-foreground">
+                                        {doc.validaciones.map(
+                                            (validacion, i) => (
+                                                <li key={i}>
+                                                    {validacion.estado} ·{' '}
+                                                    {validacion.validado_por ??
+                                                        'Sistema'}
+                                                    {validacion.validado_en &&
+                                                        ` · ${new Date(validacion.validado_en).toLocaleString()}`}
+                                                    {validacion.observacion && (
+                                                        <span className="italic">
+                                                            {' '}
+                                                            — “
+                                                            {
+                                                                validacion.observacion
+                                                            }
+                                                            ”
+                                                        </span>
+                                                    )}
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                )}
                                 </li>
                             ))}
                         </ul>

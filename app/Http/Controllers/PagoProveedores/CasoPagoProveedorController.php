@@ -54,6 +54,7 @@ class CasoPagoProveedorController extends Controller
             'checklist.items',
             'vinculosDocumento.documento.tipoDocumento',
             'vinculosDocumento.documento.versiones',
+            'vinculosDocumento.documento.validaciones.validadoPor',
         ]);
 
         return Inertia::render('pago-proveedores/casos/show', [

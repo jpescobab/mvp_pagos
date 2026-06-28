@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources\PagoProveedores;
 
+use App\Models\Documento;
 use App\Models\Proceso;
+use App\Models\VinculoDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -34,16 +36,42 @@ class ProcesoResource extends JsonResource
             ]),
             'documentos' => $this->whenLoaded(
                 'vinculosDocumento',
-                fn () => $this->vinculosDocumento
-                    ->where('activo', true)
-                    ->map(fn ($vinculo) => [
-                        'vinculo_id' => $vinculo->id,
-                        'documento_id' => $vinculo->documento->id,
-                        'tipo_documento' => $vinculo->documento->tipoDocumento?->nombre,
-                        'nombre_archivo' => $vinculo->documento->versiones->last()?->nombre_archivo,
-                        'estado_vigente' => $vinculo->documento->estadoVigente(),
-                    ])->values(),
+                fn () => $this->mapDocumentosVinculados(),
             ),
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapDocumentosVinculados(): array
+    {
+        return array_values($this->vinculosDocumento
+            ->where('activo', true)
+            ->map(fn (VinculoDocumento $vinculo) => [
+                'vinculo_id' => $vinculo->id,
+                'documento_id' => $vinculo->documento->id,
+                'tipo_documento' => $vinculo->documento->tipoDocumento?->nombre,
+                'nombre_archivo' => $vinculo->documento->versiones->last()?->nombre_archivo,
+                'estado_vigente' => $vinculo->documento->estadoVigente(),
+                'validaciones' => $this->mapHistorialValidaciones($vinculo->documento),
+            ])
+            ->all());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapHistorialValidaciones(Documento $documento): array
+    {
+        return array_values($documento->validaciones
+            ->sortByDesc('id')
+            ->map(fn ($validacion) => [
+                'estado' => $validacion->estado,
+                'observacion' => $validacion->observacion,
+                'validado_por' => $validacion->validadoPor?->name,
+                'validado_en' => $validacion->validado_en,
+            ])
+            ->all());
     }
 }

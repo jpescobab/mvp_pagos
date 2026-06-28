@@ -50,6 +50,11 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 - **WHEN** se descarga un documento que tiene más de una versión
 - **THEN** el sistema sirve el archivo de la versión con el `numero_version` más alto
 
+#### Scenario: El historial de validaciones de un documento es consultable, no solo su estado vigente
+- **WHEN** un usuario consulta el detalle de un proceso que tiene un documento con más de un evento de validación
+- **THEN** la respuesta incluye el historial completo de `validaciones_documento` de ese documento, ordenado del más reciente al más antiguo, con su resultado, observación, usuario y fecha
+- **AND** la observación de un evento de rechazo pasado sigue siendo visible aunque el documento haya sido validado posteriormente
+
 ### Requirement: Resolver checklist documental por proceso según reglas configurables
 El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee.
 
