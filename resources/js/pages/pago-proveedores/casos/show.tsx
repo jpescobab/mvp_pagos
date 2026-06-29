@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Fragment, useEffect, useState } from 'react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import casos from '@/routes/pago-proveedores/casos';
+import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import documentos from '@/routes/procesos/documentos';
 import type {
     CasoPagoProveedor,
@@ -1035,6 +1036,42 @@ export default function CasoShow() {
                                         </li>
                                     )}
                                 </Fragment>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Egresos CGU asociados
+                    </h2>
+
+                    {(caso.egresos_cgu ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin egresos CGU asociados todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {(caso.egresos_cgu ?? []).map((egreso) => (
+                                <li
+                                    key={egreso.id}
+                                    className="flex items-center justify-between py-2"
+                                >
+                                    <Link
+                                        href={
+                                            egresosCgu.show(egreso.id).url
+                                        }
+                                        className="underline"
+                                    >
+                                        {egreso.numero_egreso}
+                                    </Link>
+                                    <span className="text-muted-foreground">
+                                        {new Date(
+                                            egreso.fecha,
+                                        ).toLocaleDateString()}{' '}
+                                        · {egreso.monto}
+                                    </span>
+                                </li>
                             ))}
                         </ul>
                     )}

@@ -95,6 +95,13 @@ export type SnapshotSgf = {
     payload_normalizado: Record<string, unknown>;
 };
 
+export type EgresoCguAsociado = {
+    id: number;
+    numero_egreso: string;
+    fecha: string;
+    monto: string;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -107,6 +114,7 @@ export type CasoPagoProveedor = {
     registros_contables_cgu?: RegistroContableCgu[];
     registros_pago_bancario?: RegistroPagoBancario[];
     snapshots_sgf?: SnapshotSgf[];
+    egresos_cgu?: EgresoCguAsociado[];
 };
 
 export type ProcesoAdquisicionResumen = {

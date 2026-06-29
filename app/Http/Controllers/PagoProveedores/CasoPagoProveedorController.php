@@ -45,6 +45,7 @@ class CasoPagoProveedorController extends Controller
             'registrosContablesCgu.registradoPor',
             'registrosPagoBancario.registradoPor',
             'snapshotsSgf.importacion.iniciadoPor',
+            'egresoCguItems.egreso',
         ]);
 
         $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->first();

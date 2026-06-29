@@ -3,6 +3,7 @@
 namespace App\Http\Resources\PagoProveedores;
 
 use App\Models\CasoPagoProveedor;
+use App\Models\EgresoCguItem;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SnapshotSgf;
@@ -47,6 +48,10 @@ class CasoPagoProveedorResource extends JsonResource
             'snapshots_sgf' => $this->whenLoaded(
                 'snapshotsSgf',
                 fn () => $this->mapSnapshotsSgf(),
+            ),
+            'egresos_cgu' => $this->whenLoaded(
+                'egresoCguItems',
+                fn () => $this->mapEgresosCgu(),
             ),
         ];
     }
@@ -98,6 +103,21 @@ class CasoPagoProveedorResource extends JsonResource
                 'fuente' => $snapshot->importacion?->fuente,
                 'payload_crudo' => $snapshot->payload_crudo,
                 'payload_normalizado' => $snapshot->payload_normalizado,
+            ])
+            ->all());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapEgresosCgu(): array
+    {
+        return array_values($this->egresoCguItems
+            ->map(fn (EgresoCguItem $item) => [
+                'id' => $item->egreso->id,
+                'numero_egreso' => $item->egreso->numero_egreso,
+                'fecha' => $item->egreso->fecha,
+                'monto' => $item->monto,
             ])
             ->all());
     }

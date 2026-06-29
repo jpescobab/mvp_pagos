@@ -58,6 +58,11 @@ El sistema SHALL registrar referencias y respaldos de registro contable CGU, pag
 - **WHEN** un usuario abre el detalle de un `caso_pago_proveedor`
 - **THEN** la respuesta incluye todos los `registro_contable_cgu` y `registro_pago_bancario` asociados al caso, no solo el más reciente
 
+#### Scenario: Mostrar los egresos CGU asociados en el detalle de un caso de pago
+- **WHEN** un usuario abre el detalle de un `caso_pago_proveedor` que ya tiene uno o más `egresos_cgu_items` asociados
+- **THEN** la respuesta incluye cada `egreso_cgu` asociado, con su número, fecha y el monto del item correspondiente a ese caso
+- **AND** cada egreso mostrado permite navegar a su propio detalle (`pago-proveedores.egresos-cgu.show`)
+
 
 ### Requirement: Vincular manualmente un caso de pago a un proceso de adquisición
 El sistema SHALL permitir vincular un `caso_pago_proveedor` a un `proceso_adquisicion` mediante una acción manual y explícita, distinta de cualquier transición de workflow. El vínculo SHALL ser opcional (nullable) y SHALL permitir que varios `caso_pago_proveedor` apunten al mismo `proceso_adquisicion`, pero un `caso_pago_proveedor` SHALL apuntar a lo sumo a un `proceso_adquisicion` a la vez.

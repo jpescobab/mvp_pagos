@@ -83,4 +83,12 @@ class CasoPagoProveedor extends Model
     {
         return $this->hasMany(SnapshotSgf::class, 'sgf_id', 'sgf_id')->orderByDesc('id');
     }
+
+    /**
+     * @return HasMany<EgresoCguItem, $this>
+     */
+    public function egresoCguItems(): HasMany
+    {
+        return $this->hasMany(EgresoCguItem::class);
+    }
 }
