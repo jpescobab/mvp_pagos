@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import {
+    History,
     LayoutGrid,
     Receipt,
     ShieldCheck,
@@ -26,6 +27,7 @@ import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
+import importacionesSgf from '@/routes/sgf/importaciones';
 import definicionesWorkflow from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
 
@@ -62,6 +64,11 @@ const pagoProveedoresNavItems: NavItem[] = [
         title: 'Egresos CGU',
         href: egresosCgu.index(),
         icon: Receipt,
+    },
+    {
+        title: 'Importaciones SGF',
+        href: importacionesSgf.index(),
+        icon: History,
     },
 ];
 
