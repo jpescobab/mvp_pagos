@@ -3,6 +3,7 @@ import {
     BarChart3,
     Building2,
     FileBarChart,
+    Gauge,
     History,
     LayoutGrid,
     Plug,
@@ -34,6 +35,7 @@ import definicionesInformeRazonado from '@/routes/informes-razonados/definicione
 import ejecucionesInformeRazonado from '@/routes/informes-razonados/ejecuciones';
 import conectores from '@/routes/integraciones/conectores';
 import sistemasExternos from '@/routes/integraciones/sistemas-externos';
+import clientesMedidores from '@/routes/maestros/clientes-medidores';
 import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
@@ -67,6 +69,11 @@ const mainNavItems: NavItem[] = [
         title: 'Proveedores',
         href: proveedores.index(),
         icon: Building2,
+    },
+    {
+        title: 'Clientes Medidores',
+        href: clientesMedidores.index(),
+        icon: Gauge,
     },
 ];
 
