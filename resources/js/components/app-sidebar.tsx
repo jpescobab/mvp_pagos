@@ -6,6 +6,7 @@ import {
     History,
     LayoutGrid,
     Plug,
+    PlugZap,
     Receipt,
     ShieldCheck,
     ShoppingCart,
@@ -31,6 +32,7 @@ import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import definicionesInformeRazonado from '@/routes/informes-razonados/definiciones';
 import ejecucionesInformeRazonado from '@/routes/informes-razonados/ejecuciones';
+import conectores from '@/routes/integraciones/conectores';
 import sistemasExternos from '@/routes/integraciones/sistemas-externos';
 import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
@@ -99,6 +101,11 @@ const integracionesNavItems: NavItem[] = [
         title: 'Sistemas Externos',
         href: sistemasExternos.index(),
         icon: Plug,
+    },
+    {
+        title: 'Conectores Playwright',
+        href: conectores.index(),
+        icon: PlugZap,
     },
 ];
 

@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
+use App\Models\ConectorAutomatizacionNavegador;
 use App\Models\EgresoCgu;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use App\Policies\AuditLogPolicy;
 use App\Policies\CasoPagoProveedorPolicy;
+use App\Policies\ConectorAutomatizacionNavegadorPolicy;
 use App\Policies\EgresoCguPolicy;
 use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\ProcesoPolicy;
@@ -80,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ProcesoAdquisicion::class, ProcesoAdquisicionPolicy::class);
         Gate::policy(Proceso::class, ProcesoPolicy::class);
         Gate::policy(AuditLog::class, AuditLogPolicy::class);
+        Gate::policy(ConectorAutomatizacionNavegador::class, ConectorAutomatizacionNavegadorPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 
