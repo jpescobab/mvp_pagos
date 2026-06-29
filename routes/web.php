@@ -14,3 +14,4 @@ require __DIR__.'/adquisiciones.php';
 require __DIR__.'/documentos.php';
 require __DIR__.'/indicadores.php';
 require __DIR__.'/seguridad.php';
+require __DIR__.'/workflow.php';

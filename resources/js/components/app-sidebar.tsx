@@ -6,6 +6,7 @@ import {
     ShoppingCart,
     TrendingUp,
     Wallet,
+    Workflow,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -25,6 +26,7 @@ import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
+import definicionesWorkflow from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -42,6 +44,11 @@ const mainNavItems: NavItem[] = [
         title: 'Auditoría',
         href: auditoria.index(),
         icon: ShieldCheck,
+    },
+    {
+        title: 'Definiciones de Workflow',
+        href: definicionesWorkflow.index(),
+        icon: Workflow,
     },
 ];
 
