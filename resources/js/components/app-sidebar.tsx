@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import {
+    BarChart3,
     Building2,
+    FileBarChart,
     History,
     LayoutGrid,
     Plug,
@@ -27,10 +29,13 @@ import { dashboard } from '@/routes';
 import procesosAdquisicion from '@/routes/adquisiciones/procesos';
 import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
+import definicionesInformeRazonado from '@/routes/informes-razonados/definiciones';
+import ejecucionesInformeRazonado from '@/routes/informes-razonados/ejecuciones';
 import sistemasExternos from '@/routes/integraciones/sistemas-externos';
 import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
+import periodosReportabilidad from '@/routes/reportabilidad/periodos';
 import importacionesSgf from '@/routes/sgf/importaciones';
 import definicionesWorkflow from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
@@ -97,6 +102,24 @@ const integracionesNavItems: NavItem[] = [
     },
 ];
 
+const reportabilidadNavItems: NavItem[] = [
+    {
+        title: 'Períodos de Reportabilidad',
+        href: periodosReportabilidad.index(),
+        icon: BarChart3,
+    },
+    {
+        title: 'Definiciones de Informes',
+        href: definicionesInformeRazonado.index(),
+        icon: FileBarChart,
+    },
+    {
+        title: 'Ejecuciones de Informes',
+        href: ejecucionesInformeRazonado.index(),
+        icon: FileBarChart,
+    },
+];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -125,6 +148,10 @@ export function AppSidebar() {
                 <NavMain
                     items={integracionesNavItems}
                     label="Integraciones"
+                />
+                <NavMain
+                    items={reportabilidadNavItems}
+                    label="Reportabilidad"
                 />
             </SidebarContent>
 

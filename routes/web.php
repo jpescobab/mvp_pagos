@@ -18,3 +18,5 @@ require __DIR__.'/workflow.php';
 require __DIR__.'/sgf.php';
 require __DIR__.'/maestros.php';
 require __DIR__.'/integraciones.php';
+require __DIR__.'/reportabilidad.php';
+require __DIR__.'/informes-razonados.php';
