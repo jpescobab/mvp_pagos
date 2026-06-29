@@ -68,6 +68,24 @@ export type ProcesoAdquisicionVinculado = {
     objeto: string;
 };
 
+export type RegistroContableCgu = {
+    id: number;
+    numero_registro: string;
+    fecha_registro: string;
+    monto: string;
+    observaciones: string | null;
+    registrado_por: string | null;
+};
+
+export type RegistroPagoBancario = {
+    id: number;
+    numero_operacion: string;
+    fecha_pago: string;
+    monto: string;
+    banco: string | null;
+    registrado_por: string | null;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -77,6 +95,8 @@ export type CasoPagoProveedor = {
     sgf_current_group_raw: string | null;
     proceso: Proceso;
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
+    registros_contables_cgu?: RegistroContableCgu[];
+    registros_pago_bancario?: RegistroPagoBancario[];
 };
 
 export type ProcesoAdquisicionResumen = {

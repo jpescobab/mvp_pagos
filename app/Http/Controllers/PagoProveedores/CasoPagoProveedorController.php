@@ -42,6 +42,8 @@ class CasoPagoProveedorController extends Controller
             'proceso.historialTransiciones.estadoDestino',
             'proceso.historialTransiciones.user',
             'procesoAdquisicion',
+            'registrosContablesCgu.registradoPor',
+            'registrosPagoBancario.registradoPor',
         ]);
 
         $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->first();

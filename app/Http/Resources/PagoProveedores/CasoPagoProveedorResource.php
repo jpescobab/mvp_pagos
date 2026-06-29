@@ -3,6 +3,8 @@
 namespace App\Http\Resources\PagoProveedores;
 
 use App\Models\CasoPagoProveedor;
+use App\Models\RegistroContableCgu;
+use App\Models\RegistroPagoBancario;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,6 +35,48 @@ class CasoPagoProveedorResource extends JsonResource
                     'objeto' => $this->procesoAdquisicion->objeto,
                 ],
             ),
+            'registros_contables_cgu' => $this->whenLoaded(
+                'registrosContablesCgu',
+                fn () => $this->mapRegistrosContablesCgu(),
+            ),
+            'registros_pago_bancario' => $this->whenLoaded(
+                'registrosPagoBancario',
+                fn () => $this->mapRegistrosPagoBancario(),
+            ),
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapRegistrosContablesCgu(): array
+    {
+        return array_values($this->registrosContablesCgu
+            ->map(fn (RegistroContableCgu $registro) => [
+                'id' => $registro->id,
+                'numero_registro' => $registro->numero_registro,
+                'fecha_registro' => $registro->fecha_registro,
+                'monto' => $registro->monto,
+                'observaciones' => $registro->observaciones,
+                'registrado_por' => $registro->registradoPor?->name,
+            ])
+            ->all());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapRegistrosPagoBancario(): array
+    {
+        return array_values($this->registrosPagoBancario
+            ->map(fn (RegistroPagoBancario $registro) => [
+                'id' => $registro->id,
+                'numero_operacion' => $registro->numero_operacion,
+                'fecha_pago' => $registro->fecha_pago,
+                'monto' => $registro->monto,
+                'banco' => $registro->banco,
+                'registrado_por' => $registro->registradoPor?->name,
+            ])
+            ->all());
     }
 }

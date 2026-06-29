@@ -247,6 +247,85 @@ export default function CasoShow() {
         );
     }
 
+    const [numeroRegistroCgu, setNumeroRegistroCgu] = useState('');
+    const [fechaRegistroCgu, setFechaRegistroCgu] = useState('');
+    const [montoRegistroCgu, setMontoRegistroCgu] = useState('');
+    const [observacionesRegistroCgu, setObservacionesRegistroCgu] =
+        useState('');
+    const [registrandoCgu, setRegistrandoCgu] = useState(false);
+    const [errorRegistroCgu, setErrorRegistroCgu] = useState<string | null>(
+        null,
+    );
+
+    function registrarContableCgu() {
+        setRegistrandoCgu(true);
+        setErrorRegistroCgu(null);
+
+        router.post(
+            casos.registrosContablesCgu.store(caso.id).url,
+            {
+                numero_registro: numeroRegistroCgu,
+                fecha_registro: fechaRegistroCgu,
+                monto: montoRegistroCgu,
+                observaciones: observacionesRegistroCgu,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNumeroRegistroCgu('');
+                    setFechaRegistroCgu('');
+                    setMontoRegistroCgu('');
+                    setObservacionesRegistroCgu('');
+                },
+                onError: (errors) =>
+                    setErrorRegistroCgu(
+                        Object.values(errors as Record<string, string>)[0] ??
+                            null,
+                    ),
+                onFinish: () => setRegistrandoCgu(false),
+            },
+        );
+    }
+
+    const [numeroOperacionPago, setNumeroOperacionPago] = useState('');
+    const [fechaPago, setFechaPago] = useState('');
+    const [montoPago, setMontoPago] = useState('');
+    const [bancoPago, setBancoPago] = useState('');
+    const [registrandoPago, setRegistrandoPago] = useState(false);
+    const [errorRegistroPago, setErrorRegistroPago] = useState<string | null>(
+        null,
+    );
+
+    function registrarPagoBancario() {
+        setRegistrandoPago(true);
+        setErrorRegistroPago(null);
+
+        router.post(
+            casos.registrosPagoBancario.store(caso.id).url,
+            {
+                numero_operacion: numeroOperacionPago,
+                fecha_pago: fechaPago,
+                monto: montoPago,
+                banco: bancoPago,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNumeroOperacionPago('');
+                    setFechaPago('');
+                    setMontoPago('');
+                    setBancoPago('');
+                },
+                onError: (errors) =>
+                    setErrorRegistroPago(
+                        Object.values(errors as Record<string, string>)[0] ??
+                            null,
+                    ),
+                onFinish: () => setRegistrandoPago(false),
+            },
+        );
+    }
+
     return (
         <>
             <Head title={`Caso ${caso.sgf_id}`} />
@@ -623,6 +702,208 @@ export default function CasoShow() {
                             onClick={subirDocumento}
                         >
                             Subir
+                        </Button>
+                    </div>
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Registro contable CGU
+                    </h2>
+
+                    {errorRegistroCgu && (
+                        <p className="text-sm text-destructive">
+                            {errorRegistroCgu}
+                        </p>
+                    )}
+
+                    {(caso.registros_contables_cgu ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin registro contable CGU todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {(caso.registros_contables_cgu ?? []).map(
+                                (registro) => (
+                                    <li key={registro.id} className="py-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-mono">
+                                                {registro.numero_registro}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {new Date(
+                                                    registro.fecha_registro,
+                                                ).toLocaleDateString()}{' '}
+                                                · {registro.monto}
+                                            </span>
+                                        </div>
+                                        <p className="text-muted-foreground">
+                                            {registro.registrado_por ??
+                                                'Sistema'}
+                                            {registro.observaciones &&
+                                                ` — ${registro.observaciones}`}
+                                        </p>
+                                    </li>
+                                ),
+                            )}
+                        </ul>
+                    )}
+
+                    <div className="flex flex-wrap items-end gap-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="numero-registro-cgu">
+                                N.º de registro
+                            </Label>
+                            <Input
+                                id="numero-registro-cgu"
+                                value={numeroRegistroCgu}
+                                onChange={(e) =>
+                                    setNumeroRegistroCgu(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="fecha-registro-cgu">Fecha</Label>
+                            <Input
+                                id="fecha-registro-cgu"
+                                type="date"
+                                value={fechaRegistroCgu}
+                                onChange={(e) =>
+                                    setFechaRegistroCgu(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="monto-registro-cgu">Monto</Label>
+                            <Input
+                                id="monto-registro-cgu"
+                                type="number"
+                                value={montoRegistroCgu}
+                                onChange={(e) =>
+                                    setMontoRegistroCgu(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="observaciones-registro-cgu">
+                                Observaciones
+                            </Label>
+                            <Input
+                                id="observaciones-registro-cgu"
+                                value={observacionesRegistroCgu}
+                                onChange={(e) =>
+                                    setObservacionesRegistroCgu(
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                        </div>
+                        <Button
+                            disabled={
+                                registrandoCgu ||
+                                numeroRegistroCgu === '' ||
+                                fechaRegistroCgu === '' ||
+                                montoRegistroCgu === ''
+                            }
+                            onClick={registrarContableCgu}
+                        >
+                            Registrar
+                        </Button>
+                    </div>
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Registro de pago bancario
+                    </h2>
+
+                    {errorRegistroPago && (
+                        <p className="text-sm text-destructive">
+                            {errorRegistroPago}
+                        </p>
+                    )}
+
+                    {(caso.registros_pago_bancario ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin registro de pago bancario todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {(caso.registros_pago_bancario ?? []).map(
+                                (registro) => (
+                                    <li key={registro.id} className="py-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-mono">
+                                                {registro.numero_operacion}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {new Date(
+                                                    registro.fecha_pago,
+                                                ).toLocaleDateString()}{' '}
+                                                · {registro.monto}
+                                            </span>
+                                        </div>
+                                        <p className="text-muted-foreground">
+                                            {registro.registrado_por ??
+                                                'Sistema'}
+                                            {registro.banco &&
+                                                ` — ${registro.banco}`}
+                                        </p>
+                                    </li>
+                                ),
+                            )}
+                        </ul>
+                    )}
+
+                    <div className="flex flex-wrap items-end gap-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="numero-operacion-pago">
+                                N.º de operación
+                            </Label>
+                            <Input
+                                id="numero-operacion-pago"
+                                value={numeroOperacionPago}
+                                onChange={(e) =>
+                                    setNumeroOperacionPago(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="fecha-pago">Fecha</Label>
+                            <Input
+                                id="fecha-pago"
+                                type="date"
+                                value={fechaPago}
+                                onChange={(e) => setFechaPago(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="monto-pago">Monto</Label>
+                            <Input
+                                id="monto-pago"
+                                type="number"
+                                value={montoPago}
+                                onChange={(e) => setMontoPago(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="banco-pago">Banco</Label>
+                            <Input
+                                id="banco-pago"
+                                value={bancoPago}
+                                onChange={(e) => setBancoPago(e.target.value)}
+                            />
+                        </div>
+                        <Button
+                            disabled={
+                                registrandoPago ||
+                                numeroOperacionPago === '' ||
+                                fechaPago === '' ||
+                                montoPago === ''
+                            }
+                            onClick={registrarPagoBancario}
+                        >
+                            Registrar
                         </Button>
                     </div>
                 </section>
