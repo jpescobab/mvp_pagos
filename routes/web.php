@@ -16,3 +16,4 @@ require __DIR__.'/indicadores.php';
 require __DIR__.'/seguridad.php';
 require __DIR__.'/workflow.php';
 require __DIR__.'/sgf.php';
+require __DIR__.'/maestros.php';

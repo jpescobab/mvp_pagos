@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import {
+    Building2,
     History,
     LayoutGrid,
     Receipt,
@@ -25,6 +26,7 @@ import { dashboard } from '@/routes';
 import procesosAdquisicion from '@/routes/adquisiciones/procesos';
 import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
+import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import importacionesSgf from '@/routes/sgf/importaciones';
@@ -51,6 +53,11 @@ const mainNavItems: NavItem[] = [
         title: 'Definiciones de Workflow',
         href: definicionesWorkflow.index(),
         icon: Workflow,
+    },
+    {
+        title: 'Proveedores',
+        href: proveedores.index(),
+        icon: Building2,
     },
 ];
 
