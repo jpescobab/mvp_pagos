@@ -4,6 +4,7 @@ namespace App\Http\Resources\PagoProveedores;
 
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCguItem;
+use App\Models\Factura;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SnapshotSgf;
@@ -52,6 +53,10 @@ class CasoPagoProveedorResource extends JsonResource
             'egresos_cgu' => $this->whenLoaded(
                 'egresoCguItems',
                 fn () => $this->mapEgresosCgu(),
+            ),
+            'facturas' => $this->whenLoaded(
+                'facturas',
+                fn () => $this->mapFacturas(),
             ),
         ];
     }
@@ -118,6 +123,21 @@ class CasoPagoProveedorResource extends JsonResource
                 'numero_egreso' => $item->egreso->numero_egreso,
                 'fecha' => $item->egreso->fecha,
                 'monto' => $item->monto,
+            ])
+            ->all());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapFacturas(): array
+    {
+        return array_values($this->facturas
+            ->map(fn (Factura $factura) => [
+                'id' => $factura->id,
+                'folio' => $factura->folio,
+                'monto' => $factura->monto,
+                'fecha_emision' => $factura->fecha_emision,
             ])
             ->all());
     }

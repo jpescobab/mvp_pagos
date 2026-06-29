@@ -3,6 +3,7 @@
 use App\Http\Controllers\PagoProveedores\BuscarProcesoAdquisicionController;
 use App\Http\Controllers\PagoProveedores\CasoPagoProveedorController;
 use App\Http\Controllers\PagoProveedores\EgresoCguController;
+use App\Http\Controllers\PagoProveedores\FacturaController;
 use App\Http\Controllers\PagoProveedores\RegistroContableCguController;
 use App\Http\Controllers\PagoProveedores\RegistroPagoBancarioController;
 use App\Http\Controllers\PagoProveedores\TransicionCasoPagoProveedorController;
@@ -20,6 +21,7 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
 
     Route::post('casos/{caso}/registros-contables-cgu', [RegistroContableCguController::class, 'store'])->name('casos.registros-contables-cgu.store');
     Route::post('casos/{caso}/registros-pago-bancario', [RegistroPagoBancarioController::class, 'store'])->name('casos.registros-pago-bancario.store');
+    Route::post('casos/{caso}/facturas', [FacturaController::class, 'store'])->name('casos.facturas.store');
 
     Route::get('egresos-cgu', [EgresoCguController::class, 'index'])->name('egresos-cgu.index');
     Route::get('egresos-cgu/crear', [EgresoCguController::class, 'create'])->name('egresos-cgu.create');

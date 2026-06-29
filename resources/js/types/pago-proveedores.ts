@@ -102,6 +102,13 @@ export type EgresoCguAsociado = {
     monto: string;
 };
 
+export type Factura = {
+    id: number;
+    folio: string;
+    monto: string;
+    fecha_emision: string;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -115,6 +122,7 @@ export type CasoPagoProveedor = {
     registros_pago_bancario?: RegistroPagoBancario[];
     snapshots_sgf?: SnapshotSgf[];
     egresos_cgu?: EgresoCguAsociado[];
+    facturas?: Factura[];
 };
 
 export type ProcesoAdquisicionResumen = {

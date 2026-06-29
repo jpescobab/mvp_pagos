@@ -31,4 +31,9 @@ class CasoPagoProveedorPolicy
     {
         return $user->can('pago_proveedores.pagar');
     }
+
+    public function registrarFactura(User $user, CasoPagoProveedor $caso): bool
+    {
+        return $user->can('pago_proveedores.registrar_factura');
+    }
 }

@@ -345,6 +345,42 @@ export default function CasoShow() {
         );
     }
 
+    const [folioFactura, setFolioFactura] = useState('');
+    const [montoFactura, setMontoFactura] = useState('');
+    const [fechaEmisionFactura, setFechaEmisionFactura] = useState('');
+    const [registrandoFactura, setRegistrandoFactura] = useState(false);
+    const [errorRegistroFactura, setErrorRegistroFactura] = useState<
+        string | null
+    >(null);
+
+    function registrarFactura() {
+        setRegistrandoFactura(true);
+        setErrorRegistroFactura(null);
+
+        router.post(
+            casos.facturas.store(caso.id).url,
+            {
+                folio: folioFactura,
+                monto: montoFactura,
+                fecha_emision: fechaEmisionFactura,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setFolioFactura('');
+                    setMontoFactura('');
+                    setFechaEmisionFactura('');
+                },
+                onError: (errors) =>
+                    setErrorRegistroFactura(
+                        Object.values(errors as Record<string, string>)[0] ??
+                            null,
+                    ),
+                onFinish: () => setRegistrandoFactura(false),
+            },
+        );
+    }
+
     return (
         <>
             <Head title={`Caso ${caso.sgf_id}`} />
@@ -921,6 +957,88 @@ export default function CasoShow() {
                                 montoPago === ''
                             }
                             onClick={registrarPagoBancario}
+                        >
+                            Registrar
+                        </Button>
+                    </div>
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">Facturas</h2>
+
+                    {errorRegistroFactura && (
+                        <p className="text-sm text-destructive">
+                            {errorRegistroFactura}
+                        </p>
+                    )}
+
+                    {(caso.facturas ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin facturas registradas todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {(caso.facturas ?? []).map((factura) => (
+                                <li key={factura.id} className="py-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-mono">
+                                            {factura.folio}
+                                        </span>
+                                        <span className="text-muted-foreground">
+                                            {new Date(
+                                                factura.fecha_emision,
+                                            ).toLocaleDateString()}{' '}
+                                            · {factura.monto}
+                                        </span>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <div className="flex flex-wrap items-end gap-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="folio-factura">Folio</Label>
+                            <Input
+                                id="folio-factura"
+                                value={folioFactura}
+                                onChange={(e) =>
+                                    setFolioFactura(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="fecha-emision-factura">
+                                Fecha de emisión
+                            </Label>
+                            <Input
+                                id="fecha-emision-factura"
+                                type="date"
+                                value={fechaEmisionFactura}
+                                onChange={(e) =>
+                                    setFechaEmisionFactura(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="monto-factura">Monto</Label>
+                            <Input
+                                id="monto-factura"
+                                type="number"
+                                value={montoFactura}
+                                onChange={(e) =>
+                                    setMontoFactura(e.target.value)
+                                }
+                            />
+                        </div>
+                        <Button
+                            disabled={
+                                registrandoFactura ||
+                                folioFactura === '' ||
+                                fechaEmisionFactura === '' ||
+                                montoFactura === ''
+                            }
+                            onClick={registrarFactura}
                         >
                             Registrar
                         </Button>
