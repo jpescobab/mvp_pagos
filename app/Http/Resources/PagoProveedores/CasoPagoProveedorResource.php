@@ -5,6 +5,7 @@ namespace App\Http\Resources\PagoProveedores;
 use App\Models\CasoPagoProveedor;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
+use App\Models\SnapshotSgf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -43,6 +44,10 @@ class CasoPagoProveedorResource extends JsonResource
                 'registrosPagoBancario',
                 fn () => $this->mapRegistrosPagoBancario(),
             ),
+            'snapshots_sgf' => $this->whenLoaded(
+                'snapshotsSgf',
+                fn () => $this->mapSnapshotsSgf(),
+            ),
         ];
     }
 
@@ -76,6 +81,23 @@ class CasoPagoProveedorResource extends JsonResource
                 'monto' => $registro->monto,
                 'banco' => $registro->banco,
                 'registrado_por' => $registro->registradoPor?->name,
+            ])
+            ->all());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function mapSnapshotsSgf(): array
+    {
+        return array_values($this->snapshotsSgf
+            ->map(fn (SnapshotSgf $snapshot) => [
+                'id' => $snapshot->id,
+                'capturado_en' => $snapshot->capturado_en,
+                'hash' => $snapshot->hash,
+                'fuente' => $snapshot->importacion?->fuente,
+                'payload_crudo' => $snapshot->payload_crudo,
+                'payload_normalizado' => $snapshot->payload_normalizado,
             ])
             ->all());
     }

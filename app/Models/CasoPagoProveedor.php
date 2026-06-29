@@ -75,4 +75,12 @@ class CasoPagoProveedor extends Model
     {
         return $this->hasMany(RegistroPagoBancario::class);
     }
+
+    /**
+     * @return HasMany<SnapshotSgf, $this>
+     */
+    public function snapshotsSgf(): HasMany
+    {
+        return $this->hasMany(SnapshotSgf::class, 'sgf_id', 'sgf_id')->orderByDesc('id');
+    }
 }

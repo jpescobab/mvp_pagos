@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -67,6 +67,24 @@ export default function CasoShow() {
     }
 
     const historial = [...(caso.proceso.historial_transiciones ?? [])].reverse();
+
+    const [snapshotsExpandidos, setSnapshotsExpandidos] = useState<
+        Set<number>
+    >(new Set());
+
+    function alternarSnapshotExpandido(id: number) {
+        setSnapshotsExpandidos((actual) => {
+            const siguiente = new Set(actual);
+
+            if (siguiente.has(id)) {
+                siguiente.delete(id);
+            } else {
+                siguiente.add(id);
+            }
+
+            return siguiente;
+        });
+    }
 
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
     const [resultadosBusqueda, setResultadosBusqueda] = useState<
@@ -942,6 +960,81 @@ export default function CasoShow() {
                                         </p>
                                     )}
                                 </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Historial de snapshots SGF
+                    </h2>
+
+                    {(caso.snapshots_sgf ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin snapshots SGF registrados todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {(caso.snapshots_sgf ?? []).map((snapshot) => (
+                                <Fragment key={snapshot.id}>
+                                    <li className="py-2">
+                                        <div className="flex items-center justify-between">
+                                            <span>
+                                                {new Date(
+                                                    snapshot.capturado_en,
+                                                ).toLocaleString()}{' '}
+                                                <span className="text-muted-foreground">
+                                                    ·{' '}
+                                                    {snapshot.fuente ??
+                                                        'Sin fuente'}
+                                                </span>
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono text-xs text-muted-foreground">
+                                                    {snapshot.hash.slice(
+                                                        0,
+                                                        12,
+                                                    )}
+                                                    …
+                                                </span>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        alternarSnapshotExpandido(
+                                                            snapshot.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {snapshotsExpandidos.has(
+                                                        snapshot.id,
+                                                    )
+                                                        ? 'Ocultar'
+                                                        : 'Ver detalle'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    {snapshotsExpandidos.has(
+                                        snapshot.id,
+                                    ) && (
+                                        <li className="bg-muted/30 px-2 py-3">
+                                            <pre className="overflow-x-auto text-xs">
+                                                {JSON.stringify(
+                                                    {
+                                                        payload_crudo:
+                                                            snapshot.payload_crudo,
+                                                        payload_normalizado:
+                                                            snapshot.payload_normalizado,
+                                                    },
+                                                    null,
+                                                    2,
+                                                )}
+                                            </pre>
+                                        </li>
+                                    )}
+                                </Fragment>
                             ))}
                         </ul>
                     )}

@@ -86,6 +86,15 @@ export type RegistroPagoBancario = {
     registrado_por: string | null;
 };
 
+export type SnapshotSgf = {
+    id: number;
+    capturado_en: string;
+    hash: string;
+    fuente: string | null;
+    payload_crudo: Record<string, unknown>;
+    payload_normalizado: Record<string, unknown>;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -97,6 +106,7 @@ export type CasoPagoProveedor = {
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
     registros_contables_cgu?: RegistroContableCgu[];
     registros_pago_bancario?: RegistroPagoBancario[];
+    snapshots_sgf?: SnapshotSgf[];
 };
 
 export type ProcesoAdquisicionResumen = {
