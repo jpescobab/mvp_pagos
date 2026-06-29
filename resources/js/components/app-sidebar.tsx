@@ -3,6 +3,7 @@ import {
     Building2,
     History,
     LayoutGrid,
+    Plug,
     Receipt,
     ShieldCheck,
     ShoppingCart,
@@ -26,6 +27,7 @@ import { dashboard } from '@/routes';
 import procesosAdquisicion from '@/routes/adquisiciones/procesos';
 import auditoria from '@/routes/auditoria';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
+import sistemasExternos from '@/routes/integraciones/sistemas-externos';
 import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
@@ -87,6 +89,14 @@ const adquisicionesNavItems: NavItem[] = [
     },
 ];
 
+const integracionesNavItems: NavItem[] = [
+    {
+        title: 'Sistemas Externos',
+        href: sistemasExternos.index(),
+        icon: Plug,
+    },
+];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -111,6 +121,10 @@ export function AppSidebar() {
                 <NavMain
                     items={adquisicionesNavItems}
                     label="Adquisiciones"
+                />
+                <NavMain
+                    items={integracionesNavItems}
+                    label="Integraciones"
                 />
             </SidebarContent>
 
