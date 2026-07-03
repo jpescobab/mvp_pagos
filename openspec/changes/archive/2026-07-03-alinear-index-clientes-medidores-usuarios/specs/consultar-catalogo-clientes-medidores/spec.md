@@ -1,10 +1,4 @@
-# Spec: consultar-catalogo-clientes-medidores
-
-## Purpose
-
-Exponer, de solo lectura, el catálogo institucional de `clientes_medidores` ya sembrado (número de cliente, proveedor, centro de costo, tipo de suministro), para que sea consultable antes de que el módulo funcional "Consumo eléctrico" exista.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Listar el catálogo de clientes medidores
 El sistema SHALL exponer, a cualquier usuario autenticado, un listado paginado de los `clientes_medidores` registrados con su número de cliente, proveedor, centro de costo, tipo de suministro, dirección y si está activo, con búsqueda por número de cliente, nombre del proveedor o código/nombre del centro de costo.

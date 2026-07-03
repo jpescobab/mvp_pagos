@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 
-export function UserStatusBadge({ active }: { active: boolean }) {
-    if (active) {
+export function ClienteMedidorStatusBadge({ activo }: { activo: boolean }) {
+    if (activo) {
         return (
             <Badge
                 variant="outline"
