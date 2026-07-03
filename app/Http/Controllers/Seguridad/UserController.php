@@ -133,7 +133,7 @@ class UserController extends Controller
         return to_route('usuarios.index');
     }
 
-    public function edit(User $usuario): Response
+    public function edit(Request $request, User $usuario): Response
     {
         Gate::authorize('update', $usuario);
 
@@ -149,8 +149,12 @@ class UserController extends Controller
                 'unidad' => $funcionario?->unidad,
                 'cfinanciero_id' => $funcionario?->cfinanciero_id,
                 'ccosto_id' => $funcionario?->ccosto_id,
+                'role_ids' => $usuario->roles()->pluck('roles.id')->all(),
             ],
             'catalogs' => $this->catalogos(),
+            'permissions' => [
+                'can_assign_roles' => (bool) $request->user()?->can('usuarios.asignar_roles'),
+            ],
         ]);
     }
 
@@ -186,6 +190,24 @@ class UserController extends Controller
 
         try {
             $this->gestionUsuarios->desactivar($request->user(), $usuario);
+        } catch (RuntimeException $e) {
+            return Inertia::flash('error', $e->getMessage())->back();
+        }
+
+        return back();
+    }
+
+    public function actualizarRoles(Request $request, User $usuario): RedirectResponse
+    {
+        Gate::authorize('asignarRoles', $usuario);
+
+        $datos = $request->validate([
+            'roles' => ['array'],
+            'roles.*' => ['integer', 'exists:roles,id'],
+        ]);
+
+        try {
+            $this->gestionUsuarios->asignarRoles($usuario, $datos['roles'] ?? []);
         } catch (RuntimeException $e) {
             return Inertia::flash('error', $e->getMessage())->back();
         }

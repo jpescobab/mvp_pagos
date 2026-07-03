@@ -1,6 +1,7 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -24,14 +25,21 @@ type UsuarioEditable = {
     unidad: string | null;
     cfinanciero_id: number | null;
     ccosto_id: number | null;
+    role_ids: number[];
 };
 
 type PageProps = {
     usuario: UsuarioEditable;
     catalogs: CatalogosUsuarios;
+    permissions: { can_assign_roles: boolean };
 };
 
-export default function UsuariosEditar({ usuario, catalogs }: PageProps) {
+export default function UsuariosEditar({
+    usuario,
+    catalogs,
+    permissions,
+}: PageProps) {
+    const { flash } = usePage();
     const [name, setName] = useState(usuario.name);
     const [email, setEmail] = useState(usuario.email);
     const [rut, setRut] = useState(usuario.rut ?? '');
@@ -47,6 +55,13 @@ export default function UsuariosEditar({ usuario, catalogs }: PageProps) {
     );
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [procesando, setProcesando] = useState(false);
+    const [rolesSeleccionados, setRolesSeleccionados] = useState<number[]>(
+        usuario.role_ids,
+    );
+    const [erroresRoles, setErroresRoles] = useState<Record<string, string>>(
+        {},
+    );
+    const [procesandoRoles, setProcesandoRoles] = useState(false);
 
     function enviar() {
         setProcesando(true);
@@ -75,6 +90,30 @@ export default function UsuariosEditar({ usuario, catalogs }: PageProps) {
         );
     }
 
+    function alternarRol(rolId: number, marcado: boolean) {
+        setRolesSeleccionados((actuales) =>
+            marcado
+                ? [...actuales, rolId]
+                : actuales.filter((id) => id !== rolId),
+        );
+    }
+
+    function enviarRoles() {
+        setProcesandoRoles(true);
+        setErroresRoles({});
+
+        router.patch(
+            usuarios.roles.update(usuario.id).url,
+            { roles: rolesSeleccionados },
+            {
+                preserveScroll: true,
+                onError: (errores) =>
+                    setErroresRoles(errores as Record<string, string>),
+                onFinish: () => setProcesandoRoles(false),
+            },
+        );
+    }
+
     return (
         <>
             <Head title={`Editar usuario — ${usuario.name}`} />
@@ -83,6 +122,12 @@ export default function UsuariosEditar({ usuario, catalogs }: PageProps) {
                 <h1 className="text-xl font-semibold tracking-tight">
                     Editar usuario
                 </h1>
+
+                {flash.error && (
+                    <div className="max-w-xl rounded-md border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive-foreground">
+                        {flash.error}
+                    </div>
+                )}
 
                 <div className="grid max-w-xl gap-4">
                     <div className="grid gap-2">
@@ -237,6 +282,52 @@ export default function UsuariosEditar({ usuario, catalogs }: PageProps) {
                         Cancelar
                     </Button>
                 </div>
+
+                {permissions.can_assign_roles && (
+                    <div className="grid max-w-xl gap-2 border-t pt-6">
+                        <Label>Roles</Label>
+                        <div className="flex flex-col gap-2 rounded-md border p-3">
+                            {catalogs.roles.map((rol) => (
+                                <div
+                                    key={rol.id}
+                                    className="flex items-center gap-2"
+                                >
+                                    <Checkbox
+                                        id={`rol-${rol.id}`}
+                                        checked={rolesSeleccionados.includes(
+                                            rol.id,
+                                        )}
+                                        onCheckedChange={(checked) =>
+                                            alternarRol(
+                                                rol.id,
+                                                checked === true,
+                                            )
+                                        }
+                                    />
+                                    <Label
+                                        htmlFor={`rol-${rol.id}`}
+                                        className="font-normal"
+                                    >
+                                        {rol.name}
+                                    </Label>
+                                </div>
+                            ))}
+                        </div>
+                        {erroresRoles.roles && (
+                            <p className="text-sm text-destructive">
+                                {erroresRoles.roles}
+                            </p>
+                        )}
+                        <div>
+                            <Button
+                                disabled={procesandoRoles}
+                                onClick={enviarRoles}
+                            >
+                                Guardar roles
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

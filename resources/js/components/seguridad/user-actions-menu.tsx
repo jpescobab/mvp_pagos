@@ -59,10 +59,7 @@ export function UserActionsMenu({ usuario, permissions }: UserActionsMenuProps) 
     const diferidas: Array<{
         label: string;
         permitido: boolean;
-    }> = [
-        { label: 'Ver detalle', permitido: permissions.can_view_user },
-        { label: 'Asignar roles', permitido: permissions.can_assign_roles },
-    ];
+    }> = [{ label: 'Ver detalle', permitido: permissions.can_view_user }];
 
     return (
         <>

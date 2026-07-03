@@ -60,3 +60,31 @@ export type PermisosUsuarios = {
     can_reset_password: boolean;
     can_assign_roles: boolean;
 };
+
+export type RolListado = {
+    id: number;
+    name: string;
+    users_count: number;
+    permissions_count: number;
+    is_core: boolean;
+};
+
+export type FiltrosRoles = {
+    search: string | null;
+};
+
+export type PermisoOpcion = {
+    id: number;
+    name: string;
+};
+
+export type GrupoPermisos = {
+    group: string;
+    permissions: PermisoOpcion[];
+};
+
+export type RolEditable = {
+    id: number;
+    name: string;
+    permission_ids: number[];
+};

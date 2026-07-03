@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Spatie\Permission\Models\Role;
 
 class GestionUsuariosService
 {
@@ -148,6 +149,27 @@ class GestionUsuariosService
         );
     }
 
+    /**
+     * @param  array<int, int>  $roles
+     */
+    public function asignarRoles(User $usuario, array $roles): void
+    {
+        $rolesActuales = $usuario->roles()->pluck('roles.id')->all();
+
+        if ($this->quitaRolDeAdministradorAlUltimoActivo($usuario, $roles)) {
+            throw new RuntimeException('No puede quitarle el rol de Administrador del Sistema al último Administrador del Sistema activo.');
+        }
+
+        $usuario->syncRoles($roles);
+
+        $this->auditLogger->log(
+            'reasignar_roles_usuario',
+            $usuario,
+            ['roles' => $rolesActuales],
+            ['roles' => $roles],
+        );
+    }
+
     public function resetearPassword(User $usuario): string
     {
         $passwordTemporal = Str::password();
@@ -180,5 +202,19 @@ class GestionUsuariosService
             ->exists();
 
         return ! $otrosAdministradoresActivos;
+    }
+
+    /**
+     * @param  array<int, int>  $rolesNuevos
+     */
+    private function quitaRolDeAdministradorAlUltimoActivo(User $usuario, array $rolesNuevos): bool
+    {
+        if (! $this->esUltimoAdministradorActivo($usuario)) {
+            return false;
+        }
+
+        $idsRolesAdministrador = Role::whereIn('name', self::ROLES_ADMINISTRADOR)->pluck('id')->all();
+
+        return array_intersect($idsRolesAdministrador, $rolesNuevos) === [];
     }
 }

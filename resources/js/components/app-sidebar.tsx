@@ -5,6 +5,7 @@ import {
     FileBarChart,
     Gauge,
     History,
+    KeyRound,
     LayoutGrid,
     Plug,
     PlugZap,
@@ -40,6 +41,7 @@ import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import periodosReportabilidad from '@/routes/reportabilidad/periodos';
+import roles from '@/routes/roles';
 import importacionesSgf from '@/routes/sgf/importaciones';
 import usuarios from '@/routes/usuarios';
 import definicionesWorkflow from '@/routes/workflow/definiciones';
@@ -68,6 +70,11 @@ const administracionNavItems: NavItem[] = [
         title: 'Definiciones de Workflow',
         href: definicionesWorkflow.index(),
         icon: Workflow,
+    },
+    {
+        title: 'Roles y Permisos',
+        href: roles.index(),
+        icon: KeyRound,
     },
 ];
 

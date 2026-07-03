@@ -1,6 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { ProveedorActionsMenu } from '@/components/maestros/proveedor-actions-menu';
+import { ProveedorStatusBadge } from '@/components/maestros/proveedor-status-badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { useInitials } from '@/hooks/use-initials';
 import proveedores from '@/routes/maestros/proveedores';
 import type { Proveedor } from '@/types/maestros';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -13,6 +17,7 @@ type PageProps = {
 export default function ProveedoresIndex() {
     const { proveedores: pagina, q } = usePage<PageProps>().props;
     const [termino, setTermino] = useState(q ?? '');
+    const getInitials = useInitials();
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -50,24 +55,24 @@ export default function ProveedoresIndex() {
 
                 <div className="overflow-hidden rounded-xl border">
                     <table className="w-full text-sm">
-                        <thead className="bg-muted/50 text-left text-muted-foreground">
+                        <thead className="bg-muted/50 text-left text-xs text-muted-foreground uppercase">
                             <tr>
-                                <th className="px-4 py-2 font-medium">RUT</th>
-                                <th className="px-4 py-2 font-medium">
-                                    Nombre
+                                <th className="px-3 py-1.5 font-medium">
+                                    Proveedor
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="hidden px-3 py-1.5 font-medium md:table-cell">
                                     Correo
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="hidden px-3 py-1.5 font-medium lg:table-cell">
                                     Dirección
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="hidden px-3 py-1.5 font-medium lg:table-cell">
                                     Contacto
                                 </th>
-                                <th className="px-4 py-2 font-medium">
-                                    Activo
+                                <th className="px-3 py-1.5 font-medium">
+                                    Estado
                                 </th>
+                                <th className="px-3 py-1.5 font-medium"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -75,31 +80,52 @@ export default function ProveedoresIndex() {
                                 <tr>
                                     <td
                                         colSpan={6}
-                                        className="px-4 py-6 text-center text-muted-foreground"
+                                        className="px-3 py-6 text-center text-muted-foreground"
                                     >
                                         Sin proveedores que coincidan.
                                     </td>
                                 </tr>
                             )}
                             {pagina.data.map((proveedor) => (
-                                <tr key={proveedor.id}>
-                                    <td className="px-4 py-2 font-mono">
-                                        {proveedor.rutproveedor}
+                                <tr
+                                    key={proveedor.id}
+                                    className="hover:bg-muted/30"
+                                >
+                                    <td className="px-3 py-1.5">
+                                        <div className="flex items-center gap-2.5">
+                                            <Avatar className="size-7">
+                                                <AvatarFallback className="bg-accent text-[11px] font-semibold text-accent-foreground">
+                                                    {getInitials(
+                                                        proveedor.nombre,
+                                                    )}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="min-w-0">
+                                                <div className="truncate font-medium">
+                                                    {proveedor.nombre}
+                                                </div>
+                                                <div className="font-mono text-xs text-muted-foreground">
+                                                    {proveedor.rutproveedor}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-2">
-                                        {proveedor.nombre}
-                                    </td>
-                                    <td className="px-4 py-2 text-muted-foreground">
+                                    <td className="hidden px-3 py-1.5 text-muted-foreground md:table-cell">
                                         {proveedor.correo ?? '—'}
                                     </td>
-                                    <td className="px-4 py-2 text-muted-foreground">
+                                    <td className="hidden px-3 py-1.5 text-muted-foreground lg:table-cell">
                                         {proveedor.direccion ?? '—'}
                                     </td>
-                                    <td className="px-4 py-2 text-muted-foreground">
+                                    <td className="hidden px-3 py-1.5 text-muted-foreground lg:table-cell">
                                         {proveedor.contacto ?? '—'}
                                     </td>
-                                    <td className="px-4 py-2">
-                                        {proveedor.activo ? 'Sí' : 'No'}
+                                    <td className="px-3 py-1.5">
+                                        <ProveedorStatusBadge
+                                            activo={proveedor.activo}
+                                        />
+                                    </td>
+                                    <td className="px-3 py-1.5 text-right">
+                                        <ProveedorActionsMenu />
                                     </td>
                                 </tr>
                             ))}
