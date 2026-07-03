@@ -1,36 +1,4 @@
-# Spec: tema-visual-layout
-
-## Purpose
-
-Define la identidad visual institucional de la aplicación ("CAPJ +"), el tema de colores/tipografía que reemplaza el scaffolding neutro de `laravel/react-starter-kit`, la navegación principal del sidebar agrupada por módulo y limitada a los módulos realmente implementados, el login institucional con indicadores económicos, el topbar con tema y menú de usuario, y el panel general con datos reales.
-
-## Requirements
-
-### Requirement: Identidad de marca de la aplicación
-El sistema SHALL identificarse como "CAPJ +" en toda superficie de marca visible al usuario (logo del sidebar, título de la pestaña del navegador), reemplazando el branding del scaffolding de `laravel/react-starter-kit`.
-
-#### Scenario: Logo del sidebar
-- **WHEN** un usuario autenticado visualiza cualquier página con layout de sidebar
-- **THEN** el encabezado del sidebar muestra la marca "CAPJ +", no "Laravel Starter Kit"
-
-#### Scenario: Título de la pestaña del navegador
-- **WHEN** un usuario carga cualquier página de la aplicación
-- **THEN** el `<title>` de la página refleja el nombre configurado de la aplicación ("CAPJ +"), no "Laravel"
-
-### Requirement: Tema visual con paleta y tipografía institucional
-El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde/rojo/ámbar con variantes suaves para badges y deltas, variantes dark-mode) y tipografía (`Manrope` como fuente principal) definidas como tokens de tema, con radio base de 16px para tarjetas y superficies, sin alterar los nombres de las variables CSS que consumen los componentes UI existentes.
-
-#### Scenario: Color primario de acciones
-- **WHEN** se renderiza un componente con `bg-primary` o `text-primary` (ej. un botón primario)
-- **THEN** el color resultante corresponde al azul institucional definido en el tema, no al gris neutro original
-
-#### Scenario: Tipografía principal
-- **WHEN** se renderiza texto con la fuente sans-serif por defecto del tema
-- **THEN** la fuente aplicada es `Manrope`, no `Instrument Sans`
-
-#### Scenario: Tokens semánticos suaves
-- **WHEN** se renderiza un badge o indicador de estado con variante suave (éxito, alerta, error)
-- **THEN** el color proviene de los tokens semánticos del tema (verde/ámbar/rojo con fondo suave), no de valores hex escritos en el componente
+## MODIFIED Requirements
 
 ### Requirement: Navegación principal como riel de íconos
 El sistema SHALL presentar la navegación principal del sidebar como grupos colapsables por módulo funcional implementado, con la marca institucional (logo + "CAPJ +" + subtítulo "Finanzas y Ppto") en el encabezado, labels de grupo en mayúsculas, ítem activo destacado con fondo acentuado y barra lateral, y colapso del sidebar a modo ícono con tooltips. El sidebar SHALL seguir sin listar módulos funcionales que no tengan páginas implementadas.
@@ -50,6 +18,23 @@ El sistema SHALL presentar la navegación principal del sidebar como grupos cola
 #### Scenario: Sin enlaces al scaffolding original
 - **WHEN** un usuario autenticado visualiza el sidebar
 - **THEN** no se muestran enlaces al repositorio o documentación de `laravel/react-starter-kit`
+
+### Requirement: Tema visual con paleta y tipografía institucional
+El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde/rojo/ámbar con variantes suaves para badges y deltas, variantes dark-mode) y tipografía (`Manrope` como fuente principal) definidas como tokens de tema, con radio base de 16px para tarjetas y superficies, sin alterar los nombres de las variables CSS que consumen los componentes UI existentes.
+
+#### Scenario: Color primario de acciones
+- **WHEN** se renderiza un componente con `bg-primary` o `text-primary` (ej. un botón primario)
+- **THEN** el color resultante corresponde al azul institucional definido en el tema, no al gris neutro original
+
+#### Scenario: Tipografía principal
+- **WHEN** se renderiza texto con la fuente sans-serif por defecto del tema
+- **THEN** la fuente aplicada es `Manrope`, no `Instrument Sans`
+
+#### Scenario: Tokens semánticos suaves
+- **WHEN** se renderiza un badge o indicador de estado con variante suave (éxito, alerta, error)
+- **THEN** el color proviene de los tokens semánticos del tema (verde/ámbar/rojo con fondo suave), no de valores hex escritos en el componente
+
+## ADDED Requirements
 
 ### Requirement: Login institucional con indicadores económicos
 El sistema SHALL presentar la página de inicio de sesión con la identidad institucional: logo del Poder Judicial, título "Bienvenido a CAPJ +", subtítulo "Sección Finanzas y Presupuesto - Zonal Coyhaique", tarjeta central sobre una escena de fondo institucional, y chips con los últimos valores reales de indicadores económicos (UF, UTM, UTA, IPC) cuando existan en la base de datos. La lógica de autenticación (Fortify) no cambia.

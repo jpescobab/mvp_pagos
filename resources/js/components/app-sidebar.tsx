@@ -17,12 +17,11 @@ import {
     Workflow,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
+import { NavGroup } from '@/components/nav-group';
 import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -46,16 +45,19 @@ import usuarios from '@/routes/usuarios';
 import definicionesWorkflow from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const generalNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Panel general',
         href: dashboard(),
         icon: LayoutGrid,
     },
+];
+
+const administracionNavItems: NavItem[] = [
     {
-        title: 'Indicadores Económicos',
-        href: indicadoresEconomicos.index(),
-        icon: TrendingUp,
+        title: 'Usuarios',
+        href: usuarios.index(),
+        icon: Users,
     },
     {
         title: 'Auditoría',
@@ -63,24 +65,9 @@ const mainNavItems: NavItem[] = [
         icon: ShieldCheck,
     },
     {
-        title: 'Usuarios',
-        href: usuarios.index(),
-        icon: Users,
-    },
-    {
         title: 'Definiciones de Workflow',
         href: definicionesWorkflow.index(),
         icon: Workflow,
-    },
-    {
-        title: 'Proveedores',
-        href: proveedores.index(),
-        icon: Building2,
-    },
-    {
-        title: 'Clientes Medidores',
-        href: clientesMedidores.index(),
-        icon: Gauge,
     },
 ];
 
@@ -110,16 +97,16 @@ const adquisicionesNavItems: NavItem[] = [
     },
 ];
 
-const integracionesNavItems: NavItem[] = [
+const maestrosNavItems: NavItem[] = [
     {
-        title: 'Sistemas Externos',
-        href: sistemasExternos.index(),
-        icon: Plug,
+        title: 'Proveedores',
+        href: proveedores.index(),
+        icon: Building2,
     },
     {
-        title: 'Conectores Playwright',
-        href: conectores.index(),
-        icon: PlugZap,
+        title: 'Clientes Medidores',
+        href: clientesMedidores.index(),
+        icon: Gauge,
     },
 ];
 
@@ -141,6 +128,24 @@ const reportabilidadNavItems: NavItem[] = [
     },
 ];
 
+const integracionesNavItems: NavItem[] = [
+    {
+        title: 'Sistemas Externos',
+        href: sistemasExternos.index(),
+        icon: Plug,
+    },
+    {
+        title: 'Conectores Playwright',
+        href: conectores.index(),
+        icon: PlugZap,
+    },
+    {
+        title: 'Indicadores Económicos',
+        href: indicadoresEconomicos.index(),
+        icon: TrendingUp,
+    },
+];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -149,7 +154,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href={dashboard()} prefetch>
-                                <AppLogo />
+                                <AppLogo subtitle="Finanzas y Ppto" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -157,28 +162,23 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
-                <NavMain
-                    items={pagoProveedoresNavItems}
+                <NavMain items={generalNavItems} />
+                <NavGroup
+                    label="Administración"
+                    items={administracionNavItems}
+                />
+                <NavGroup
                     label="Pago de Proveedores"
+                    items={pagoProveedoresNavItems}
                 />
-                <NavMain
-                    items={adquisicionesNavItems}
-                    label="Adquisiciones"
-                />
-                <NavMain
-                    items={integracionesNavItems}
-                    label="Integraciones"
-                />
-                <NavMain
-                    items={reportabilidadNavItems}
+                <NavGroup label="Adquisiciones" items={adquisicionesNavItems} />
+                <NavGroup label="Maestros" items={maestrosNavItems} />
+                <NavGroup
                     label="Reportabilidad"
+                    items={reportabilidadNavItems}
                 />
+                <NavGroup label="Integraciones" items={integracionesNavItems} />
             </SidebarContent>
-
-            <SidebarFooter>
-                <NavUser />
-            </SidebarFooter>
         </Sidebar>
     );
 }

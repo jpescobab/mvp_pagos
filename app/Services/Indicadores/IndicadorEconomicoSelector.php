@@ -4,6 +4,7 @@ namespace App\Services\Indicadores;
 
 use App\Models\IndicadorEconomico;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Carbon;
 
 class IndicadorEconomicoSelector
 {
@@ -30,6 +31,39 @@ class IndicadorEconomicoSelector
     public function paraPeriodo(string $tipo, string $periodo): ?IndicadorEconomico
     {
         return IndicadorEconomico::where('tipo', $tipo)->where('periodo', $periodo)->first();
+    }
+
+    /**
+     * Latest registered value per tipo, for display chips (login, dashboard).
+     *
+     * @param  list<string>  $tipos
+     * @return list<array{tipo: string, valor: string, fecha_valor: ?string, periodo: ?string}>
+     */
+    public function ultimosPorTipo(array $tipos): array
+    {
+        $resultado = [];
+
+        foreach ($tipos as $tipo) {
+            $indicador = IndicadorEconomico::where('tipo', $tipo)
+                ->orderByDesc('fecha_valor')
+                ->orderByDesc('periodo')
+                ->first();
+
+            if ($indicador === null) {
+                continue;
+            }
+
+            $fechaValor = $indicador->fecha_valor;
+
+            $resultado[] = [
+                'tipo' => $indicador->tipo,
+                'valor' => (string) $indicador->valor,
+                'fecha_valor' => $fechaValor === null ? null : Carbon::parse($fechaValor)->toDateString(),
+                'periodo' => $indicador->periodo,
+            ];
+        }
+
+        return $resultado;
     }
 
     private function aplicarFallbackUsd(CarbonInterface $fecha): ?IndicadorEconomico
