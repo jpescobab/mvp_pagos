@@ -57,6 +57,61 @@ class GestionUsuariosService
         });
     }
 
+    /**
+     * Actualiza los datos personales e institucionales del usuario.
+     * No toca roles, contraseña ni estado activo.
+     *
+     * @param  array{name: string, email: string, rut: string, cargo: ?string, unidad: ?string, cfinanciero_id: ?int, ccosto_id: ?int}  $datos
+     */
+    public function editar(User $usuario, array $datos): void
+    {
+        DB::transaction(function () use ($usuario, $datos): void {
+            $funcionario = $usuario->funcionario;
+
+            $before = [
+                'name' => $usuario->name,
+                'email' => $usuario->email,
+                'rut' => $funcionario?->rut,
+                'cargo' => $funcionario?->cargo,
+                'unidad' => $funcionario?->unidad,
+                'cfinanciero_id' => $funcionario?->cfinanciero_id,
+                'ccosto_id' => $funcionario?->ccosto_id,
+            ];
+
+            $usuario->forceFill([
+                'name' => $datos['name'],
+                'email' => $datos['email'],
+            ])->save();
+
+            Funcionario::updateOrCreate(
+                ['user_id' => $usuario->id],
+                [
+                    'rut' => $datos['rut'],
+                    'nombre' => $datos['name'],
+                    'cargo' => $datos['cargo'] ?? null,
+                    'unidad' => $datos['unidad'] ?? null,
+                    'cfinanciero_id' => $datos['cfinanciero_id'] ?? null,
+                    'ccosto_id' => $datos['ccosto_id'] ?? null,
+                ],
+            );
+
+            $this->auditLogger->log(
+                'editar_usuario',
+                $usuario,
+                $before,
+                [
+                    'name' => $datos['name'],
+                    'email' => $datos['email'],
+                    'rut' => $datos['rut'],
+                    'cargo' => $datos['cargo'] ?? null,
+                    'unidad' => $datos['unidad'] ?? null,
+                    'cfinanciero_id' => $datos['cfinanciero_id'] ?? null,
+                    'ccosto_id' => $datos['ccosto_id'] ?? null,
+                ],
+            );
+        });
+    }
+
     public function activar(User $usuario): void
     {
         $before = ['active' => $usuario->active];

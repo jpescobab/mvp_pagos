@@ -61,7 +61,6 @@ export function UserActionsMenu({ usuario, permissions }: UserActionsMenuProps) 
         permitido: boolean;
     }> = [
         { label: 'Ver detalle', permitido: permissions.can_view_user },
-        { label: 'Editar usuario', permitido: permissions.can_edit_user },
         { label: 'Asignar roles', permitido: permissions.can_assign_roles },
     ];
 
@@ -75,6 +74,15 @@ export function UserActionsMenu({ usuario, permissions }: UserActionsMenuProps) 
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    {permissions.can_edit_user && (
+                        <DropdownMenuItem
+                            onSelect={() =>
+                                router.get(usuarios.edit(usuario.id).url)
+                            }
+                        >
+                            Editar usuario
+                        </DropdownMenuItem>
+                    )}
                     {!usuario.active && permissions.can_activate_user && (
                         <DropdownMenuItem
                             onSelect={() => setConfirmacion('activar')}

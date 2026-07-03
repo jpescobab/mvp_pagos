@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seguridad;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Seguridad\CrearUsuarioRequest;
+use App\Http\Requests\Seguridad\EditarUsuarioRequest;
 use App\Http\Resources\Seguridad\UserResource;
 use App\Models\Ccosto;
 use App\Models\Cfinanciero;
@@ -127,6 +128,44 @@ class UserController extends Controller
         Inertia::flash([
             'passwordTemporal' => $resultado['passwordTemporal'],
             'usuarioNombre' => $resultado['usuario']->name,
+        ]);
+
+        return to_route('usuarios.index');
+    }
+
+    public function edit(User $usuario): Response
+    {
+        Gate::authorize('update', $usuario);
+
+        $funcionario = $usuario->funcionario;
+
+        return Inertia::render('seguridad/usuarios/edit', [
+            'usuario' => [
+                'id' => $usuario->id,
+                'name' => $usuario->name,
+                'email' => $usuario->email,
+                'rut' => $funcionario?->rut,
+                'cargo' => $funcionario?->cargo,
+                'unidad' => $funcionario?->unidad,
+                'cfinanciero_id' => $funcionario?->cfinanciero_id,
+                'ccosto_id' => $funcionario?->ccosto_id,
+            ],
+            'catalogs' => $this->catalogos(),
+        ]);
+    }
+
+    public function update(EditarUsuarioRequest $request, User $usuario): RedirectResponse
+    {
+        $datos = $request->validated();
+
+        $this->gestionUsuarios->editar($usuario, [
+            'name' => $datos['name'],
+            'email' => $datos['email'],
+            'rut' => $datos['rut'],
+            'cargo' => $datos['cargo'] ?? null,
+            'unidad' => $datos['unidad'] ?? null,
+            'cfinanciero_id' => $datos['cfinanciero_id'] ?? null,
+            'ccosto_id' => $datos['ccosto_id'] ?? null,
         ]);
 
         return to_route('usuarios.index');
