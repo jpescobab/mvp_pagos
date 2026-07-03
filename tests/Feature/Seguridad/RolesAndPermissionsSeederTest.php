@@ -15,7 +15,13 @@ test('el seeder crea los roles y permisos esperados', function () {
         'documentos.validar',
         'roles.administrar',
         'tablas_maestras.administrar',
-        'usuarios.administrar',
+        'usuarios.activar',
+        'usuarios.asignar_roles',
+        'usuarios.crear',
+        'usuarios.desactivar',
+        'usuarios.editar',
+        'usuarios.resetear_password',
+        'usuarios.ver',
     ]);
 });
 
@@ -25,5 +31,5 @@ test('admin no tiene el permiso roles.administrar', function () {
     $admin = Role::where('name', 'admin')->firstOrFail();
 
     expect($admin->hasPermissionTo('roles.administrar'))->toBeFalse();
-    expect($admin->hasPermissionTo('usuarios.administrar'))->toBeTrue();
+    expect($admin->hasPermissionTo('usuarios.editar'))->toBeTrue();
 });

@@ -80,3 +80,13 @@ El sistema SHALL definir el permiso core `auditoria.ver` (distinto de los permis
 - **WHEN** se ejecuta `RolesAndPermissionsSeeder`
 - **THEN** el permiso `auditoria.ver` existe
 - **AND** los roles `superadmin` y `admin` lo tienen asignado
+
+
+### Requirement: Permisos granulares para gestionar usuarios institucionales
+El sistema SHALL definir los permisos `usuarios.ver`, `usuarios.crear`, `usuarios.editar`, `usuarios.activar`, `usuarios.desactivar`, `usuarios.resetear_password` y `usuarios.asignar_roles`, en reemplazo del permiso único `usuarios.administrar`, para gobernar de forma auditable cada acción sobre usuarios institucionales por separado.
+
+#### Scenario: Asignación inicial de los permisos
+- **WHEN** se ejecuta `RolesAndPermissionsSeeder`
+- **THEN** los siete permisos `usuarios.ver/crear/editar/activar/desactivar/resetear_password/asignar_roles` existen
+- **AND** los roles `superadmin` y `admin` los tienen asignados
+- **AND** el permiso `usuarios.administrar` ya no existe

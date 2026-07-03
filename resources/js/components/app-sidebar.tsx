@@ -12,6 +12,7 @@ import {
     ShieldCheck,
     ShoppingCart,
     TrendingUp,
+    Users,
     Wallet,
     Workflow,
 } from 'lucide-react';
@@ -41,6 +42,7 @@ import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import periodosReportabilidad from '@/routes/reportabilidad/periodos';
 import importacionesSgf from '@/routes/sgf/importaciones';
+import usuarios from '@/routes/usuarios';
 import definicionesWorkflow from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
 
@@ -59,6 +61,11 @@ const mainNavItems: NavItem[] = [
         title: 'Auditoría',
         href: auditoria.index(),
         icon: ShieldCheck,
+    },
+    {
+        title: 'Usuarios',
+        href: usuarios.index(),
+        icon: Users,
     },
     {
         title: 'Definiciones de Workflow',

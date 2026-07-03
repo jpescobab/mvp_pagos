@@ -17,7 +17,13 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'usuarios.administrar',
+            'usuarios.ver',
+            'usuarios.crear',
+            'usuarios.editar',
+            'usuarios.activar',
+            'usuarios.desactivar',
+            'usuarios.resetear_password',
+            'usuarios.asignar_roles',
             'roles.administrar',
             'core_institucional.administrar',
             'tablas_maestras.administrar',
@@ -30,12 +36,20 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
+        Permission::where('name', 'usuarios.administrar')->delete();
+
         $superadmin = Role::firstOrCreate(['name' => 'superadmin']);
         $superadmin->syncPermissions($permissions);
 
         $admin = Role::firstOrCreate(['name' => 'admin']);
         $admin->syncPermissions([
-            'usuarios.administrar',
+            'usuarios.ver',
+            'usuarios.crear',
+            'usuarios.editar',
+            'usuarios.activar',
+            'usuarios.desactivar',
+            'usuarios.resetear_password',
+            'usuarios.asignar_roles',
             'core_institucional.administrar',
             'tablas_maestras.administrar',
             'documentos.gestionar',

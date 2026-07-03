@@ -15,5 +15,10 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             [key: string]: unknown;
         };
+        flashDataType: {
+            passwordTemporal?: string;
+            usuarioNombre?: string;
+            error?: string;
+        };
     }
 }

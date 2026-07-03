@@ -12,7 +12,7 @@ class Funcionario extends Model
 
     protected $table = 'funcionarios';
 
-    protected $fillable = ['rut', 'nombre', 'user_id', 'ccosto_id', 'cfinanciero_id', 'activo'];
+    protected $fillable = ['rut', 'nombre', 'cargo', 'unidad', 'user_id', 'ccosto_id', 'cfinanciero_id', 'activo'];
 
     protected function casts(): array
     {

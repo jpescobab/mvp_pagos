@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\Seguridad\RegistrarUltimoAcceso;
 use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
 use App\Models\ConectorAutomatizacionNavegador;
@@ -19,9 +20,11 @@ use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -44,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureAuthorization();
+        $this->configureEventListeners();
     }
 
     /**
@@ -96,5 +100,13 @@ class AppServiceProvider extends ServiceProvider
                 );
             }
         });
+    }
+
+    /**
+     * Register application event listeners.
+     */
+    protected function configureEventListeners(): void
+    {
+        Event::listen(Login::class, RegistrarUltimoAcceso::class);
     }
 }
