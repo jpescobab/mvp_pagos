@@ -53,26 +53,26 @@ export default function ProveedoresIndex() {
                     />
                 </div>
 
-                <div className="overflow-hidden rounded-xl border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50 text-left text-xs text-muted-foreground uppercase">
+                <div className="overflow-x-auto rounded-xl border">
+                    <table className="w-full table-fixed text-xs">
+                        <thead className="bg-muted/50 text-left text-[10px] tracking-wide text-muted-foreground uppercase">
                             <tr>
-                                <th className="px-3 py-1.5 font-medium">
+                                <th className="w-[32%] px-2.5 py-1 font-medium">
                                     Proveedor
                                 </th>
-                                <th className="hidden px-3 py-1.5 font-medium md:table-cell">
+                                <th className="hidden w-[20%] px-2.5 py-1 font-medium md:table-cell">
                                     Correo
                                 </th>
-                                <th className="hidden px-3 py-1.5 font-medium lg:table-cell">
+                                <th className="hidden w-[22%] px-2.5 py-1 font-medium lg:table-cell">
                                     Dirección
                                 </th>
-                                <th className="hidden px-3 py-1.5 font-medium lg:table-cell">
+                                <th className="hidden w-[12%] px-2.5 py-1 font-medium lg:table-cell">
                                     Contacto
                                 </th>
-                                <th className="px-3 py-1.5 font-medium">
+                                <th className="w-[9%] px-2.5 py-1 font-medium">
                                     Estado
                                 </th>
-                                <th className="px-3 py-1.5 font-medium"></th>
+                                <th className="w-[5%] px-2.5 py-1 font-medium"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -80,7 +80,7 @@ export default function ProveedoresIndex() {
                                 <tr>
                                     <td
                                         colSpan={6}
-                                        className="px-3 py-6 text-center text-muted-foreground"
+                                        className="px-2.5 py-5 text-center text-muted-foreground"
                                     >
                                         Sin proveedores que coincidan.
                                     </td>
@@ -91,40 +91,54 @@ export default function ProveedoresIndex() {
                                     key={proveedor.id}
                                     className="hover:bg-muted/30"
                                 >
-                                    <td className="px-3 py-1.5">
-                                        <div className="flex items-center gap-2.5">
-                                            <Avatar className="size-7">
-                                                <AvatarFallback className="bg-accent text-[11px] font-semibold text-accent-foreground">
+                                    <td className="px-2.5 py-1">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="size-6 shrink-0">
+                                                <AvatarFallback className="bg-accent text-[10px] font-semibold text-accent-foreground">
                                                     {getInitials(
                                                         proveedor.nombre,
                                                     )}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="min-w-0">
-                                                <div className="truncate font-medium">
+                                                <div
+                                                    className="truncate font-medium"
+                                                    title={proveedor.nombre}
+                                                >
                                                     {proveedor.nombre}
                                                 </div>
-                                                <div className="font-mono text-xs text-muted-foreground">
+                                                <div className="truncate font-mono text-[10px] text-muted-foreground">
                                                     {proveedor.rutproveedor}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="hidden px-3 py-1.5 text-muted-foreground md:table-cell">
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 text-muted-foreground md:table-cell"
+                                        title={proveedor.correo ?? undefined}
+                                    >
                                         {proveedor.correo ?? '—'}
                                     </td>
-                                    <td className="hidden px-3 py-1.5 text-muted-foreground lg:table-cell">
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
+                                        title={
+                                            proveedor.direccion ?? undefined
+                                        }
+                                    >
                                         {proveedor.direccion ?? '—'}
                                     </td>
-                                    <td className="hidden px-3 py-1.5 text-muted-foreground lg:table-cell">
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
+                                        title={proveedor.contacto ?? undefined}
+                                    >
                                         {proveedor.contacto ?? '—'}
                                     </td>
-                                    <td className="px-3 py-1.5">
+                                    <td className="px-2.5 py-1">
                                         <ProveedorStatusBadge
                                             activo={proveedor.activo}
                                         />
                                     </td>
-                                    <td className="px-3 py-1.5 text-right">
+                                    <td className="px-2.5 py-1 text-right">
                                         <ProveedorActionsMenu />
                                     </td>
                                 </tr>

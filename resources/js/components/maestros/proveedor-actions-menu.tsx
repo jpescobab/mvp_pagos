@@ -16,8 +16,8 @@ export function ProveedorActionsMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="size-4" />
+                <Button variant="ghost" size="icon" className="size-6">
+                    <MoreHorizontal className="size-3.5" />
                     <span className="sr-only">Acciones</span>
                 </Button>
             </DropdownMenuTrigger>

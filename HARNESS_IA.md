@@ -467,6 +467,10 @@ Prohibido:
 - borrar snapshots o auditoría;
 - mezclar estados SGF con estados internos.
 
+### Listados/índices en React
+
+Todo listado o índice tabular nuevo (catálogos de consulta, tablas maestras u otro) SHALL seguir el patrón de tabla densa especificado en `openspec/specs/tema-visual-layout/spec.md` (requirement "Listados tabulares densos"): columnas de ancho fijo, identidad visual por fila, badge de estado con tokens semánticos, columnas secundarias truncadas con tooltip y ocultas progresivamente en viewports angostos, y acciones agrupadas en un menú desplegable. Implementación de referencia: `resources/js/pages/maestros/proveedores/index.tsx`.
+
 ---
 
 ## 16. Orden de implementación recomendado
