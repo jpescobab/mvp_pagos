@@ -161,7 +161,7 @@ export default function UsuariosIndex() {
                     </div>
                     {permissions.can_create_user && (
                         <Button asChild>
-                            <Link href="/usuarios/create">Nuevo usuario</Link>
+                            <Link href={usuarios.create()}>Nuevo usuario</Link>
                         </Button>
                     )}
                 </div>

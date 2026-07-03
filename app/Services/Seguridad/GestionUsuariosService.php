@@ -2,8 +2,10 @@
 
 namespace App\Services\Seguridad;
 
+use App\Models\Funcionario;
 use App\Models\User;
 use App\Services\AuditLogger;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -14,6 +16,46 @@ class GestionUsuariosService
     private const ROLES_ADMINISTRADOR = ['admin', 'superadmin'];
 
     public function __construct(private readonly AuditLogger $auditLogger) {}
+
+    /**
+     * @param  array{name: string, email: string, rut: string, cargo: ?string, unidad: ?string, roles: array<int, int>, cfinanciero_id: ?int, ccosto_id: ?int}  $datos
+     * @return array{usuario: User, passwordTemporal: string}
+     */
+    public function crear(array $datos): array
+    {
+        return DB::transaction(function () use ($datos): array {
+            $passwordTemporal = Str::password();
+
+            $usuario = User::create([
+                'name' => $datos['name'],
+                'email' => $datos['email'],
+                'password' => Hash::make($passwordTemporal),
+            ]);
+
+            $usuario->forceFill(['must_change_password' => true])->save();
+
+            Funcionario::create([
+                'user_id' => $usuario->id,
+                'rut' => $datos['rut'],
+                'nombre' => $datos['name'],
+                'cargo' => $datos['cargo'] ?? null,
+                'unidad' => $datos['unidad'] ?? null,
+                'cfinanciero_id' => $datos['cfinanciero_id'] ?? null,
+                'ccosto_id' => $datos['ccosto_id'] ?? null,
+            ]);
+
+            $usuario->syncRoles($datos['roles']);
+
+            $this->auditLogger->log(
+                'crear_usuario',
+                $usuario,
+                [],
+                ['name' => $usuario->name, 'email' => $usuario->email, 'roles' => $datos['roles']],
+            );
+
+            return ['usuario' => $usuario, 'passwordTemporal' => $passwordTemporal];
+        });
+    }
 
     public function activar(User $usuario): void
     {

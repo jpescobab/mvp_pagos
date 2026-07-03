@@ -8,6 +8,8 @@ Route::middleware(['auth'])->get('auditoria', [AuditoriaController::class, 'inde
 
 Route::middleware(['auth'])->prefix('usuarios')->name('usuarios.')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('index');
+    Route::get('create', [UserController::class, 'create'])->name('create');
+    Route::post('/', [UserController::class, 'store'])->name('store');
     Route::patch('{usuario}/activar', [UserController::class, 'activar'])->name('activar');
     Route::patch('{usuario}/desactivar', [UserController::class, 'desactivar'])->name('desactivar');
     Route::post('{usuario}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');

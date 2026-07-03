@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Seguridad;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Seguridad\CrearUsuarioRequest;
 use App\Http\Resources\Seguridad\UserResource;
 use App\Models\Ccosto;
 use App\Models\Cfinanciero;
@@ -10,6 +11,7 @@ use App\Models\Jurisdiccion;
 use App\Models\User;
 use App\Services\Seguridad\GestionUsuariosService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -93,14 +95,41 @@ class UserController extends Controller
                 'sort' => $sort !== '' ? $sort : null,
                 'direction' => $direction,
             ],
-            'catalogs' => [
-                'roles' => Role::orderBy('name')->get(['id', 'name']),
-                'jurisdicciones' => Jurisdiccion::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
-                'centros_financieros' => Cfinanciero::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
-                'centros_costos' => Ccosto::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
-            ],
+            'catalogs' => $this->catalogos(),
             'permissions' => $permissions,
         ]);
+    }
+
+    public function create(): Response
+    {
+        Gate::authorize('create', User::class);
+
+        return Inertia::render('seguridad/usuarios/create', [
+            'catalogs' => $this->catalogos(),
+        ]);
+    }
+
+    public function store(CrearUsuarioRequest $request): RedirectResponse
+    {
+        $datos = $request->validated();
+
+        $resultado = $this->gestionUsuarios->crear([
+            'name' => $datos['name'],
+            'email' => $datos['email'],
+            'rut' => $datos['rut'],
+            'cargo' => $datos['cargo'] ?? null,
+            'unidad' => $datos['unidad'] ?? null,
+            'roles' => $datos['roles'],
+            'cfinanciero_id' => $datos['cfinanciero_id'] ?? null,
+            'ccosto_id' => $datos['ccosto_id'] ?? null,
+        ]);
+
+        Inertia::flash([
+            'passwordTemporal' => $resultado['passwordTemporal'],
+            'usuarioNombre' => $resultado['usuario']->name,
+        ]);
+
+        return to_route('usuarios.index');
     }
 
     public function activar(User $usuario): RedirectResponse
@@ -135,5 +164,18 @@ class UserController extends Controller
             'passwordTemporal' => $passwordTemporal,
             'usuarioNombre' => $usuario->name,
         ])->back();
+    }
+
+    /**
+     * @return array<string, Collection<int, mixed>>
+     */
+    private function catalogos(): array
+    {
+        return [
+            'roles' => Role::orderBy('name')->get(['id', 'name']),
+            'jurisdicciones' => Jurisdiccion::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'centros_financieros' => Cfinanciero::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'centros_costos' => Ccosto::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+        ];
     }
 }
