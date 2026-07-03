@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Listeners\Seguridad\RegistrarUltimoAcceso;
 use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
+use App\Models\Ccosto;
+use App\Models\Cfinanciero;
 use App\Models\ConectorAutomatizacionNavegador;
 use App\Models\EgresoCgu;
 use App\Models\Proceso;
@@ -12,6 +14,8 @@ use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use App\Policies\AuditLogPolicy;
 use App\Policies\CasoPagoProveedorPolicy;
+use App\Policies\CcostoPolicy;
+use App\Policies\CfinancieroPolicy;
 use App\Policies\ConectorAutomatizacionNavegadorPolicy;
 use App\Policies\EgresoCguPolicy;
 use App\Policies\ProcesoAdquisicionPolicy;
@@ -87,6 +91,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Proceso::class, ProcesoPolicy::class);
         Gate::policy(AuditLog::class, AuditLogPolicy::class);
         Gate::policy(ConectorAutomatizacionNavegador::class, ConectorAutomatizacionNavegadorPolicy::class);
+        Gate::policy(Cfinanciero::class, CfinancieroPolicy::class);
+        Gate::policy(Ccosto::class, CcostoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

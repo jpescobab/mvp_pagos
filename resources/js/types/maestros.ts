@@ -17,3 +17,20 @@ export type ClienteMedidor = {
     direccion_suministro: string | null;
     activo: boolean;
 };
+
+export type Cfinanciero = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    activo: boolean;
+    jurisdiccion: { id: number; nombre: string };
+};
+
+export type Ccosto = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    cod_edificio: string | null;
+    activo: boolean;
+    cfinanciero: { id: number; nombre: string };
+};

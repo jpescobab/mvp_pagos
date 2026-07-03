@@ -1,11 +1,13 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Building2,
+    Coins,
     FileBarChart,
     Gauge,
     History,
     KeyRound,
+    Landmark,
     LayoutGrid,
     Plug,
     PlugZap,
@@ -36,6 +38,8 @@ import definicionesInformeRazonado from '@/routes/informes-razonados/definicione
 import ejecucionesInformeRazonado from '@/routes/informes-razonados/ejecuciones';
 import conectores from '@/routes/integraciones/conectores';
 import sistemasExternos from '@/routes/integraciones/sistemas-externos';
+import ccostos from '@/routes/maestros/ccostos';
+import cfinancieros from '@/routes/maestros/cfinancieros';
 import clientesMedidores from '@/routes/maestros/clientes-medidores';
 import proveedores from '@/routes/maestros/proveedores';
 import casos from '@/routes/pago-proveedores/casos';
@@ -117,6 +121,19 @@ const maestrosNavItems: NavItem[] = [
     },
 ];
 
+const estructuraInstitucionalNavItems: NavItem[] = [
+    {
+        title: 'Centros Financieros',
+        href: cfinancieros.index(),
+        icon: Landmark,
+    },
+    {
+        title: 'Centros de Costos',
+        href: ccostos.index(),
+        icon: Coins,
+    },
+];
+
 const reportabilidadNavItems: NavItem[] = [
     {
         title: 'Períodos de Reportabilidad',
@@ -154,6 +171,11 @@ const integracionesNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const puedeAdministrarEstructura = auth.permissions.includes(
+        'core_institucional.administrar',
+    );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -179,7 +201,17 @@ export function AppSidebar() {
                     items={pagoProveedoresNavItems}
                 />
                 <NavGroup label="Adquisiciones" items={adquisicionesNavItems} />
-                <NavGroup label="Maestros" items={maestrosNavItems} />
+                <NavGroup
+                    label="Maestros"
+                    items={
+                        puedeAdministrarEstructura
+                            ? [
+                                  ...maestrosNavItems,
+                                  ...estructuraInstitucionalNavItems,
+                              ]
+                            : maestrosNavItems
+                    }
+                />
                 <NavGroup
                     label="Reportabilidad"
                     items={reportabilidadNavItems}
