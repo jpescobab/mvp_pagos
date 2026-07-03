@@ -3,7 +3,7 @@
 **Versión:** v9 optimizada  
 **Uso:** archivo rector para Claude Code, Codex, agentes IA y equipo de desarrollo  
 **Stack base:** Laravel 13 + PostgreSQL + React + Laravel Boost + OpenSpec  
-**Estado:** listo para subir a la raíz del proyecto
+**Estado:** en producción activa. El core (§16, pasos 1-10) y Pago de Proveedores, Adquisiciones e Informes Razonados están implementados; el resto de módulos funcionales (§4.2) siguen siendo plan, no código.
 
 ---
 
@@ -54,7 +54,7 @@ El sistema **no reemplaza** sistemas oficiales como SGF, CGU, BancoEstado, SII, 
 ## 4. Principios obligatorios
 
 1. **Core no desactivable.** Seguridad, usuarios, roles, permisos, estructura CAPJ, workflow, auditoría, documentos, parámetros, integraciones, indicadores económicos, cortes y trazabilidad forman parte del núcleo.
-2. **Módulos funcionales activables.** Pago de Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados e Informes razonados pueden activarse/desactivarse sin borrar datos ni evidencia.
+2. **Módulos funcionales activables.** Pago de Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados e Informes razonados pueden activarse/desactivarse sin borrar datos ni evidencia. **Implementados:** Pago de Proveedores, Adquisiciones, Informes razonados. **Planeados (sin código todavía):** Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados — no asumir modelos/tablas/specs existentes para estos; proponer vía OpenSpec antes de codificar.
 3. **Workflow antes que CRUD.** Todo proceso relevante debe tener estado interno, transición, tarea, responsable, documento, notificación, auditoría e historial.
 4. **SGF es origen, no gobierno interno.** Los estados y grupos SGF no gobiernan workflow, unidades, permisos ni responsables internos.
 5. **Snapshot obligatorio.** Todo dato/documento recibido desde SGF o API externa relevante debe conservar payload, fuente, fecha, hash, método de captura, usuario/job y vínculo al caso.
@@ -471,8 +471,10 @@ Prohibido:
 
 ## 16. Orden de implementación recomendado
 
+Pasos 1-13 (core, `tasks/01..10` + extensiones directas) están **completos e implementados** — ver `openspec/changes/archive/`. Se mantienen aquí como referencia histórica y como checklist para auditar que ningún módulo nuevo se salte una capa (p. ej. no crear un módulo de pago sin workflow, sin documentos ni sin auditoría).
+
 1. Estructura CAPJ y tablas maestras institucionales.
-2. Seguridad, usuarios, roles y permisos.
+2. Seguridad, usuarios, roles y permisos. *(Extendido en 2026-07 con gestión granular de usuarios institucionales — listar, activar, desactivar, resetear contraseña — ver spec `listar-usuarios-institucionales`.)*
 3. Módulos del sistema y parámetros institucionales.
 4. Indicadores económicos CMF/SII.
 5. Workflow Core.
@@ -483,7 +485,9 @@ Prohibido:
 10. Pago de Proveedores por `sgf_id`.
 11. CGU, BancoEstado y egreso CGU como referencias/evidencia.
 12. Reportabilidad, cortes e informes razonados.
-13. Playwright solo donde corresponda.
+13. Playwright solo donde corresponda. *(Ya implementado: `conectores_automatizacion_navegador` y ejecución de importaciones SGF.)*
+
+Trabajo posterior a estos 13 pasos (Adquisiciones como módulo funcional completo, catálogos de consulta, checklist documental por módulo, auditoría visual, etc.) se propone y documenta ad-hoc vía `/opsx:propose` — no tiene numeración fija; su registro vive en `openspec/specs/` y `openspec/changes/archive/`, no en esta lista.
 
 ---
 

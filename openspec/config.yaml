@@ -34,6 +34,11 @@ context: |
     indicadores, integraciones y reportabilidad. Módulos funcionales activables (Pago de
     Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico,
     Servicios contratados, Informes razonados) pueden desactivarse sin borrar datos.
+    Implementados hoy: Pago de Proveedores, Adquisiciones, Informes razonados. Los demás
+    son plan, no código — no asumir tablas/modelos existentes para ellos.
+  - Permisos: convención modulo_accion.verbo en snake_case en ambos lados (ej.
+    pago_proveedores.registrar_cgu, usuarios.resetear_password), consistente en todos los
+    seeders reales. Usar siempre este formato al definir permisos nuevos.
 
   Stack obligatorio: Laravel 13 (PHP ^8.3), PostgreSQL, Inertia 3 + React 19, Spatie
   Laravel Permission, Sanctum si corresponde, Queue/Scheduler/Process, Laravel Boost.
@@ -49,4 +54,7 @@ context: |
   controles de acceso.
 
   Orden de implementación: tasks/01_*.md a tasks/10_*.md, en ese orden numérico; cada
-  uno corresponde 1:1 a un dominio en openspec/specs/.
+  uno corresponde 1:1 a un dominio en openspec/specs/. Los 10 ya están implementados y
+  archivados; funcionalidad nueva (core o de módulos) se propone ad-hoc vía
+  /opsx:propose, sin numeración fija — su fuente de verdad es openspec/specs/, no una
+  lista mantenida a mano.
