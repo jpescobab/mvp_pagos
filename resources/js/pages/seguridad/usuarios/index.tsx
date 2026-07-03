@@ -1,11 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import { UserFilters } from '@/components/seguridad/user-filters';
 import { UsersTable } from '@/components/seguridad/users-table';
-import {
-    navegarPaginacion,
-    Pagination,
-} from '@/components/shared/pagination';
+import { navegarPaginacion, Pagination } from '@/components/shared/pagination';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -14,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -25,7 +22,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import usuarios from '@/routes/usuarios';
 import type { Paginated } from '@/types/pago-proveedores';
 import type {
-    CatalogosUsuarios,
     FiltrosUsuarios,
     PermisosUsuarios,
     UsuarioListado,
@@ -34,7 +30,6 @@ import type {
 type PageProps = {
     users: Paginated<UsuarioListado>;
     filters: FiltrosUsuarios;
-    catalogs: CatalogosUsuarios;
     permissions: PermisosUsuarios;
 };
 
@@ -54,12 +49,7 @@ const OPCIONES_ORDEN: Array<{ value: string; label: string }> = [
 
 export default function UsuariosIndex() {
     const page = usePage<PageProps>();
-    const {
-        users: pagina,
-        filters,
-        catalogs,
-        permissions,
-    } = page.props;
+    const { users: pagina, filters, permissions } = page.props;
     const { flash } = page;
 
     const [search, setSearch] = useState(filters.search ?? '');
@@ -93,11 +83,6 @@ export default function UsuariosIndex() {
             usuarios.index().url,
             {
                 search: filters.search,
-                estado: filters.estado,
-                rol_id: filters.rol_id,
-                jurisdiccion_id: filters.jurisdiccion_id,
-                centro_financiero_id: filters.centro_financiero_id,
-                centro_costo_id: filters.centro_costo_id,
                 per_page: filters.per_page,
                 sort: filters.sort,
                 direction: filters.direction,
@@ -111,13 +96,17 @@ export default function UsuariosIndex() {
         );
     }
 
-    function limpiarFiltros() {
+    function limpiarBusqueda() {
         setSearch('');
         setCargando(true);
         router.get(
             usuarios.index().url,
             {},
-            { preserveState: true, preserveScroll: true, onFinish: () => setCargando(false) },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onFinish: () => setCargando(false),
+            },
         );
     }
 
@@ -137,13 +126,7 @@ export default function UsuariosIndex() {
         navegar({ sort, direction });
     }
 
-    const hayFiltrosActivos =
-        filters.search !== null ||
-        filters.estado !== null ||
-        filters.rol_id !== null ||
-        filters.jurisdiccion_id !== null ||
-        filters.centro_financiero_id !== null ||
-        filters.centro_costo_id !== null;
+    const hayBusquedaActiva = filters.search !== null;
 
     return (
         <>
@@ -172,22 +155,22 @@ export default function UsuariosIndex() {
                     </div>
                 )}
 
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                    <UserFilters
-                        filters={filters}
-                        catalogs={catalogs}
-                        search={search}
-                        onSearchChange={setSearch}
-                        onFilterChange={navegar}
-                        onClear={limpiarFiltros}
-                        hayFiltrosActivos={hayFiltrosActivos}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <Input
+                        placeholder="Buscar por nombre, email o RUT…"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-72"
                     />
 
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
                             Ordenar por
                         </span>
-                        <Select value={ordenActual} onValueChange={cambiarOrden}>
+                        <Select
+                            value={ordenActual}
+                            onValueChange={cambiarOrden}
+                        >
                             <SelectTrigger className="w-56">
                                 <SelectValue />
                             </SelectTrigger>
@@ -213,20 +196,17 @@ export default function UsuariosIndex() {
                     </div>
                 )}
 
-                {!cargando && pagina.meta.total === 0 && !hayFiltrosActivos && (
+                {!cargando && pagina.meta.total === 0 && !hayBusquedaActiva && (
                     <div className="rounded-xl border px-4 py-10 text-center text-muted-foreground">
                         No existen usuarios registrados.
                     </div>
                 )}
 
-                {!cargando && pagina.meta.total === 0 && hayFiltrosActivos && (
+                {!cargando && pagina.meta.total === 0 && hayBusquedaActiva && (
                     <div className="flex flex-col items-center gap-3 rounded-xl border px-4 py-10 text-center text-muted-foreground">
-                        <p>
-                            No se encontraron usuarios con los filtros
-                            aplicados.
-                        </p>
-                        <Button variant="outline" onClick={limpiarFiltros}>
-                            Limpiar filtros
+                        <p>No se encontraron usuarios con esa búsqueda.</p>
+                        <Button variant="outline" onClick={limpiarBusqueda}>
+                            Limpiar búsqueda
                         </Button>
                     </div>
                 )}

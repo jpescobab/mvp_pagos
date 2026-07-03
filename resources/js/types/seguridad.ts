@@ -28,11 +28,6 @@ export type UsuarioListado = {
 
 export type FiltrosUsuarios = {
     search: string | null;
-    estado: string | null;
-    rol_id: number | null;
-    jurisdiccion_id: number | null;
-    centro_financiero_id: number | null;
-    centro_costo_id: number | null;
     per_page: number;
     sort: string | null;
     direction: 'asc' | 'desc';
@@ -46,7 +41,6 @@ export type CatalogoOpcion = {
 
 export type CatalogosUsuarios = {
     roles: CatalogoOpcion[];
-    jurisdicciones: CatalogoOpcion[];
     centros_financieros: CatalogoOpcion[];
     centros_costos: CatalogoOpcion[];
 };

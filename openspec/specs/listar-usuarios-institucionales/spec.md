@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Listado administrativo de usuarios institucionales: búsqueda, filtros, paginación, orden y acciones de cuenta (activar, desactivar, resetear contraseña) protegidas por permiso granular, sobre `users`/`funcionarios`. El CRUD completo (crear/editar/detalle), la asignación de roles y el CRUD de roles/permisos pertenecen a cambios futuros.
+Listado administrativo de usuarios institucionales: búsqueda, paginación, orden y acciones de cuenta (activar, desactivar, resetear contraseña) protegidas por permiso granular, sobre `users`/`funcionarios`. El CRUD completo (crear/editar/detalle), la asignación de roles y el CRUD de roles/permisos pertenecen a cambios futuros.
 
 ## Requirements
 
@@ -22,21 +22,16 @@ El sistema SHALL exponer una página autorizada (`usuarios.ver`) que liste los `
 - **WHEN** no existen usuarios registrados en el sistema
 - **THEN** la página muestra el mensaje "No existen usuarios registrados."
 
-### Requirement: Buscar y filtrar usuarios institucionales
-El sistema SHALL permitir buscar usuarios por nombre, email y rut (del `Funcionario` vinculado), y filtrar por estado, rol, jurisdicción, centro financiero y centro de costo, conservando los filtros aplicados tras cualquier acción sobre el listado.
+### Requirement: Buscar usuarios institucionales
+El sistema SHALL permitir buscar usuarios por nombre, email y rut (del `Funcionario` vinculado), conservando el término de búsqueda aplicado tras cualquier acción sobre el listado. El sistema SHALL NOT ofrecer filtros adicionales por estado, rol, jurisdicción, centro financiero o centro de costo en este listado.
 
 #### Scenario: Búsqueda general
 - **WHEN** se envía un término de búsqueda
 - **THEN** el sistema retorna solo los usuarios cuyo nombre, email o rut coincidan parcialmente con el término
 
-#### Scenario: Filtrar por atributos institucionales
-- **WHEN** se envían filtros de estado, rol, jurisdicción, centro financiero o centro de costo
-- **THEN** el sistema retorna solo los usuarios que cumplen todos los filtros aplicados
-
-#### Scenario: Sin resultados por filtros
-- **WHEN** los filtros aplicados no coinciden con ningún usuario
-- **THEN** la página muestra el mensaje "No se encontraron usuarios con los filtros aplicados."
-- **AND** ofrece un botón para limpiar los filtros
+#### Scenario: Sin resultados de búsqueda
+- **WHEN** el término de búsqueda no coincide con ningún usuario
+- **THEN** la página muestra el mensaje "No se encontraron usuarios con esa búsqueda."
 
 ### Requirement: Paginar y ordenar el listado de usuarios
 El sistema SHALL paginar el listado con 15 registros por defecto (15/25/50/100 configurables) y SHALL ordenarlo por nombre, email, estado, último acceso o fecha de creación, con orden inicial de usuarios activos primero y luego alfabético por nombre.

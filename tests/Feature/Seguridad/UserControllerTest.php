@@ -39,7 +39,6 @@ test('un usuario con el permiso usuarios.ver puede listar usuarios', function ()
         ->component('seguridad/usuarios/index')
         ->has('users.data')
         ->has('filters')
-        ->has('catalogs')
         ->has('permissions')
     );
 });
@@ -75,42 +74,6 @@ test('la búsqueda filtra por nombre, email y rut', function () {
 
     $response = $this->actingAs($actor)->get(route('usuarios.index', ['search' => '22.222.222-2']));
     $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $porRut->id)->has('users.data', 1));
-});
-
-test('los filtros institucionales acotan el listado', function () {
-    $this->withoutVite();
-    $this->seed(RolesAndPermissionsSeeder::class);
-
-    $actor = User::factory()->create();
-    $actor->givePermissionTo('usuarios.ver');
-
-    $activo = User::factory()->create();
-    $inactivo = User::factory()->inactive()->create();
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['estado' => 'inactivo']));
-    $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $inactivo->id)->has('users.data', 1));
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['estado' => 'activo']));
-    $response->assertInertia(fn (Assert $page) => $page->has('users.data', 2));
-
-    $conFuncionario = User::factory()->create();
-    $funcionario = crearFuncionario($conFuncionario);
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['centro_costo_id' => $funcionario->ccosto_id]));
-    $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $conFuncionario->id)->has('users.data', 1));
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['centro_financiero_id' => $funcionario->cfinanciero_id]));
-    $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $conFuncionario->id)->has('users.data', 1));
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['jurisdiccion_id' => $funcionario->cfinanciero->jurisdiccion_id]));
-    $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $conFuncionario->id)->has('users.data', 1));
-
-    $conRol = User::factory()->create();
-    $conRol->assignRole('admin');
-    $rolId = $conRol->roles->firstOrFail()->id;
-
-    $response = $this->actingAs($actor)->get(route('usuarios.index', ['rol_id' => $rolId]));
-    $response->assertInertia(fn (Assert $page) => $page->where('users.data.0.id', $conRol->id)->has('users.data', 1));
 });
 
 test('la paginación respeta el tamaño solicitado', function () {

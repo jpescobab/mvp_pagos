@@ -8,7 +8,6 @@ use App\Http\Requests\Seguridad\EditarUsuarioRequest;
 use App\Http\Resources\Seguridad\UserResource;
 use App\Models\Ccosto;
 use App\Models\Cfinanciero;
-use App\Models\Jurisdiccion;
 use App\Models\User;
 use App\Services\Seguridad\GestionUsuariosService;
 use Illuminate\Http\Request;
@@ -32,11 +31,6 @@ class UserController extends Controller
         Gate::authorize('viewAny', User::class);
 
         $search = $request->string('search')->toString();
-        $estado = $request->string('estado')->toString();
-        $rolId = $request->integer('rol_id') ?: null;
-        $jurisdiccionId = $request->integer('jurisdiccion_id') ?: null;
-        $centroFinancieroId = $request->integer('centro_financiero_id') ?: null;
-        $centroCostoId = $request->integer('centro_costo_id') ?: null;
         $sort = $request->string('sort')->toString();
         $direction = $request->string('direction')->toString() === 'desc' ? 'desc' : 'asc';
         $perPage = in_array($request->integer('per_page'), self::TAMANOS_PAGINA, true)
@@ -50,20 +44,6 @@ class UserController extends Controller
                     ->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhereHas('funcionario', fn ($f) => $f->where('rut', 'like', "%{$search}%")),
-            ))
-            ->when($estado !== '', fn ($query) => $query->where('active', $estado === 'activo'))
-            ->when($rolId !== null, fn ($query) => $query->whereHas('roles', fn ($r) => $r->where('id', $rolId)))
-            ->when($jurisdiccionId !== null, fn ($query) => $query->whereHas(
-                'funcionario.cfinanciero',
-                fn ($c) => $c->where('jurisdiccion_id', $jurisdiccionId),
-            ))
-            ->when($centroFinancieroId !== null, fn ($query) => $query->whereHas(
-                'funcionario',
-                fn ($f) => $f->where('cfinanciero_id', $centroFinancieroId),
-            ))
-            ->when($centroCostoId !== null, fn ($query) => $query->whereHas(
-                'funcionario',
-                fn ($f) => $f->where('ccosto_id', $centroCostoId),
             ))
             ->when(
                 in_array($sort, ['name', 'email', 'active', 'last_login_at', 'created_at'], true),
@@ -87,16 +67,10 @@ class UserController extends Controller
             'users' => UserResource::collection($usuarios),
             'filters' => [
                 'search' => $search !== '' ? $search : null,
-                'estado' => $estado !== '' ? $estado : null,
-                'rol_id' => $rolId,
-                'jurisdiccion_id' => $jurisdiccionId,
-                'centro_financiero_id' => $centroFinancieroId,
-                'centro_costo_id' => $centroCostoId,
                 'per_page' => $perPage,
                 'sort' => $sort !== '' ? $sort : null,
                 'direction' => $direction,
             ],
-            'catalogs' => $this->catalogos(),
             'permissions' => $permissions,
         ]);
     }
@@ -234,7 +208,6 @@ class UserController extends Controller
     {
         return [
             'roles' => Role::orderBy('name')->get(['id', 'name']),
-            'jurisdicciones' => Jurisdiccion::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'centros_financieros' => Cfinanciero::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'centros_costos' => Ccosto::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
         ];
