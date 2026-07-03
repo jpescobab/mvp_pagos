@@ -18,7 +18,7 @@ El sistema SHALL identificarse como "CAPJ +" en toda superficie de marca visible
 - **THEN** el `<title>` de la página refleja el nombre configurado de la aplicación ("CAPJ +"), no "Laravel"
 
 ### Requirement: Tema visual con paleta y tipografía institucional
-El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde/rojo/ámbar con variantes suaves para badges y deltas, variantes dark-mode) y tipografía (`Manrope` como fuente principal) definidas como tokens de tema, con radio base de 16px para tarjetas y superficies, sin alterar los nombres de las variables CSS que consumen los componentes UI existentes.
+El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde/rojo/ámbar con variantes suaves para badges y deltas, variantes dark-mode), tipografía (`Manrope` como fuente principal) y una escala de tamaños de texto (`--text-xs` a `--text-2xl`) reducida frente a los valores por defecto de Tailwind, definidas como tokens de tema, con radio base de 16px para tarjetas y superficies, sin alterar los nombres de las variables CSS que consumen los componentes UI existentes.
 
 #### Scenario: Color primario de acciones
 - **WHEN** se renderiza un componente con `bg-primary` o `text-primary` (ej. un botón primario)
@@ -31,6 +31,25 @@ El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde
 #### Scenario: Tokens semánticos suaves
 - **WHEN** se renderiza un badge o indicador de estado con variante suave (éxito, alerta, error)
 - **THEN** el color proviene de los tokens semánticos del tema (verde/ámbar/rojo con fondo suave), no de valores hex escritos en el componente
+
+#### Scenario: Escala tipográfica reducida en toda la aplicación
+- **WHEN** se renderiza cualquier texto con una utilidad `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl` o `text-2xl` en cualquier página, el sidebar de navegación o un componente compartido
+- **THEN** el tamaño resultante corresponde a la escala reducida definida en el tema (no a los tamaños por defecto de Tailwind), aplicada automáticamente sin necesidad de clases adicionales por página
+
+### Requirement: Botones institucionales sin relleno de color sólido
+El sistema SHALL presentar los botones con variante semántica de color (`default`/primario, `secondary`, `destructive`) sin relleno de color sólido: solo con borde y texto del color semántico correspondiente, con un fondo suave únicamente al pasar el cursor (`hover`). Las variantes sin color (`outline`, `ghost`, `link`) no cambian.
+
+#### Scenario: Botón de acción primaria sin relleno
+- **WHEN** se renderiza un botón con la variante primaria/por defecto (ej. "Guardar", "Nuevo usuario")
+- **THEN** el botón se muestra con borde y texto en el color primario institucional, sin fondo de color sólido
+
+#### Scenario: Botón destructivo sin relleno
+- **WHEN** se renderiza un botón con la variante `destructive` (ej. "Eliminar")
+- **THEN** el botón se muestra con borde y texto en el color destructivo, sin fondo de color sólido
+
+#### Scenario: Retroalimentación visual al pasar el cursor
+- **WHEN** el usuario pasa el cursor sobre un botón con variante `default`, `secondary` o `destructive`
+- **THEN** el botón muestra un fondo suave del color semántico correspondiente como retroalimentación, sin llegar a un relleno sólido
 
 ### Requirement: Navegación principal como riel de íconos
 El sistema SHALL presentar la navegación principal del sidebar como grupos colapsables por módulo funcional implementado, con la marca institucional (logo + "CAPJ +" + subtítulo "Finanzas y Ppto") en el encabezado, labels de grupo en mayúsculas, ítem activo destacado con fondo acentuado y barra lateral, y colapso del sidebar a modo ícono con tooltips. El sidebar SHALL seguir sin listar módulos funcionales que no tengan páginas implementadas.
@@ -93,7 +112,7 @@ El sistema SHALL presentar como página de inicio autenticada un "Panel general"
 - **THEN** el panel se renderiza con conteos en cero y estados vacíos, sin errores
 
 ### Requirement: Listados tabulares densos
-El sistema SHALL presentar cualquier página de listado/índice tabular (catálogos de consulta, tablas maestras u otro listado paginado) con: columnas de ancho fijo que no se reordenan según el contenido más largo, una identidad visual (avatar con iniciales u otro indicador equivalente) junto al campo principal de cada fila, un badge de estado con los tokens semánticos del tema cuando la entidad tenga un estado, columnas secundarias con una sola línea de texto truncada y su valor completo disponible al pasar el cursor, ocultamiento progresivo de columnas secundarias en viewports angostos, y un menú de acciones desplegable al final de la fila (en vez de íconos sueltos) donde las acciones aún no implementadas se muestran deshabilitadas con la indicación "Disponible próximamente".
+El sistema SHALL presentar cualquier página de listado/índice tabular (catálogos de consulta, tablas maestras u otro listado paginado) con: columnas de ancho fijo que no se reordenan según el contenido más largo, una identidad visual (avatar con iniciales u otro indicador equivalente) junto al campo principal de cada fila, un badge de estado con los tokens semánticos del tema cuando la entidad tenga un estado, columnas secundarias con una sola línea de texto truncada y su valor completo disponible al pasar el cursor, ocultamiento progresivo de columnas secundarias en viewports angostos, y un menú de acciones desplegable al final de la fila (en vez de íconos sueltos) donde las acciones aún no implementadas se muestran deshabilitadas con la indicación "Disponible próximamente". El título de página y los controles del encabezado del listado SHALL usar la escala tipográfica reducida del tema para maximizar el espacio disponible para los datos.
 
 #### Scenario: Columnas de ancho fijo
 - **WHEN** un usuario autenticado visualiza un listado tabular con el sidebar expandido
@@ -111,3 +130,15 @@ El sistema SHALL presentar cualquier página de listado/índice tabular (catálo
 - **WHEN** un usuario autenticado abre el menú de acciones de una fila de un listado tabular
 - **THEN** las acciones se muestran agrupadas en un desplegable en vez de íconos sueltos en la fila
 - **AND** las acciones que aún no están implementadas se muestran deshabilitadas con la indicación "Disponible próximamente"
+
+#### Scenario: Título de listado con tipografía reducida
+- **WHEN** un usuario autenticado visualiza el encabezado de cualquier página de listado/índice
+- **THEN** el título de la página usa la escala tipográfica reducida del tema, dejando el mayor espacio vertical posible para la tabla de datos
+
+#### Scenario: Columna con entidad relacionada
+- **WHEN** la entidad del listado tiene una relación jerárquica directa con otra entidad (ej. un centro financiero con su jurisdicción, o un centro de costo con su centro financiero)
+- **THEN** el listado muestra el nombre de la entidad relacionada como columna secundaria, truncado con tooltip igual que cualquier otra columna secundaria
+
+#### Scenario: Valor nulo en columna opcional
+- **WHEN** un campo opcional de la entidad listada es `null` para una fila
+- **THEN** la celda correspondiente muestra el indicador `"—"` en vez de quedar en blanco o producir un error

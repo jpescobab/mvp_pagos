@@ -119,7 +119,7 @@ export default function Dashboard({
             <Head title="Panel general" />
 
             <div className="flex h-full flex-1 flex-col gap-5 p-4">
-                <h1 className="text-[22px] font-bold tracking-tight">
+                <h1 className="text-[17px] font-bold tracking-tight">
                     Panel general
                 </h1>
 

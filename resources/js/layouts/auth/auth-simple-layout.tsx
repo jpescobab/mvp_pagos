@@ -117,7 +117,7 @@ export default function AuthSimpleLayout({
                             <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                             CAPJ +
                         </span>
-                        <h1 className="mt-2 text-[28px] leading-tight font-bold tracking-tight">
+                        <h1 className="mt-2 text-[20px] leading-tight font-bold tracking-tight">
                             {title}
                         </h1>
                         <p className="mb-4 text-sm text-muted-foreground">
