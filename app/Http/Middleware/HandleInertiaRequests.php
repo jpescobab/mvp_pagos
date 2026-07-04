@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Indicadores\IndicadorEconomicoSelector;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -43,6 +44,9 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'indicadoresTopbar' => $request->user()
+                ? app(IndicadorEconomicoSelector::class)->ultimosPorTipo(['UF', 'UTM', 'USD', 'IPC'])
+                : [],
         ];
     }
 }

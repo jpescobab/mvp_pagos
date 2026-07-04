@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { TopbarIndicadores } from '@/components/topbar-indicadores';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -27,6 +28,7 @@ export function AppSidebarHeader({
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
             <div className="ml-auto flex items-center gap-2">
+                <TopbarIndicadores />
                 <ThemeToggle />
                 {auth.user && (
                     <DropdownMenu>
