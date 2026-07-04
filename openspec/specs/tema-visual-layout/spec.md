@@ -56,7 +56,8 @@ El sistema SHALL presentar la navegación principal del sidebar como grupos cola
 
 #### Scenario: Grupos por módulo implementado
 - **WHEN** un usuario autenticado visualiza el sidebar principal
-- **THEN** los ítems de navegación aparecen agrupados por módulo (General, Administración, Pago de Proveedores, Adquisiciones, Maestros, Reportabilidad, Integraciones) y no como lista plana
+- **THEN** los ítems de navegación aparecen agrupados por módulo (General, Administración, Pago de Proveedores, Adquisiciones, Reportabilidad, Integraciones) y no como lista plana
+- **AND** el grupo Administración incluye, además de las funciones de administración de usuarios y seguridad, los catálogos de consulta (Proveedores, Clientes Medidores, Centros Financieros, Centros de Costos)
 
 #### Scenario: Ítem activo destacado
 - **WHEN** el usuario navega a una página de un módulo
@@ -70,20 +71,20 @@ El sistema SHALL presentar la navegación principal del sidebar como grupos cola
 - **WHEN** un usuario autenticado visualiza el sidebar
 - **THEN** no se muestran enlaces al repositorio o documentación de `laravel/react-starter-kit`
 
-### Requirement: Login institucional con indicadores económicos
-El sistema SHALL presentar la página de inicio de sesión con la identidad institucional: logo del Poder Judicial, título "Bienvenido a CAPJ +", subtítulo "Sección Finanzas y Presupuesto - Zonal Coyhaique", tarjeta central sobre una escena de fondo institucional, y chips con los últimos valores reales de indicadores económicos (UF, UTM, UTA, IPC) cuando existan en la base de datos. La lógica de autenticación (Fortify) no cambia.
+### Requirement: Login institucional
+El sistema SHALL presentar la página de inicio de sesión con la identidad institucional: logo del Poder Judicial como fondo dentro de la tarjeta central (baja opacidad, detrás del formulario), título "Bienvenido a CAPJ +", subtítulo "Sección Finanzas y Presupuesto - Zonal Coyhaique", y tarjeta central sobre una escena de fondo institucional. La lógica de autenticación (Fortify) no cambia. El sistema SHALL NOT mostrar chips de indicadores económicos en esta página. La tarjeta central SHALL permanecer centrada horizontal y verticalmente en viewports de tamaño desktop, tablet y mobile en orientación normal.
 
-#### Scenario: Chips con indicadores reales
-- **WHEN** un visitante carga la página de login y existen indicadores económicos en la base de datos
-- **THEN** se muestran chips con el último valor registrado de cada indicador disponible
-
-#### Scenario: Sin indicadores registrados
-- **WHEN** un visitante carga la página de login y no existen indicadores económicos
-- **THEN** la página se renderiza sin chips de indicadores y sin errores
+#### Scenario: Logo como fondo de la tarjeta
+- **WHEN** un visitante carga la página de login
+- **THEN** el logo del Poder Judicial se muestra como elemento de fondo dentro de la tarjeta central, detrás del formulario, y no en la barra superior
 
 #### Scenario: Autenticación intacta
-- **WHEN** un usuario envía credenciales válidas desde el nuevo login
+- **WHEN** un usuario envía credenciales válidas desde el login
 - **THEN** inicia sesión mediante el flujo Fortify existente y es redirigido al panel
+
+#### Scenario: Tarjeta centrada en tamaños de viewport habituales
+- **WHEN** un visitante carga la página de login en un viewport de tamaño desktop, tablet o mobile en orientación portrait
+- **THEN** la tarjeta central se muestra centrada horizontal y verticalmente, sin desplazamiento perceptible por scrollbars ni por el espacio reservado para la barra superior o el pie de página
 
 ### Requirement: Topbar con tema y menú de usuario
 El sistema SHALL presentar en el encabezado superior de las páginas autenticadas, junto a las migas de pan, un control para alternar el tema claro/oscuro y un avatar circular con las iniciales del usuario autenticado que abre el menú de usuario (perfil, configuración, cerrar sesión).

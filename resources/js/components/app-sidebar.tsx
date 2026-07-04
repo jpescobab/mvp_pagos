@@ -80,6 +80,16 @@ const administracionNavItems: NavItem[] = [
         href: roles.index(),
         icon: KeyRound,
     },
+    {
+        title: 'Proveedores',
+        href: proveedores.index(),
+        icon: Building2,
+    },
+    {
+        title: 'Clientes Medidores',
+        href: clientesMedidores.index(),
+        icon: Gauge,
+    },
 ];
 
 const pagoProveedoresNavItems: NavItem[] = [
@@ -105,19 +115,6 @@ const adquisicionesNavItems: NavItem[] = [
         title: 'Procesos',
         href: procesosAdquisicion.index(),
         icon: ShoppingCart,
-    },
-];
-
-const maestrosNavItems: NavItem[] = [
-    {
-        title: 'Proveedores',
-        href: proveedores.index(),
-        icon: Building2,
-    },
-    {
-        title: 'Clientes Medidores',
-        href: clientesMedidores.index(),
-        icon: Gauge,
     },
 ];
 
@@ -194,24 +191,20 @@ export function AppSidebar() {
                 <NavMain items={generalNavItems} />
                 <NavGroup
                     label="Administración"
-                    items={administracionNavItems}
+                    items={
+                        puedeAdministrarEstructura
+                            ? [
+                                  ...administracionNavItems,
+                                  ...estructuraInstitucionalNavItems,
+                              ]
+                            : administracionNavItems
+                    }
                 />
                 <NavGroup
                     label="Pago de Proveedores"
                     items={pagoProveedoresNavItems}
                 />
                 <NavGroup label="Adquisiciones" items={adquisicionesNavItems} />
-                <NavGroup
-                    label="Maestros"
-                    items={
-                        puedeAdministrarEstructura
-                            ? [
-                                  ...maestrosNavItems,
-                                  ...estructuraInstitucionalNavItems,
-                              ]
-                            : maestrosNavItems
-                    }
-                />
                 <NavGroup
                     label="Reportabilidad"
                     items={reportabilidadNavItems}

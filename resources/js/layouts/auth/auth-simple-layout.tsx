@@ -1,51 +1,11 @@
-import { usePage } from '@inertiajs/react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import type { AuthLayoutProps } from '@/types';
-
-export type IndicadorLogin = {
-    tipo: string;
-    valor: string;
-    fecha_valor: string | null;
-    periodo: string | null;
-};
-
-const ETIQUETAS: Record<string, string> = {
-    UF: 'U.F',
-    UTM: 'U.T.M',
-    UTA: 'U.T.A',
-    IPC: 'I.P.C',
-    USD: 'Dólar',
-};
-
-function formatearIndicador(indicador: IndicadorLogin): string {
-    const valor = Number(indicador.valor);
-
-    if (Number.isNaN(valor)) {
-        return indicador.valor;
-    }
-
-    if (indicador.tipo === 'IPC') {
-        return `${new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 }).format(valor)}%`;
-    }
-
-    const decimales =
-        indicador.tipo === 'UF' || indicador.tipo === 'USD' ? 2 : 0;
-
-    return `$ ${new Intl.NumberFormat('es-CL', {
-        minimumFractionDigits: decimales,
-        maximumFractionDigits: decimales,
-    }).format(valor)}`;
-}
 
 export default function AuthSimpleLayout({
     children,
     title,
     description,
 }: AuthLayoutProps) {
-    const { indicadores } = usePage<{
-        indicadores?: IndicadorLogin[];
-    }>().props;
-
     return (
         <div className="relative min-h-svh overflow-hidden bg-background">
             {/* Escena de fondo */}
@@ -70,49 +30,28 @@ export default function AuthSimpleLayout({
             />
 
             {/* Topbar */}
-            <header className="fixed inset-x-0 top-0 z-10 flex items-center justify-between px-7 py-5">
-                <span className="inline-flex items-center rounded-xl border bg-card px-3 py-1.5 shadow-sm">
-                    <img
-                        src="/images/logo-capj-light.png"
-                        alt="Poder Judicial — República de Chile"
-                        className="h-10 w-auto dark:hidden"
-                    />
-                    <img
-                        src="/images/logo-capj-dark.png"
-                        alt="Poder Judicial — República de Chile"
-                        className="hidden h-10 w-auto dark:block"
-                    />
-                </span>
+            <header className="fixed inset-x-0 top-0 z-10 flex items-center justify-end px-7 py-5">
                 <ThemeToggle />
             </header>
 
-            {/* Chips de indicadores económicos */}
-            {indicadores !== undefined && indicadores.length > 0 && (
-                <div className="fixed inset-x-0 top-24 z-[4] mx-auto hidden max-w-5xl justify-between gap-3.5 px-12 md:flex">
-                    {indicadores.map((indicador) => (
-                        <div
-                            key={indicador.tipo}
-                            className="flex flex-1 items-center gap-2.5 rounded-2xl border bg-card/80 px-3.5 py-2.5 shadow-sm backdrop-blur-md"
-                        >
-                            <span className="size-2 shrink-0 rounded-full bg-primary shadow-[0_0_0_4px_var(--accent)]" />
-                            <div className="min-w-0">
-                                <div className="text-[11px] tracking-widest text-muted-foreground uppercase">
-                                    {ETIQUETAS[indicador.tipo] ??
-                                        indicador.tipo}
-                                </div>
-                                <div className="font-mono text-sm font-semibold">
-                                    {formatearIndicador(indicador)}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
             {/* Tarjeta central */}
-            <main className="relative z-[2] grid min-h-svh place-items-center px-6 pt-44 pb-24">
-                <div className="w-full max-w-md rounded-[22px] border bg-card/80 p-9 pb-7 shadow-xl backdrop-blur-xl">
-                    <div className="flex flex-col gap-1.5">
+            <main className="relative z-[2] grid min-h-svh place-items-center px-6 pt-16 pb-16 md:pt-24 md:pb-24">
+                <div className="relative w-full max-w-md overflow-hidden rounded-[22px] border bg-card/80 p-9 pb-7 shadow-xl backdrop-blur-xl">
+                    {/* Logo como fondo */}
+                    <img
+                        src="/images/logo-capj-light.png"
+                        alt=""
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 m-auto h-64 w-64 object-contain opacity-[0.06] dark:hidden"
+                    />
+                    <img
+                        src="/images/logo-capj-dark.png"
+                        alt=""
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 m-auto hidden h-64 w-64 object-contain opacity-[0.08] dark:block"
+                    />
+
+                    <div className="relative z-10 flex flex-col gap-1.5">
                         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold tracking-wider text-accent-foreground uppercase">
                             <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                             CAPJ +
@@ -125,9 +64,9 @@ export default function AuthSimpleLayout({
                         </p>
                     </div>
 
-                    {children}
+                    <div className="relative z-10">{children}</div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-dashed pt-4 font-mono text-[11px] text-muted-foreground">
+                    <div className="relative z-10 mt-5 flex items-center justify-between border-t border-dashed pt-4 font-mono text-[11px] text-muted-foreground">
                         <span>Conexión cifrada · TLS 1.3</span>
                         <span>CAPJ +</span>
                     </div>
