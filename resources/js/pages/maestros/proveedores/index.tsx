@@ -145,7 +145,9 @@ export default function ProveedoresIndex() {
                                         />
                                     </td>
                                     <td className="px-2.5 py-1 text-right">
-                                        <ProveedorActionsMenu />
+                                        <ProveedorActionsMenu
+                                            proveedor={proveedor}
+                                        />
                                     </td>
                                 </tr>
                             ))}
