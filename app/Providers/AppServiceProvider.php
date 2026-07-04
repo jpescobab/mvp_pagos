@@ -11,6 +11,7 @@ use App\Models\ConectorAutomatizacionNavegador;
 use App\Models\EgresoCgu;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
+use App\Models\Proveedor;
 use App\Models\User;
 use App\Policies\AuditLogPolicy;
 use App\Policies\CasoPagoProveedorPolicy;
@@ -20,6 +21,7 @@ use App\Policies\ConectorAutomatizacionNavegadorPolicy;
 use App\Policies\EgresoCguPolicy;
 use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\ProcesoPolicy;
+use App\Policies\ProveedorPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
@@ -93,6 +95,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ConectorAutomatizacionNavegador::class, ConectorAutomatizacionNavegadorPolicy::class);
         Gate::policy(Cfinanciero::class, CfinancieroPolicy::class);
         Gate::policy(Ccosto::class, CcostoPolicy::class);
+        Gate::policy(Proveedor::class, ProveedorPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

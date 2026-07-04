@@ -12,12 +12,36 @@ class Proveedor extends Model
 
     protected $table = 'proveedores';
 
-    protected $fillable = ['rutproveedor', 'nombre', 'correo', 'direccion', 'contacto', 'imagen', 'activo'];
+    protected $fillable = [
+        'rutproveedor',
+        'nombre',
+        'correo',
+        'direccion',
+        'contacto',
+        'imagen',
+        'activo',
+        'giro',
+        'tipo_contribuyente',
+        'rubros',
+        'contacto_cargo',
+        'contacto_telefono',
+        'region',
+        'comuna',
+        'banco',
+        'tipo_cuenta',
+        'numero_cuenta',
+        'condicion_pago',
+        'moneda',
+        'correo_pago',
+        'documento_respaldo_path',
+        'notas_internas',
+    ];
 
     protected function casts(): array
     {
         return [
             'activo' => 'boolean',
+            'rubros' => 'array',
         ];
     }
 

@@ -22,6 +22,20 @@ class ProveedorResource extends JsonResource
             'direccion' => $this->direccion,
             'contacto' => $this->contacto,
             'activo' => $this->activo,
+            'giro' => $this->giro,
+            'tipo_contribuyente' => $this->tipo_contribuyente,
+            'rubros' => $this->rubros,
+            'contacto_cargo' => $this->contacto_cargo,
+            'contacto_telefono' => $this->contacto_telefono,
+            'region' => $this->region,
+            'comuna' => $this->comuna,
+            'banco' => $this->banco,
+            'tipo_cuenta' => $this->tipo_cuenta,
+            'numero_cuenta' => $this->numero_cuenta,
+            'condicion_pago' => $this->condicion_pago,
+            'moneda' => $this->moneda,
+            'correo_pago' => $this->correo_pago,
+            'notas_internas' => $this->notas_internas,
         ];
     }
 }

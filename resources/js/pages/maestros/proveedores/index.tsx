@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ProveedorActionsMenu } from '@/components/maestros/proveedor-actions-menu';
 import { ProveedorStatusBadge } from '@/components/maestros/proveedor-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useInitials } from '@/hooks/use-initials';
 import proveedores from '@/routes/maestros/proveedores';
@@ -45,12 +46,19 @@ export default function ProveedoresIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Proveedores
                     </h1>
-                    <Input
-                        placeholder="Buscar por RUT o nombre…"
-                        value={termino}
-                        onChange={(e) => setTermino(e.target.value)}
-                        className="w-72"
-                    />
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Buscar por RUT o nombre…"
+                            value={termino}
+                            onChange={(e) => setTermino(e.target.value)}
+                            className="w-72"
+                        />
+                        <Button asChild>
+                            <Link href={proveedores.create().url}>
+                                Nuevo proveedor
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border">
@@ -121,9 +129,7 @@ export default function ProveedoresIndex() {
                                     </td>
                                     <td
                                         className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
-                                        title={
-                                            proveedor.direccion ?? undefined
-                                        }
+                                        title={proveedor.direccion ?? undefined}
                                     >
                                         {proveedor.direccion ?? '—'}
                                     </td>

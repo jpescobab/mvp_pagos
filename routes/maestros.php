@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->prefix('maestros')->name('maestros.')->group(function () {
     Route::get('proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
+    Route::get('proveedores/crear', [ProveedorController::class, 'create'])->name('proveedores.create');
+    Route::post('proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
     Route::get('clientes-medidores', [ClienteMedidorController::class, 'index'])->name('clientes-medidores.index');
     Route::get('cfinancieros', [CfinancieroController::class, 'index'])->name('cfinancieros.index');
     Route::get('ccostos', [CcostoController::class, 'index'])->name('ccostos.index');

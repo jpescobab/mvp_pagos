@@ -6,6 +6,34 @@ export type Proveedor = {
     direccion: string | null;
     contacto: string | null;
     activo: boolean;
+    giro: string | null;
+    tipo_contribuyente: string | null;
+    rubros: string[] | null;
+    contacto_cargo: string | null;
+    contacto_telefono: string | null;
+    region: string | null;
+    comuna: string | null;
+    banco: string | null;
+    tipo_cuenta: string | null;
+    numero_cuenta: string | null;
+    condicion_pago: string | null;
+    moneda: string | null;
+    correo_pago: string | null;
+    notas_internas: string | null;
+};
+
+export type OpcionCatalogo = {
+    value: string;
+    label: string;
+};
+
+export type CatalogosProveedor = {
+    tiposContribuyente: OpcionCatalogo[];
+    rubros: OpcionCatalogo[];
+    tiposCuenta: OpcionCatalogo[];
+    condicionesPago: OpcionCatalogo[];
+    monedas: OpcionCatalogo[];
+    bancos: string[];
 };
 
 export type ClienteMedidor = {
