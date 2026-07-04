@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Define la identidad visual institucional de la aplicación ("CAPJ +"), el tema de colores/tipografía que reemplaza el scaffolding neutro de `laravel/react-starter-kit`, la navegación principal del sidebar agrupada por módulo y limitada a los módulos realmente implementados, el login institucional con indicadores económicos, el topbar con tema y menú de usuario, y el panel general con datos reales.
+Define la identidad visual institucional de la aplicación ("CAPJ +"), el tema de colores/tipografía que reemplaza el scaffolding neutro de `laravel/react-starter-kit`, la navegación principal del sidebar agrupada por módulo y limitada a los módulos realmente implementados, el login institucional, el topbar con tema y menú de usuario, y el panel general con datos reales.
 
 ## Requirements
 
 ### Requirement: Identidad de marca de la aplicación
-El sistema SHALL identificarse como "CAPJ +" en toda superficie de marca visible al usuario (logo del sidebar, título de la pestaña del navegador), reemplazando el branding del scaffolding de `laravel/react-starter-kit`.
+El sistema SHALL identificarse como "CAPJ +" en toda superficie de marca visible al usuario (logo del sidebar, título de la pestaña del navegador), reemplazando el branding del scaffolding de `laravel/react-starter-kit`. La ruta raíz del sitio SHALL llevar a la experiencia institucional (login) en vez de a la página `welcome` del scaffolding.
 
 #### Scenario: Logo del sidebar
 - **WHEN** un usuario autenticado visualiza cualquier página con layout de sidebar
@@ -16,6 +16,14 @@ El sistema SHALL identificarse como "CAPJ +" en toda superficie de marca visible
 #### Scenario: Título de la pestaña del navegador
 - **WHEN** un usuario carga cualquier página de la aplicación
 - **THEN** el `<title>` de la página refleja el nombre configurado de la aplicación ("CAPJ +"), no "Laravel"
+
+#### Scenario: Raíz del sitio lleva al login institucional
+- **WHEN** un visitante no autenticado visita la raíz del sitio (`/`)
+- **THEN** es redirigido a la página de login institucional, no a la página `welcome` del scaffolding
+
+#### Scenario: Raíz del sitio para un usuario ya autenticado
+- **WHEN** un usuario ya autenticado visita la raíz del sitio (`/`)
+- **THEN** termina en el panel general (`/dashboard`), sin quedar en la página de login
 
 ### Requirement: Tema visual con paleta y tipografía institucional
 El sistema SHALL aplicar una paleta de colores (primario azul, semánticos verde/rojo/ámbar con variantes suaves para badges y deltas, variantes dark-mode), tipografía (`Manrope` como fuente principal) y una escala de tamaños de texto (`--text-xs` a `--text-2xl`) reducida frente a los valores por defecto de Tailwind, definidas como tokens de tema, con radio base de 16px para tarjetas y superficies, sin alterar los nombres de las variables CSS que consumen los componentes UI existentes.
