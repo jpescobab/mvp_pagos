@@ -8,6 +8,11 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+    ETIQUETAS_INDICADOR,
+    formatearValorIndicador,
+} from '@/lib/indicadores';
+import type { Indicador } from '@/lib/indicadores';
 import { dashboard } from '@/routes';
 import casos from '@/routes/pago-proveedores/casos';
 
@@ -16,13 +21,6 @@ type Kpis = {
     egresos_cgu_mes: number;
     adquisiciones_activas: number;
     informes_en_curso: number;
-};
-
-type Indicador = {
-    tipo: string;
-    valor: string;
-    fecha_valor: string | null;
-    periodo: string | null;
 };
 
 type CasoReciente = {
@@ -39,34 +37,6 @@ type PageProps = {
     indicadores: Indicador[];
     casosRecientes: CasoReciente[];
 };
-
-const ETIQUETAS_INDICADOR: Record<string, string> = {
-    UF: 'U.F',
-    UTM: 'U.T.M',
-    UTA: 'U.T.A',
-    IPC: 'I.P.C',
-    USD: 'Dólar',
-};
-
-function formatearValor(indicador: Indicador): string {
-    const valor = Number(indicador.valor);
-
-    if (Number.isNaN(valor)) {
-        return indicador.valor;
-    }
-
-    if (indicador.tipo === 'IPC') {
-        return `${new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 }).format(valor)}%`;
-    }
-
-    const decimales =
-        indicador.tipo === 'UF' || indicador.tipo === 'USD' ? 2 : 0;
-
-    return `$ ${new Intl.NumberFormat('es-CL', {
-        minimumFractionDigits: decimales,
-        maximumFractionDigits: decimales,
-    }).format(valor)}`;
-}
 
 function formatearMonto(monto: string | null): string {
     if (monto === null) {
@@ -122,8 +92,29 @@ export default function Dashboard({
                 <h1 className="text-[17px] font-bold tracking-tight">
                     Panel general
                 </h1>
+                {indicadores.length > 0 && (
+                    <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                        {indicadores.map((indicador) => (
+                            <div
+                                key={indicador.tipo}
+                                className="flex items-center gap-2.5 rounded-2xl border bg-card px-3.5 py-2.5 shadow-sm"
+                            >
+                                <TrendingUp className="size-4 shrink-0 text-primary" />
+                                <div className="min-w-0">
+                                    <div className="text-[10px] tracking-widest text-muted-foreground uppercase">
+                                        {ETIQUETAS_INDICADOR[indicador.tipo] ??
+                                            indicador.tipo}
+                                    </div>
+                                    <div className="truncate font-mono text-sm font-semibold">
+                                        {formatearValorIndicador(indicador)}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </section>
+                )}
 
-                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <section className="grid gap-4 md:grid-cols-4 xl:grid-cols-4">
                     <KpiCard
                         titulo="Casos de pago activos"
                         valor={kpis.casos_pago_activos}
@@ -149,28 +140,6 @@ export default function Dashboard({
                         icono={FileBarChart}
                     />
                 </section>
-
-                {indicadores.length > 0 && (
-                    <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
-                        {indicadores.map((indicador) => (
-                            <div
-                                key={indicador.tipo}
-                                className="flex items-center gap-2.5 rounded-2xl border bg-card px-3.5 py-2.5 shadow-sm"
-                            >
-                                <TrendingUp className="size-4 shrink-0 text-primary" />
-                                <div className="min-w-0">
-                                    <div className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                                        {ETIQUETAS_INDICADOR[indicador.tipo] ??
-                                            indicador.tipo}
-                                    </div>
-                                    <div className="truncate font-mono text-sm font-semibold">
-                                        {formatearValor(indicador)}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </section>
-                )}
 
                 <section className="rounded-2xl border bg-card p-4 shadow-sm">
                     <h3 className="mb-3 text-sm font-semibold">

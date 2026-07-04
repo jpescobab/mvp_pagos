@@ -139,7 +139,7 @@ export default function UsuariosIndex() {
                             Usuarios
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Administración de usuarios institucionales
+                            Administración de usuarios
                         </p>
                     </div>
                     {permissions.can_create_user && (
