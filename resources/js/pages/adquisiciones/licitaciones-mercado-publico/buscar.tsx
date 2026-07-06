@@ -6,142 +6,95 @@ import {
     FichaConsultaMercadoPublico,
 } from '@/components/mercado-publico/ficha-consulta';
 import type { SeccionFichaConsulta } from '@/components/mercado-publico/ficha-consulta';
-import { Badge } from '@/components/ui/badge';
+import { LicitacionEstadoBadge } from '@/components/mercado-publico/licitacion-estado-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
-import { restarMontos } from '@/lib/format';
-import ordenesCompraMp, {
-    pdf as pdfOrdenCompraMp,
-} from '@/routes/adquisiciones/ordenes_compra_mp';
+import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
 import type {
-    DiferenciaCampoOrdenCompraMercadoPublico,
-    OrdenCompraMercadoPublico,
-    PayloadNormalizadoOrdenCompraMercadoPublico,
+    DiferenciaCampoLicitacionMercadoPublico,
+    LicitacionMercadoPublico,
+    PayloadNormalizadoLicitacionMercadoPublico,
 } from '@/types/adquisiciones';
 
-const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
-    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
+const URL_BASE_DETALLE_LICITACION_MERCADO_PUBLICO =
+    'https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=';
 
-function urlDetalleOcMercadoPublico(codigo: string): string {
-    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
+function urlDetalleLicitacionMercadoPublico(codigo: string): string {
+    return `${URL_BASE_DETALLE_LICITACION_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
 }
 
-type OcParaFicha = {
+type LicitacionParaFicha = {
+    nombre: string | null;
     estadoMercadoPublico: string | null;
     moneda: string | null;
-    formaPago: string | null;
-    plazoEntregaDias: number | null;
-    montoNeto: string | number | null;
-    montoTotal: string | number | null;
-    fechaEmision: string | null;
+    montoEstimado: string | number | null;
     organismoComprador: {
         nombre: string | null;
         unidad: string | null;
         rut: string | null;
     } | null;
     cronograma: { estado: string | null; fecha: string | null }[];
-    proveedor: { nombre: string | null; rut: string | null } | null;
+    adjudicacion: PayloadNormalizadoLicitacionMercadoPublico['adjudicacion'];
     items: {
         codigoProducto: string | null;
+        nombreProducto: string | null;
         descripcion: string;
         cantidad: string | number;
-        precioUnitario: string | number;
-        montoTotal: string | number;
+        adjudicacion: PayloadNormalizadoLicitacionMercadoPublico['items'][number]['adjudicacion'];
     }[];
 };
 
-function ordenLocalAFicha(orden: OrdenCompraMercadoPublico): OcParaFicha {
+function licitacionLocalAFicha(
+    licitacion: LicitacionMercadoPublico,
+): LicitacionParaFicha {
     return {
-        estadoMercadoPublico: orden.estado_mercado_publico,
-        moneda: orden.moneda,
-        formaPago: orden.forma_pago,
-        plazoEntregaDias: orden.plazo_entrega_dias,
-        montoNeto: orden.monto_neto,
-        montoTotal: orden.monto_total,
-        fechaEmision: orden.fecha_emision,
-        organismoComprador: orden.organismo_comprador,
-        cronograma: orden.cronograma,
-        proveedor: orden.proveedor
-            ? {
-                  nombre: orden.proveedor.nombre,
-                  rut: orden.proveedor.rutproveedor,
-              }
-            : null,
-        items: (orden.items ?? []).map((item) => ({
+        nombre: licitacion.nombre,
+        estadoMercadoPublico: licitacion.estado_mercado_publico,
+        moneda: licitacion.moneda,
+        montoEstimado: licitacion.monto_estimado,
+        organismoComprador: licitacion.organismo_comprador,
+        cronograma: licitacion.cronograma,
+        adjudicacion: licitacion.adjudicacion,
+        items: (licitacion.items ?? []).map((item) => ({
             codigoProducto: item.codigo_producto,
+            nombreProducto: item.nombre_producto,
             descripcion: item.descripcion,
             cantidad: item.cantidad,
-            precioUnitario: item.precio_unitario,
-            montoTotal: item.monto_total,
+            adjudicacion: item.adjudicacion,
         })),
     };
 }
 
 function payloadAFicha(
-    payload: PayloadNormalizadoOrdenCompraMercadoPublico,
-): OcParaFicha {
+    payload: PayloadNormalizadoLicitacionMercadoPublico,
+): LicitacionParaFicha {
     return {
+        nombre: payload.nombre,
         estadoMercadoPublico: payload.estado,
         moneda: payload.moneda,
-        formaPago: payload.forma_pago,
-        plazoEntregaDias: payload.plazo_entrega_dias,
-        montoNeto: payload.monto_neto,
-        montoTotal: payload.monto_total,
-        fechaEmision: payload.fecha_emision,
+        montoEstimado: payload.monto_estimado,
         organismoComprador: payload.organismo_comprador,
         cronograma: payload.cronograma,
-        proveedor: {
-            nombre: payload.proveedor.nombre,
-            rut: payload.proveedor.rut,
-        },
+        adjudicacion: payload.adjudicacion,
         items: payload.items.map((item) => ({
             codigoProducto: item.codigo_producto,
+            nombreProducto: item.nombre_producto,
             descripcion: item.descripcion,
             cantidad: item.cantidad,
-            precioUnitario: item.precio_unitario,
-            montoTotal: item.monto_total,
+            adjudicacion: item.adjudicacion,
         })),
     };
 }
 
-function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
+function construirSecciones(
+    licitacion: LicitacionParaFicha,
+): SeccionFichaConsulta[] {
     return [
         {
             key: 'cronograma',
             titulo: 'Cronograma',
-            contenido: <CronogramaTimeline eventos={oc.cronograma} />,
-        },
-        {
-            key: 'desglose-financiero',
-            titulo: 'Desglose financiero',
-            contenido: (
-                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
-                    <div>
-                        <dt className="text-muted-foreground">Monto neto</dt>
-                        <dd>
-                            <Monto valor={oc.montoNeto} />
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Impuesto</dt>
-                        <dd>
-                            <Monto
-                                valor={restarMontos(
-                                    oc.montoTotal,
-                                    oc.montoNeto,
-                                )}
-                            />
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Monto total</dt>
-                        <dd>
-                            <Monto valor={oc.montoTotal} />
-                        </dd>
-                    </div>
-                </dl>
-            ),
+            contenido: <CronogramaTimeline eventos={licitacion.cronograma} />,
         },
         {
             key: 'organismo-comprador',
@@ -150,46 +103,34 @@ function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div>
                         <dt className="text-muted-foreground">Organismo</dt>
-                        <dd>{oc.organismoComprador?.nombre ?? '—'}</dd>
+                        <dd>{licitacion.organismoComprador?.nombre ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">Unidad</dt>
-                        <dd>{oc.organismoComprador?.unidad ?? '—'}</dd>
+                        <dd>{licitacion.organismoComprador?.unidad ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">RUT</dt>
-                        <dd>{oc.organismoComprador?.rut ?? '—'}</dd>
+                        <dd>{licitacion.organismoComprador?.rut ?? '—'}</dd>
                     </div>
                 </dl>
             ),
         },
         {
             key: 'condiciones',
-            titulo: 'Condiciones del contrato',
+            titulo: 'Condiciones',
             contenido: (
-                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-4">
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <div>
                         <dt className="text-muted-foreground">Moneda</dt>
-                        <dd>{oc.moneda ?? '—'}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Forma de pago</dt>
-                        <dd>{oc.formaPago ?? '—'}</dd>
+                        <dd>{licitacion.moneda ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">
-                            Plazo de entrega
+                            Monto estimado
                         </dt>
                         <dd>
-                            {oc.plazoEntregaDias !== null
-                                ? `${oc.plazoEntregaDias} días`
-                                : '—'}
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Monto neto</dt>
-                        <dd>
-                            <Monto valor={oc.montoNeto} />
+                            <Monto valor={licitacion.montoEstimado} />
                         </dd>
                     </div>
                 </dl>
@@ -198,30 +139,36 @@ function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
         {
             key: 'adjudicacion',
             titulo: 'Adjudicación',
-            contenido: (
+            contenido: licitacion.adjudicacion ? (
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div>
-                        <dt className="text-muted-foreground">Proveedor</dt>
-                        <dd>{oc.proveedor?.nombre ?? '—'}</dd>
+                        <dt className="text-muted-foreground">Fecha</dt>
+                        <dd>{licitacion.adjudicacion.fecha ?? '—'}</dd>
                     </div>
                     <div>
-                        <dt className="text-muted-foreground">RUT</dt>
-                        <dd>{oc.proveedor?.rut ?? '—'}</dd>
+                        <dt className="text-muted-foreground">N.º de acta</dt>
+                        <dd>{licitacion.adjudicacion.numero ?? '—'}</dd>
                     </div>
                     <div>
-                        <dt className="text-muted-foreground">Monto total</dt>
+                        <dt className="text-muted-foreground">
+                            N.º de oferentes
+                        </dt>
                         <dd>
-                            <Monto valor={oc.montoTotal} />
+                            {licitacion.adjudicacion.numero_oferentes ?? '—'}
                         </dd>
                     </div>
                 </dl>
+            ) : (
+                <p className="text-sm text-muted-foreground">
+                    Esta licitación aún no ha sido adjudicada.
+                </p>
             ),
         },
         {
             key: 'items',
             titulo: 'Ítems',
             contenido:
-                oc.items.length === 0 ? (
+                licitacion.items.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         Sin ítems informados.
                     </p>
@@ -232,30 +179,29 @@ function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
                                 <th className="py-2">Código</th>
                                 <th className="py-2">Descripción</th>
                                 <th className="py-2 text-right">Cantidad</th>
-                                <th className="py-2 text-right">
-                                    Precio unitario
-                                </th>
-                                <th className="py-2 text-right">Total</th>
+                                <th className="py-2">Proveedor adjudicado</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {oc.items.map((item, i) => (
+                            {licitacion.items.map((item, i) => (
                                 <tr key={i}>
                                     <td className="py-2 font-mono">
                                         {item.codigoProducto ?? '—'}
                                     </td>
-                                    <td className="py-2">{item.descripcion}</td>
+                                    <td className="py-2">
+                                        {item.nombreProducto ??
+                                            item.descripcion}
+                                    </td>
                                     <td className="py-2 text-right">
                                         <Monto
                                             valor={item.cantidad}
                                             variante="numero"
                                         />
                                     </td>
-                                    <td className="py-2 text-right">
-                                        <Monto valor={item.precioUnitario} />
-                                    </td>
-                                    <td className="py-2 text-right">
-                                        <Monto valor={item.montoTotal} />
+                                    <td className="py-2">
+                                        {item.adjudicacion
+                                            ? `${item.adjudicacion.nombre_proveedor ?? '—'} (${item.adjudicacion.rut_proveedor ?? '—'})`
+                                            : '—'}
                                     </td>
                                 </tr>
                             ))}
@@ -267,39 +213,33 @@ function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
 }
 
 const NOMBRES_CAMPOS_DIFERENCIA: Record<string, string> = {
+    nombre: 'Nombre',
     estado_mercado_publico: 'Estado',
+    codigo_estado_mercado_publico: 'Código de estado',
     moneda: 'Moneda',
-    forma_pago: 'Forma de pago',
-    plazo_entrega_dias: 'Plazo de entrega',
-    monto_neto: 'Monto neto',
-    monto_total: 'Monto total',
-    fecha_emision: 'Fecha de emisión',
+    monto_estimado: 'Monto estimado',
     organismo_comprador: 'Organismo comprador',
     cronograma: 'Cronograma',
+    adjudicacion: 'Adjudicación',
 };
 
 type PageProps = {
     codigo: string | null;
-    ordenLocal?: OrdenCompraMercadoPublico;
+    licitacionLocal?: LicitacionMercadoPublico;
     vistaPrevia?: {
-        payload_normalizado: PayloadNormalizadoOrdenCompraMercadoPublico;
+        payload_normalizado: PayloadNormalizadoLicitacionMercadoPublico;
         payload_crudo?: unknown;
-        proveedor_existente: {
-            id: number;
-            nombre: string;
-            rutproveedor: string | null;
-        } | null;
     };
     noEncontrada?: boolean;
     comparacion?: {
         encontrada: boolean;
-        diferencias: Record<string, DiferenciaCampoOrdenCompraMercadoPublico>;
+        diferencias: Record<string, DiferenciaCampoLicitacionMercadoPublico>;
     };
 };
 
-export default function BuscarOrdenCompraMercadoPublico({
+export default function BuscarLicitacionMercadoPublico({
     codigo,
-    ordenLocal,
+    licitacionLocal,
     vistaPrevia,
     noEncontrada,
     comparacion,
@@ -314,7 +254,7 @@ export default function BuscarOrdenCompraMercadoPublico({
         }
 
         router.get(
-            ordenesCompraMp.index.url({
+            licitacionesMp.index.url({
                 query: { codigo: codigoIngresado.trim() },
             }),
             {},
@@ -323,27 +263,27 @@ export default function BuscarOrdenCompraMercadoPublico({
     }
 
     function verificar() {
-        if (!ordenLocal) {
+        if (!licitacionLocal) {
             return;
         }
 
         setProcesando(true);
         setComparacionDescartada(false);
         router.post(
-            ordenesCompraMp.verificar.url(ordenLocal.id),
+            licitacionesMp.verificar.url(licitacionLocal.id),
             {},
             { preserveState: true, onFinish: () => setProcesando(false) },
         );
     }
 
     function aplicarActualizacion() {
-        if (!ordenLocal) {
+        if (!licitacionLocal) {
             return;
         }
 
         setProcesando(true);
         router.post(
-            ordenesCompraMp.actualizar.url(ordenLocal.id),
+            licitacionesMp.actualizar.url(licitacionLocal.id),
             {},
             { onFinish: () => setProcesando(false) },
         );
@@ -352,7 +292,7 @@ export default function BuscarOrdenCompraMercadoPublico({
     function guardar() {
         setProcesando(true);
         router.post(
-            ordenesCompraMp.guardar.url(),
+            licitacionesMp.guardar.url(),
             {
                 codigo: vistaPrevia?.payload_normalizado.codigo,
             },
@@ -368,19 +308,19 @@ export default function BuscarOrdenCompraMercadoPublico({
 
     return (
         <>
-            <Head title="Buscar Orden de Compra" />
+            <Head title="Buscar Licitación" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 <div className="flex flex-row items-end gap-2 rounded-xl border p-4">
                     <div className="flex-1 space-y-1">
                         <label
-                            htmlFor="codigo-oc"
+                            htmlFor="codigo-licitacion"
                             className="text-sm text-muted-foreground"
                         >
-                            Código de Orden de Compra
+                            Código de Licitación
                         </label>
                         <Input
-                            id="codigo-oc"
+                            id="codigo-licitacion"
                             value={codigoIngresado}
                             onChange={(e) => setCodigoIngresado(e.target.value)}
                             onKeyDown={(e) => {
@@ -388,41 +328,36 @@ export default function BuscarOrdenCompraMercadoPublico({
                                     consultar();
                                 }
                             }}
-                            placeholder="Ej: 2182-99-AG26"
+                            placeholder="Ej: 1004-34-LE26"
                         />
                     </div>
                     <Button onClick={consultar}>Consultar</Button>
                 </div>
 
-                {ordenLocal && (
+                {licitacionLocal && (
                     <>
                         <FichaConsultaMercadoPublico
                             encabezado={{
-                                titulo: `OC ${ordenLocal.codigo}`,
-                                subtitulo: ordenLocal.proceso_adquisicion && (
-                                    <span>
-                                        Vinculada a{' '}
-                                        {ordenLocal.proceso_adquisicion.codigo}
-                                    </span>
-                                ),
-                                montoDestacado: (
-                                    <>
-                                        <p className="text-xs text-muted-foreground">
-                                            Monto total
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            <Monto
-                                                valor={ordenLocal.monto_total}
-                                            />
-                                        </p>
-                                    </>
-                                ),
+                                titulo: `Licitación ${licitacionLocal.codigo}`,
+                                subtitulo:
+                                    licitacionLocal.proceso_adquisicion ? (
+                                        <span>
+                                            Vinculada a{' '}
+                                            {
+                                                licitacionLocal
+                                                    .proceso_adquisicion.codigo
+                                            }
+                                        </span>
+                                    ) : (
+                                        licitacionLocal.nombre
+                                    ),
                                 acciones: (
                                     <>
-                                        <Badge variant="outline">
-                                            {ordenLocal.estado_mercado_publico ??
-                                                'Sin estado'}
-                                        </Badge>
+                                        <LicitacionEstadoBadge
+                                            estado={
+                                                licitacionLocal.estado_mercado_publico
+                                            }
+                                        />
                                         <Button
                                             variant="outline"
                                             disabled={procesando}
@@ -432,22 +367,18 @@ export default function BuscarOrdenCompraMercadoPublico({
                                         </Button>
                                         <AccionesEncabezadoFichaMercadoPublico
                                             payloadCrudo={
-                                                ordenLocal.payload_crudo
+                                                licitacionLocal.payload_crudo
                                             }
-                                            urlDetalle={urlDetalleOcMercadoPublico(
-                                                ordenLocal.codigo,
+                                            urlDetalle={urlDetalleLicitacionMercadoPublico(
+                                                licitacionLocal.codigo,
                                             )}
-                                            urlPdf={pdfOrdenCompraMp.url({
-                                                query: {
-                                                    codigo: ordenLocal.codigo,
-                                                },
-                                            })}
+                                            urlPdf={null}
                                         />
                                     </>
                                 ),
                             }}
                             secciones={construirSecciones(
-                                ordenLocalAFicha(ordenLocal),
+                                licitacionLocalAFicha(licitacionLocal),
                             )}
                         />
 
@@ -459,8 +390,8 @@ export default function BuscarOrdenCompraMercadoPublico({
 
                                 {!comparacion?.encontrada ? (
                                     <p className="text-sm text-muted-foreground">
-                                        La OC ya no está disponible en Mercado
-                                        Público.
+                                        La licitación ya no está disponible en
+                                        Mercado Público.
                                     </p>
                                 ) : diferenciasEntries.length === 0 ? (
                                     <p className="text-sm text-muted-foreground">
@@ -536,112 +467,51 @@ export default function BuscarOrdenCompraMercadoPublico({
                 {vistaPrevia && (
                     <FichaConsultaMercadoPublico
                         encabezado={{
-                            titulo: `OC ${vistaPrevia.payload_normalizado.codigo}`,
-                            subtitulo: 'Vista previa · aún no guardada',
-                            montoDestacado: (
-                                <>
-                                    <p className="text-xs text-muted-foreground">
-                                        Monto total
-                                    </p>
-                                    <p className="text-lg font-semibold">
-                                        <Monto
-                                            valor={
-                                                vistaPrevia.payload_normalizado
-                                                    .monto_total
-                                            }
-                                        />
-                                    </p>
-                                </>
-                            ),
+                            titulo: `Licitación ${vistaPrevia.payload_normalizado.codigo}`,
+                            subtitulo:
+                                vistaPrevia.payload_normalizado.nombre ??
+                                'Vista previa · aún no guardada',
                             acciones: (
                                 <>
-                                    <Badge variant="outline">
-                                        {vistaPrevia.payload_normalizado
-                                            .estado ?? 'Sin estado'}
-                                    </Badge>
+                                    <LicitacionEstadoBadge
+                                        estado={
+                                            vistaPrevia.payload_normalizado
+                                                .estado
+                                        }
+                                    />
                                     <AccionesEncabezadoFichaMercadoPublico
                                         payloadCrudo={vistaPrevia.payload_crudo}
-                                        urlDetalle={urlDetalleOcMercadoPublico(
+                                        urlDetalle={urlDetalleLicitacionMercadoPublico(
                                             vistaPrevia.payload_normalizado
                                                 .codigo,
                                         )}
-                                        urlPdf={pdfOrdenCompraMp.url({
-                                            query: {
-                                                codigo: vistaPrevia
-                                                    .payload_normalizado.codigo,
-                                            },
-                                        })}
+                                        urlPdf={null}
                                     />
+                                    <Button
+                                        disabled={procesando}
+                                        onClick={() => guardar()}
+                                    >
+                                        Guardar Licitación
+                                    </Button>
                                 </>
                             ),
                         }}
-                        secciones={[
-                            ...construirSecciones(
-                                payloadAFicha(vistaPrevia.payload_normalizado),
-                            ),
-                            {
-                                key: 'proveedor-emisor',
-                                titulo: 'Proveedor emisor',
-                                contenido: (
-                                    <div className="flex items-center justify-between">
-                                        {vistaPrevia.proveedor_existente ? (
-                                            <p className="text-sm">
-                                                {
-                                                    vistaPrevia
-                                                        .proveedor_existente
-                                                        .nombre
-                                                }{' '}
-                                                <span className="text-muted-foreground">
-                                                    (
-                                                    {
-                                                        vistaPrevia
-                                                            .proveedor_existente
-                                                            .rutproveedor
-                                                    }
-                                                    )
-                                                </span>
-                                            </p>
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground">
-                                                Se creará un proveedor nuevo con
-                                                estos datos al guardar:{' '}
-                                                {
-                                                    vistaPrevia
-                                                        .payload_normalizado
-                                                        .proveedor.nombre
-                                                }{' '}
-                                                (
-                                                {
-                                                    vistaPrevia
-                                                        .payload_normalizado
-                                                        .proveedor.rut
-                                                }
-                                                )
-                                            </p>
-                                        )}
-                                        <Button
-                                            disabled={procesando}
-                                            onClick={() => guardar()}
-                                        >
-                                            Guardar OC
-                                        </Button>
-                                    </div>
-                                ),
-                            },
-                        ]}
+                        secciones={construirSecciones(
+                            payloadAFicha(vistaPrevia.payload_normalizado),
+                        )}
                     />
                 )}
 
                 {noEncontrada && (
                     <div className="rounded-xl border p-4 text-sm text-muted-foreground">
-                        La OC «{codigo}» no fue encontrada ni localmente ni en
-                        Mercado Público.
+                        La licitación «{codigo}» no fue encontrada ni localmente
+                        ni en Mercado Público.
                     </div>
                 )}
 
-                {!ordenLocal && !vistaPrevia && !noEncontrada && (
+                {!licitacionLocal && !vistaPrevia && !noEncontrada && (
                     <div className="rounded-xl border p-4 text-sm text-muted-foreground">
-                        Ingresa un código de Orden de Compra para comenzar.
+                        Ingresa un código de Licitación para comenzar.
                     </div>
                 )}
             </div>
@@ -649,11 +519,11 @@ export default function BuscarOrdenCompraMercadoPublico({
     );
 }
 
-BuscarOrdenCompraMercadoPublico.layout = {
+BuscarLicitacionMercadoPublico.layout = {
     breadcrumbs: [
         {
-            title: 'Órdenes de compra (Mercado Público)',
-            href: ordenesCompraMp.index(),
+            title: 'Licitaciones (Mercado Público)',
+            href: licitacionesMp.index(),
         },
     ],
 };

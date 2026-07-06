@@ -104,3 +104,75 @@ export type DiferenciaCampoOrdenCompraMercadoPublico = {
     local: unknown;
     api: unknown;
 };
+
+export type AdjudicacionLicitacionMercadoPublico = {
+    tipo: number | null;
+    fecha: string | null;
+    numero: string | null;
+    numero_oferentes: number | null;
+    url_acta: string | null;
+};
+
+export type AdjudicacionItemLicitacionMercadoPublico = {
+    rut_proveedor: string | null;
+    nombre_proveedor: string | null;
+    cantidad: number | null;
+    monto_unitario: number | null;
+};
+
+export type LicitacionMercadoPublicoItem = {
+    id: number;
+    correlativo: number | null;
+    codigo_producto: string | null;
+    categoria: string | null;
+    nombre_producto: string | null;
+    descripcion: string;
+    unidad_medida: string | null;
+    cantidad: string;
+    adjudicacion: AdjudicacionItemLicitacionMercadoPublico | null;
+};
+
+export type LicitacionMercadoPublico = {
+    id: number;
+    codigo: string;
+    nombre: string | null;
+    estado_mercado_publico: string | null;
+    codigo_estado_mercado_publico: number | null;
+    moneda: string | null;
+    monto_estimado: string | null;
+    organismo_comprador: OrganismoCompradorMercadoPublico | null;
+    cronograma: EventoCronogramaMercadoPublico[];
+    adjudicacion: AdjudicacionLicitacionMercadoPublico | null;
+    payload_crudo?: unknown;
+    proceso_adquisicion: { id: number; codigo: string } | null;
+    items?: LicitacionMercadoPublicoItem[];
+};
+
+export type ItemPayloadNormalizadoLicitacionMercadoPublico = {
+    correlativo: number | null;
+    codigo_producto: string | null;
+    categoria: string | null;
+    nombre_producto: string | null;
+    descripcion: string;
+    unidad_medida: string | null;
+    cantidad: number;
+    adjudicacion: AdjudicacionItemLicitacionMercadoPublico | null;
+};
+
+export type PayloadNormalizadoLicitacionMercadoPublico = {
+    codigo: string;
+    nombre: string | null;
+    estado: string | null;
+    codigo_estado: number | null;
+    moneda: string | null;
+    monto_estimado: number | null;
+    organismo_comprador: OrganismoCompradorMercadoPublico;
+    cronograma: EventoCronogramaMercadoPublico[];
+    adjudicacion: AdjudicacionLicitacionMercadoPublico | null;
+    items: ItemPayloadNormalizadoLicitacionMercadoPublico[];
+};
+
+export type DiferenciaCampoLicitacionMercadoPublico = {
+    local: unknown;
+    api: unknown;
+};

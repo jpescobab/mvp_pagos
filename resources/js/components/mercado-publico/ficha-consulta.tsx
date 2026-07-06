@@ -9,14 +9,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { pdf as pdfOrdenCompraMp } from '@/routes/adquisiciones/ordenes_compra_mp';
-
-const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
-    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
-
-function urlDetalleOcMercadoPublico(codigo: string): string {
-    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
-}
 
 /**
  * Componente genérico de "ficha" para consultas a Mercado Público: no conoce
@@ -89,25 +81,27 @@ export function FichaConsultaMercadoPublico({
 }
 
 /**
- * Acciones del encabezado de la ficha de una OC: "Ver JSON" muestra el
- * payload crudo del snapshot ya vinculado (sin volver a consultar Mercado
- * Público); "Ver PDF" y "Mercado Público" abren en una pestaña nueva el
- * detalle oficial de la OC en mercadopublico.cl; "Ver PDF" descarga el PDF
- * directamente a través de un endpoint propio que resuelve el enlace real
- * de descarga desde esa misma página pública (no hay un campo de enlace en
- * la API JSON de Mercado Público).
+ * Acciones del encabezado de la ficha de una consulta a Mercado Público:
+ * "Ver JSON" muestra el payload crudo del snapshot ya vinculado (sin volver a
+ * consultar Mercado Público); "Mercado Público" abre en una pestaña nueva el
+ * detalle oficial en mercadopublico.cl (`urlDetalle`, provisto por el
+ * llamador porque cada dominio expone su propia URL pública); "Ver PDF"
+ * descarga el PDF directamente a través de un endpoint propio (`urlPdf`) que
+ * resuelve el enlace real de descarga — cuando el llamador no tiene ese
+ * endpoint disponible (`urlPdf` es `null`), la acción queda deshabilitada con
+ * la indicación "Disponible próximamente".
  */
 export function AccionesEncabezadoFichaMercadoPublico({
-    codigo,
     payloadCrudo,
+    urlDetalle,
+    urlPdf,
 }: {
-    codigo: string;
     payloadCrudo: unknown;
+    urlDetalle: string;
+    urlPdf: string | null;
 }) {
     const [jsonAbierto, setJsonAbierto] = useState(false);
     const tieneJson = payloadCrudo !== null && payloadCrudo !== undefined;
-    const urlDetalle = urlDetalleOcMercadoPublico(codigo);
-    const urlPdf = pdfOrdenCompraMp.url({ query: { codigo } });
 
     return (
         <div className="flex items-center gap-2">
@@ -130,12 +124,24 @@ export function AccionesEncabezadoFichaMercadoPublico({
                 </DialogContent>
             </Dialog>
 
-            <Button variant="outline" size="sm" asChild>
-                <a href={urlPdf} target="_blank" rel="noopener noreferrer">
+            {urlPdf ? (
+                <Button variant="outline" size="sm" asChild>
+                    <a href={urlPdf} target="_blank" rel="noopener noreferrer">
+                        <FileText className="size-4" />
+                        Ver PDF
+                    </a>
+                </Button>
+            ) : (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    title="Disponible próximamente"
+                >
                     <FileText className="size-4" />
                     Ver PDF
-                </a>
-            </Button>
+                </Button>
+            )}
 
             <Button variant="outline" size="sm" asChild>
                 <a href={urlDetalle} target="_blank" rel="noopener noreferrer">

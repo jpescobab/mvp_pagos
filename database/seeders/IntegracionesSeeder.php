@@ -15,6 +15,7 @@ class IntegracionesSeeder extends Seeder
             'integraciones.gestionar_conectores',
             'integraciones.ejecutar_playwright',
             'adquisiciones.consultar_orden_compra_mp',
+            'adquisiciones.consultar_licitacion_mp',
         ];
 
         foreach ($permisos as $permiso) {

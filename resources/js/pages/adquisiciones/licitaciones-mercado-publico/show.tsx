@@ -6,7 +6,7 @@ import {
     FichaConsultaMercadoPublico,
 } from '@/components/mercado-publico/ficha-consulta';
 import type { SeccionFichaConsulta } from '@/components/mercado-publico/ficha-consulta';
-import { Badge } from '@/components/ui/badge';
+import { LicitacionEstadoBadge } from '@/components/mercado-publico/licitacion-estado-badge';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
 import {
@@ -16,17 +16,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { restarMontos } from '@/lib/format';
-import ordenesCompraMp, {
-    pdf as pdfOrdenCompraMp,
-} from '@/routes/adquisiciones/ordenes_compra_mp';
-import type { OrdenCompraMercadoPublico } from '@/types/adquisiciones';
+import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
+import type { LicitacionMercadoPublico } from '@/types/adquisiciones';
 
-const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
-    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
+const URL_BASE_DETALLE_LICITACION_MERCADO_PUBLICO =
+    'https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=';
 
-function urlDetalleOcMercadoPublico(codigo: string): string {
-    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
+function urlDetalleLicitacionMercadoPublico(codigo: string): string {
+    return `${URL_BASE_DETALLE_LICITACION_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
 }
 
 type ProcesoAdquisicionSeleccionable = {
@@ -35,49 +32,18 @@ type ProcesoAdquisicionSeleccionable = {
 };
 
 type PageProps = {
-    orden: OrdenCompraMercadoPublico;
+    licitacion: LicitacionMercadoPublico;
     procesosAdquisicion: ProcesoAdquisicionSeleccionable[];
 };
 
 function construirSecciones(
-    orden: OrdenCompraMercadoPublico,
+    licitacion: LicitacionMercadoPublico,
 ): SeccionFichaConsulta[] {
     return [
         {
             key: 'cronograma',
             titulo: 'Cronograma',
-            contenido: <CronogramaTimeline eventos={orden.cronograma} />,
-        },
-        {
-            key: 'desglose-financiero',
-            titulo: 'Desglose financiero',
-            contenido: (
-                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
-                    <div>
-                        <dt className="text-muted-foreground">Monto neto</dt>
-                        <dd>
-                            <Monto valor={orden.monto_neto} />
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Impuesto</dt>
-                        <dd>
-                            <Monto
-                                valor={restarMontos(
-                                    orden.monto_total,
-                                    orden.monto_neto,
-                                )}
-                            />
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Monto total</dt>
-                        <dd>
-                            <Monto valor={orden.monto_total} />
-                        </dd>
-                    </div>
-                </dl>
-            ),
+            contenido: <CronogramaTimeline eventos={licitacion.cronograma} />,
         },
         {
             key: 'organismo-comprador',
@@ -86,46 +52,34 @@ function construirSecciones(
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
                     <div>
                         <dt className="text-muted-foreground">Organismo</dt>
-                        <dd>{orden.organismo_comprador?.nombre ?? '—'}</dd>
+                        <dd>{licitacion.organismo_comprador?.nombre ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">Unidad</dt>
-                        <dd>{orden.organismo_comprador?.unidad ?? '—'}</dd>
+                        <dd>{licitacion.organismo_comprador?.unidad ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">RUT</dt>
-                        <dd>{orden.organismo_comprador?.rut ?? '—'}</dd>
+                        <dd>{licitacion.organismo_comprador?.rut ?? '—'}</dd>
                     </div>
                 </dl>
             ),
         },
         {
             key: 'condiciones',
-            titulo: 'Condiciones del contrato',
+            titulo: 'Condiciones',
             contenido: (
-                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-4">
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <div>
                         <dt className="text-muted-foreground">Moneda</dt>
-                        <dd>{orden.moneda ?? '—'}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Forma de pago</dt>
-                        <dd>{orden.forma_pago ?? '—'}</dd>
+                        <dd>{licitacion.moneda ?? '—'}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">
-                            Plazo de entrega
+                            Monto estimado
                         </dt>
                         <dd>
-                            {orden.plazo_entrega_dias !== null
-                                ? `${orden.plazo_entrega_dias} días`
-                                : '—'}
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="text-muted-foreground">Monto neto</dt>
-                        <dd>
-                            <Monto valor={orden.monto_neto} />
+                            <Monto valor={licitacion.monto_estimado} />
                         </dd>
                     </div>
                 </dl>
@@ -134,30 +88,53 @@ function construirSecciones(
         {
             key: 'adjudicacion',
             titulo: 'Adjudicación',
-            contenido: (
-                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+            contenido: licitacion.adjudicacion ? (
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-4">
                     <div>
-                        <dt className="text-muted-foreground">Proveedor</dt>
-                        <dd>{orden.proveedor?.nombre ?? '—'}</dd>
+                        <dt className="text-muted-foreground">Fecha</dt>
+                        <dd>{licitacion.adjudicacion.fecha ?? '—'}</dd>
                     </div>
                     <div>
-                        <dt className="text-muted-foreground">RUT</dt>
-                        <dd>{orden.proveedor?.rutproveedor ?? '—'}</dd>
+                        <dt className="text-muted-foreground">N.º de acta</dt>
+                        <dd>{licitacion.adjudicacion.numero ?? '—'}</dd>
                     </div>
                     <div>
-                        <dt className="text-muted-foreground">Monto total</dt>
+                        <dt className="text-muted-foreground">
+                            N.º de oferentes
+                        </dt>
                         <dd>
-                            <Monto valor={orden.monto_total} />
+                            {licitacion.adjudicacion.numero_oferentes ?? '—'}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-muted-foreground">Acta</dt>
+                        <dd>
+                            {licitacion.adjudicacion.url_acta ? (
+                                <a
+                                    href={licitacion.adjudicacion.url_acta}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline"
+                                >
+                                    Ver acta
+                                </a>
+                            ) : (
+                                '—'
+                            )}
                         </dd>
                     </div>
                 </dl>
+            ) : (
+                <p className="text-sm text-muted-foreground">
+                    Esta licitación aún no ha sido adjudicada.
+                </p>
             ),
         },
         {
             key: 'items',
             titulo: 'Ítems',
             contenido:
-                (orden.items ?? []).length === 0 ? (
+                (licitacion.items ?? []).length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         Sin ítems informados.
                     </p>
@@ -168,30 +145,45 @@ function construirSecciones(
                                 <th className="py-2">Código</th>
                                 <th className="py-2">Descripción</th>
                                 <th className="py-2 text-right">Cantidad</th>
+                                <th className="py-2">Proveedor adjudicado</th>
                                 <th className="py-2 text-right">
-                                    Precio unitario
+                                    Monto unitario
                                 </th>
-                                <th className="py-2 text-right">Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {(orden.items ?? []).map((item) => (
+                            {(licitacion.items ?? []).map((item) => (
                                 <tr key={item.id}>
                                     <td className="py-2 font-mono">
                                         {item.codigo_producto ?? '—'}
                                     </td>
-                                    <td className="py-2">{item.descripcion}</td>
+                                    <td className="py-2">
+                                        {item.nombre_producto ??
+                                            item.descripcion}
+                                    </td>
                                     <td className="py-2 text-right">
                                         <Monto
                                             valor={item.cantidad}
                                             variante="numero"
                                         />
                                     </td>
-                                    <td className="py-2 text-right">
-                                        <Monto valor={item.precio_unitario} />
+                                    <td className="py-2">
+                                        {item.adjudicacion
+                                            ? `${item.adjudicacion.nombre_proveedor ?? '—'} (${item.adjudicacion.rut_proveedor ?? '—'})`
+                                            : '—'}
                                     </td>
                                     <td className="py-2 text-right">
-                                        <Monto valor={item.monto_total} />
+                                        {item.adjudicacion?.monto_unitario !=
+                                        null ? (
+                                            <Monto
+                                                valor={
+                                                    item.adjudicacion
+                                                        .monto_unitario
+                                                }
+                                            />
+                                        ) : (
+                                            '—'
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -202,12 +194,14 @@ function construirSecciones(
     ];
 }
 
-export default function OrdenCompraMercadoPublicoShow({
-    orden,
+export default function LicitacionMercadoPublicoShow({
+    licitacion,
     procesosAdquisicion,
 }: PageProps) {
     const [procesoSeleccionado, setProcesoSeleccionado] = useState<string>(
-        orden.proceso_adquisicion ? String(orden.proceso_adquisicion.id) : '',
+        licitacion.proceso_adquisicion
+            ? String(licitacion.proceso_adquisicion.id)
+            : '',
     );
     const [procesando, setProcesando] = useState(false);
 
@@ -218,7 +212,7 @@ export default function OrdenCompraMercadoPublicoShow({
 
         setProcesando(true);
         router.post(
-            ordenesCompraMp.vinculo.store.url(orden.id),
+            licitacionesMp.vinculo.store.url(licitacion.id),
             { proceso_adquisicion_id: Number(procesoSeleccionado) },
             { preserveScroll: true, onFinish: () => setProcesando(false) },
         );
@@ -226,7 +220,7 @@ export default function OrdenCompraMercadoPublicoShow({
 
     function desvincular() {
         setProcesando(true);
-        router.delete(ordenesCompraMp.vinculo.destroy.url(orden.id), {
+        router.delete(licitacionesMp.vinculo.destroy.url(licitacion.id), {
             preserveScroll: true,
             onFinish: () => setProcesando(false),
         });
@@ -234,41 +228,29 @@ export default function OrdenCompraMercadoPublicoShow({
 
     return (
         <>
-            <Head title={`OC ${orden.codigo}`} />
+            <Head title={`Licitación ${licitacion.codigo}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 <FichaConsultaMercadoPublico
                     encabezado={{
-                        titulo: `OC ${orden.codigo}`,
-                        montoDestacado: (
-                            <>
-                                <p className="text-xs text-muted-foreground">
-                                    Monto total
-                                </p>
-                                <p className="text-lg font-semibold">
-                                    <Monto valor={orden.monto_total} />
-                                </p>
-                            </>
-                        ),
+                        titulo: `Licitación ${licitacion.codigo}`,
+                        subtitulo: licitacion.nombre,
                         acciones: (
                             <>
-                                <Badge variant="outline">
-                                    {orden.estado_mercado_publico ??
-                                        'Sin estado'}
-                                </Badge>
+                                <LicitacionEstadoBadge
+                                    estado={licitacion.estado_mercado_publico}
+                                />
                                 <AccionesEncabezadoFichaMercadoPublico
-                                    payloadCrudo={orden.payload_crudo}
-                                    urlDetalle={urlDetalleOcMercadoPublico(
-                                        orden.codigo,
+                                    payloadCrudo={licitacion.payload_crudo}
+                                    urlDetalle={urlDetalleLicitacionMercadoPublico(
+                                        licitacion.codigo,
                                     )}
-                                    urlPdf={pdfOrdenCompraMp.url({
-                                        query: { codigo: orden.codigo },
-                                    })}
+                                    urlPdf={null}
                                 />
                             </>
                         ),
                     }}
-                    secciones={construirSecciones(orden)}
+                    secciones={construirSecciones(licitacion)}
                 />
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -276,10 +258,10 @@ export default function OrdenCompraMercadoPublicoShow({
                         Proceso de adquisición vinculado
                     </h2>
 
-                    {orden.proceso_adquisicion ? (
+                    {licitacion.proceso_adquisicion ? (
                         <div className="flex items-center justify-between">
                             <p className="text-sm">
-                                {orden.proceso_adquisicion.codigo}
+                                {licitacion.proceso_adquisicion.codigo}
                             </p>
                             <Button
                                 variant="outline"
@@ -325,11 +307,11 @@ export default function OrdenCompraMercadoPublicoShow({
     );
 }
 
-OrdenCompraMercadoPublicoShow.layout = {
+LicitacionMercadoPublicoShow.layout = {
     breadcrumbs: [
         {
-            title: 'Órdenes de compra (Mercado Público)',
-            href: ordenesCompraMp.index(),
+            title: 'Licitaciones (Mercado Público)',
+            href: licitacionesMp.index(),
         },
         { title: 'Detalle', href: '#' },
     ],

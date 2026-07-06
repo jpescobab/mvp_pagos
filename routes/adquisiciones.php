@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Adquisiciones\LicitacionMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\OrdenCompraMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\ProcesoAdquisicionController;
 use App\Http\Controllers\Adquisiciones\TransicionProcesoAdquisicionController;
+use App\Http\Controllers\Adquisiciones\VinculoProcesoAdquisicionLicitacionMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +25,16 @@ Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->gr
         Route::post('{orden}/actualizar', [OrdenCompraMercadoPublicoController::class, 'actualizar'])->name('actualizar');
         Route::post('{orden}/vinculo', [VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController::class, 'store'])->name('vinculo.store');
         Route::delete('{orden}/vinculo', [VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController::class, 'destroy'])->name('vinculo.destroy');
+    });
+
+    Route::prefix('licitaciones-mercado-publico')->name('licitaciones_mp.')->group(function () {
+        Route::get('/', [LicitacionMercadoPublicoController::class, 'index'])->name('index');
+        Route::post('buscar', [LicitacionMercadoPublicoController::class, 'buscar'])->name('buscar');
+        Route::post('guardar', [LicitacionMercadoPublicoController::class, 'guardar'])->name('guardar');
+        Route::get('{licitacion}', [LicitacionMercadoPublicoController::class, 'show'])->name('show');
+        Route::post('{licitacion}/verificar', [LicitacionMercadoPublicoController::class, 'verificar'])->name('verificar');
+        Route::post('{licitacion}/actualizar', [LicitacionMercadoPublicoController::class, 'actualizar'])->name('actualizar');
+        Route::post('{licitacion}/vinculo', [VinculoProcesoAdquisicionLicitacionMercadoPublicoController::class, 'store'])->name('vinculo.store');
+        Route::delete('{licitacion}/vinculo', [VinculoProcesoAdquisicionLicitacionMercadoPublicoController::class, 'destroy'])->name('vinculo.destroy');
     });
 });
