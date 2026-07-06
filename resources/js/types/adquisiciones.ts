@@ -67,6 +67,7 @@ export type OrdenCompraMercadoPublico = {
     fecha_emision: string | null;
     organismo_comprador: OrganismoCompradorMercadoPublico | null;
     cronograma: EventoCronogramaMercadoPublico[];
+    payload_crudo?: unknown;
     proveedor: {
         id: number;
         nombre: string;

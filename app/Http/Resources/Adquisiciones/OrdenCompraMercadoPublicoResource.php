@@ -26,6 +26,7 @@ class OrdenCompraMercadoPublicoResource extends JsonResource
             'fecha_emision' => $this->fecha_emision,
             'organismo_comprador' => $this->organismo_comprador,
             'cronograma' => $this->cronograma ?? [],
+            'payload_crudo' => $this->whenLoaded('snapshot', fn () => $this->snapshot?->payload_crudo),
             'proveedor' => $this->when($this->proveedor !== null, fn () => [
                 'id' => $this->proveedor->id,
                 'nombre' => $this->proveedor->nombre,

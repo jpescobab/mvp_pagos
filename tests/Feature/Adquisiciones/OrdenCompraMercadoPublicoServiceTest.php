@@ -22,8 +22,8 @@ function ordenCrudaMercadoPublico(string $codigo, array $overrides = []): array
         'TotalNeto' => 100000,
         'Total' => 119000,
         'Fechas' => [
-            'FechaEnvio' => '2026-04-20',
-            'FechaAceptacion' => '2026-05-01',
+            'FechaEnvio' => '2026-04-20 09:15:00',
+            'FechaAceptacion' => '2026-05-01 14:30:00',
         ],
         'Comprador' => [
             'NombreOrganismo' => 'Corporación Administrativa del Poder Judicial',
@@ -108,6 +108,17 @@ test('consultarApi registra la solicitud y el snapshot cuando la API encuentra l
     expect($resultado['payload_normalizado']['items'])->toHaveCount(2);
 });
 
+test('el cronograma conserva la fecha y hora reales de cada hito, sin truncarlas al día', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-CRONOGRAMA-HORA'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-CRONOGRAMA-HORA');
+
+    expect($resultado['payload_normalizado']['cronograma'])->toBe([
+        ['estado' => 'Enviada', 'fecha' => '2026-04-20 09:15:00'],
+        ['estado' => 'Aceptada', 'fecha' => '2026-05-01 14:30:00'],
+    ]);
+});
+
 test('compararConApi no encuentra diferencias cuando el registro local coincide con la API', function () {
     Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-IGUAL-001'), 200)]);
 
@@ -126,8 +137,8 @@ test('compararConApi no encuentra diferencias cuando el registro local coincide 
             'rut' => '60.503.000-9',
         ],
         'cronograma' => [
-            ['estado' => 'Enviada', 'fecha' => '2026-04-20'],
-            ['estado' => 'Aceptada', 'fecha' => '2026-05-01'],
+            ['estado' => 'Enviada', 'fecha' => '2026-04-20 09:15:00'],
+            ['estado' => 'Aceptada', 'fecha' => '2026-05-01 14:30:00'],
         ],
     ]);
 

@@ -21,7 +21,7 @@ class OrdenCompraMercadoPublicoService
 
     public function buscarLocal(string $codigo): ?OrdenCompraMercadoPublico
     {
-        return OrdenCompraMercadoPublico::with(['items', 'proveedor', 'procesoAdquisicion'])
+        return OrdenCompraMercadoPublico::with(['items', 'proveedor', 'procesoAdquisicion', 'snapshot'])
             ->where('codigo', $codigo)
             ->first();
     }
@@ -330,7 +330,8 @@ class OrdenCompraMercadoPublicoService
     /**
      * Construye la línea de tiempo de la OC a partir de los hitos discretos que
      * expone Mercado Público en `Fechas` (no hay un historial de estados como
-     * lista propiamente tal en esta API).
+     * lista propiamente tal en esta API). Se conserva la fecha y hora tal como
+     * las entrega la API, sin truncarlas a solo el día.
      *
      * @param  array<string, mixed>  $fechas
      * @return array<int, array{estado: string, fecha: string}>
@@ -348,7 +349,7 @@ class OrdenCompraMercadoPublicoService
 
         foreach ($hitos as $campo => $estado) {
             if (! empty($fechas[$campo] ?? null)) {
-                $cronograma[] = ['estado' => $estado, 'fecha' => substr((string) $fechas[$campo], 0, 10)];
+                $cronograma[] = ['estado' => $estado, 'fecha' => (string) $fechas[$campo]];
             }
         }
 
