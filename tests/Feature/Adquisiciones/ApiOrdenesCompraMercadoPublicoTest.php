@@ -152,7 +152,7 @@ test('confirmar la actualización aplica los datos más recientes de la API al r
     expect($orden->refresh()->estado_mercado_publico)->toBe('Aceptada');
 });
 
-test('guardar una OC nueva con proveedor existente crea el registro con sus ítems', function () {
+test('guardar una OC nueva con proveedor existente crea el registro con sus ítems y redirige al índice', function () {
     $proveedor = Proveedor::create(['rutproveedor' => '76.123.456-7', 'nombre' => 'Proveedor de Prueba SpA', 'activo' => true]);
     Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcApiHttp('OC-HTTP-GUARDAR'), 200)]);
     $usuario = usuarioConPermisoOrdenCompraMpHttp();
@@ -162,13 +162,14 @@ test('guardar una OC nueva con proveedor existente crea el registro con sus íte
     ]);
 
     $response->assertSessionHasNoErrors();
+    $response->assertRedirect(route('adquisiciones.ordenes_compra_mp.index'));
     $orden = OrdenCompraMercadoPublico::where('codigo', 'OC-HTTP-GUARDAR')->first();
     expect($orden)->not->toBeNull();
     expect($orden->proveedor_id)->toBe($proveedor->id);
     expect($orden->items()->count())->toBe(1);
 });
 
-test('guardar una OC nueva sin proveedor identificable es rechazado hasta indicar uno', function () {
+test('guardar una OC nueva sin proveedor existente lo crea automáticamente en la misma operación', function () {
     Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcApiHttp('OC-HTTP-SIN-PROVEEDOR'), 200)]);
     $usuario = usuarioConPermisoOrdenCompraMpHttp();
 
@@ -176,6 +177,10 @@ test('guardar una OC nueva sin proveedor identificable es rechazado hasta indica
         'codigo' => 'OC-HTTP-SIN-PROVEEDOR',
     ]);
 
-    $response->assertSessionHasErrors('proveedor_id');
-    expect(OrdenCompraMercadoPublico::where('codigo', 'OC-HTTP-SIN-PROVEEDOR')->exists())->toBeFalse();
+    $response->assertSessionHasNoErrors();
+    $response->assertRedirect(route('adquisiciones.ordenes_compra_mp.index'));
+    $orden = OrdenCompraMercadoPublico::where('codigo', 'OC-HTTP-SIN-PROVEEDOR')->first();
+    expect($orden)->not->toBeNull();
+    expect($orden->proveedor)->not->toBeNull();
+    expect($orden->proveedor->rutproveedor)->toBe('76123456-7');
 });

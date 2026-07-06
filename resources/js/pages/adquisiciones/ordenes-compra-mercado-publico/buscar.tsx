@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
 import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
-import proveedores from '@/routes/maestros/proveedores';
 import type {
     DiferenciaCampoOrdenCompraMercadoPublico,
     OrdenCompraMercadoPublico,
@@ -307,13 +306,12 @@ export default function BuscarOrdenCompraMercadoPublico({
         );
     }
 
-    function guardar(proveedorId?: number) {
+    function guardar() {
         setProcesando(true);
         router.post(
             ordenesCompraMp.guardar.url(),
             {
                 codigo: vistaPrevia?.payload_normalizado.codigo,
-                proveedor_id: proveedorId,
             },
             { onFinish: () => setProcesando(false) },
         );
@@ -486,71 +484,48 @@ export default function BuscarOrdenCompraMercadoPublico({
                             {
                                 key: 'proveedor-emisor',
                                 titulo: 'Proveedor emisor',
-                                contenido: vistaPrevia.proveedor_existente ? (
+                                contenido: (
                                     <div className="flex items-center justify-between">
-                                        <p className="text-sm">
-                                            {
-                                                vistaPrevia.proveedor_existente
-                                                    .nombre
-                                            }{' '}
-                                            <span className="text-muted-foreground">
-                                                (
+                                        {vistaPrevia.proveedor_existente ? (
+                                            <p className="text-sm">
                                                 {
                                                     vistaPrevia
                                                         .proveedor_existente
-                                                        .rutproveedor
+                                                        .nombre
+                                                }{' '}
+                                                <span className="text-muted-foreground">
+                                                    (
+                                                    {
+                                                        vistaPrevia
+                                                            .proveedor_existente
+                                                            .rutproveedor
+                                                    }
+                                                    )
+                                                </span>
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">
+                                                Se creará un proveedor nuevo
+                                                con estos datos al guardar:{' '}
+                                                {
+                                                    vistaPrevia
+                                                        .payload_normalizado
+                                                        .proveedor.nombre
+                                                }{' '}
+                                                (
+                                                {
+                                                    vistaPrevia
+                                                        .payload_normalizado
+                                                        .proveedor.rut
                                                 }
                                                 )
-                                            </span>
-                                        </p>
+                                            </p>
+                                        )}
                                         <Button
                                             disabled={procesando}
-                                            onClick={() =>
-                                                guardar(
-                                                    vistaPrevia
-                                                        .proveedor_existente!
-                                                        .id,
-                                                )
-                                            }
+                                            onClick={() => guardar()}
                                         >
                                             Guardar OC
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm text-muted-foreground">
-                                            El proveedor{' '}
-                                            {
-                                                vistaPrevia.payload_normalizado
-                                                    .proveedor.nombre
-                                            }{' '}
-                                            (
-                                            {
-                                                vistaPrevia.payload_normalizado
-                                                    .proveedor.rut
-                                            }
-                                            ) no existe en el catálogo. Créalo
-                                            antes de guardar la OC.
-                                        </p>
-                                        <Button variant="outline" asChild>
-                                            <a
-                                                href={proveedores.create.url({
-                                                    query: {
-                                                        rutproveedor:
-                                                            vistaPrevia
-                                                                .payload_normalizado
-                                                                .proveedor
-                                                                .rut ?? '',
-                                                        nombre:
-                                                            vistaPrevia
-                                                                .payload_normalizado
-                                                                .proveedor
-                                                                .nombre ?? '',
-                                                    },
-                                                })}
-                                            >
-                                                Crear proveedor
-                                            </a>
                                         </Button>
                                     </div>
                                 ),

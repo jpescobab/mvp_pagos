@@ -166,18 +166,86 @@ test('verificarProveedor encuentra el proveedor existente sin importar el format
     expect($this->servicio->verificarProveedor($payloadSinProveedor))->toBeNull();
 });
 
-test('guardarDesdeApi crea la OC, sus ítems y queda vinculada al snapshot que la originó', function () {
+test('guardarDesdeApi crea la OC, sus ítems y queda vinculada al snapshot que la originó, usando el proveedor indicado como override', function () {
     Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-GUARDAR-001'), 200)]);
 
     $resultado = $this->servicio->consultarApi('OC-GUARDAR-001');
     $proveedor = Proveedor::create(['rutproveedor' => '76.123.456-7', 'nombre' => 'Proveedor de Prueba SpA', 'activo' => true]);
 
-    $oc = $this->servicio->guardarDesdeApi($resultado['payload_normalizado'], $proveedor, $resultado['snapshot']);
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+        proveedorIdOverride: $proveedor->id,
+    );
 
     expect($oc->codigo)->toBe('OC-GUARDAR-001');
     expect($oc->proveedor_id)->toBe($proveedor->id);
     expect($oc->snapshot_datos_externo_id)->toBe($resultado['snapshot']->id);
     expect($oc->items)->toHaveCount(2);
+    expect($proveedorResultado)->toBe('sin_cambios');
+});
+
+test('guardarDesdeApi crea el proveedor automáticamente cuando no existe en el catálogo', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-PROVEEDOR-NUEVO'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-PROVEEDOR-NUEVO');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+    );
+
+    expect($proveedorResultado)->toBe('creado');
+    expect($oc->proveedor->rutproveedor)->toBe('76123456-7');
+    expect($oc->proveedor->nombre)->toBe('Proveedor de Prueba SpA');
+});
+
+test('guardarDesdeApi completa el nombre vacío de un proveedor existente sin sobrescribir otros campos', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-PROVEEDOR-INCOMPLETO'), 200)]);
+
+    $proveedor = Proveedor::create(['rutproveedor' => '76.123.456-7', 'nombre' => '', 'correo' => 'contacto@proveedor.cl', 'activo' => true]);
+    $resultado = $this->servicio->consultarApi('OC-PROVEEDOR-INCOMPLETO');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+    );
+
+    expect($proveedorResultado)->toBe('actualizado');
+    expect($oc->proveedor_id)->toBe($proveedor->id);
+    expect($oc->proveedor->nombre)->toBe('Proveedor de Prueba SpA');
+    expect($oc->proveedor->correo)->toBe('contacto@proveedor.cl');
+});
+
+test('guardarDesdeApi no modifica un proveedor existente que ya tiene sus campos completos', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-PROVEEDOR-COMPLETO'), 200)]);
+
+    $proveedor = Proveedor::create(['rutproveedor' => '76.123.456-7', 'nombre' => 'Nombre Ya Cargado SpA', 'activo' => true]);
+    $resultado = $this->servicio->consultarApi('OC-PROVEEDOR-COMPLETO');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+    );
+
+    expect($proveedorResultado)->toBe('sin_cambios');
+    expect($oc->proveedor_id)->toBe($proveedor->id);
+    expect($oc->proveedor->nombre)->toBe('Nombre Ya Cargado SpA');
+});
+
+test('guardarDesdeApi revierte la creación del proveedor si el guardado de la OC falla', function () {
+    // Fuerza el fallo del guardado de la OC violando su unicidad de código
+    // (ya existe una OC con ese mismo código), después de que el proveedor
+    // ya se creó dentro de la misma transacción.
+    OrdenCompraMercadoPublico::factory()->create(['codigo' => 'OC-FALLA-TRANSACCION']);
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-FALLA-TRANSACCION'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-FALLA-TRANSACCION');
+
+    expect(fn () => $this->servicio->guardarDesdeApi($resultado['payload_normalizado'], $resultado['snapshot']))
+        ->toThrow(Exception::class);
+
+    expect(Proveedor::where('rutproveedor', '76123456-7')->exists())->toBeFalse();
 });
 
 test('aplicarActualizacion sobrescribe los campos y reemplaza los ítems del registro local', function () {

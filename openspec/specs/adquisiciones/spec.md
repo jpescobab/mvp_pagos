@@ -31,14 +31,6 @@ El sistema SHALL mantener un catálogo de `modalidades_adquisicion` activas (lic
 - **WHEN** se intenta crear un `proceso_adquisicion` referenciando una modalidad inexistente o inactiva
 - **THEN** el sistema rechaza la creación
 
-### Requirement: No modelar integración externa todavía
-El sistema SHALL NOT integrar con Mercado Público ni ningún otro sistema externo como origen de datos para Adquisiciones en este alcance. Los procesos de adquisición se crean internamente.
-
-#### Scenario: Crear un proceso de adquisición sin snapshot externo
-- **WHEN** se crea un `proceso_adquisicion`
-- **THEN** no se genera ni se espera ningún `snapshot_datos_externos` asociado
-
-
 ### Requirement: Un proceso de adquisición expone sus casos de pago vinculados
 El sistema SHALL permitir que un `proceso_adquisicion` consulte todos los `caso_pago_proveedor` que se hayan vinculado manualmente a él, sin que esto implique gobernar el workflow de esos casos.
 
@@ -69,3 +61,19 @@ El sistema SHALL invocar la resolución del checklist documental (`ResolutorChec
 - **WHEN** se abre el detalle de procesos con modalidades distintas (p. ej. trato directo vs. licitación pública)
 - **THEN** cada uno resuelve el subconjunto de `requisitos_documentales` aplicable a su propia modalidad
 - **AND** un proceso de trato directo no exige `BASES_LICITACION`
+
+### Requirement: Integración con Mercado Público como origen de evidencia, no de gobierno
+El sistema SHALL permitir que una Orden de Compra de Mercado Público (capability `ordenes-compra-mercado-publico`) se vincule opcionalmente a un `proceso_adquisicion` existente, como evidencia externa trazable. Mercado Público SHALL NOT gobernar el workflow, los estados, los responsables ni las unidades internas de ningún `proceso_adquisicion`: esa vinculación es únicamente informativa y no dispara transiciones de `TransicionWorkflowService`. Los `proceso_adquisicion` SHALL seguir creándose y transicionando exclusivamente por los mecanismos internos ya definidos, con o sin una OC vinculada.
+
+#### Scenario: Crear un proceso de adquisición sin OC vinculada
+- **WHEN** se crea un `proceso_adquisicion`
+- **THEN** no se exige ni se genera ningún vínculo con una `orden_compra_mercado_publico`
+
+#### Scenario: Vincular una OC no altera el workflow del proceso
+- **WHEN** se vincula una `orden_compra_mercado_publico` a un `proceso_adquisicion` existente
+- **THEN** el estado del `Proceso` de ese `proceso_adquisicion` permanece sin cambios
+- **AND** la vinculación queda registrada en auditoría como una acción independiente del workflow
+
+#### Scenario: La verificación de una OC contra Mercado Público no requiere un proceso de adquisición
+- **WHEN** un usuario busca, verifica o guarda una `orden_compra_mercado_publico` sin vincularla a ningún `proceso_adquisicion`
+- **THEN** el sistema completa la operación normalmente, dejando el vínculo pendiente para más adelante

@@ -76,13 +76,16 @@ class OrdenCompraMercadoPublicoService
 
     /**
      * @param  array<string, mixed>  $payloadNormalizado
+     * @return array{orden: OrdenCompraMercadoPublico, proveedor_resultado: string}
      */
-    public function guardarDesdeApi(array $payloadNormalizado, ?Proveedor $proveedor, SnapshotDatosExterno $snapshot, ?int $procesoAdquisicionId = null): OrdenCompraMercadoPublico
+    public function guardarDesdeApi(array $payloadNormalizado, SnapshotDatosExterno $snapshot, ?int $procesoAdquisicionId = null, ?int $proveedorIdOverride = null): array
     {
-        return DB::transaction(function () use ($payloadNormalizado, $proveedor, $snapshot, $procesoAdquisicionId) {
+        return DB::transaction(function () use ($payloadNormalizado, $snapshot, $procesoAdquisicionId, $proveedorIdOverride) {
+            ['proveedor' => $proveedor, 'resultado' => $proveedorResultado] = $this->resolverProveedor($payloadNormalizado, $proveedorIdOverride);
+
             $oc = OrdenCompraMercadoPublico::create([
                 'codigo' => $payloadNormalizado['codigo'],
-                'proveedor_id' => $proveedor?->id,
+                'proveedor_id' => $proveedor->id,
                 'proceso_adquisicion_id' => $procesoAdquisicionId,
                 'snapshot_datos_externo_id' => $snapshot->id,
                 ...$this->camposDelPayload($payloadNormalizado),
@@ -90,8 +93,51 @@ class OrdenCompraMercadoPublicoService
 
             $this->crearItems($oc, $payloadNormalizado['items'] ?? []);
 
-            return $oc->refresh()->load(['items', 'proveedor', 'procesoAdquisicion']);
+            return [
+                'orden' => $oc->refresh()->load(['items', 'proveedor', 'procesoAdquisicion']),
+                'proveedor_resultado' => $proveedorResultado,
+            ];
         });
+    }
+
+    /**
+     * Resuelve el proveedor emisor de una OC nueva: si se indica un override manual, se usa
+     * tal cual; si no, se busca por RUT normalizado y, de no existir, se crea con los datos
+     * del payload; si ya existe, se completan únicamente sus campos vacíos.
+     *
+     * @param  array<string, mixed>  $payloadNormalizado
+     * @return array{proveedor: Proveedor, resultado: string}
+     */
+    private function resolverProveedor(array $payloadNormalizado, ?int $proveedorIdOverride): array
+    {
+        if ($proveedorIdOverride !== null) {
+            return ['proveedor' => Proveedor::findOrFail($proveedorIdOverride), 'resultado' => 'sin_cambios'];
+        }
+
+        $proveedor = $this->verificarProveedor($payloadNormalizado);
+        $datosProveedor = $payloadNormalizado['proveedor'] ?? [];
+
+        if ($proveedor === null) {
+            $proveedor = Proveedor::create([
+                'rutproveedor' => $datosProveedor['rut'] ?? '',
+                'nombre' => $datosProveedor['nombre'] ?? '',
+                'activo' => true,
+            ]);
+
+            return ['proveedor' => $proveedor, 'resultado' => 'creado'];
+        }
+
+        $camposFaltantes = array_filter([
+            'nombre' => $proveedor->nombre === '' ? ($datosProveedor['nombre'] ?? null) : null,
+        ], fn ($valor) => $valor !== null && $valor !== '');
+
+        if ($camposFaltantes === []) {
+            return ['proveedor' => $proveedor, 'resultado' => 'sin_cambios'];
+        }
+
+        $proveedor->fill($camposFaltantes)->save();
+
+        return ['proveedor' => $proveedor, 'resultado' => 'actualizado'];
     }
 
     /**
