@@ -7,6 +7,7 @@ use App\Enums\Maestros\Moneda;
 use App\Enums\Maestros\RubroProveedor;
 use App\Enums\Maestros\TipoContribuyente;
 use App\Enums\Maestros\TipoCuentaBancaria;
+use App\Models\Proveedor;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,6 +16,15 @@ class StoreProveedorRequest extends FormRequest
     public function authorize(): bool
     {
         return (bool) $this->user()?->can('core_institucional.administrar');
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('rutproveedor')) {
+            $this->merge([
+                'rutproveedor' => Proveedor::normalizarRut($this->string('rutproveedor')->toString()),
+            ]);
+        }
     }
 
     /**

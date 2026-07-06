@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,6 +44,32 @@ class Proveedor extends Model
             'activo' => 'boolean',
             'rubros' => 'array',
         ];
+    }
+
+    /**
+     * Normaliza el RUT al guardarlo (sin puntos, con guión, dígito verificador
+     * en mayúscula) para que dos formatos del mismo RUT nunca generen
+     * proveedores duplicados, sin importar el origen (formulario manual,
+     * importación SGF, consulta a Mercado Público, etc.).
+     *
+     * @return Attribute<string, string>
+     */
+    protected function rutproveedor(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value): string => self::normalizarRut($value),
+        );
+    }
+
+    public static function normalizarRut(string $rut): string
+    {
+        $limpio = strtoupper(preg_replace('/[^0-9kK]/', '', $rut) ?? '');
+
+        if ($limpio === '') {
+            return '';
+        }
+
+        return substr($limpio, 0, -1).'-'.substr($limpio, -1);
     }
 
     /**

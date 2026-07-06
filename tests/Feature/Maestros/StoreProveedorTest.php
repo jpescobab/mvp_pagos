@@ -5,6 +5,43 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
+
+test('el formulario de creación de proveedor acepta rut y nombre iniciales por query string', function () {
+    $this->withoutVite();
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $response = $this->actingAs($actor)->get(route('maestros.proveedores.create', [
+        'rutproveedor' => '76.123.456-7',
+        'nombre' => 'Proveedor de Prueba SpA',
+    ]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('maestros/proveedores/create', shouldExist: false)
+        ->where('valoresIniciales.rutproveedor', '76.123.456-7')
+        ->where('valoresIniciales.nombre', 'Proveedor de Prueba SpA')
+    );
+});
+
+test('el formulario de creación de proveedor no exige valores iniciales', function () {
+    $this->withoutVite();
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $response = $this->actingAs($actor)->get(route('maestros.proveedores.create'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('maestros/proveedores/create', shouldExist: false)
+        ->where('valoresIniciales', null)
+    );
+});
 
 test('un usuario con core_institucional.administrar puede registrar un proveedor con datos mínimos', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -19,8 +56,9 @@ test('un usuario con core_institucional.administrar puede registrar un proveedor
 
     $response->assertRedirect(route('maestros.proveedores.index'));
 
-    $proveedor = Proveedor::where('rutproveedor', '76.234.567-8')->first();
+    $proveedor = Proveedor::where('rutproveedor', '76234567-8')->first();
     expect($proveedor)->not->toBeNull();
+    expect($proveedor->rutproveedor)->toBe('76234567-8');
     expect($proveedor->nombre)->toBe('Comercial Andes Sur Ltda.');
     expect($proveedor->activo)->toBeTrue();
     expect($proveedor->giro)->toBeNull();
@@ -59,7 +97,7 @@ test('un usuario con core_institucional.administrar puede registrar un proveedor
 
     $response->assertRedirect(route('maestros.proveedores.index'));
 
-    $proveedor = Proveedor::where('rutproveedor', '77.890.123-4')->first();
+    $proveedor = Proveedor::where('rutproveedor', '77890123-4')->first();
     expect($proveedor)->not->toBeNull();
     expect($proveedor->rubros)->toBe(['tecnologia_informatica', 'asesoria_profesional']);
     expect($proveedor->banco)->toBe('Banco BCI');
@@ -82,6 +120,23 @@ test('registrar un proveedor con un rut ya existente falla la validación', func
 
     $response->assertInvalid(['rutproveedor']);
     expect(Proveedor::where('rutproveedor', '11111111-1')->count())->toBe(1);
+});
+
+test('registrar un proveedor con el mismo rut en otro formato (con puntos) falla la validación en vez de duplicar', function () {
+    Proveedor::create(['rutproveedor' => '89862200-2', 'nombre' => 'LATAM AIRLINES GROUP S.A.']);
+
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $response = $this->actingAs($actor)->post(route('maestros.proveedores.store'), [
+        'rutproveedor' => '89.862.200-2',
+        'nombre' => 'LATAM AIRLINES GROUP S.A.',
+    ]);
+
+    $response->assertInvalid(['rutproveedor']);
+    expect(Proveedor::where('nombre', 'LATAM AIRLINES GROUP S.A.')->count())->toBe(1);
 });
 
 test('un usuario sin core_institucional.administrar no puede registrar un proveedor', function () {

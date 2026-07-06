@@ -70,12 +70,18 @@ class ProveedorController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         Gate::authorize('create', Proveedor::class);
 
+        $rutproveedor = $request->string('rutproveedor')->toString();
+        $nombre = $request->string('nombre')->toString();
+
         return Inertia::render('maestros/proveedores/create', [
             'catalogos' => $this->catalogos(),
+            'valoresIniciales' => ($rutproveedor !== '' || $nombre !== '')
+                ? ['rutproveedor' => $rutproveedor ?: null, 'nombre' => $nombre ?: null]
+                : null,
         ]);
     }
 

@@ -4,6 +4,7 @@ import {
     Building2,
     Coins,
     FileBarChart,
+    FileSearch,
     Gauge,
     History,
     KeyRound,
@@ -32,6 +33,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as ordenesCompraMercadoPublico } from '@/routes/adquisiciones/ordenes_compra_mp';
 import { index as procesosAdquisicion } from '@/routes/adquisiciones/procesos';
 import { index as auditoria } from '@/routes/auditoria';
 import { index as indicadoresEconomicos } from '@/routes/indicadores-economicos';
@@ -134,11 +136,16 @@ const pagoProveedoresNavItems: NavItem[] = [
     },
 ];
 
-const adquisicionesNavItems: NavItem[] = [
+const adquisicionesNavItems: NavItemConPermiso[] = [
     {
         title: 'Procesos',
         href: procesosAdquisicion(),
         icon: ShoppingCart,
+    },
+    {
+        title: 'Órdenes de Compra (Mercado Público)',
+        href: ordenesCompraMercadoPublico(),
+        icon: FileSearch,
     },
 ];
 
@@ -207,6 +214,10 @@ export function AppSidebar() {
         reportabilidadNavItems,
         auth.permissions,
     );
+    const adquisicionesItems = filtrarPorPermiso(
+        adquisicionesNavItems,
+        auth.permissions,
+    );
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -234,7 +245,7 @@ export function AppSidebar() {
                     label="Pago de Proveedores"
                     items={pagoProveedoresNavItems}
                 />
-                <NavGroup label="Adquisiciones" items={adquisicionesNavItems} />
+                <NavGroup label="Adquisiciones" items={adquisicionesItems} />
                 {reportabilidadItems.length > 0 && (
                     <NavGroup
                         label="Reportabilidad"

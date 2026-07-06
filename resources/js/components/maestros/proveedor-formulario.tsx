@@ -73,7 +73,7 @@ type ProveedorFormularioProps = {
     accionUrl: string;
     metodoHttp: 'post' | 'patch';
     volverUrl: string;
-    valoresIniciales?: Proveedor;
+    valoresIniciales?: Partial<Proveedor>;
     tieneDocumentoRespaldo?: boolean;
 };
 

@@ -40,4 +40,9 @@ return [
         'base_url' => env('CMF_API_BASE_URL', 'https://api.cmfchile.cl/api-sbifv3/recursos_api'),
     ],
 
+    'mercadopublico' => [
+        'api_key' => env('MERCADOPUBLICO_API_KEY'),
+        'base_url' => env('MERCADOPUBLICO_API_BASE_URL', 'https://api.mercadopublico.cl/servicios/v1/publico'),
+    ],
+
 ];

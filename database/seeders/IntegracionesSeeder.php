@@ -14,6 +14,7 @@ class IntegracionesSeeder extends Seeder
         $permisos = [
             'integraciones.gestionar_conectores',
             'integraciones.ejecutar_playwright',
+            'adquisiciones.consultar_orden_compra_mp',
         ];
 
         foreach ($permisos as $permiso) {
@@ -29,7 +30,7 @@ class IntegracionesSeeder extends Seeder
             ['codigo' => 'BANCOESTADO', 'nombre' => 'BancoEstado', 'activo' => false],
             ['codigo' => 'SII', 'nombre' => 'SII', 'activo' => false],
             ['codigo' => 'CMF', 'nombre' => 'CMF', 'activo' => false],
-            ['codigo' => 'MERCADO_PUBLICO', 'nombre' => 'Mercado Público', 'activo' => false],
+            ['codigo' => 'MERCADO_PUBLICO', 'nombre' => 'Mercado Público', 'activo' => true],
         ];
 
         foreach ($sistemas as $sistema) {

@@ -18,6 +18,15 @@ class UpdateProveedorRequest extends FormRequest
         return (bool) $this->user()?->can('core_institucional.administrar');
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('rutproveedor')) {
+            $this->merge([
+                'rutproveedor' => Proveedor::normalizarRut($this->string('rutproveedor')->toString()),
+            ]);
+        }
+    }
+
     /**
      * @return array<string, array<int, mixed>>
      */

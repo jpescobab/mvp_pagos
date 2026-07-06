@@ -16,6 +16,7 @@ use App\Models\EgresoCgu;
 use App\Models\EjecucionInformeRazonado;
 use App\Models\IndicadorEconomicoImportacion;
 use App\Models\Item;
+use App\Models\OrdenCompraMercadoPublico;
 use App\Models\PeriodoReportabilidad;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
@@ -34,6 +35,7 @@ use App\Policies\EgresoCguPolicy;
 use App\Policies\EjecucionInformeRazonadoPolicy;
 use App\Policies\IndicadorEconomicoImportacionPolicy;
 use App\Policies\ItemPolicy;
+use App\Policies\OrdenCompraMercadoPublicoPolicy;
 use App\Policies\PeriodoReportabilidadPolicy;
 use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\ProcesoPolicy;
@@ -120,6 +122,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(IndicadorEconomicoImportacion::class, IndicadorEconomicoImportacionPolicy::class);
         Gate::policy(DefinicionInformeRazonado::class, DefinicionInformeRazonadoPolicy::class);
         Gate::policy(EjecucionInformeRazonado::class, EjecucionInformeRazonadoPolicy::class);
+        Gate::policy(OrdenCompraMercadoPublico::class, OrdenCompraMercadoPublicoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

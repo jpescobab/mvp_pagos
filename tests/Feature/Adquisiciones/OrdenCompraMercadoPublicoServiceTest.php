@@ -1,0 +1,195 @@
+<?php
+
+use App\Models\OrdenCompraMercadoPublico;
+use App\Models\OrdenCompraMercadoPublicoItem;
+use App\Models\Proveedor;
+use App\Models\SnapshotDatosExterno;
+use App\Models\SolicitudApiExterna;
+use App\Services\Adquisiciones\OrdenCompraMercadoPublicoService;
+use Database\Seeders\IntegracionesSeeder;
+use Illuminate\Support\Facades\Http;
+
+/**
+ * @return array<string, mixed>
+ */
+function ordenCrudaMercadoPublico(string $codigo, array $overrides = []): array
+{
+    return array_merge([
+        'Codigo' => $codigo,
+        'Estado' => 'Aceptada',
+        'TipoMoneda' => 'CLP',
+        'FormaPago' => '2',
+        'TotalNeto' => 100000,
+        'Total' => 119000,
+        'Fechas' => [
+            'FechaEnvio' => '2026-04-20',
+            'FechaAceptacion' => '2026-05-01',
+        ],
+        'Comprador' => [
+            'NombreOrganismo' => 'Corporación Administrativa del Poder Judicial',
+            'NombreUnidad' => 'Corte de Apelaciones',
+            'RutUnidad' => '60.503.000-9',
+        ],
+        'Proveedor' => [
+            'RutSucursal' => '76.123.456-7',
+            'Nombre' => 'Proveedor de Prueba SpA',
+        ],
+        'Items' => [
+            'Listado' => [
+                ['CodigoProducto' => 'A-1', 'Producto' => 'Resma de papel', 'Cantidad' => 10, 'PrecioNeto' => 5000, 'Total' => 50000],
+                ['CodigoProducto' => 'A-2', 'Producto' => 'Notebook', 'Cantidad' => 1, 'PrecioNeto' => 69000, 'Total' => 69000],
+            ],
+        ],
+    ], $overrides);
+}
+
+/**
+ * Envuelve la orden en la forma real de la respuesta de Mercado Público:
+ * `{"Cantidad": 1, "Listado": [{...}]}`.
+ *
+ * @return array<string, mixed>
+ */
+function payloadCrudoOcMercadoPublico(string $codigo, array $overrides = []): array
+{
+    return [
+        'Cantidad' => 1,
+        'Version' => 'v1',
+        'Listado' => [ordenCrudaMercadoPublico($codigo, $overrides)],
+    ];
+}
+
+beforeEach(function () {
+    $this->seed(IntegracionesSeeder::class);
+    $this->servicio = app(OrdenCompraMercadoPublicoService::class);
+});
+
+test('buscarLocal encuentra una OC existente por código y retorna null si no existe', function () {
+    OrdenCompraMercadoPublico::factory()->create(['codigo' => 'OC-LOCAL-001']);
+
+    expect($this->servicio->buscarLocal('OC-LOCAL-001'))->not->toBeNull();
+    expect($this->servicio->buscarLocal('OC-INEXISTENTE'))->toBeNull();
+});
+
+test('consultarApi registra la solicitud como no encontrada y no crea snapshot cuando la API no encuentra la OC', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response([], 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-NO-EXISTE');
+
+    expect($resultado['encontrada'])->toBeFalse();
+    expect($resultado['snapshot'])->toBeNull();
+    expect($resultado['solicitud'])->toBeInstanceOf(SolicitudApiExterna::class);
+    expect($resultado['solicitud']->estado)->toBe('no_encontrada');
+    expect(SnapshotDatosExterno::count())->toBe(0);
+});
+
+test('consultarApi no confunde una respuesta de error de Mercado Público (ticket inválido) con una OC encontrada', function () {
+    // Mercado Público responde con un "Codigo" numérico genérico ajeno al código de OC
+    // consultado cuando el ticket es inválido o falta, sin Estado/Comprador/Items reales.
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(['Codigo' => 203, 'Mensaje' => 'Ticket invalido'], 200)]);
+
+    $resultado = $this->servicio->consultarApi('2182-130-CM26');
+
+    expect($resultado['encontrada'])->toBeFalse();
+    expect($resultado['snapshot'])->toBeNull();
+    expect($resultado['solicitud']->estado)->toBe('no_encontrada');
+    expect(SnapshotDatosExterno::count())->toBe(0);
+});
+
+test('consultarApi registra la solicitud y el snapshot cuando la API encuentra la OC', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-NUEVA-001'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-NUEVA-001');
+
+    expect($resultado['encontrada'])->toBeTrue();
+    expect($resultado['solicitud']->estado)->toBe('exitosa');
+    expect($resultado['snapshot'])->toBeInstanceOf(SnapshotDatosExterno::class);
+    expect($resultado['snapshot']->payload_crudo['Listado'][0]['Codigo'])->toBe('OC-NUEVA-001');
+    expect($resultado['payload_normalizado']['organismo_comprador']['nombre'])->toBe('Corporación Administrativa del Poder Judicial');
+    expect($resultado['payload_normalizado']['items'])->toHaveCount(2);
+});
+
+test('compararConApi no encuentra diferencias cuando el registro local coincide con la API', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-IGUAL-001'), 200)]);
+
+    $oc = OrdenCompraMercadoPublico::factory()->create([
+        'codigo' => 'OC-IGUAL-001',
+        'estado_mercado_publico' => 'Aceptada',
+        'moneda' => 'CLP',
+        'forma_pago' => '2',
+        'plazo_entrega_dias' => null,
+        'monto_neto' => 100000,
+        'monto_total' => 119000,
+        'fecha_emision' => '2026-04-20',
+        'organismo_comprador' => [
+            'nombre' => 'Corporación Administrativa del Poder Judicial',
+            'unidad' => 'Corte de Apelaciones',
+            'rut' => '60.503.000-9',
+        ],
+        'cronograma' => [
+            ['estado' => 'Enviada', 'fecha' => '2026-04-20'],
+            ['estado' => 'Aceptada', 'fecha' => '2026-05-01'],
+        ],
+    ]);
+
+    $resultado = $this->servicio->compararConApi($oc);
+
+    expect($resultado['encontrada'])->toBeTrue();
+    expect($resultado['diferencias'])->toBe([]);
+});
+
+test('compararConApi detecta diferencias entre el registro local y la API', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-DISTINTA-001', ['Estado' => 'Modificada']), 200)]);
+
+    $oc = OrdenCompraMercadoPublico::factory()->create([
+        'codigo' => 'OC-DISTINTA-001',
+        'estado_mercado_publico' => 'Aceptada',
+    ]);
+
+    $resultado = $this->servicio->compararConApi($oc);
+
+    expect($resultado['encontrada'])->toBeTrue();
+    expect($resultado['diferencias'])->toHaveKey('estado_mercado_publico');
+    expect($resultado['diferencias']['estado_mercado_publico']['local'])->toBe('Aceptada');
+    expect($resultado['diferencias']['estado_mercado_publico']['api'])->toBe('Modificada');
+});
+
+test('verificarProveedor encuentra el proveedor existente sin importar el formato del rut, y retorna null si no existe', function () {
+    // El proveedor local queda guardado sin puntos (normalizado); Mercado Público
+    // entrega el RUT con puntos. Antes del fix, esta diferencia de formato hacía
+    // creer que el proveedor no existía y terminaba duplicándolo.
+    Proveedor::create(['rutproveedor' => '76123456-7', 'nombre' => 'Proveedor de Prueba SpA', 'activo' => true]);
+
+    $payload = ['proveedor' => ['rut' => '76.123.456-7', 'nombre' => 'Proveedor de Prueba SpA']];
+    expect($this->servicio->verificarProveedor($payload)?->rutproveedor)->toBe('76123456-7');
+
+    $payloadSinProveedor = ['proveedor' => ['rut' => '1-9', 'nombre' => 'Otro']];
+    expect($this->servicio->verificarProveedor($payloadSinProveedor))->toBeNull();
+});
+
+test('guardarDesdeApi crea la OC, sus ítems y queda vinculada al snapshot que la originó', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-GUARDAR-001'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-GUARDAR-001');
+    $proveedor = Proveedor::create(['rutproveedor' => '76.123.456-7', 'nombre' => 'Proveedor de Prueba SpA', 'activo' => true]);
+
+    $oc = $this->servicio->guardarDesdeApi($resultado['payload_normalizado'], $proveedor, $resultado['snapshot']);
+
+    expect($oc->codigo)->toBe('OC-GUARDAR-001');
+    expect($oc->proveedor_id)->toBe($proveedor->id);
+    expect($oc->snapshot_datos_externo_id)->toBe($resultado['snapshot']->id);
+    expect($oc->items)->toHaveCount(2);
+});
+
+test('aplicarActualizacion sobrescribe los campos y reemplaza los ítems del registro local', function () {
+    $oc = OrdenCompraMercadoPublico::factory()
+        ->has(OrdenCompraMercadoPublicoItem::factory()->count(1), 'items')
+        ->create(['codigo' => 'OC-ACTUALIZAR-001', 'estado_mercado_publico' => 'Enviada']);
+
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-ACTUALIZAR-001'), 200)]);
+    $resultado = $this->servicio->compararConApi($oc);
+
+    $actualizada = $this->servicio->aplicarActualizacion($oc, $resultado['payload_normalizado'], $resultado['snapshot']);
+
+    expect($actualizada->estado_mercado_publico)->toBe('Aceptada');
+    expect($actualizada->items)->toHaveCount(2);
+});

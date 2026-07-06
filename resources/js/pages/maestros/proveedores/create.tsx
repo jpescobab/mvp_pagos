@@ -1,13 +1,17 @@
 import { Head } from '@inertiajs/react';
 import { ProveedorFormulario } from '@/components/maestros/proveedor-formulario';
 import proveedores from '@/routes/maestros/proveedores';
-import type { CatalogosProveedor } from '@/types/maestros';
+import type { CatalogosProveedor, Proveedor } from '@/types/maestros';
 
 type PageProps = {
     catalogos: CatalogosProveedor;
+    valoresIniciales?: Partial<Proveedor>;
 };
 
-export default function ProveedoresCrear({ catalogos }: PageProps) {
+export default function ProveedoresCrear({
+    catalogos,
+    valoresIniciales,
+}: PageProps) {
     return (
         <>
             <Head title="Nuevo proveedor" />
@@ -17,6 +21,7 @@ export default function ProveedoresCrear({ catalogos }: PageProps) {
                 accionUrl={proveedores.store().url}
                 metodoHttp="post"
                 volverUrl={proveedores.index().url}
+                valoresIniciales={valoresIniciales}
             />
         </>
     );
