@@ -15,13 +15,16 @@ use App\Models\Proveedor;
 use App\Models\SnapshotSgf;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
+use App\Services\Indicadores\ServicioImportacionIndicadores;
 use App\Services\InformesRazonados\InformeRazonadoService;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use App\Services\Workflow\TransicionWorkflowService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\ModalidadesAdquisicionSeeder;
 use Database\Seeders\WorkflowAdquisicionesSeeder;
 use Database\Seeders\WorkflowInformesRazonadosSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
+use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function crearCcostoDePruebaParaDashboard(): Ccosto
@@ -102,11 +105,15 @@ function crearEjecucionInformeRazonadoDePruebaParaDashboard(string $codigoDefini
 
 function crearIndicadorDePruebaParaDashboard(array $atributos): IndicadorEconomico
 {
-    $importacion = IndicadorEconomicoImportacion::create(['tipo' => 'diario', 'estado' => 'ok']);
+    $importacion = IndicadorEconomicoImportacion::create(['tipo_importacion' => 'diaria_usd', 'estado' => 'success']);
 
     return IndicadorEconomico::create([
         'importacion_id' => $importacion->id,
+        'nombre' => 'Indicador de prueba',
+        'tipo' => 'moneda',
         'periodicidad_valor' => 'diaria',
+        'unidad_medida' => 'CLP',
+        'moneda_base' => 'CLP',
         'fuente' => 'CMF',
         ...$atributos,
     ]);
@@ -173,8 +180,8 @@ test('el dashboard expone los KPIs, indicadores económicos y casos recientes', 
         'monto_total' => 300000,
     ]);
 
-    crearIndicadorDePruebaParaDashboard(['tipo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
-    crearIndicadorDePruebaParaDashboard(['tipo' => 'USD', 'fecha_valor' => '2026-06-10', 'valor' => 916.97]);
+    crearIndicadorDePruebaParaDashboard(['codigo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
+    crearIndicadorDePruebaParaDashboard(['codigo' => 'USD', 'fecha_valor' => '2026-06-10', 'valor' => 916.97]);
 
     $usuario = User::factory()->create();
 
@@ -188,8 +195,8 @@ test('el dashboard expone los KPIs, indicadores económicos y casos recientes', 
         ->where('kpis.adquisiciones_activas', 1)
         ->where('kpis.informes_en_curso', 1)
         ->has('indicadores', 2)
-        ->where('indicadores.0.tipo', 'UF')
-        ->where('indicadores.1.tipo', 'USD')
+        ->where('indicadores.0.codigo', 'UF')
+        ->where('indicadores.1.codigo', 'USD')
         ->has('casosRecientes', 2)
     );
 
@@ -200,4 +207,33 @@ test('el dashboard expone los KPIs, indicadores económicos y casos recientes', 
 
     expect($casosRecientes['sgf-dash-cerrado']['proveedor'])->toBe('Proveedor Cerrado');
     expect($casosRecientes['sgf-dash-cerrado']['cerrado'])->toBeTrue();
+});
+
+test('el topbar y el dashboard reflejan el indicador recién importado sin esperar el TTL de la caché', function () {
+    $this->withoutVite();
+
+    CarbonImmutable::setTestNow(CarbonImmutable::create(2026, 6, 15));
+
+    crearIndicadorDePruebaParaDashboard(['codigo' => 'USD', 'fecha_valor' => '2026-06-12', 'valor' => 900.0]);
+
+    $usuario = User::factory()->create();
+
+    $primeraRespuesta = $this->actingAs($usuario)->get(route('dashboard'));
+    $primerasProps = $primeraRespuesta->viewData('page')['props'];
+
+    expect((float) collect($primerasProps['indicadoresTopbar'])->firstWhere('codigo', 'USD')['valor'])->toBe(900.0);
+    expect((float) collect($primerasProps['indicadores'])->firstWhere('codigo', 'USD')['valor'])->toBe(900.0);
+
+    Http::fake([
+        '*/dolar*' => Http::response(['Dolares' => [['Valor' => '950,00', 'Fecha' => '2026-06-15']]]),
+    ]);
+    app(ServicioImportacionIndicadores::class)->importarUsd();
+
+    $segundaRespuesta = $this->actingAs($usuario)->get(route('dashboard'));
+    $segundasProps = $segundaRespuesta->viewData('page')['props'];
+
+    expect((float) collect($segundasProps['indicadoresTopbar'])->firstWhere('codigo', 'USD')['valor'])->toBe(950.0);
+    expect((float) collect($segundasProps['indicadores'])->firstWhere('codigo', 'USD')['valor'])->toBe(950.0);
+
+    CarbonImmutable::setTestNow();
 });

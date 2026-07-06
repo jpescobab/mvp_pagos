@@ -37,7 +37,7 @@ El CLI `openspec` (paquete `@fission-ai/openspec`, instalado como devDependency)
 Notas importantes:
 
 - Los `openspec/specs/*/spec.md` que todavía no pasaron por un change archivado siguen en prosa libre (no el formato estructurado que espera el CLI) — `openspec list --specs` los reconoce por nombre pero muestra `requirements 0` hasta que se archiven. Siguen siendo válidos como fuente de verdad mientras tanto.
-- `openspec/project.md` y `openspec/principles.md` se retiraron — su contenido vive ahora en la sección `context:` de `openspec/config.yaml`.
+- `openspec/project.md` y `openspec/principles.md` se retiraron — su contenido vive ahora en la sección `context:` de `openspec/config.yaml`. **Nota**: `scripts/check.sh` y `scripts/check.bat` todavía verifican la existencia de esos dos archivos retirados y por eso fallan siempre — están desactualizados, no son una señal real de que la estructura del harness esté rota.
 - `/opsx:explore` además sirve para pensar/investigar antes de proponer, tanto para el trabajo numerado de `tasks/` como para cambios ad-hoc no contemplados en `tasks/01..10`.
 
 ## Detenerse si

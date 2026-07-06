@@ -60,7 +60,7 @@ El sistema SHALL presentar los botones con variante semántica de color (`defaul
 - **THEN** el botón muestra un fondo suave del color semántico correspondiente como retroalimentación, sin llegar a un relleno sólido
 
 ### Requirement: Navegación principal como riel de íconos
-El sistema SHALL presentar la navegación principal del sidebar como grupos colapsables por módulo funcional implementado, con la marca institucional (logo + "CAPJ +" + subtítulo "Finanzas y Ppto") en el encabezado, labels de grupo en mayúsculas, ítem activo destacado con fondo acentuado y barra lateral, y colapso del sidebar a modo ícono con tooltips. El sidebar SHALL seguir sin listar módulos funcionales que no tengan páginas implementadas.
+El sistema SHALL presentar la navegación principal del sidebar como grupos colapsables por módulo funcional implementado, con la marca institucional (logo + "CAPJ +" + subtítulo "Finanzas y Ppto") en el encabezado, labels de grupo en mayúsculas, ítem activo destacado con fondo acentuado y barra lateral, y colapso del sidebar a modo ícono con tooltips. El sidebar SHALL seguir sin listar módulos funcionales que no tengan páginas implementadas. El sidebar SHALL además filtrar cada ítem individualmente según los permisos del usuario autenticado (`auth.permissions`), mostrando solo aquellos a los que el usuario tiene acceso, y SHALL ocultar un grupo completo si, tras filtrar, no le queda ningún ítem visible.
 
 #### Scenario: Grupos por módulo implementado
 - **WHEN** un usuario autenticado visualiza el sidebar principal
@@ -78,6 +78,30 @@ El sistema SHALL presentar la navegación principal del sidebar como grupos cola
 #### Scenario: Sin enlaces al scaffolding original
 - **WHEN** un usuario autenticado visualiza el sidebar
 - **THEN** no se muestran enlaces al repositorio o documentación de `laravel/react-starter-kit`
+
+#### Scenario: Ítem oculto sin el permiso requerido
+- **WHEN** un usuario autenticado sin el permiso que gobierna un ítem del sidebar (p. ej. `usuarios.ver`, `auditoria.ver`, `roles.administrar`, `core_institucional.administrar`, `reportabilidad.ver`, `informes.ver`) visualiza el sidebar principal
+- **THEN** ese ítem no aparece en la navegación
+
+#### Scenario: Grupo oculto si queda vacío tras filtrar
+- **WHEN** un usuario autenticado no tiene permiso para ningún ítem de un grupo del sidebar
+- **THEN** el grupo completo no se muestra
+
+#### Scenario: Ítems de acceso abierto siguen visibles
+- **WHEN** un usuario autenticado sin permisos administrativos visualiza el sidebar principal
+- **THEN** sigue viendo los ítems cuya visibilidad es intencionalmente abierta a cualquier autenticado (Casos, Egresos CGU, Procesos de Adquisición, Conectores Playwright, Definiciones de Workflow, Importaciones SGF, Sistemas Externos, Indicadores Económicos)
+
+### Requirement: Imports de rutas del sidebar con nombre, no por defecto
+El sidebar principal SHALL importar con nombre únicamente las funciones de ruta de Wayfinder que efectivamente usa (por ejemplo, `index`), en vez de importar el export por defecto de un módulo de rutas (que agrupa todos los métodos del controlador), por consistencia con el patrón ya usado en el resto de componentes globales (`app-header.tsx`, `user-menu-content.tsx`). Nota: en la práctica esto no logró reducir el tamaño del bundle (ver `openspec/changes/archive/*-sidebar-route-imports-tree-shaking/proposal.md`, sección "Resultado medido") porque el código generado por Wayfinder ata sus métodos al objeto exportado vía asignaciones a nivel de módulo, lo que impide a Rollup tree-shakearlos mientras cualquier otro consumidor de la app siga usando el export por defecto del mismo archivo.
+
+#### Scenario: Import con nombre de la función de ruta usada
+- **WHEN** se revisa el código fuente de `app-sidebar.tsx`
+- **THEN** cada ítem de navegación importa la función de ruta correspondiente con import con nombre (p. ej. `import { index as proveedores } from '@/routes/maestros/proveedores'`)
+- **AND** ningún ítem importa el export por defecto de un módulo de rutas
+
+#### Scenario: Los enlaces del sidebar no cambian
+- **WHEN** un usuario autenticado visualiza el sidebar principal tras el cambio de imports
+- **THEN** cada ítem de navegación apunta exactamente a la misma URL que antes del cambio
 
 ### Requirement: Login institucional
 El sistema SHALL presentar la página de inicio de sesión con la identidad institucional: logo del Poder Judicial como fondo dentro de la tarjeta central (baja opacidad, detrás del formulario), título "Bienvenido a CAPJ +", subtítulo "Sección Finanzas y Presupuesto - Zonal Coyhaique", y tarjeta central sobre una escena de fondo institucional. La lógica de autenticación (Fortify) no cambia. El sistema SHALL NOT mostrar chips de indicadores económicos en esta página. La tarjeta central SHALL permanecer centrada horizontal y verticalmente en viewports de tamaño desktop, tablet y mobile en orientación normal.
@@ -166,3 +190,40 @@ El sistema SHALL presentar cualquier página de listado/índice tabular (catálo
 #### Scenario: Valor nulo en columna opcional
 - **WHEN** un campo opcional de la entidad listada es `null` para una fila
 - **THEN** la celda correspondiente muestra el indicador `"—"` en vez de quedar en blanco o producir un error
+
+### Requirement: Formato numérico global
+El sistema SHALL presentar todo número de negocio visible al usuario (montos en pesos, indicadores económicos, cantidades, KPIs, contadores de paginación y demás magnitudes) con un formato legible y consistente en toda la aplicación: separador de miles con punto (`.`) y separador decimal con coma (`,`) — convención `es-CL`. El sistema SHALL resolver este formateo mediante un helper/componente central reutilizable en `resources/js` en vez de lógica de formateo repetida por página. Este requirement SHALL NOT aplicar a identificadores, códigos institucionales, años ni otros valores que no representen una magnitud de negocio.
+
+#### Scenario: Monto grande con miles y decimales
+- **WHEN** una vista renderiza un monto o cantidad igual o mayor a 1.000
+- **THEN** se muestra con punto como separador de miles y, si tiene decimales, coma como separador decimal (ej. `1.234.567,89`)
+
+#### Scenario: Reutilización del helper central
+- **WHEN** una página nueva o existente necesita mostrar un monto, indicador o cantidad
+- **THEN** usa el helper/componente central de formato numérico en vez de invocar `Intl.NumberFormat` o `toLocaleString` de forma ad-hoc
+
+#### Scenario: Contadores de paginación con el mismo formato
+- **WHEN** un usuario autenticado visualiza el contador "Mostrando X–Y de Z" de un listado paginado
+- **THEN** los tres números (`X`, `Y`, `Z`) siguen el mismo formato `es-CL` que el resto de los números de la aplicación
+
+### Requirement: Valores negativos en rojo
+El sistema SHALL mostrar todo valor numérico de negocio negativo (monto, indicador, cantidad, KPI) en el color semántico "danger" del tema (rojo), reutilizando el token existente `text-destructive` sin introducir un color hardcodeado nuevo. El sistema SHALL NOT aplicar este color a valores en cero o positivos.
+
+#### Scenario: Monto negativo resaltado
+- **WHEN** una vista renderiza un monto o cantidad con valor negativo
+- **THEN** el número se muestra en el color rojo semántico del tema, distinguible del texto normal
+
+#### Scenario: Monto positivo o cero sin color especial
+- **WHEN** una vista renderiza un monto o cantidad con valor cero o positivo
+- **THEN** el número se muestra con el color de texto normal, sin el rojo reservado para negativos
+
+### Requirement: Legibilidad tipográfica de cifras
+Por ser una aplicación financiera, el sistema SHALL renderizar todo número de negocio (montos, indicadores, cantidades, KPIs) con la tipografía monoespaciada del tema (`font-mono` / `JetBrains Mono`, definida en `resources/css/app.css` y ya usada como convención para códigos e identificadores), de modo que los dígitos no se presten a confusión entre sí (ej. `0` con `8`, `1` con `l`) y las cifras en una misma columna queden alineadas. El sistema SHALL NOT usar para cifras una tipografía o estilo donde dígitos distintos resulten visualmente ambiguos.
+
+#### Scenario: Cifra con tipografía monoespaciada
+- **WHEN** una vista renderiza un monto, indicador, cantidad o KPI
+- **THEN** el número se muestra con la fuente monoespaciada del tema, con ancho de dígito uniforme
+
+#### Scenario: Columna de montos alineada
+- **WHEN** una tabla o listado muestra varias filas con montos en la misma columna
+- **THEN** las cifras quedan alineadas verticalmente entre filas gracias al ancho uniforme de la tipografía monoespaciada

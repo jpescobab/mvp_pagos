@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'appearance' => $request->cookie('appearance') ?? 'system',
             'indicadoresTopbar' => $request->user()
                 ? app(IndicadorEconomicoSelector::class)->ultimosPorTipo(['UF', 'UTM', 'USD', 'IPC'])
                 : [],

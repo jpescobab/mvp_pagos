@@ -37,14 +37,14 @@ export function TopbarIndicadores() {
                 <div className="flex flex-col gap-2 px-2 py-1.5">
                     {indicadoresTopbar.map((indicador) => (
                         <div
-                            key={indicador.tipo}
+                            key={indicador.codigo}
                             className="flex items-center justify-between text-sm"
                         >
                             <span className="text-muted-foreground">
-                                {ETIQUETAS_INDICADOR[indicador.tipo] ??
-                                    indicador.tipo}
+                                {ETIQUETAS_INDICADOR[indicador.codigo] ??
+                                    indicador.codigo}
                             </span>
-                            <span className="font-mono font-semibold">
+                            <span className="font-mono tabular-nums">
                                 {formatearValorIndicador(indicador)}
                             </span>
                         </div>

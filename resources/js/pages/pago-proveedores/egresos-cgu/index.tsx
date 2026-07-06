@@ -1,5 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { Monto } from '@/components/ui/monto';
+import { formatNumero } from '@/lib/format';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { EgresoCgu, Paginated } from '@/types/pago-proveedores';
 
@@ -31,9 +33,7 @@ export default function EgresosCguIndex() {
                                 <th className="px-4 py-2 font-medium">
                                     N° egreso
                                 </th>
-                                <th className="px-4 py-2 font-medium">
-                                    Fecha
-                                </th>
+                                <th className="px-4 py-2 font-medium">Fecha</th>
                                 <th className="px-4 py-2 font-medium">
                                     Monto total
                                 </th>
@@ -49,8 +49,7 @@ export default function EgresosCguIndex() {
                                         colSpan={4}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No hay egresos CGU registrados
-                                        todavía.
+                                        No hay egresos CGU registrados todavía.
                                     </td>
                                 </tr>
                             )}
@@ -73,7 +72,7 @@ export default function EgresosCguIndex() {
                                         ).toLocaleDateString()}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {egreso.monto_total}
+                                        <Monto valor={egreso.monto_total} />
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
                                         {egreso.items
@@ -87,8 +86,9 @@ export default function EgresosCguIndex() {
                 </div>
 
                 <div className="text-sm text-muted-foreground">
-                    Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0} de{' '}
-                    {pagina.meta.total}
+                    Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                    {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                    {formatNumero(pagina.meta.total)}
                 </div>
             </div>
         </>

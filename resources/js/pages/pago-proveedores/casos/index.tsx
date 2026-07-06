@@ -1,5 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
+import { Monto } from '@/components/ui/monto';
+import { formatNumero } from '@/lib/format';
 import casos from '@/routes/pago-proveedores/casos';
 import type { CasoPagoProveedor, Paginated } from '@/types/pago-proveedores';
 
@@ -27,9 +29,7 @@ export default function CasosIndex() {
                                     Proveedor
                                 </th>
                                 <th className="px-4 py-2 font-medium">RUT</th>
-                                <th className="px-4 py-2 font-medium">
-                                    Monto
-                                </th>
+                                <th className="px-4 py-2 font-medium">Monto</th>
                                 <th className="px-4 py-2 font-medium">
                                     Estado SGF
                                 </th>
@@ -51,10 +51,7 @@ export default function CasosIndex() {
                                 </tr>
                             )}
                             {pagina.data.map((caso) => (
-                                <tr
-                                    key={caso.id}
-                                    className="hover:bg-muted/30"
-                                >
+                                <tr key={caso.id} className="hover:bg-muted/30">
                                     <td className="px-4 py-2">
                                         <Link
                                             href={casos.show(caso.id)}
@@ -68,16 +65,14 @@ export default function CasosIndex() {
                                         {caso.proveedor.rutproveedor ?? '—'}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {caso.monto}
+                                        <Monto valor={caso.monto} />
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
                                         {caso.sgf_status ?? '—'}
                                     </td>
                                     <td className="px-4 py-2">
                                         <EstadoBadge
-                                            estado={
-                                                caso.proceso.estado_actual
-                                            }
+                                            estado={caso.proceso.estado_actual}
                                         />
                                     </td>
                                 </tr>
@@ -88,8 +83,9 @@ export default function CasosIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

@@ -1,5 +1,7 @@
+import { formatMonto, formatPorcentaje } from '@/lib/format';
+
 export type Indicador = {
-    tipo: string;
+    codigo: string;
     valor: string;
     fecha_valor: string | null;
     periodo: string | null;
@@ -14,21 +16,19 @@ export const ETIQUETAS_INDICADOR: Record<string, string> = {
 };
 
 export function formatearValorIndicador(indicador: Indicador): string {
-    const valor = Number(indicador.valor);
-
-    if (Number.isNaN(valor)) {
+    if (Number.isNaN(Number(indicador.valor))) {
         return indicador.valor;
     }
 
-    if (indicador.tipo === 'IPC') {
-        return `${new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 }).format(valor)}%`;
+    if (indicador.codigo === 'IPC') {
+        return formatPorcentaje(indicador.valor, 1);
     }
 
     const decimales =
-        indicador.tipo === 'UF' || indicador.tipo === 'USD' ? 2 : 0;
+        indicador.codigo === 'UF' || indicador.codigo === 'USD' ? 2 : 0;
 
-    return `$ ${new Intl.NumberFormat('es-CL', {
+    return formatMonto(indicador.valor, {
         minimumFractionDigits: decimales,
         maximumFractionDigits: decimales,
-    }).format(valor)}`;
+    });
 }

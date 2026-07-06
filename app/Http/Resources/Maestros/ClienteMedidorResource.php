@@ -18,10 +18,12 @@ class ClienteMedidorResource extends JsonResource
             'id' => $this->id,
             'numero_cliente' => $this->numero_cliente,
             'proveedor' => $this->proveedor === null ? null : [
+                'id' => $this->proveedor->id,
                 'nombre' => $this->proveedor->nombre,
                 'rutproveedor' => $this->proveedor->rutproveedor,
             ],
             'ccosto' => [
+                'id' => $this->ccosto->id,
                 'codigo' => $this->ccosto->codigo,
                 'nombre' => $this->ccosto->nombre,
             ],

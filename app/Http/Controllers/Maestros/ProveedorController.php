@@ -50,6 +50,8 @@ class ProveedorController extends Controller
 
     public function index(Request $request): Response
     {
+        Gate::authorize('viewAny', Proveedor::class);
+
         $q = $request->string('q')->toString();
 
         $proveedores = Proveedor::query()

@@ -16,7 +16,7 @@ class IndicadorEconomicoResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'tipo' => $this->tipo,
+            'codigo' => $this->codigo,
             'fecha_valor' => $this->fecha_valor,
             'periodo' => $this->periodo,
             'valor' => $this->valor,

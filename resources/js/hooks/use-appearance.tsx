@@ -58,6 +58,18 @@ const subscribe = (callback: () => void) => {
     return () => listeners.delete(callback);
 };
 
+// Detecta si ya se completó la hidratación sin usar setState en un efecto:
+// getServerSnapshot devuelve false (igual que el servidor) y getSnapshot
+// devuelve true; useSyncExternalStore re-renderiza solo una vez apenas
+// detecta la diferencia tras montar.
+const sinSuscripcion = () => () => {};
+const useHidratado = (): boolean =>
+    useSyncExternalStore(
+        sinSuscripcion,
+        () => true,
+        () => false,
+    );
+
 const notify = (): void => listeners.forEach((listener) => listener());
 
 const mediaQuery = (): MediaQueryList | null => {
@@ -87,16 +99,33 @@ export function initializeTheme(): void {
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
-export function useAppearance(): UseAppearanceReturn {
+/**
+ * `appearanceCompartida` es el valor real (cookie `appearance`) para la
+ * request/render actual, ya resuelto por el servidor. Los componentes que
+ * viven dentro del árbol de Inertia (páginas, layouts) deben pasarlo desde
+ * `usePage().props.appearance`. Componentes fuera de ese árbol (ej. el
+ * `<Toaster>` global, montado como hermano de `<App>` en `app.tsx`) no tienen
+ * acceso a `usePage()` y usan el valor por defecto `'system'`.
+ */
+export function useAppearance(
+    appearanceCompartida: Appearance = 'system',
+): UseAppearanceReturn {
+    // El servidor no puede evaluar `prefers-color-scheme`, así que hasta que
+    // el cliente termine de hidratar tratamos 'system' como 'light' (igual
+    // que el servidor) para que el primer render coincida exactamente.
+    const hidratado = useHidratado();
+
     const appearance: Appearance = useSyncExternalStore(
         subscribe,
         () => currentAppearance,
-        () => 'system',
+        () => appearanceCompartida,
     );
 
-    const resolvedAppearance: ResolvedAppearance = isDarkMode(appearance)
-        ? 'dark'
-        : 'light';
+    const resolvedAppearance: ResolvedAppearance =
+        appearance === 'dark' ||
+        (appearance === 'system' && hidratado && prefersDark())
+            ? 'dark'
+            : 'light';
 
     const updateAppearance = (mode: Appearance): void => {
         currentAppearance = mode;

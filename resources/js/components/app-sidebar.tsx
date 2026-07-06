@@ -14,6 +14,7 @@ import {
     Receipt,
     ShieldCheck,
     ShoppingCart,
+    Tags,
     TrendingUp,
     Users,
     Wallet,
@@ -31,25 +32,37 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import procesosAdquisicion from '@/routes/adquisiciones/procesos';
-import auditoria from '@/routes/auditoria';
-import indicadoresEconomicos from '@/routes/indicadores-economicos';
-import definicionesInformeRazonado from '@/routes/informes-razonados/definiciones';
-import ejecucionesInformeRazonado from '@/routes/informes-razonados/ejecuciones';
-import conectores from '@/routes/integraciones/conectores';
-import sistemasExternos from '@/routes/integraciones/sistemas-externos';
-import ccostos from '@/routes/maestros/ccostos';
-import cfinancieros from '@/routes/maestros/cfinancieros';
-import clientesMedidores from '@/routes/maestros/clientes-medidores';
-import proveedores from '@/routes/maestros/proveedores';
-import casos from '@/routes/pago-proveedores/casos';
-import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
-import periodosReportabilidad from '@/routes/reportabilidad/periodos';
-import roles from '@/routes/roles';
-import importacionesSgf from '@/routes/sgf/importaciones';
-import usuarios from '@/routes/usuarios';
-import definicionesWorkflow from '@/routes/workflow/definiciones';
+import { index as procesosAdquisicion } from '@/routes/adquisiciones/procesos';
+import { index as auditoria } from '@/routes/auditoria';
+import { index as indicadoresEconomicos } from '@/routes/indicadores-economicos';
+import { index as definicionesInformeRazonado } from '@/routes/informes-razonados/definiciones';
+import { index as ejecucionesInformeRazonado } from '@/routes/informes-razonados/ejecuciones';
+import { index as conectores } from '@/routes/integraciones/conectores';
+import { index as sistemasExternos } from '@/routes/integraciones/sistemas-externos';
+import { index as ccostos } from '@/routes/maestros/ccostos';
+import { index as cfinancieros } from '@/routes/maestros/cfinancieros';
+import { index as clientesMedidores } from '@/routes/maestros/clientes-medidores';
+import { index as items } from '@/routes/maestros/items';
+import { index as proveedores } from '@/routes/maestros/proveedores';
+import { index as casos } from '@/routes/pago-proveedores/casos';
+import { index as egresosCgu } from '@/routes/pago-proveedores/egresos-cgu';
+import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
+import { index as roles } from '@/routes/roles';
+import { index as importacionesSgf } from '@/routes/sgf/importaciones';
+import { index as usuarios } from '@/routes/usuarios';
+import { index as definicionesWorkflow } from '@/routes/workflow/definiciones';
 import type { NavItem } from '@/types';
+
+type NavItemConPermiso = NavItem & { permiso?: string };
+
+function filtrarPorPermiso(
+    items: NavItemConPermiso[],
+    permisos: string[],
+): NavItem[] {
+    return items.filter(
+        (item) => !item.permiso || permisos.includes(item.permiso),
+    );
+}
 
 const generalNavItems: NavItem[] = [
     {
@@ -59,53 +72,64 @@ const generalNavItems: NavItem[] = [
     },
 ];
 
-const administracionNavItems: NavItem[] = [
+const administracionNavItems: NavItemConPermiso[] = [
     {
         title: 'Usuarios',
-        href: usuarios.index(),
+        href: usuarios(),
         icon: Users,
+        permiso: 'usuarios.ver',
     },
     {
         title: 'Auditoría',
-        href: auditoria.index(),
+        href: auditoria(),
         icon: ShieldCheck,
+        permiso: 'auditoria.ver',
     },
     {
         title: 'Definiciones de Workflow',
-        href: definicionesWorkflow.index(),
+        href: definicionesWorkflow(),
         icon: Workflow,
     },
     {
         title: 'Roles y Permisos',
-        href: roles.index(),
+        href: roles(),
         icon: KeyRound,
+        permiso: 'roles.administrar',
     },
     {
         title: 'Proveedores',
-        href: proveedores.index(),
+        href: proveedores(),
         icon: Building2,
+        permiso: 'core_institucional.administrar',
     },
     {
         title: 'Clientes Medidores',
-        href: clientesMedidores.index(),
+        href: clientesMedidores(),
         icon: Gauge,
+        permiso: 'core_institucional.administrar',
+    },
+    {
+        title: 'Ítems Presupuestarios',
+        href: items(),
+        icon: Tags,
+        permiso: 'core_institucional.administrar',
     },
 ];
 
 const pagoProveedoresNavItems: NavItem[] = [
     {
         title: 'Casos',
-        href: casos.index(),
+        href: casos(),
         icon: Wallet,
     },
     {
         title: 'Egresos CGU',
-        href: egresosCgu.index(),
+        href: egresosCgu(),
         icon: Receipt,
     },
     {
         title: 'Importaciones SGF',
-        href: importacionesSgf.index(),
+        href: importacionesSgf(),
         icon: History,
     },
 ];
@@ -113,64 +137,75 @@ const pagoProveedoresNavItems: NavItem[] = [
 const adquisicionesNavItems: NavItem[] = [
     {
         title: 'Procesos',
-        href: procesosAdquisicion.index(),
+        href: procesosAdquisicion(),
         icon: ShoppingCart,
     },
 ];
 
-const estructuraInstitucionalNavItems: NavItem[] = [
+const estructuraInstitucionalNavItems: NavItemConPermiso[] = [
     {
         title: 'Centros Financieros',
-        href: cfinancieros.index(),
+        href: cfinancieros(),
         icon: Landmark,
+        permiso: 'core_institucional.administrar',
     },
     {
         title: 'Centros de Costos',
-        href: ccostos.index(),
+        href: ccostos(),
         icon: Coins,
+        permiso: 'core_institucional.administrar',
     },
 ];
 
-const reportabilidadNavItems: NavItem[] = [
+const reportabilidadNavItems: NavItemConPermiso[] = [
     {
         title: 'Períodos de Reportabilidad',
-        href: periodosReportabilidad.index(),
+        href: periodosReportabilidad(),
         icon: BarChart3,
+        permiso: 'reportabilidad.ver',
     },
     {
         title: 'Definiciones de Informes',
-        href: definicionesInformeRazonado.index(),
+        href: definicionesInformeRazonado(),
         icon: FileBarChart,
+        permiso: 'informes.ver',
     },
     {
         title: 'Ejecuciones de Informes',
-        href: ejecucionesInformeRazonado.index(),
+        href: ejecucionesInformeRazonado(),
         icon: FileBarChart,
+        permiso: 'informes.ver',
     },
 ];
 
 const integracionesNavItems: NavItem[] = [
     {
         title: 'Sistemas Externos',
-        href: sistemasExternos.index(),
+        href: sistemasExternos(),
         icon: Plug,
     },
     {
         title: 'Conectores Playwright',
-        href: conectores.index(),
+        href: conectores(),
         icon: PlugZap,
     },
     {
         title: 'Indicadores Económicos',
-        href: indicadoresEconomicos.index(),
+        href: indicadoresEconomicos(),
         icon: TrendingUp,
     },
 ];
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const puedeAdministrarEstructura = auth.permissions.includes(
-        'core_institucional.administrar',
+
+    const administracionItems = filtrarPorPermiso(
+        [...administracionNavItems, ...estructuraInstitucionalNavItems],
+        auth.permissions,
+    );
+    const reportabilidadItems = filtrarPorPermiso(
+        reportabilidadNavItems,
+        auth.permissions,
     );
 
     return (
@@ -189,26 +224,23 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={generalNavItems} />
-                <NavGroup
-                    label="Administración"
-                    items={
-                        puedeAdministrarEstructura
-                            ? [
-                                  ...administracionNavItems,
-                                  ...estructuraInstitucionalNavItems,
-                              ]
-                            : administracionNavItems
-                    }
-                />
+                {administracionItems.length > 0 && (
+                    <NavGroup
+                        label="Administración"
+                        items={administracionItems}
+                    />
+                )}
                 <NavGroup
                     label="Pago de Proveedores"
                     items={pagoProveedoresNavItems}
                 />
                 <NavGroup label="Adquisiciones" items={adquisicionesNavItems} />
-                <NavGroup
-                    label="Reportabilidad"
-                    items={reportabilidadNavItems}
-                />
+                {reportabilidadItems.length > 0 && (
+                    <NavGroup
+                        label="Reportabilidad"
+                        items={reportabilidadItems}
+                    />
+                )}
                 <NavGroup label="Integraciones" items={integracionesNavItems} />
             </SidebarContent>
         </Sidebar>

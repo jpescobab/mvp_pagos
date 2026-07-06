@@ -34,4 +34,12 @@ class Cfinanciero extends Model
     {
         return $this->hasMany(Ccosto::class);
     }
+
+    /**
+     * @return HasMany<Funcionario, $this>
+     */
+    public function funcionarios(): HasMany
+    {
+        return $this->hasMany(Funcionario::class);
+    }
 }

@@ -10,6 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Monto } from '@/components/ui/monto';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
 import type { EjecucionInformeRazonado } from '@/types/informes-razonados';
 import type { TransicionWorkflow } from '@/types/pago-proveedores';
@@ -25,9 +26,7 @@ export default function EjecucionInformeRazonadoShow() {
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
-    const [errorTransicion, setErrorTransicion] = useState<string | null>(
-        null,
-    );
+    const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -44,8 +43,7 @@ export default function EjecucionInformeRazonadoShow() {
                 },
                 onError: (errors) =>
                     setErrorTransicion(
-                        (errors as Record<string, string>).transicion ??
-                            null,
+                        (errors as Record<string, string>).transicion ?? null,
                     ),
                 onFinish: () => setProcesando(false),
             },
@@ -129,7 +127,11 @@ export default function EjecucionInformeRazonadoShow() {
                                     >
                                         <span>{metrica.etiqueta}</span>
                                         <span className="text-muted-foreground">
-                                            {metrica.valor} {metrica.unidad}
+                                            <Monto
+                                                valor={metrica.valor}
+                                                variante="numero"
+                                            />{' '}
+                                            {metrica.unidad}
                                         </span>
                                     </li>
                                 ))}
@@ -163,10 +165,7 @@ export default function EjecucionInformeRazonadoShow() {
                         ) : (
                             <ul className="divide-y text-sm">
                                 {ejecucion.narrativas?.map((narrativa) => (
-                                    <li
-                                        key={narrativa.id}
-                                        className="py-2"
-                                    >
+                                    <li key={narrativa.id} className="py-2">
                                         {narrativa.contenido}
                                     </li>
                                 ))}
@@ -175,9 +174,7 @@ export default function EjecucionInformeRazonadoShow() {
                     </section>
 
                     <section className="space-y-2 rounded-xl border p-4">
-                        <h2 className="text-base font-medium">
-                            Excepciones
-                        </h2>
+                        <h2 className="text-base font-medium">Excepciones</h2>
                         {(ejecucion.excepciones ?? []).length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 Sin excepciones todavía.
@@ -185,10 +182,7 @@ export default function EjecucionInformeRazonadoShow() {
                         ) : (
                             <ul className="divide-y text-sm">
                                 {ejecucion.excepciones?.map((excepcion) => (
-                                    <li
-                                        key={excepcion.id}
-                                        className="py-2"
-                                    >
+                                    <li key={excepcion.id} className="py-2">
                                         <span className="font-mono">
                                             {excepcion.severidad}
                                         </span>{' '}
@@ -223,9 +217,7 @@ export default function EjecucionInformeRazonadoShow() {
                     </section>
 
                     <section className="space-y-2 rounded-xl border p-4">
-                        <h2 className="text-base font-medium">
-                            Aprobaciones
-                        </h2>
+                        <h2 className="text-base font-medium">Aprobaciones</h2>
                         {(ejecucion.aprobaciones ?? []).length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 Sin aprobaciones todavía.

@@ -39,8 +39,8 @@ export type CatalogosProveedor = {
 export type ClienteMedidor = {
     id: number;
     numero_cliente: string;
-    proveedor: { nombre: string; rutproveedor: string } | null;
-    ccosto: { codigo: string; nombre: string };
+    proveedor: { id: number; nombre: string; rutproveedor: string } | null;
+    ccosto: { id: number; codigo: string; nombre: string };
     tipo_suministro: string;
     direccion_suministro: string | null;
     activo: boolean;
@@ -61,4 +61,42 @@ export type Ccosto = {
     cod_edificio: string | null;
     activo: boolean;
     cfinanciero: { id: number; nombre: string };
+};
+
+export type Asignacion = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    descripcion: string | null;
+    activo: boolean;
+};
+
+export type Catalogo = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    descripcion: string | null;
+    activo: boolean;
+};
+
+export type ItemPresupuestario = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    descripcion: string | null;
+    activo: boolean;
+    asignaciones?: Asignacion[];
+    catalogos?: Catalogo[];
+};
+
+export type JurisdiccionSeleccionable = {
+    id: number;
+    codigo: string;
+    nombre: string;
+};
+
+export type CfinancieroSeleccionable = {
+    id: number;
+    codigo: string;
+    nombre: string;
 };

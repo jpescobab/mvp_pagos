@@ -11,6 +11,7 @@ use App\Models\DefinicionInformeRazonado;
 use App\Models\EjecucionInformeRazonado;
 use App\Services\InformesRazonados\InformeRazonadoService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,6 +21,8 @@ class EjecucionInformeRazonadoController extends Controller
 
     public function index(): Response
     {
+        Gate::authorize('viewAny', EjecucionInformeRazonado::class);
+
         $ejecuciones = EjecucionInformeRazonado::with(['definicionInformeRazonado', 'corteReportabilidad.periodoReportabilidad', 'proceso.estadoActual'])
             ->orderByDesc('generado_en')
             ->get();

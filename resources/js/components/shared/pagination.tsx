@@ -6,6 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatNumero } from '@/lib/format';
 import type { Paginated } from '@/types/pago-proveedores';
 
 const TAMANOS_PAGINA = [15, 25, 50, 100];
@@ -26,8 +27,9 @@ export function Pagination({
     return (
         <div className="flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground sm:flex-row">
             <span>
-                Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0} de{' '}
-                {pagina.meta.total}
+                Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                {formatNumero(pagina.meta.total)}
             </span>
 
             <div className="flex items-center gap-4">

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Monto } from '@/components/ui/monto';
 import {
     Select,
     SelectContent,
@@ -40,9 +41,7 @@ export default function CasoShow() {
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
-    const [errorTransicion, setErrorTransicion] = useState<string | null>(
-        null,
-    );
+    const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -59,19 +58,20 @@ export default function CasoShow() {
                 },
                 onError: (errors) =>
                     setErrorTransicion(
-                        (errors as Record<string, string>).transicion ??
-                            null,
+                        (errors as Record<string, string>).transicion ?? null,
                     ),
                 onFinish: () => setProcesando(false),
             },
         );
     }
 
-    const historial = [...(caso.proceso.historial_transiciones ?? [])].reverse();
+    const historial = [
+        ...(caso.proceso.historial_transiciones ?? []),
+    ].reverse();
 
-    const [snapshotsExpandidos, setSnapshotsExpandidos] = useState<
-        Set<number>
-    >(new Set());
+    const [snapshotsExpandidos, setSnapshotsExpandidos] = useState<Set<number>>(
+        new Set(),
+    );
 
     function alternarSnapshotExpandido(id: number) {
         setSnapshotsExpandidos((actual) => {
@@ -105,7 +105,10 @@ export default function CasoShow() {
 
             fetch(
                 `${casos.buscarAdquisiciones.url(caso.id)}?q=${encodeURIComponent(terminoBusqueda)}`,
-                { signal: controller.signal, headers: { Accept: 'application/json' } },
+                {
+                    signal: controller.signal,
+                    headers: { Accept: 'application/json' },
+                },
             )
                 .then((response) => response.json())
                 .then((json: ProcesoAdquisicionResumen[]) =>
@@ -163,21 +166,25 @@ export default function CasoShow() {
         formData.append('archivo', archivo);
         formData.append('tipo_documento_id', tipoDocumentoId);
 
-        router.post(documentos.store({ proceso: caso.proceso.id }).url, formData, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setArchivo(null);
-                setTipoDocumentoId('');
+        router.post(
+            documentos.store({ proceso: caso.proceso.id }).url,
+            formData,
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setArchivo(null);
+                    setTipoDocumentoId('');
+                },
+                onError: (errors) =>
+                    setErrorDocumento(
+                        (errors as Record<string, string>).archivo ??
+                            (errors as Record<string, string>)
+                                .tipo_documento_id ??
+                            null,
+                    ),
+                onFinish: () => setSubiendoDocumento(false),
             },
-            onError: (errors) =>
-                setErrorDocumento(
-                    (errors as Record<string, string>).archivo ??
-                        (errors as Record<string, string>)
-                            .tipo_documento_id ??
-                        null,
-                ),
-            onFinish: () => setSubiendoDocumento(false),
-        });
+        );
     }
 
     function desvincularDocumento(vinculoId: number) {
@@ -188,12 +195,10 @@ export default function CasoShow() {
         );
     }
 
-    const [errorValidacion, setErrorValidacion] = useState<string | null>(
+    const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
+    const [documentoARechazar, setDocumentoARechazar] = useState<number | null>(
         null,
     );
-    const [documentoARechazar, setDocumentoARechazar] = useState<
-        number | null
-    >(null);
     const [observacionRechazo, setObservacionRechazo] = useState('');
 
     function validarDocumento(documentoId: number) {
@@ -407,7 +412,7 @@ export default function CasoShow() {
 
                 <div className="text-sm">
                     <span className="text-muted-foreground">Monto: </span>
-                    {caso.monto}
+                    <Monto valor={caso.monto} />
                 </div>
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -604,109 +609,113 @@ export default function CasoShow() {
                     ) : (
                         <ul className="divide-y text-sm">
                             {(caso.proceso.documentos ?? []).map((doc) => (
-                                <li key={doc.vinculo_id} className="space-y-2 py-2">
-                                <div className="flex items-center justify-between">
-                                    <span>
-                                        {doc.tipo_documento ??
-                                            'Documento sin tipo'}{' '}
-                                        <span className="text-muted-foreground">
-                                            ({doc.nombre_archivo}) ·{' '}
-                                            {doc.estado_vigente}
+                                <li
+                                    key={doc.vinculo_id}
+                                    className="space-y-2 py-2"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span>
+                                            {doc.tipo_documento ??
+                                                'Documento sin tipo'}{' '}
+                                            <span className="text-muted-foreground">
+                                                ({doc.nombre_archivo}) ·{' '}
+                                                {doc.estado_vigente}
+                                            </span>
                                         </span>
-                                    </span>
-                                    <div className="flex gap-2">
-                                        <a
-                                            href={
-                                                documentos.descargar({
-                                                    proceso: caso.proceso.id,
-                                                    documento:
-                                                        doc.documento_id,
-                                                }).url
-                                            }
-                                            className="text-sm underline"
-                                        >
-                                            Descargar
-                                        </a>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                validarDocumento(
-                                                    doc.documento_id,
-                                                )
-                                            }
-                                        >
-                                            Validar
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                setDocumentoARechazar(
-                                                    doc.documento_id,
-                                                )
-                                            }
-                                        >
-                                            Rechazar
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                desvincularDocumento(
-                                                    doc.vinculo_id,
-                                                )
-                                            }
-                                        >
-                                            Desvincular
-                                        </Button>
-                                        <input
-                                            type="file"
-                                            accept=".pdf,.jpg,.jpeg,.png"
-                                            className="w-32 text-xs"
-                                            title="Subir nueva versión"
-                                            onChange={(e) => {
-                                                const archivoVersion =
-                                                    e.target.files?.[0];
-
-                                                if (archivoVersion) {
-                                                    subirNuevaVersion(
-                                                        doc.documento_id,
-                                                        archivoVersion,
-                                                    );
+                                        <div className="flex gap-2">
+                                            <a
+                                                href={
+                                                    documentos.descargar({
+                                                        proceso:
+                                                            caso.proceso.id,
+                                                        documento:
+                                                            doc.documento_id,
+                                                    }).url
                                                 }
+                                                className="text-sm underline"
+                                            >
+                                                Descargar
+                                            </a>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    validarDocumento(
+                                                        doc.documento_id,
+                                                    )
+                                                }
+                                            >
+                                                Validar
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setDocumentoARechazar(
+                                                        doc.documento_id,
+                                                    )
+                                                }
+                                            >
+                                                Rechazar
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    desvincularDocumento(
+                                                        doc.vinculo_id,
+                                                    )
+                                                }
+                                            >
+                                                Desvincular
+                                            </Button>
+                                            <input
+                                                type="file"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                className="w-32 text-xs"
+                                                title="Subir nueva versión"
+                                                onChange={(e) => {
+                                                    const archivoVersion =
+                                                        e.target.files?.[0];
 
-                                                e.target.value = '';
-                                            }}
-                                        />
+                                                    if (archivoVersion) {
+                                                        subirNuevaVersion(
+                                                            doc.documento_id,
+                                                            archivoVersion,
+                                                        );
+                                                    }
+
+                                                    e.target.value = '';
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {doc.validaciones.length > 0 && (
-                                    <ul className="space-y-1 pl-4 text-xs text-muted-foreground">
-                                        {doc.validaciones.map(
-                                            (validacion, i) => (
-                                                <li key={i}>
-                                                    {validacion.estado} ·{' '}
-                                                    {validacion.validado_por ??
-                                                        'Sistema'}
-                                                    {validacion.validado_en &&
-                                                        ` · ${new Date(validacion.validado_en).toLocaleString()}`}
-                                                    {validacion.observacion && (
-                                                        <span className="italic">
-                                                            {' '}
-                                                            — “
-                                                            {
-                                                                validacion.observacion
-                                                            }
-                                                            ”
-                                                        </span>
-                                                    )}
-                                                </li>
-                                            ),
-                                        )}
-                                    </ul>
-                                )}
+                                    {doc.validaciones.length > 0 && (
+                                        <ul className="space-y-1 pl-4 text-xs text-muted-foreground">
+                                            {doc.validaciones.map(
+                                                (validacion, i) => (
+                                                    <li key={i}>
+                                                        {validacion.estado} ·{' '}
+                                                        {validacion.validado_por ??
+                                                            'Sistema'}
+                                                        {validacion.validado_en &&
+                                                            ` · ${new Date(validacion.validado_en).toLocaleString()}`}
+                                                        {validacion.observacion && (
+                                                            <span className="italic">
+                                                                {' '}
+                                                                — “
+                                                                {
+                                                                    validacion.observacion
+                                                                }
+                                                                ”
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -789,7 +798,8 @@ export default function CasoShow() {
                                                 {new Date(
                                                     registro.fecha_registro,
                                                 ).toLocaleDateString()}{' '}
-                                                · {registro.monto}
+                                                ·{' '}
+                                                <Monto valor={registro.monto} />
                                             </span>
                                         </div>
                                         <p className="text-muted-foreground">
@@ -847,9 +857,7 @@ export default function CasoShow() {
                                 id="observaciones-registro-cgu"
                                 value={observacionesRegistroCgu}
                                 onChange={(e) =>
-                                    setObservacionesRegistroCgu(
-                                        e.target.value,
-                                    )
+                                    setObservacionesRegistroCgu(e.target.value)
                                 }
                             />
                         </div>
@@ -895,7 +903,8 @@ export default function CasoShow() {
                                                 {new Date(
                                                     registro.fecha_pago,
                                                 ).toLocaleDateString()}{' '}
-                                                · {registro.monto}
+                                                ·{' '}
+                                                <Monto valor={registro.monto} />
                                             </span>
                                         </div>
                                         <p className="text-muted-foreground">
@@ -988,7 +997,7 @@ export default function CasoShow() {
                                             {new Date(
                                                 factura.fecha_emision,
                                             ).toLocaleDateString()}{' '}
-                                            · {factura.monto}
+                                            · <Monto valor={factura.monto} />
                                         </span>
                                     </div>
                                 </li>
@@ -1111,10 +1120,7 @@ export default function CasoShow() {
                                             </span>
                                             <div className="flex items-center gap-2">
                                                 <span className="font-mono text-xs text-muted-foreground">
-                                                    {snapshot.hash.slice(
-                                                        0,
-                                                        12,
-                                                    )}
+                                                    {snapshot.hash.slice(0, 12)}
                                                     …
                                                 </span>
                                                 <Button
@@ -1135,9 +1141,7 @@ export default function CasoShow() {
                                             </div>
                                         </div>
                                     </li>
-                                    {snapshotsExpandidos.has(
-                                        snapshot.id,
-                                    ) && (
+                                    {snapshotsExpandidos.has(snapshot.id) && (
                                         <li className="bg-muted/30 px-2 py-3">
                                             <pre className="overflow-x-auto text-xs">
                                                 {JSON.stringify(
@@ -1176,9 +1180,7 @@ export default function CasoShow() {
                                     className="flex items-center justify-between py-2"
                                 >
                                     <Link
-                                        href={
-                                            egresosCgu.show(egreso.id).url
-                                        }
+                                        href={egresosCgu.show(egreso.id).url}
                                         className="underline"
                                     >
                                         {egreso.numero_egreso}
@@ -1187,7 +1189,7 @@ export default function CasoShow() {
                                         {new Date(
                                             egreso.fecha,
                                         ).toLocaleDateString()}{' '}
-                                        · {egreso.monto}
+                                        · <Monto valor={egreso.monto} />
                                     </span>
                                 </li>
                             ))}
@@ -1257,9 +1259,7 @@ export default function CasoShow() {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="observacion-rechazo">
-                            Observación
-                        </Label>
+                        <Label htmlFor="observacion-rechazo">Observación</Label>
                         <textarea
                             id="observacion-rechazo"
                             className="min-h-24 rounded-md border bg-background p-2 text-sm"

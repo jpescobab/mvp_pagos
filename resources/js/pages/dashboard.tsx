@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Monto } from '@/components/ui/monto';
+import { formatNumero } from '@/lib/format';
 import {
     ETIQUETAS_INDICADOR,
     formatearValorIndicador,
@@ -38,20 +40,6 @@ type PageProps = {
     casosRecientes: CasoReciente[];
 };
 
-function formatearMonto(monto: string | null): string {
-    if (monto === null) {
-        return '—';
-    }
-
-    const valor = Number(monto);
-
-    if (Number.isNaN(valor)) {
-        return monto;
-    }
-
-    return `$ ${new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(valor)}`;
-}
-
 function KpiCard({
     titulo,
     valor,
@@ -71,8 +59,8 @@ function KpiCard({
                     <Icono className="size-3.5" />
                 </span>
             </div>
-            <div className="text-2xl font-bold tracking-tight tabular-nums">
-                {new Intl.NumberFormat('es-CL').format(valor)}
+            <div className="font-mono text-2xl font-bold tracking-tight tabular-nums">
+                {formatNumero(valor)}
             </div>
             <div className="text-[11px] text-muted-foreground">{pie}</div>
         </article>
@@ -96,16 +84,17 @@ export default function Dashboard({
                     <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
                         {indicadores.map((indicador) => (
                             <div
-                                key={indicador.tipo}
+                                key={indicador.codigo}
                                 className="flex items-center gap-2.5 rounded-2xl border bg-card px-3.5 py-2.5 shadow-sm"
                             >
                                 <TrendingUp className="size-4 shrink-0 text-primary" />
                                 <div className="min-w-0">
                                     <div className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                                        {ETIQUETAS_INDICADOR[indicador.tipo] ??
-                                            indicador.tipo}
+                                        {ETIQUETAS_INDICADOR[
+                                            indicador.codigo
+                                        ] ?? indicador.codigo}
                                     </div>
-                                    <div className="truncate font-mono text-sm font-semibold">
+                                    <div className="truncate font-mono text-sm tabular-nums">
                                         {formatearValorIndicador(indicador)}
                                     </div>
                                 </div>
@@ -189,7 +178,7 @@ export default function Dashboard({
                                             {caso.proveedor ?? '—'}
                                         </td>
                                         <td className="px-2.5 py-3 text-right font-semibold tabular-nums">
-                                            {formatearMonto(caso.monto)}
+                                            <Monto valor={caso.monto} />
                                         </td>
                                         <td className="px-2.5 py-3">
                                             {caso.estado !== null ? (

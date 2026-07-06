@@ -139,3 +139,11 @@ El sistema SHALL permitir, gobernado por el permiso `usuarios.asignar_roles`, ca
 - **WHEN** un usuario sin el permiso `usuarios.asignar_roles` intenta cambiar los roles de un usuario existente
 - **THEN** el sistema bloquea la operación
 - **AND** registra el evento de autorización denegada en `security_audit_logs`
+
+### Requirement: Permiso dedicado para disparar la importación manual de indicadores económicos
+El sistema SHALL definir el permiso `indicadores.importar`, distinto de la visibilidad de la página de indicadores económicos (que sigue abierta a cualquier usuario autenticado), para gobernar quién puede disparar manualmente la importación mensual de indicadores económicos.
+
+#### Scenario: Asignación inicial del permiso
+- **WHEN** se ejecuta `RolesAndPermissionsSeeder`
+- **THEN** el permiso `indicadores.importar` existe
+- **AND** los roles `superadmin` y `admin` lo tienen asignado

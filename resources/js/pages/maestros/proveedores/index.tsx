@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useInitials } from '@/hooks/use-initials';
+import { formatNumero } from '@/lib/format';
 import proveedores from '@/routes/maestros/proveedores';
 import type { Proveedor } from '@/types/maestros';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -157,8 +158,9 @@ export default function ProveedoresIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

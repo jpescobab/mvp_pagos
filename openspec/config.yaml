@@ -58,3 +58,35 @@ context: |
   archivados; funcionalidad nueva (core o de módulos) se propone ad-hoc vía
   /opsx:propose, sin numeración fija — su fuente de verdad es openspec/specs/, no una
   lista mantenida a mano.
+
+  Rendimiento — lecciones de una auditoría previa (ver openspec/changes/archive/2026-07-04-*
+  para el detalle completo), a tener en cuenta en toda propuesta nueva:
+  - Cualquier prop compartida en cada request (HandleInertiaRequests::share(), o
+    equivalente) que dependa de datos que cambian con poca frecuencia SHALL cachearse
+    con TTL corto + invalidación en el punto de escritura, no recalcularse en cada
+    request. Si el mismo dato también lo pide un controlador específico (ej. el
+    dashboard), ambos SHALL resolverlo contra el mismo servicio cacheado en vez de
+    duplicar la consulta cada uno por su lado (ver IndicadorEconomicoSelector::
+    ultimosPorTipo como referencia).
+  - El código generado por Wayfinder (resources/js/routes/**, resources/js/actions/**)
+    NO es tree-shakeable a nivel de archivo: cada método del controlador se ata al
+    export por defecto mediante asignaciones a nivel de módulo. Si CUALQUIER
+    consumidor en la app importa el export por defecto de un archivo de rutas/acciones,
+    Rollup conserva el archivo completo para todos los demás consumidores también.
+    Preferir siempre import con nombre (`import { index as x } from '@/routes/...'`)
+    por consistencia con el resto del código, pero no esperar que por sí solo reduzca
+    el tamaño del bundle mientras exista al menos un consumidor que use el export por
+    defecto del mismo archivo — verificar con `npm run build` antes de prometer una
+    reducción de tamaño.
+  - Antes de agregar un índice de base de datos por sospecha de N+1 o "falta de
+    índice", verificar el SQL real generado (`Model::query()->toSql()` o `EXPLAIN`) —
+    un `whereHas`/`whereNull` puede ya estar cubierto por un índice compuesto existente
+    en la correlación (ej. las relaciones polimórficas `sujeto_type`/`sujeto_id` de
+    `procesos`). No proponer migraciones de índices sin ese chequeo previo.
+  - `CACHE_STORE` y `SESSION_DRIVER` están en `database` (no hay redis/predis instalado
+    en este entorno). Cambiarlos es una decisión de infraestructura vía `.env` (no
+    versionado, no pasa por OpenSpec ni por git) — no proponerlo como un change de
+    código; si se evalúa, es una conversación aparte con quien opera el entorno.
+  - Antes de proponer un fix de performance, medir el estado actual (build de
+    producción, `toSql()`/query log, conteo de filas reales) y volver a medir después
+    del cambio — no asumir el efecto de una optimización sin verificarlo empíricamente.

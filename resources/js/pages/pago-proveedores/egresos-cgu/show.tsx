@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Monto } from '@/components/ui/monto';
 import {
     Select,
     SelectContent,
@@ -12,7 +13,10 @@ import {
 } from '@/components/ui/select';
 import documentos from '@/routes/egresos-cgu/documentos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
-import type { EgresoCgu, TipoDocumentoSeleccionable } from '@/types/pago-proveedores';
+import type {
+    EgresoCgu,
+    TipoDocumentoSeleccionable,
+} from '@/types/pago-proveedores';
 
 type PageProps = {
     egreso: EgresoCgu;
@@ -48,8 +52,7 @@ export default function EgresoCguShow() {
             onError: (errors) =>
                 setErrorDocumento(
                     (errors as Record<string, string>).archivo ??
-                        (errors as Record<string, string>)
-                            .tipo_documento_id ??
+                        (errors as Record<string, string>).tipo_documento_id ??
                         null,
                 ),
             onFinish: () => setSubiendoDocumento(false),
@@ -75,19 +78,17 @@ export default function EgresoCguShow() {
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         {new Date(egreso.fecha).toLocaleDateString()} · Monto
-                        total {egreso.monto_total}
+                        total <Monto valor={egreso.monto_total} />
                     </p>
                     {egreso.observaciones && (
-                        <p className="mt-2 text-sm italic text-muted-foreground">
+                        <p className="mt-2 text-sm text-muted-foreground italic">
                             “{egreso.observaciones}”
                         </p>
                     )}
                 </div>
 
                 <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">
-                        Casos cubiertos
-                    </h2>
+                    <h2 className="text-base font-medium">Casos cubiertos</h2>
 
                     {egreso.items.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
@@ -103,7 +104,7 @@ export default function EgresoCguShow() {
                                     <span className="font-mono">
                                         {item.caso.sgf_id}
                                     </span>
-                                    <span>{item.monto}</span>
+                                    <Monto valor={item.monto} />
                                 </li>
                             ))}
                         </ul>
@@ -145,8 +146,7 @@ export default function EgresoCguShow() {
                                             href={
                                                 documentos.descargar({
                                                     egresoCgu: egreso.id,
-                                                    documento:
-                                                        doc.documento_id,
+                                                    documento: doc.documento_id,
                                                 }).url
                                             }
                                             className="text-sm underline"

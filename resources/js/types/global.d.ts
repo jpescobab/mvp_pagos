@@ -1,3 +1,4 @@
+import type { Appearance } from '@/hooks/use-appearance';
 import type { Indicador } from '@/lib/indicadores';
 import type { Auth } from '@/types/auth';
 
@@ -14,6 +15,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            appearance: Appearance;
             indicadoresTopbar: Indicador[];
             [key: string]: unknown;
         };

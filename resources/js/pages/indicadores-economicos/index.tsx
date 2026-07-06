@@ -1,4 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
     Select,
     SelectContent,
@@ -6,25 +8,39 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatNumero } from '@/lib/format';
+import { formatearValorIndicador } from '@/lib/indicadores';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import type { IndicadorEconomico } from '@/types/indicadores';
 import type { Paginated } from '@/types/pago-proveedores';
 
 type PageProps = {
     indicadores: Paginated<IndicadorEconomico>;
-    tipo: string | null;
+    codigo: string | null;
 };
 
-const TIPOS = ['UF', 'USD', 'UTM', 'UTA', 'IPC'];
+const CODIGOS = ['UF', 'USD', 'UTM', 'UTA', 'IPC'];
 
 export default function IndicadoresEconomicosIndex() {
-    const { indicadores: pagina, tipo } = usePage<PageProps>().props;
+    const { indicadores: pagina, codigo, auth } = usePage<PageProps>().props;
+    const [importando, setImportando] = useState(false);
+    const puedeImportar = auth.permissions.includes('indicadores.importar');
 
-    function filtrarPorTipo(valor: string) {
+    function filtrarPorCodigo(valor: string) {
         router.get(
             indicadoresEconomicos.index().url,
-            valor === 'todos' ? {} : { tipo: valor },
+            valor === 'todos' ? {} : { codigo: valor },
             { preserveState: true, preserveScroll: true },
+        );
+    }
+
+    function importarAhora() {
+        setImportando(true);
+
+        router.post(
+            indicadoresEconomicos.importarMensual().url,
+            {},
+            { preserveScroll: true, onFinish: () => setImportando(false) },
         );
     }
 
@@ -37,22 +53,34 @@ export default function IndicadoresEconomicosIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Indicadores Económicos
                     </h1>
-                    <Select
-                        value={tipo ?? 'todos'}
-                        onValueChange={filtrarPorTipo}
-                    >
-                        <SelectTrigger className="w-40">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="todos">Todos</SelectItem>
-                            {TIPOS.map((t) => (
-                                <SelectItem key={t} value={t}>
-                                    {t}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                        {puedeImportar && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={importando}
+                                onClick={importarAhora}
+                            >
+                                {importando ? 'Importando…' : 'Importar ahora'}
+                            </Button>
+                        )}
+                        <Select
+                            value={codigo ?? 'todos'}
+                            onValueChange={filtrarPorCodigo}
+                        >
+                            <SelectTrigger className="w-40">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="todos">Todos</SelectItem>
+                                {CODIGOS.map((c) => (
+                                    <SelectItem key={c} value={c}>
+                                        {c}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="overflow-hidden rounded-xl border">
@@ -60,14 +88,12 @@ export default function IndicadoresEconomicosIndex() {
                         <thead className="bg-muted/50 text-left text-muted-foreground">
                             <tr>
                                 <th className="px-4 py-2 font-medium">
-                                    Tipo
+                                    Código
                                 </th>
                                 <th className="px-4 py-2 font-medium">
                                     Fecha / Periodo
                                 </th>
-                                <th className="px-4 py-2 font-medium">
-                                    Valor
-                                </th>
+                                <th className="px-4 py-2 font-medium">Valor</th>
                                 <th className="px-4 py-2 font-medium">
                                     Fuente
                                 </th>
@@ -87,7 +113,7 @@ export default function IndicadoresEconomicosIndex() {
                             {pagina.data.map((indicador) => (
                                 <tr key={indicador.id}>
                                     <td className="px-4 py-2 font-medium">
-                                        {indicador.tipo}
+                                        {indicador.codigo}
                                     </td>
                                     <td className="px-4 py-2 font-mono text-xs">
                                         {indicador.fecha_valor
@@ -96,8 +122,8 @@ export default function IndicadoresEconomicosIndex() {
                                               ).toLocaleDateString()
                                             : indicador.periodo}
                                     </td>
-                                    <td className="px-4 py-2">
-                                        {indicador.valor}
+                                    <td className="px-4 py-2 font-mono tabular-nums">
+                                        {formatearValorIndicador(indicador)}
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
                                         {indicador.fuente}
@@ -110,8 +136,9 @@ export default function IndicadoresEconomicosIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

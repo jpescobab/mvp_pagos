@@ -8,6 +8,7 @@ use App\Http\Resources\Reportabilidad\PeriodoReportabilidadResource;
 use App\Models\PeriodoReportabilidad;
 use App\Services\Reportabilidad\CorteReportabilidadService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,6 +18,8 @@ class PeriodoReportabilidadController extends Controller
 
     public function index(): Response
     {
+        Gate::authorize('viewAny', PeriodoReportabilidad::class);
+
         $periodos = PeriodoReportabilidad::withCount('cortesReportabilidad')
             ->with('cortesReportabilidad')
             ->orderByDesc('fecha_inicio')

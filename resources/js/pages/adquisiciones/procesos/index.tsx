@@ -1,6 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
+import { Monto } from '@/components/ui/monto';
+import { formatNumero } from '@/lib/format';
 import procesos from '@/routes/adquisiciones/procesos';
 import type { ProcesoAdquisicion } from '@/types/adquisiciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -42,9 +44,7 @@ export default function ProcesosIndex() {
                                 <th className="px-4 py-2 font-medium">
                                     Proveedor
                                 </th>
-                                <th className="px-4 py-2 font-medium">
-                                    Monto
-                                </th>
+                                <th className="px-4 py-2 font-medium">Monto</th>
                                 <th className="px-4 py-2 font-medium">
                                     Estado
                                 </th>
@@ -57,8 +57,7 @@ export default function ProcesosIndex() {
                                         colSpan={6}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        No hay procesos de adquisición
-                                        todavía.
+                                        No hay procesos de adquisición todavía.
                                     </td>
                                 </tr>
                             )}
@@ -85,7 +84,7 @@ export default function ProcesosIndex() {
                                         {proceso.proveedor.nombre ?? '—'}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {proceso.monto ?? '—'}
+                                        <Monto valor={proceso.monto} />
                                     </td>
                                     <td className="px-4 py-2">
                                         <EstadoBadge
@@ -102,8 +101,9 @@ export default function ProcesosIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

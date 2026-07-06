@@ -7,6 +7,7 @@ use App\Models\Institucion;
 use App\Models\Jurisdiccion;
 use App\Models\Proveedor;
 use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function crearCcostoParaClientesMedidores(): Ccosto
@@ -23,7 +24,9 @@ test('un usuario autenticado puede listar el catálogo de clientes medidores sin
     ClienteMedidor::create(['numero_cliente' => '111-1', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Eléctrico']);
     ClienteMedidor::create(['numero_cliente' => '222-2', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Agua']);
 
+    $this->seed(RolesAndPermissionsSeeder::class);
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('core_institucional.administrar');
 
     $response = $this->actingAs($usuario)->get(route('maestros.clientes-medidores.index'));
 
@@ -39,7 +42,9 @@ test('buscar por número de cliente devuelve solo las coincidencias', function (
     ClienteMedidor::create(['numero_cliente' => '111-1', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Eléctrico']);
     ClienteMedidor::create(['numero_cliente' => '222-2', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Agua']);
 
+    $this->seed(RolesAndPermissionsSeeder::class);
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('core_institucional.administrar');
 
     $response = $this->actingAs($usuario)->get(route('maestros.clientes-medidores.index', ['q' => '222']));
 
@@ -57,7 +62,9 @@ test('buscar por nombre de proveedor devuelve solo las coincidencias', function 
     ClienteMedidor::create(['numero_cliente' => '111-1', 'ccosto_id' => $ccosto->id, 'proveedor_id' => $proveedor->id, 'tipo_suministro' => 'Agua']);
     ClienteMedidor::create(['numero_cliente' => '222-2', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Eléctrico']);
 
+    $this->seed(RolesAndPermissionsSeeder::class);
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('core_institucional.administrar');
 
     $response = $this->actingAs($usuario)->get(route('maestros.clientes-medidores.index', ['q' => 'Patagonia']));
 
@@ -75,7 +82,9 @@ test('buscar por código de centro de costo devuelve solo las coincidencias', fu
     ClienteMedidor::create(['numero_cliente' => '111-1', 'ccosto_id' => $ccosto->id, 'tipo_suministro' => 'Agua']);
     ClienteMedidor::create(['numero_cliente' => '222-2', 'ccosto_id' => $otroCcosto->id, 'tipo_suministro' => 'Eléctrico']);
 
+    $this->seed(RolesAndPermissionsSeeder::class);
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('core_institucional.administrar');
 
     $response = $this->actingAs($usuario)->get(route('maestros.clientes-medidores.index', ['q' => '020301']));
 
@@ -91,4 +100,12 @@ test('un usuario no autenticado es redirigido al login', function () {
     $response = $this->get(route('maestros.clientes-medidores.index'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('un usuario sin core_institucional.administrar no puede listar clientes medidores', function () {
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('maestros.clientes-medidores.index'));
+
+    $response->assertForbidden();
 });

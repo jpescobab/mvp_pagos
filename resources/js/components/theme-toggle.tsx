@@ -1,9 +1,12 @@
+import { usePage } from '@inertiajs/react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/hooks/use-appearance';
 
 export function ThemeToggle() {
-    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const { appearance: appearanceCompartida } = usePage().props;
+    const { resolvedAppearance, updateAppearance } =
+        useAppearance(appearanceCompartida);
     const esOscuro = resolvedAppearance === 'dark';
 
     return (

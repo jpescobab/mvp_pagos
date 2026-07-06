@@ -1,3 +1,4 @@
+import { usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import type { HTMLAttributes } from 'react';
@@ -9,7 +10,9 @@ export default function AppearanceToggleTab({
     className = '',
     ...props
 }: HTMLAttributes<HTMLDivElement>) {
-    const { appearance, updateAppearance } = useAppearance();
+    const { appearance: appearanceCompartida } = usePage().props;
+    const { appearance, updateAppearance } =
+        useAppearance(appearanceCompartida);
 
     const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
         { value: 'light', icon: Sun, label: 'Light' },

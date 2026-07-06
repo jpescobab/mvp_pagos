@@ -30,6 +30,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'documentos.gestionar',
             'documentos.validar',
             'auditoria.ver',
+            'reportabilidad.ver',
+            'informes.ver',
+            'indicadores.importar',
         ];
 
         foreach ($permissions as $permission) {
@@ -55,6 +58,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'documentos.gestionar',
             'documentos.validar',
             'auditoria.ver',
+            'reportabilidad.ver',
+            'informes.ver',
+            'indicadores.importar',
         ]);
     }
 }

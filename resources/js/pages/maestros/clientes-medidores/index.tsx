@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import { ClienteMedidorActionsMenu } from '@/components/maestros/cliente-medidor-actions-menu';
 import { ClienteMedidorStatusBadge } from '@/components/maestros/cliente-medidor-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useInitials } from '@/hooks/use-initials';
+import { formatNumero } from '@/lib/format';
 import clientesMedidores from '@/routes/maestros/clientes-medidores';
 import type { ClienteMedidor } from '@/types/maestros';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -45,12 +47,19 @@ export default function ClientesMedidoresIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Clientes Medidores
                     </h1>
-                    <Input
-                        placeholder="Buscar por N.º de cliente, proveedor o centro de costo…"
-                        value={termino}
-                        onChange={(e) => setTermino(e.target.value)}
-                        className="w-80"
-                    />
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Buscar por N.º de cliente, proveedor o centro de costo…"
+                            value={termino}
+                            onChange={(e) => setTermino(e.target.value)}
+                            className="w-80"
+                        />
+                        <Button asChild>
+                            <Link href={clientesMedidores.create().url}>
+                                Nuevo cliente medidor
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border">
@@ -146,7 +155,9 @@ export default function ClientesMedidoresIndex() {
                                         />
                                     </td>
                                     <td className="px-2.5 py-1 text-right">
-                                        <ClienteMedidorActionsMenu />
+                                        <ClienteMedidorActionsMenu
+                                            clienteMedidor={cliente}
+                                        />
                                     </td>
                                 </tr>
                             ))}
@@ -156,8 +167,9 @@ export default function ClientesMedidoresIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

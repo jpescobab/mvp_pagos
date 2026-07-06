@@ -7,6 +7,7 @@ use App\Http\Requests\InformesRazonados\CrearDefinicionInformeRazonadoRequest;
 use App\Http\Resources\InformesRazonados\DefinicionInformeRazonadoResource;
 use App\Models\DefinicionInformeRazonado;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,6 +15,8 @@ class DefinicionInformeRazonadoController extends Controller
 {
     public function index(): Response
     {
+        Gate::authorize('viewAny', DefinicionInformeRazonado::class);
+
         $definiciones = DefinicionInformeRazonado::withCount('ejecuciones')
             ->orderBy('codigo')
             ->get();

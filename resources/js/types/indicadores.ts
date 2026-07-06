@@ -1,6 +1,6 @@
 export type IndicadorEconomico = {
     id: number;
-    tipo: string;
+    codigo: string;
     fecha_valor: string | null;
     periodo: string | null;
     valor: string;

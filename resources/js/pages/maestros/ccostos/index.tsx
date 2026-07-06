@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import { CcostoActionsMenu } from '@/components/maestros/ccosto-actions-menu';
 import { CcostoStatusBadge } from '@/components/maestros/ccosto-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useInitials } from '@/hooks/use-initials';
+import { formatNumero } from '@/lib/format';
 import ccostos from '@/routes/maestros/ccostos';
 import type { Ccosto } from '@/types/maestros';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -45,12 +47,19 @@ export default function CcostosIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Centros de Costos
                     </h1>
-                    <Input
-                        placeholder="Buscar por código o nombre…"
-                        value={termino}
-                        onChange={(e) => setTermino(e.target.value)}
-                        className="w-72"
-                    />
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Buscar por código o nombre…"
+                            value={termino}
+                            onChange={(e) => setTermino(e.target.value)}
+                            className="w-72"
+                        />
+                        <Button asChild>
+                            <Link href={ccostos.create().url}>
+                                Nuevo centro de costo
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border">
@@ -123,7 +132,7 @@ export default function CcostosIndex() {
                                         />
                                     </td>
                                     <td className="px-2.5 py-1 text-right">
-                                        <CcostoActionsMenu />
+                                        <CcostoActionsMenu ccosto={ccosto} />
                                     </td>
                                 </tr>
                             ))}
@@ -133,8 +142,9 @@ export default function CcostosIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

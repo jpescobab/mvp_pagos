@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Maestros\AsignacionController;
+use App\Http\Controllers\Maestros\CatalogoController;
 use App\Http\Controllers\Maestros\CcostoController;
 use App\Http\Controllers\Maestros\CfinancieroController;
 use App\Http\Controllers\Maestros\ClienteMedidorController;
+use App\Http\Controllers\Maestros\ItemController;
 use App\Http\Controllers\Maestros\ProveedorController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +18,37 @@ Route::middleware(['auth'])->prefix('maestros')->name('maestros.')->group(functi
     Route::patch('proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
     Route::delete('proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
     Route::get('clientes-medidores', [ClienteMedidorController::class, 'index'])->name('clientes-medidores.index');
+    Route::get('clientes-medidores/crear', [ClienteMedidorController::class, 'create'])->name('clientes-medidores.create');
+    Route::post('clientes-medidores', [ClienteMedidorController::class, 'store'])->name('clientes-medidores.store');
+    Route::get('clientes-medidores/{clienteMedidor}', [ClienteMedidorController::class, 'show'])->name('clientes-medidores.show');
+    Route::get('clientes-medidores/{clienteMedidor}/editar', [ClienteMedidorController::class, 'edit'])->name('clientes-medidores.edit');
+    Route::patch('clientes-medidores/{clienteMedidor}', [ClienteMedidorController::class, 'update'])->name('clientes-medidores.update');
+    Route::delete('clientes-medidores/{clienteMedidor}', [ClienteMedidorController::class, 'destroy'])->name('clientes-medidores.destroy');
     Route::get('cfinancieros', [CfinancieroController::class, 'index'])->name('cfinancieros.index');
+    Route::get('cfinancieros/crear', [CfinancieroController::class, 'create'])->name('cfinancieros.create');
+    Route::post('cfinancieros', [CfinancieroController::class, 'store'])->name('cfinancieros.store');
+    Route::get('cfinancieros/{cfinanciero}', [CfinancieroController::class, 'show'])->name('cfinancieros.show');
+    Route::get('cfinancieros/{cfinanciero}/editar', [CfinancieroController::class, 'edit'])->name('cfinancieros.edit');
+    Route::patch('cfinancieros/{cfinanciero}', [CfinancieroController::class, 'update'])->name('cfinancieros.update');
+    Route::delete('cfinancieros/{cfinanciero}', [CfinancieroController::class, 'destroy'])->name('cfinancieros.destroy');
     Route::get('ccostos', [CcostoController::class, 'index'])->name('ccostos.index');
+    Route::get('ccostos/crear', [CcostoController::class, 'create'])->name('ccostos.create');
+    Route::post('ccostos', [CcostoController::class, 'store'])->name('ccostos.store');
+    Route::get('ccostos/{ccosto}', [CcostoController::class, 'show'])->name('ccostos.show');
+    Route::get('ccostos/{ccosto}/editar', [CcostoController::class, 'edit'])->name('ccostos.edit');
+    Route::patch('ccostos/{ccosto}', [CcostoController::class, 'update'])->name('ccostos.update');
+    Route::delete('ccostos/{ccosto}', [CcostoController::class, 'destroy'])->name('ccostos.destroy');
+    Route::get('items', [ItemController::class, 'index'])->name('items.index');
+    Route::get('items/crear', [ItemController::class, 'create'])->name('items.create');
+    Route::post('items', [ItemController::class, 'store'])->name('items.store');
+    Route::get('items/{item}', [ItemController::class, 'show'])->name('items.show');
+    Route::get('items/{item}/editar', [ItemController::class, 'edit'])->name('items.edit');
+    Route::patch('items/{item}', [ItemController::class, 'update'])->name('items.update');
+    Route::delete('items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
+    Route::post('items/{item}/asignaciones', [AsignacionController::class, 'store'])->name('items.asignaciones.store');
+    Route::patch('items/{item}/asignaciones/{asignacion}', [AsignacionController::class, 'update'])->name('items.asignaciones.update');
+    Route::delete('items/{item}/asignaciones/{asignacion}', [AsignacionController::class, 'destroy'])->name('items.asignaciones.destroy');
+    Route::post('items/{item}/catalogos', [CatalogoController::class, 'store'])->name('items.catalogos.store');
+    Route::patch('items/{item}/catalogos/{catalogo}', [CatalogoController::class, 'update'])->name('items.catalogos.update');
+    Route::delete('items/{item}/catalogos/{catalogo}', [CatalogoController::class, 'destroy'])->name('items.catalogos.destroy');
 });

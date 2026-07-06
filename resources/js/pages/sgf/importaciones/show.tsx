@@ -1,4 +1,5 @@
 import { Head, usePage } from '@inertiajs/react';
+import { formatNumero } from '@/lib/format';
 import importaciones from '@/routes/sgf/importaciones';
 import type { ImportacionSgf } from '@/types/sgf';
 
@@ -38,7 +39,8 @@ export default function ImportacionSgfShow() {
 
                 <section className="space-y-3 rounded-xl border p-4">
                     <h2 className="text-base font-medium">
-                        Snapshots producidos ({importacion.total_filas})
+                        Snapshots producidos (
+                        {formatNumero(importacion.total_filas)})
                     </h2>
 
                     {(importacion.snapshots ?? []).length === 0 ? (

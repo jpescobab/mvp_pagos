@@ -1,4 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Monto } from '@/components/ui/monto';
+import { formatNumero } from '@/lib/format';
 import importaciones from '@/routes/sgf/importaciones';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { ImportacionSgf } from '@/types/sgf';
@@ -70,8 +72,7 @@ export default function ImportacionesSgfIndex() {
                                         {importacion.fuente}
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
-                                        {importacion.iniciado_por ??
-                                            'Sistema'}
+                                        {importacion.iniciado_por ?? 'Sistema'}
                                     </td>
                                     <td className="px-4 py-2 font-mono text-xs">
                                         {new Date(
@@ -86,7 +87,10 @@ export default function ImportacionesSgfIndex() {
                                             : '—'}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {importacion.total_filas}
+                                        <Monto
+                                            valor={importacion.total_filas}
+                                            variante="numero"
+                                        />
                                     </td>
                                     <td className="px-4 py-2">
                                         {importacion.estado}
@@ -99,8 +103,9 @@ export default function ImportacionesSgfIndex() {
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
-                        Mostrando {pagina.meta.from ?? 0}–{pagina.meta.to ?? 0}{' '}
-                        de {pagina.meta.total}
+                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
+                        {formatNumero(pagina.meta.to ?? 0)}{' '}
+                        de {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link
