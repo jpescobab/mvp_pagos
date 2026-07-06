@@ -17,6 +17,7 @@ Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->gr
         Route::get('/', [OrdenCompraMercadoPublicoController::class, 'index'])->name('index');
         Route::post('buscar', [OrdenCompraMercadoPublicoController::class, 'buscar'])->name('buscar');
         Route::post('guardar', [OrdenCompraMercadoPublicoController::class, 'guardar'])->name('guardar');
+        Route::get('pdf', [OrdenCompraMercadoPublicoController::class, 'pdf'])->name('pdf');
         Route::get('{orden}', [OrdenCompraMercadoPublicoController::class, 'show'])->name('show');
         Route::post('{orden}/verificar', [OrdenCompraMercadoPublicoController::class, 'verificar'])->name('verificar');
         Route::post('{orden}/actualizar', [OrdenCompraMercadoPublicoController::class, 'actualizar'])->name('actualizar');

@@ -248,6 +248,7 @@ export default function OrdenCompraMercadoPublicoShow({
                                         'Sin estado'}
                                 </Badge>
                                 <AccionesEncabezadoFichaMercadoPublico
+                                    codigo={orden.codigo}
                                     payloadCrudo={orden.payload_crudo}
                                 />
                             </>

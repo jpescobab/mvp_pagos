@@ -9,11 +9,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { pdf as pdfOrdenCompraMp } from '@/routes/adquisiciones/ordenes_compra_mp';
+
+const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
+    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
+
+function urlDetalleOcMercadoPublico(codigo: string): string {
+    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
+}
 
 /**
  * Componente genérico de "ficha" para consultas a Mercado Público: no conoce
@@ -88,17 +91,23 @@ export function FichaConsultaMercadoPublico({
 /**
  * Acciones del encabezado de la ficha de una OC: "Ver JSON" muestra el
  * payload crudo del snapshot ya vinculado (sin volver a consultar Mercado
- * Público), mientras que "Ver PDF" y "Ver en Mercado Público" quedan
- * deshabilitadas porque hoy no existe una fuente de PDF ni un enlace externo
- * verificado hacia el detalle público de una OC individual.
+ * Público); "Ver PDF" y "Mercado Público" abren en una pestaña nueva el
+ * detalle oficial de la OC en mercadopublico.cl; "Ver PDF" descarga el PDF
+ * directamente a través de un endpoint propio que resuelve el enlace real
+ * de descarga desde esa misma página pública (no hay un campo de enlace en
+ * la API JSON de Mercado Público).
  */
 export function AccionesEncabezadoFichaMercadoPublico({
+    codigo,
     payloadCrudo,
 }: {
+    codigo: string;
     payloadCrudo: unknown;
 }) {
     const [jsonAbierto, setJsonAbierto] = useState(false);
     const tieneJson = payloadCrudo !== null && payloadCrudo !== undefined;
+    const urlDetalle = urlDetalleOcMercadoPublico(codigo);
+    const urlPdf = pdfOrdenCompraMp.url({ query: { codigo } });
 
     return (
         <div className="flex items-center gap-2">
@@ -121,29 +130,19 @@ export function AccionesEncabezadoFichaMercadoPublico({
                 </DialogContent>
             </Dialog>
 
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span>
-                        <Button variant="outline" size="sm" disabled>
-                            <FileText className="size-4" />
-                            Ver PDF
-                        </Button>
-                    </span>
-                </TooltipTrigger>
-                <TooltipContent>Disponible próximamente</TooltipContent>
-            </Tooltip>
+            <Button variant="outline" size="sm" asChild>
+                <a href={urlPdf} target="_blank" rel="noopener noreferrer">
+                    <FileText className="size-4" />
+                    Ver PDF
+                </a>
+            </Button>
 
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span>
-                        <Button variant="outline" size="sm" disabled>
-                            <ExternalLink className="size-4" />
-                            Mercado Público
-                        </Button>
-                    </span>
-                </TooltipTrigger>
-                <TooltipContent>Disponible próximamente</TooltipContent>
-            </Tooltip>
+            <Button variant="outline" size="sm" asChild>
+                <a href={urlDetalle} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="size-4" />
+                    Mercado Público
+                </a>
+            </Button>
         </div>
     );
 }

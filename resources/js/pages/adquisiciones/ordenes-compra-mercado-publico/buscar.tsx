@@ -422,6 +422,7 @@ export default function BuscarOrdenCompraMercadoPublico({
                                             Verificar contra Mercado Público
                                         </Button>
                                         <AccionesEncabezadoFichaMercadoPublico
+                                            codigo={ordenLocal.codigo}
                                             payloadCrudo={
                                                 ordenLocal.payload_crudo
                                             }
@@ -543,6 +544,10 @@ export default function BuscarOrdenCompraMercadoPublico({
                                             .estado ?? 'Sin estado'}
                                     </Badge>
                                     <AccionesEncabezadoFichaMercadoPublico
+                                        codigo={
+                                            vistaPrevia.payload_normalizado
+                                                .codigo
+                                        }
                                         payloadCrudo={vistaPrevia.payload_crudo}
                                     />
                                 </>

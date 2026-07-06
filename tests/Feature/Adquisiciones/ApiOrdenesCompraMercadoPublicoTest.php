@@ -201,3 +201,34 @@ test('guardar una OC nueva sin proveedor existente lo crea automáticamente en l
     expect($orden->proveedor)->not->toBeNull();
     expect($orden->proveedor->rutproveedor)->toBe('76123456-7');
 });
+
+test('ver PDF redirige directamente al PDF resuelto desde Mercado Público', function () {
+    $htmlConBotonPdf = '<html><body><input type="image" id="imgPDF" onclick="open(&#39;PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==&#39;,&#39;MercadoPublico&#39;, &#39;width=750&#39;);" /></body></html>';
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response($htmlConBotonPdf, 200),
+    ]);
+    $usuario = usuarioConPermisoOrdenCompraMpHttp();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => '2182-99-AG26']));
+
+    $response->assertRedirect('https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==');
+});
+
+test('ver PDF informa un error cuando Mercado Público no expone el botón de descarga', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response('<html><body>Sin PDF</body></html>', 200),
+    ]);
+    $usuario = usuarioConPermisoOrdenCompraMpHttp();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => 'OC-SIN-PDF']));
+
+    $response->assertSessionHasErrors('pdf');
+});
+
+test('ver PDF sin el permiso requerido es rechazado', function () {
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => '2182-99-AG26']));
+
+    $response->assertForbidden();
+});

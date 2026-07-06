@@ -47,6 +47,19 @@ class OrdenCompraMercadoPublicoController extends Controller
         return $this->renderizarBusqueda($request->string('codigo')->trim()->toString());
     }
 
+    public function pdf(BuscarOrdenCompraMercadoPublicoRequest $request): RedirectResponse
+    {
+        Gate::authorize('viewAny', OrdenCompraMercadoPublico::class);
+
+        $urlPdf = $this->servicio->resolverUrlPdf($request->string('codigo')->trim()->toString());
+
+        if ($urlPdf === null) {
+            return back()->withErrors(['pdf' => 'No fue posible obtener el PDF de esta OC desde Mercado Público.']);
+        }
+
+        return redirect()->away($urlPdf);
+    }
+
     public function verificar(OrdenCompraMercadoPublico $orden): Response
     {
         Gate::authorize('view', $orden);

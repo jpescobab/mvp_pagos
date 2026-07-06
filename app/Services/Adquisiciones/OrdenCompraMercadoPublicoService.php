@@ -17,6 +17,8 @@ use Throwable;
 
 class OrdenCompraMercadoPublicoService
 {
+    private const URL_BASE_DETALLE_OC_MERCADO_PUBLICO = 'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/';
+
     public function __construct(private readonly IntegracionExternaService $integracionExterna) {}
 
     public function buscarLocal(string $codigo): ?OrdenCompraMercadoPublico
@@ -32,6 +34,76 @@ class OrdenCompraMercadoPublicoService
     public function consultarApi(string $codigo): array
     {
         return $this->consultarApiInterno($codigo, null);
+    }
+
+    /**
+     * Resuelve el enlace real de descarga del PDF de una OC, scrapeando la
+     * página pública de detalle de Mercado Público (no hay campo de enlace
+     * en la API JSON). El token del botón nativo de descarga es estable por
+     * OC, así que se arma una URL propia a partir de él en vez de redirigir
+     * a una URL tomada literalmente de la respuesta externa.
+     */
+    public function resolverUrlPdf(string $codigo): ?string
+    {
+        $sistema = SistemaExterno::where('codigo', 'MERCADO_PUBLICO')->firstOrFail();
+        $trabajo = $this->integracionExterna->iniciarTrabajo($sistema, 'resolver_pdf_orden_compra', 'scraping');
+
+        $endpoint = self::URL_BASE_DETALLE_OC_MERCADO_PUBLICO.'DetailsPurchaseOrder.aspx?codigoOC='.urlencode($codigo);
+        $inicio = microtime(true);
+
+        try {
+            $respuesta = Http::get($endpoint);
+        } catch (Throwable $e) {
+            $this->integracionExterna->registrarSolicitud(
+                sistema: $sistema,
+                metodoHttp: 'GET',
+                endpoint: $endpoint,
+                estado: 'error',
+                payloadEnviado: ['codigo' => $codigo],
+                error: $e->getMessage(),
+                duracionMs: (int) ((microtime(true) - $inicio) * 1000),
+                trabajo: $trabajo,
+            );
+
+            $this->integracionExterna->finalizarTrabajo($trabajo, 'error', $e->getMessage());
+
+            return null;
+        }
+
+        $duracionMs = (int) ((microtime(true) - $inicio) * 1000);
+        $urlPdf = $respuesta->successful() ? $this->extraerUrlPdf($respuesta->body()) : null;
+
+        $this->integracionExterna->registrarSolicitud(
+            sistema: $sistema,
+            metodoHttp: 'GET',
+            endpoint: $endpoint,
+            estado: $urlPdf !== null ? 'exitosa' : 'no_encontrada',
+            payloadEnviado: ['codigo' => $codigo],
+            codigoRespuestaHttp: $respuesta->status(),
+            error: $urlPdf === null ? 'No se encontró el enlace de descarga de PDF en la página de Mercado Público' : null,
+            duracionMs: $duracionMs,
+            trabajo: $trabajo,
+        );
+
+        $this->integracionExterna->finalizarTrabajo($trabajo, $urlPdf !== null ? 'completado' : 'error');
+
+        return $urlPdf;
+    }
+
+    /**
+     * El botón nativo de descarga (`#imgPDF`) arma su enlace con
+     * `onclick="open(&#39;PDFReport.aspx?qs=<token>&#39;,...)"`. Solo se
+     * acepta el patrón exacto con un token de caracteres base64, y la URL
+     * final se arma con la constante base propia — nunca se redirige a una
+     * URL construida a partir de contenido arbitrario de la respuesta.
+     */
+    private function extraerUrlPdf(string $html): ?string
+    {
+        if (! preg_match('/id="imgPDF"[^>]*onclick="open\(&#39;(PDFReport\.aspx\?qs=[A-Za-z0-9+\/=]+)&#39;/', $html, $coincidencia)) {
+            return null;
+        }
+
+        return self::URL_BASE_DETALLE_OC_MERCADO_PUBLICO.$coincidencia[1];
     }
 
     /**

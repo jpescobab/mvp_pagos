@@ -7,6 +7,7 @@ use App\Models\SnapshotDatosExterno;
 use App\Models\SolicitudApiExterna;
 use App\Services\Adquisiciones\OrdenCompraMercadoPublicoService;
 use Database\Seeders\IntegracionesSeeder;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -271,4 +272,39 @@ test('aplicarActualizacion sobrescribe los campos y reemplaza los ítems del reg
 
     expect($actualizada->estado_mercado_publico)->toBe('Aceptada');
     expect($actualizada->items)->toHaveCount(2);
+});
+
+test('resolverUrlPdf extrae el enlace real de descarga desde la página pública de Mercado Público', function () {
+    $htmlConBotonPdf = '<html><body><input type="image" name="imgPDF" id="imgPDF" src="../../Includes/images/ic_descargar_pdf.gif" onclick="open(&#39;PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==&#39;,&#39;MercadoPublico&#39;, &#39;width=750&#39;);window.event.returnValue=false;" /></body></html>';
+
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response($htmlConBotonPdf, 200),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('2182-99-AG26');
+
+    expect($url)->toBe('https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==');
+    expect(SolicitudApiExterna::first()->estado)->toBe('exitosa');
+});
+
+test('resolverUrlPdf retorna null y registra la solicitud como no encontrada si la página no trae el botón de PDF', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response('<html><body>OC no encontrada</body></html>', 200),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('OC-INEXISTENTE-MP');
+
+    expect($url)->toBeNull();
+    expect(SolicitudApiExterna::first()->estado)->toBe('no_encontrada');
+});
+
+test('resolverUrlPdf retorna null y registra la solicitud como error si la petición HTTP falla', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => fn () => throw new ConnectionException('timeout'),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('2182-99-AG26');
+
+    expect($url)->toBeNull();
+    expect(SolicitudApiExterna::first()->estado)->toBe('error');
 });
