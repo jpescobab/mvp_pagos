@@ -1,6 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
 import { formatNumero } from '@/lib/format';
+import casos from '@/routes/sgf/casos';
 import importaciones from '@/routes/sgf/importaciones';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { ImportacionSgf } from '@/types/sgf';
@@ -17,16 +19,26 @@ export default function ImportacionesSgfIndex() {
             <Head title="Importaciones SGF" />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">
-                    Importaciones SGF
-                </h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-xl font-semibold tracking-tight">
+                        Importaciones SGF
+                    </h1>
+                    <Button
+                        variant="outline"
+                        onClick={() =>
+                            router.post(casos.importarPendientes().url)
+                        }
+                    >
+                        Importar pendientes de SGF
+                    </Button>
+                </div>
 
                 <div className="overflow-hidden rounded-xl border">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50 text-left text-muted-foreground">
                             <tr>
                                 <th className="px-4 py-2 font-medium">
-                                    Fuente
+                                    Tipo
                                 </th>
                                 <th className="px-4 py-2 font-medium">
                                     Iniciado por
@@ -38,7 +50,7 @@ export default function ImportacionesSgfIndex() {
                                     Finalizado en
                                 </th>
                                 <th className="px-4 py-2 font-medium">
-                                    Total filas
+                                    Total elementos
                                 </th>
                                 <th className="px-4 py-2 font-medium">
                                     Estado
@@ -69,7 +81,7 @@ export default function ImportacionesSgfIndex() {
                                     }
                                 >
                                     <td className="px-4 py-2">
-                                        {importacion.fuente}
+                                        {importacion.tipo}
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
                                         {importacion.iniciado_por ?? 'Sistema'}
@@ -88,7 +100,7 @@ export default function ImportacionesSgfIndex() {
                                     </td>
                                     <td className="px-4 py-2">
                                         <Monto
-                                            valor={importacion.total_filas}
+                                            valor={importacion.total_elementos}
                                             variante="numero"
                                         />
                                     </td>

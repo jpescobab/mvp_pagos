@@ -77,11 +77,13 @@ class CasoPagoProveedor extends Model
     }
 
     /**
-     * @return HasMany<SnapshotSgf, $this>
+     * @return HasMany<SnapshotDatosExterno, $this>
      */
     public function snapshotsSgf(): HasMany
     {
-        return $this->hasMany(SnapshotSgf::class, 'sgf_id', 'sgf_id')->orderByDesc('id');
+        return $this->hasMany(SnapshotDatosExterno::class, 'referencia_externa', 'sgf_id')
+            ->whereIn('sistema_externo_id', SistemaExterno::query()->where('codigo', 'SGF')->select('id'))
+            ->orderByDesc('id');
     }
 
     /**

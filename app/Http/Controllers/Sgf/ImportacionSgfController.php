@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Sgf;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Sgf\ImportacionSgfResource;
-use App\Models\ImportacionSgf;
+use App\Models\SistemaExterno;
+use App\Models\TrabajoIntegracion;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,7 +13,10 @@ class ImportacionSgfController extends Controller
 {
     public function index(): Response
     {
-        $importaciones = ImportacionSgf::with('iniciadoPor')
+        $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+
+        $importaciones = TrabajoIntegracion::where('sistema_externo_id', $sistema->id)
+            ->with('iniciadoPor')
             ->latest('iniciado_en')
             ->paginate(20);
 
@@ -21,12 +25,12 @@ class ImportacionSgfController extends Controller
         ]);
     }
 
-    public function show(ImportacionSgf $importacionSgf): Response
+    public function show(TrabajoIntegracion $trabajoIntegracion): Response
     {
-        $importacionSgf->load(['iniciadoPor', 'snapshots']);
+        $trabajoIntegracion->load(['iniciadoPor', 'snapshotsDatosExternos']);
 
         return Inertia::render('sgf/importaciones/show', [
-            'importacion' => new ImportacionSgfResource($importacionSgf),
+            'importacion' => new ImportacionSgfResource($trabajoIntegracion),
         ]);
     }
 }

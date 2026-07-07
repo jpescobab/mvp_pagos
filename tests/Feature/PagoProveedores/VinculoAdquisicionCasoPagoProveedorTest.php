@@ -4,13 +4,13 @@ use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
 use App\Models\Ccosto;
 use App\Models\HistorialTransicionWorkflow;
-use App\Models\ImportacionSgf;
 use App\Models\Institucion;
 use App\Models\ModalidadAdquisicion;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\SecurityAuditLog;
-use App\Models\SnapshotSgf;
+use App\Models\SistemaExterno;
+use App\Models\SnapshotDatosExterno;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
@@ -42,7 +42,10 @@ function crearProcesoAdquisicionDePrueba(string $codigo = 'ADQ-V-001'): ProcesoA
 
 function crearCasoPagoProveedorDePrueba(string $sgfId = 'sgf-vinculo-1'): CasoPagoProveedor
 {
-    $importacion = ImportacionSgf::create(['fuente' => 'manual', 'iniciado_en' => now(), 'estado' => 'en_progreso']);
+    $sistema = SistemaExterno::firstOrCreate(
+        ['codigo' => 'SGF'],
+        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
+    );
 
     $normalizado = [
         'sgf_id' => $sgfId,
@@ -53,9 +56,10 @@ function crearCasoPagoProveedorDePrueba(string $sgfId = 'sgf-vinculo-1'): CasoPa
         'monto' => 500000.0,
     ];
 
-    $snapshot = SnapshotSgf::create([
-        'importacion_sgf_id' => $importacion->id,
-        'sgf_id' => $normalizado['sgf_id'],
+    $snapshot = SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $normalizado['sgf_id'],
         'payload_crudo' => $normalizado,
         'payload_normalizado' => $normalizado,
         'hash' => hash('sha256', json_encode($normalizado, JSON_THROW_ON_ERROR)),

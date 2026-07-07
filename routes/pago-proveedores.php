@@ -14,6 +14,7 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::get('casos', [CasoPagoProveedorController::class, 'index'])->name('casos.index');
     Route::get('casos/{caso}', [CasoPagoProveedorController::class, 'show'])->name('casos.show');
     Route::post('casos/{caso}/transiciones', [TransicionCasoPagoProveedorController::class, 'store'])->name('casos.transiciones.store');
+    Route::post('casos/{caso}/verificar-sgf', [CasoPagoProveedorController::class, 'verificarSgf'])->name('casos.verificar-sgf');
 
     Route::get('casos/{caso}/buscar-adquisiciones', BuscarProcesoAdquisicionController::class)->name('casos.buscar-adquisiciones');
     Route::post('casos/{caso}/vincular-adquisicion', [VinculoAdquisicionCasoPagoProveedorController::class, 'store'])->name('casos.vincular-adquisicion.store');

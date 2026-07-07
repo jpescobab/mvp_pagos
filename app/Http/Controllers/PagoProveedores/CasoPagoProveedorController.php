@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\PagoProveedores;
 
+use App\Exceptions\ConectorAutomatizacionNoAutorizadoException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PagoProveedores\CasoPagoProveedorResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\TipoDocumento;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
+use App\Services\Sgf\ConectorSgfPlaywrightService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -15,7 +18,10 @@ use Inertia\Response;
 
 class CasoPagoProveedorController extends Controller
 {
-    public function __construct(private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist) {}
+    public function __construct(
+        private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist,
+        private readonly ConectorSgfPlaywrightService $conectorSgf,
+    ) {}
 
     public function index(): Response
     {
@@ -33,6 +39,40 @@ class CasoPagoProveedorController extends Controller
     {
         Gate::authorize('view', $caso);
 
+        $this->cargarDetalle($caso, $request);
+
+        return Inertia::render('pago-proveedores/casos/show', [
+            'caso' => new CasoPagoProveedorResource($caso),
+            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
+        ]);
+    }
+
+    public function verificarSgf(CasoPagoProveedor $caso, Request $request): Response|RedirectResponse
+    {
+        Gate::authorize('verificarCasoSgf', CasoPagoProveedor::class);
+
+        try {
+            $resultado = $this->conectorSgf->verificarCaso($caso->sgf_id);
+        } catch (ConectorAutomatizacionNoAutorizadoException $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return back();
+        }
+
+        $this->cargarDetalle($caso, $request);
+
+        return Inertia::render('pago-proveedores/casos/show', [
+            'caso' => new CasoPagoProveedorResource($caso),
+            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
+            'verificacionSgf' => [
+                'encontrada' => $resultado['encontrada'],
+                'payload_crudo' => $resultado['snapshot']?->payload_crudo,
+            ],
+        ]);
+    }
+
+    private function cargarDetalle(CasoPagoProveedor $caso, Request $request): void
+    {
         $caso->load([
             'proveedor',
             'proceso.estadoActual',
@@ -44,7 +84,7 @@ class CasoPagoProveedorController extends Controller
             'procesoAdquisicion',
             'registrosContablesCgu.registradoPor',
             'registrosPagoBancario.registradoPor',
-            'snapshotsSgf.importacion.iniciadoPor',
+            'snapshotsSgf',
             'egresoCguItems.egreso',
             'facturas',
         ]);
@@ -60,11 +100,6 @@ class CasoPagoProveedorController extends Controller
             'vinculosDocumento.documento.tipoDocumento',
             'vinculosDocumento.documento.versiones',
             'vinculosDocumento.documento.validaciones.validadoPor',
-        ]);
-
-        return Inertia::render('pago-proveedores/casos/show', [
-            'caso' => new CasoPagoProveedorResource($caso),
-            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
         ]);
     }
 }

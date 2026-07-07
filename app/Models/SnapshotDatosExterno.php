@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
@@ -78,5 +79,13 @@ class SnapshotDatosExterno extends Model
     public function vinculable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return HasMany<SnapshotDatosExternoDocumento, $this>
+     */
+    public function documentos(): HasMany
+    {
+        return $this->hasMany(SnapshotDatosExternoDocumento::class);
     }
 }

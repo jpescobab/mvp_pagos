@@ -1,10 +1,4 @@
-# Spec: consulta-importaciones-sgf
-
-## Purpose
-
-Exponer, de solo lectura, el historial de corridas de importación SGF (`trabajos_integracion` del sistema externo `SGF`) y los snapshots que cada una produjo, para que sea consultable en vez de solo verificable directamente en la base de datos.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Listar las corridas de importación SGF
 El sistema SHALL exponer, a cualquier usuario autenticado, un listado paginado de los `trabajos_integracion` del sistema externo `SGF`, ordenado del más reciente al más antiguo, con su tipo (verificación puntual o importación masiva), mecanismo, quién lo inició, fecha de inicio y fin, total de elementos y estado.

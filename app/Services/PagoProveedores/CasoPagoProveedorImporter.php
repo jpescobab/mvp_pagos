@@ -6,16 +6,16 @@ use App\Models\CasoPagoProveedor;
 use App\Models\DefinicionWorkflow;
 use App\Models\Proceso;
 use App\Models\Proveedor;
-use App\Models\SnapshotSgf;
+use App\Models\SnapshotDatosExterno;
 use Illuminate\Support\Facades\DB;
 
 class CasoPagoProveedorImporter
 {
-    public function importarDesdeSnapshot(SnapshotSgf $snapshot): CasoPagoProveedor
+    public function importarDesdeSnapshot(SnapshotDatosExterno $snapshot): CasoPagoProveedor
     {
         $normalizado = $snapshot->payload_normalizado;
 
-        $caso = CasoPagoProveedor::where('sgf_id', $snapshot->sgf_id)->first();
+        $caso = CasoPagoProveedor::where('sgf_id', $snapshot->referencia_externa)->first();
 
         if ($caso !== null) {
             $caso->update([
@@ -32,7 +32,7 @@ class CasoPagoProveedorImporter
 
         return DB::transaction(function () use ($snapshot, $normalizado) {
             $caso = CasoPagoProveedor::create([
-                'sgf_id' => $snapshot->sgf_id,
+                'sgf_id' => $snapshot->referencia_externa,
                 'proveedor_id' => Proveedor::where('rutproveedor', $normalizado['rut'])->value('id'),
                 'rut_proveedor' => $normalizado['rut'],
                 'monto' => $normalizado['monto'],

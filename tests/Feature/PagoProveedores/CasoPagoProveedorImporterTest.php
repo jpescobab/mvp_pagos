@@ -2,9 +2,9 @@
 
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCgu;
-use App\Models\ImportacionSgf;
 use App\Models\Proveedor;
-use App\Models\SnapshotSgf;
+use App\Models\SistemaExterno;
+use App\Models\SnapshotDatosExterno;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use App\Services\Workflow\TransicionWorkflowService;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
@@ -12,9 +12,12 @@ use Database\Seeders\WorkflowPagoProveedoresSeeder;
 /**
  * @param  array<string, mixed>  $overrides
  */
-function crearSnapshotSgf(array $overrides = []): SnapshotSgf
+function crearSnapshotSgf(array $overrides = []): SnapshotDatosExterno
 {
-    $importacion = ImportacionSgf::create(['fuente' => 'manual', 'iniciado_en' => now(), 'estado' => 'en_progreso']);
+    $sistema = SistemaExterno::firstOrCreate(
+        ['codigo' => 'SGF'],
+        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
+    );
 
     $normalizado = array_merge([
         'sgf_id' => '12345',
@@ -25,9 +28,10 @@ function crearSnapshotSgf(array $overrides = []): SnapshotSgf
         'monto' => 500000.0,
     ], $overrides);
 
-    return SnapshotSgf::create([
-        'importacion_sgf_id' => $importacion->id,
-        'sgf_id' => $normalizado['sgf_id'],
+    return SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $normalizado['sgf_id'],
         'payload_crudo' => $normalizado,
         'payload_normalizado' => $normalizado,
         'hash' => hash('sha256', json_encode($normalizado, JSON_THROW_ON_ERROR)),
