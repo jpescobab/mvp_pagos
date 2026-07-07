@@ -12,6 +12,7 @@ use App\Models\TipoDocumento;
 use App\Models\TrabajoIntegracion;
 use App\Services\Integraciones\AutomatizacionNavegadorService;
 use App\Services\Integraciones\IntegracionExternaService;
+use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -23,6 +24,7 @@ class ConectorSgfPlaywrightService
         private readonly IntegracionExternaService $integracionExterna,
         private readonly AutomatizacionNavegadorService $automatizacionNavegador,
         private readonly NormalizadorSgf $normalizadorSgf,
+        private readonly CasoPagoProveedorImporter $casoPagoProveedorImporter,
     ) {}
 
     /**
@@ -177,6 +179,8 @@ class ConectorSgfPlaywrightService
         foreach ($payloadCrudo['documentos'] ?? [] as $documentoSgf) {
             $this->vincularDocumento($snapshot, $documentoSgf);
         }
+
+        $this->casoPagoProveedorImporter->importarDesdeSnapshot($snapshot);
 
         return $snapshot;
     }

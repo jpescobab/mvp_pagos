@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ConectorAutomatizacionNoAutorizadoException;
+use App\Models\CasoPagoProveedor;
 use App\Models\ConectorAutomatizacionNavegador;
 use App\Models\Documento;
 use App\Models\SistemaExterno;
@@ -8,10 +9,12 @@ use App\Models\TrabajoIntegracion;
 use App\Models\User;
 use App\Services\Sgf\ConectorSgfPlaywrightService;
 use Database\Seeders\IntegracionesSeeder;
+use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     $this->seed(IntegracionesSeeder::class);
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
     config(['services.sgf_playwright.base_url' => 'http://sgf-playwright.test', 'services.sgf_playwright.api_key' => 'test-key']);
     $this->servicio = app(ConectorSgfPlaywrightService::class);
 });
@@ -61,6 +64,9 @@ test('verificarCaso registra snapshot, pasos y finaliza completado cuando SGF en
     $ejecucion = $trabajo->ejecucionesAutomatizacionNavegador()->sole();
     expect($ejecucion->estado)->toBe('completado');
     expect($ejecucion->pasos)->toHaveCount(2);
+
+    $caso = CasoPagoProveedor::where('sgf_id', '12345')->sole();
+    expect($caso->proceso->estadoActual->codigo)->toBe('importada_desde_sgf');
 });
 
 test('verificarCaso no crea snapshot y finaliza completado cuando SGF no encuentra el caso', function () {
@@ -143,6 +149,9 @@ test('importarPendientes registra un snapshot por fila y vincula documentos entr
     $documento = Documento::find($snapshotConDocumentos->documentos->first()->documento_id);
     expect($documento->tipoDocumento->codigo)->toBe('FACTURA');
     expect($documento->versiones->first()->nombre_archivo)->toBe('factura.pdf');
+
+    expect(CasoPagoProveedor::where('sgf_id', '111')->exists())->toBeTrue();
+    expect(CasoPagoProveedor::where('sgf_id', '222')->exists())->toBeTrue();
 });
 
 test('importarPendientes no guarda snapshots parciales cuando el microservicio falla', function () {

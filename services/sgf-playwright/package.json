@@ -1,0 +1,10 @@
+{
+    "name": "sgf-playwright-stub",
+    "private": true,
+    "version": "0.0.1",
+    "description": "Stub local del conector Playwright de SGF (no hace scraping real): cumple el contrato HTTP definido en el change archivado conector-sgf-playwright, para ejercitar el flujo Laravel de punta a punta en desarrollo.",
+    "type": "module",
+    "scripts": {
+        "start": "node server.js"
+    }
+}
