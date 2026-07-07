@@ -33,6 +33,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as licitacionesMercadoPublico } from '@/routes/adquisiciones/licitaciones_mp';
 import { index as ordenesCompraMercadoPublico } from '@/routes/adquisiciones/ordenes_compra_mp';
 import { index as procesosAdquisicion } from '@/routes/adquisiciones/procesos';
 import { index as auditoria } from '@/routes/auditoria';
@@ -145,6 +146,11 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
     {
         title: 'Órdenes de Compra (Mercado Público)',
         href: ordenesCompraMercadoPublico(),
+        icon: FileSearch,
+    },
+    {
+        title: 'Licitaciones (Mercado Público)',
+        href: licitacionesMercadoPublico(),
         icon: FileSearch,
     },
 ];

@@ -18,6 +18,8 @@ class WorkflowPagoProveedoresSeeder extends Seeder
             'pago_proveedores.registrar_egreso',
             'pago_proveedores.vincular_adquisicion',
             'pago_proveedores.registrar_factura',
+            'pago_proveedores.verificar_caso_sgf',
+            'pago_proveedores.importar_casos_sgf',
         ];
 
         foreach ($permisos as $permiso) {

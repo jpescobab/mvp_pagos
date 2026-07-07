@@ -60,3 +60,13 @@ export function esNegativo(valor: ValorNumerico): boolean {
 
     return numero !== null && numero < 0;
 }
+
+export function restarMontos(
+    minuendo: ValorNumerico,
+    sustraendo: ValorNumerico,
+): number | null {
+    const a = aNumero(minuendo);
+    const b = aNumero(sustraendo);
+
+    return a === null || b === null ? null : a - b;
+}

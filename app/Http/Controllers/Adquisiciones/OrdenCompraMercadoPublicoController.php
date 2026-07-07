@@ -47,11 +47,24 @@ class OrdenCompraMercadoPublicoController extends Controller
         return $this->renderizarBusqueda($request->string('codigo')->trim()->toString());
     }
 
+    public function pdf(BuscarOrdenCompraMercadoPublicoRequest $request): RedirectResponse
+    {
+        Gate::authorize('viewAny', OrdenCompraMercadoPublico::class);
+
+        $urlPdf = $this->servicio->resolverUrlPdf($request->string('codigo')->trim()->toString());
+
+        if ($urlPdf === null) {
+            return back()->withErrors(['pdf' => 'No fue posible obtener el PDF de esta OC desde Mercado Público.']);
+        }
+
+        return redirect()->away($urlPdf);
+    }
+
     public function verificar(OrdenCompraMercadoPublico $orden): Response
     {
         Gate::authorize('view', $orden);
 
-        $orden->load(['items', 'proveedor', 'procesoAdquisicion']);
+        $orden->load(['items', 'proveedor', 'procesoAdquisicion', 'snapshot']);
         $resultado = $this->servicio->compararConApi($orden);
 
         return Inertia::render(self::COMPONENTE_BUSCAR, [
@@ -116,7 +129,7 @@ class OrdenCompraMercadoPublicoController extends Controller
     {
         Gate::authorize('view', $orden);
 
-        $orden->load(['items', 'proveedor', 'procesoAdquisicion']);
+        $orden->load(['items', 'proveedor', 'procesoAdquisicion', 'snapshot']);
 
         return Inertia::render('adquisiciones/ordenes-compra-mercado-publico/show', [
             'orden' => new OrdenCompraMercadoPublicoResource($orden),
@@ -171,6 +184,7 @@ class OrdenCompraMercadoPublicoController extends Controller
             'codigo' => $codigo,
             'vistaPrevia' => [
                 'payload_normalizado' => $resultado['payload_normalizado'],
+                'payload_crudo' => $resultado['snapshot']?->payload_crudo,
                 'proveedor_existente' => $proveedor === null ? null : [
                     'id' => $proveedor->id,
                     'nombre' => $proveedor->nombre,

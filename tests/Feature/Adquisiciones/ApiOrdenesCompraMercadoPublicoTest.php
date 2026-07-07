@@ -20,8 +20,8 @@ function ordenCrudaOcApiHttp(string $codigo, array $overrides = []): array
         'TotalNeto' => 100000,
         'Total' => 119000,
         'Fechas' => [
-            'FechaEnvio' => '2026-04-20',
-            'FechaAceptacion' => '2026-05-01',
+            'FechaEnvio' => '2026-04-20 09:15:00',
+            'FechaAceptacion' => '2026-05-01 14:30:00',
         ],
         'Comprador' => [
             'NombreOrganismo' => 'Corporación Administrativa del Poder Judicial',
@@ -95,6 +95,23 @@ test('buscar un código inexistente localmente consulta la API y muestra la vist
         ->component('adquisiciones/ordenes-compra-mercado-publico/buscar', shouldExist: false)
         ->where('vistaPrevia.payload_normalizado.codigo', 'OC-HTTP-NUEVA')
         ->where('vistaPrevia.proveedor_existente', null)
+        ->where('vistaPrevia.payload_crudo.Listado.0.Codigo', 'OC-HTTP-NUEVA')
+    );
+});
+
+test('el detalle de una OC guardada expone el payload crudo del snapshot que la originó para "Ver JSON"', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcApiHttp('OC-HTTP-JSON'), 200)]);
+    $usuario = usuarioConPermisoOrdenCompraMpHttp();
+
+    $this->actingAs($usuario)->post(route('adquisiciones.ordenes_compra_mp.guardar'), ['codigo' => 'OC-HTTP-JSON']);
+
+    $orden = OrdenCompraMercadoPublico::where('codigo', 'OC-HTTP-JSON')->firstOrFail();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.show', $orden));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('orden.payload_crudo.Listado.0.Codigo', 'OC-HTTP-JSON')
     );
 });
 
@@ -183,4 +200,35 @@ test('guardar una OC nueva sin proveedor existente lo crea automáticamente en l
     expect($orden)->not->toBeNull();
     expect($orden->proveedor)->not->toBeNull();
     expect($orden->proveedor->rutproveedor)->toBe('76123456-7');
+});
+
+test('ver PDF redirige directamente al PDF resuelto desde Mercado Público', function () {
+    $htmlConBotonPdf = '<html><body><input type="image" id="imgPDF" onclick="open(&#39;PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==&#39;,&#39;MercadoPublico&#39;, &#39;width=750&#39;);" /></body></html>';
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response($htmlConBotonPdf, 200),
+    ]);
+    $usuario = usuarioConPermisoOrdenCompraMpHttp();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => '2182-99-AG26']));
+
+    $response->assertRedirect('https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==');
+});
+
+test('ver PDF informa un error cuando Mercado Público no expone el botón de descarga', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response('<html><body>Sin PDF</body></html>', 200),
+    ]);
+    $usuario = usuarioConPermisoOrdenCompraMpHttp();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => 'OC-SIN-PDF']));
+
+    $response->assertSessionHasErrors('pdf');
+});
+
+test('ver PDF sin el permiso requerido es rechazado', function () {
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('adquisiciones.ordenes_compra_mp.pdf', ['codigo' => '2182-99-AG26']));
+
+    $response->assertForbidden();
 });

@@ -7,6 +7,7 @@ use App\Models\SnapshotDatosExterno;
 use App\Models\SolicitudApiExterna;
 use App\Services\Adquisiciones\OrdenCompraMercadoPublicoService;
 use Database\Seeders\IntegracionesSeeder;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -22,8 +23,8 @@ function ordenCrudaMercadoPublico(string $codigo, array $overrides = []): array
         'TotalNeto' => 100000,
         'Total' => 119000,
         'Fechas' => [
-            'FechaEnvio' => '2026-04-20',
-            'FechaAceptacion' => '2026-05-01',
+            'FechaEnvio' => '2026-04-20 09:15:00',
+            'FechaAceptacion' => '2026-05-01 14:30:00',
         ],
         'Comprador' => [
             'NombreOrganismo' => 'Corporación Administrativa del Poder Judicial',
@@ -108,6 +109,17 @@ test('consultarApi registra la solicitud y el snapshot cuando la API encuentra l
     expect($resultado['payload_normalizado']['items'])->toHaveCount(2);
 });
 
+test('el cronograma conserva la fecha y hora reales de cada hito, sin truncarlas al día', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-CRONOGRAMA-HORA'), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-CRONOGRAMA-HORA');
+
+    expect($resultado['payload_normalizado']['cronograma'])->toBe([
+        ['estado' => 'Enviada', 'fecha' => '2026-04-20 09:15:00'],
+        ['estado' => 'Aceptada', 'fecha' => '2026-05-01 14:30:00'],
+    ]);
+});
+
 test('compararConApi no encuentra diferencias cuando el registro local coincide con la API', function () {
     Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-IGUAL-001'), 200)]);
 
@@ -126,8 +138,8 @@ test('compararConApi no encuentra diferencias cuando el registro local coincide 
             'rut' => '60.503.000-9',
         ],
         'cronograma' => [
-            ['estado' => 'Enviada', 'fecha' => '2026-04-20'],
-            ['estado' => 'Aceptada', 'fecha' => '2026-05-01'],
+            ['estado' => 'Enviada', 'fecha' => '2026-04-20 09:15:00'],
+            ['estado' => 'Aceptada', 'fecha' => '2026-05-01 14:30:00'],
         ],
     ]);
 
@@ -260,4 +272,39 @@ test('aplicarActualizacion sobrescribe los campos y reemplaza los ítems del reg
 
     expect($actualizada->estado_mercado_publico)->toBe('Aceptada');
     expect($actualizada->items)->toHaveCount(2);
+});
+
+test('resolverUrlPdf extrae el enlace real de descarga desde la página pública de Mercado Público', function () {
+    $htmlConBotonPdf = '<html><body><input type="image" name="imgPDF" id="imgPDF" src="../../Includes/images/ic_descargar_pdf.gif" onclick="open(&#39;PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==&#39;,&#39;MercadoPublico&#39;, &#39;width=750&#39;);window.event.returnValue=false;" /></body></html>';
+
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response($htmlConBotonPdf, 200),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('2182-99-AG26');
+
+    expect($url)->toBe('https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/PDFReport.aspx?qs=MSuLJTDGpV25BLIThmvKMQ==');
+    expect(SolicitudApiExterna::first()->estado)->toBe('exitosa');
+});
+
+test('resolverUrlPdf retorna null y registra la solicitud como no encontrada si la página no trae el botón de PDF', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => Http::response('<html><body>OC no encontrada</body></html>', 200),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('OC-INEXISTENTE-MP');
+
+    expect($url)->toBeNull();
+    expect(SolicitudApiExterna::first()->estado)->toBe('no_encontrada');
+});
+
+test('resolverUrlPdf retorna null y registra la solicitud como error si la petición HTTP falla', function () {
+    Http::fake([
+        '*/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx*' => fn () => throw new ConnectionException('timeout'),
+    ]);
+
+    $url = $this->servicio->resolverUrlPdf('2182-99-AG26');
+
+    expect($url)->toBeNull();
+    expect(SolicitudApiExterna::first()->estado)->toBe('error');
 });

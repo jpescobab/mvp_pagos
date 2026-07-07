@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\ImportacionSgf;
-use App\Models\SnapshotSgf;
+use App\Models\SistemaExterno;
+use App\Models\SnapshotDatosExterno;
 use App\Models\User;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -11,20 +11,25 @@ test('el detalle de un caso de pago incluye el historial de snapshots SGF ordena
 
     $caso = crearCasoPagoProveedorDePrueba('sgf-historial-1');
 
-    $importacionAnterior = ImportacionSgf::create(['fuente' => 'manual', 'iniciado_en' => now()->subDay(), 'estado' => 'completada']);
-    SnapshotSgf::create([
-        'importacion_sgf_id' => $importacionAnterior->id,
-        'sgf_id' => $caso->sgf_id,
+    $sistema = SistemaExterno::firstOrCreate(
+        ['codigo' => 'SGF'],
+        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
+    );
+
+    SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $caso->sgf_id,
         'payload_crudo' => ['estado' => 'EN_TRAMITE'],
         'payload_normalizado' => ['estado' => 'EN_TRAMITE'],
         'hash' => 'hash-anterior',
         'capturado_en' => now()->subDay(),
     ]);
 
-    $importacionReciente = ImportacionSgf::create(['fuente' => 'manual', 'iniciado_en' => now(), 'estado' => 'completada']);
-    SnapshotSgf::create([
-        'importacion_sgf_id' => $importacionReciente->id,
-        'sgf_id' => $caso->sgf_id,
+    SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $caso->sgf_id,
         'payload_crudo' => ['estado' => 'PAGADO'],
         'payload_normalizado' => ['estado' => 'PAGADO'],
         'hash' => 'hash-reciente',

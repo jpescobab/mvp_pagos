@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
+    AccionesEncabezadoFichaMercadoPublico,
     CronogramaTimeline,
     FichaConsultaMercadoPublico,
 } from '@/components/mercado-publico/ficha-consulta';
@@ -15,8 +16,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
+import { restarMontos } from '@/lib/format';
+import ordenesCompraMp, {
+    pdf as pdfOrdenCompraMp,
+} from '@/routes/adquisiciones/ordenes_compra_mp';
 import type { OrdenCompraMercadoPublico } from '@/types/adquisiciones';
+
+const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
+    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
+
+function urlDetalleOcMercadoPublico(codigo: string): string {
+    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
+}
 
 type ProcesoAdquisicionSeleccionable = {
     id: number;
@@ -36,6 +47,37 @@ function construirSecciones(
             key: 'cronograma',
             titulo: 'Cronograma',
             contenido: <CronogramaTimeline eventos={orden.cronograma} />,
+        },
+        {
+            key: 'desglose-financiero',
+            titulo: 'Desglose financiero',
+            contenido: (
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                    <div>
+                        <dt className="text-muted-foreground">Monto neto</dt>
+                        <dd>
+                            <Monto valor={orden.monto_neto} />
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-muted-foreground">Impuesto</dt>
+                        <dd>
+                            <Monto
+                                valor={restarMontos(
+                                    orden.monto_total,
+                                    orden.monto_neto,
+                                )}
+                            />
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-muted-foreground">Monto total</dt>
+                        <dd>
+                            <Monto valor={orden.monto_total} />
+                        </dd>
+                    </div>
+                </dl>
+            ),
         },
         {
             key: 'organismo-comprador',
@@ -198,10 +240,32 @@ export default function OrdenCompraMercadoPublicoShow({
                 <FichaConsultaMercadoPublico
                     encabezado={{
                         titulo: `OC ${orden.codigo}`,
+                        montoDestacado: (
+                            <>
+                                <p className="text-xs text-muted-foreground">
+                                    Monto total
+                                </p>
+                                <p className="text-lg font-semibold">
+                                    <Monto valor={orden.monto_total} />
+                                </p>
+                            </>
+                        ),
                         acciones: (
-                            <Badge variant="outline">
-                                {orden.estado_mercado_publico ?? 'Sin estado'}
-                            </Badge>
+                            <>
+                                <Badge variant="outline">
+                                    {orden.estado_mercado_publico ??
+                                        'Sin estado'}
+                                </Badge>
+                                <AccionesEncabezadoFichaMercadoPublico
+                                    payloadCrudo={orden.payload_crudo}
+                                    urlDetalle={urlDetalleOcMercadoPublico(
+                                        orden.codigo,
+                                    )}
+                                    urlPdf={pdfOrdenCompraMp.url({
+                                        query: { codigo: orden.codigo },
+                                    })}
+                                />
+                            </>
                         ),
                     }}
                     secciones={construirSecciones(orden)}

@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
+    AccionesEncabezadoFichaMercadoPublico,
     CronogramaTimeline,
     FichaConsultaMercadoPublico,
 } from '@/components/mercado-publico/ficha-consulta';
@@ -9,12 +10,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
-import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
+import { restarMontos } from '@/lib/format';
+import ordenesCompraMp, {
+    pdf as pdfOrdenCompraMp,
+} from '@/routes/adquisiciones/ordenes_compra_mp';
 import type {
     DiferenciaCampoOrdenCompraMercadoPublico,
     OrdenCompraMercadoPublico,
     PayloadNormalizadoOrdenCompraMercadoPublico,
 } from '@/types/adquisiciones';
+
+const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
+    'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
+
+function urlDetalleOcMercadoPublico(codigo: string): string {
+    return `${URL_BASE_DETALLE_OC_MERCADO_PUBLICO}${encodeURIComponent(codigo)}`;
+}
 
 type OcParaFicha = {
     estadoMercadoPublico: string | null;
@@ -100,6 +111,37 @@ function construirSecciones(oc: OcParaFicha): SeccionFichaConsulta[] {
             key: 'cronograma',
             titulo: 'Cronograma',
             contenido: <CronogramaTimeline eventos={oc.cronograma} />,
+        },
+        {
+            key: 'desglose-financiero',
+            titulo: 'Desglose financiero',
+            contenido: (
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                    <div>
+                        <dt className="text-muted-foreground">Monto neto</dt>
+                        <dd>
+                            <Monto valor={oc.montoNeto} />
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-muted-foreground">Impuesto</dt>
+                        <dd>
+                            <Monto
+                                valor={restarMontos(
+                                    oc.montoTotal,
+                                    oc.montoNeto,
+                                )}
+                            />
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className="text-muted-foreground">Monto total</dt>
+                        <dd>
+                            <Monto valor={oc.montoTotal} />
+                        </dd>
+                    </div>
+                </dl>
+            ),
         },
         {
             key: 'organismo-comprador',
@@ -241,6 +283,7 @@ type PageProps = {
     ordenLocal?: OrdenCompraMercadoPublico;
     vistaPrevia?: {
         payload_normalizado: PayloadNormalizadoOrdenCompraMercadoPublico;
+        payload_crudo?: unknown;
         proveedor_existente: {
             id: number;
             nombre: string;
@@ -362,6 +405,18 @@ export default function BuscarOrdenCompraMercadoPublico({
                                         {ordenLocal.proceso_adquisicion.codigo}
                                     </span>
                                 ),
+                                montoDestacado: (
+                                    <>
+                                        <p className="text-xs text-muted-foreground">
+                                            Monto total
+                                        </p>
+                                        <p className="text-lg font-semibold">
+                                            <Monto
+                                                valor={ordenLocal.monto_total}
+                                            />
+                                        </p>
+                                    </>
+                                ),
                                 acciones: (
                                     <>
                                         <Badge variant="outline">
@@ -375,6 +430,19 @@ export default function BuscarOrdenCompraMercadoPublico({
                                         >
                                             Verificar contra Mercado Público
                                         </Button>
+                                        <AccionesEncabezadoFichaMercadoPublico
+                                            payloadCrudo={
+                                                ordenLocal.payload_crudo
+                                            }
+                                            urlDetalle={urlDetalleOcMercadoPublico(
+                                                ordenLocal.codigo,
+                                            )}
+                                            urlPdf={pdfOrdenCompraMp.url({
+                                                query: {
+                                                    codigo: ordenLocal.codigo,
+                                                },
+                                            })}
+                                        />
                                     </>
                                 ),
                             }}
@@ -470,11 +538,41 @@ export default function BuscarOrdenCompraMercadoPublico({
                         encabezado={{
                             titulo: `OC ${vistaPrevia.payload_normalizado.codigo}`,
                             subtitulo: 'Vista previa · aún no guardada',
+                            montoDestacado: (
+                                <>
+                                    <p className="text-xs text-muted-foreground">
+                                        Monto total
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                        <Monto
+                                            valor={
+                                                vistaPrevia.payload_normalizado
+                                                    .monto_total
+                                            }
+                                        />
+                                    </p>
+                                </>
+                            ),
                             acciones: (
-                                <Badge variant="outline">
-                                    {vistaPrevia.payload_normalizado.estado ??
-                                        'Sin estado'}
-                                </Badge>
+                                <>
+                                    <Badge variant="outline">
+                                        {vistaPrevia.payload_normalizado
+                                            .estado ?? 'Sin estado'}
+                                    </Badge>
+                                    <AccionesEncabezadoFichaMercadoPublico
+                                        payloadCrudo={vistaPrevia.payload_crudo}
+                                        urlDetalle={urlDetalleOcMercadoPublico(
+                                            vistaPrevia.payload_normalizado
+                                                .codigo,
+                                        )}
+                                        urlPdf={pdfOrdenCompraMp.url({
+                                            query: {
+                                                codigo: vistaPrevia
+                                                    .payload_normalizado.codigo,
+                                            },
+                                        })}
+                                    />
+                                </>
                             ),
                         }}
                         secciones={[
@@ -505,8 +603,8 @@ export default function BuscarOrdenCompraMercadoPublico({
                                             </p>
                                         ) : (
                                             <p className="text-sm text-muted-foreground">
-                                                Se creará un proveedor nuevo
-                                                con estos datos al guardar:{' '}
+                                                Se creará un proveedor nuevo con
+                                                estos datos al guardar:{' '}
                                                 {
                                                     vistaPrevia
                                                         .payload_normalizado

@@ -7,7 +7,7 @@ use App\Models\EgresoCguItem;
 use App\Models\Factura;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
-use App\Models\SnapshotSgf;
+use App\Models\SnapshotDatosExterno;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -101,11 +101,11 @@ class CasoPagoProveedorResource extends JsonResource
     private function mapSnapshotsSgf(): array
     {
         return array_values($this->snapshotsSgf
-            ->map(fn (SnapshotSgf $snapshot) => [
+            ->map(fn (SnapshotDatosExterno $snapshot) => [
                 'id' => $snapshot->id,
                 'capturado_en' => $snapshot->capturado_en,
                 'hash' => $snapshot->hash,
-                'fuente' => $snapshot->importacion?->fuente,
+                'metodo_captura' => $snapshot->metodo_captura,
                 'payload_crudo' => $snapshot->payload_crudo,
                 'payload_normalizado' => $snapshot->payload_normalizado,
             ])

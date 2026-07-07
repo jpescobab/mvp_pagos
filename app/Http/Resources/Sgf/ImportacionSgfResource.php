@@ -2,12 +2,12 @@
 
 namespace App\Http\Resources\Sgf;
 
-use App\Models\ImportacionSgf;
-use App\Models\SnapshotSgf;
+use App\Models\SnapshotDatosExterno;
+use App\Models\TrabajoIntegracion;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin ImportacionSgf */
+/** @mixin TrabajoIntegracion */
 class ImportacionSgfResource extends JsonResource
 {
     /**
@@ -17,13 +17,15 @@ class ImportacionSgfResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'fuente' => $this->fuente,
+            'tipo' => $this->tipo,
+            'mecanismo' => $this->mecanismo,
             'iniciado_por' => $this->iniciadoPor?->name,
             'iniciado_en' => $this->iniciado_en,
             'finalizado_en' => $this->finalizado_en,
-            'total_filas' => $this->total_filas,
+            'total_elementos' => $this->total_elementos,
             'estado' => $this->estado,
-            'snapshots' => $this->whenLoaded('snapshots', fn () => $this->mapSnapshots()),
+            'error' => $this->error,
+            'snapshots' => $this->whenLoaded('snapshotsDatosExternos', fn () => $this->mapSnapshots()),
         ];
     }
 
@@ -32,10 +34,10 @@ class ImportacionSgfResource extends JsonResource
      */
     private function mapSnapshots(): array
     {
-        return array_values($this->snapshots
-            ->map(fn (SnapshotSgf $snapshot) => [
+        return array_values($this->snapshotsDatosExternos
+            ->map(fn (SnapshotDatosExterno $snapshot) => [
                 'id' => $snapshot->id,
-                'sgf_id' => $snapshot->sgf_id,
+                'referencia_externa' => $snapshot->referencia_externa,
                 'hash' => $snapshot->hash,
                 'capturado_en' => $snapshot->capturado_en,
             ])

@@ -5,14 +5,14 @@ use App\Models\Ccosto;
 use App\Models\CorteReportabilidad;
 use App\Models\DefinicionInformeRazonado;
 use App\Models\EgresoCgu;
-use App\Models\ImportacionSgf;
 use App\Models\IndicadorEconomico;
 use App\Models\IndicadorEconomicoImportacion;
 use App\Models\Institucion;
 use App\Models\ModalidadAdquisicion;
 use App\Models\PeriodoReportabilidad;
 use App\Models\Proveedor;
-use App\Models\SnapshotSgf;
+use App\Models\SistemaExterno;
+use App\Models\SnapshotDatosExterno;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
 use App\Services\Indicadores\ServicioImportacionIndicadores;
@@ -46,7 +46,10 @@ function crearCasoPagoProveedorDePruebaParaDashboard(string $sgfId, string $prov
         'activo' => true,
     ]);
 
-    $importacion = ImportacionSgf::create(['fuente' => 'manual', 'iniciado_en' => now(), 'estado' => 'en_progreso']);
+    $sistema = SistemaExterno::firstOrCreate(
+        ['codigo' => 'SGF'],
+        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
+    );
 
     $normalizado = [
         'sgf_id' => $sgfId,
@@ -57,9 +60,10 @@ function crearCasoPagoProveedorDePruebaParaDashboard(string $sgfId, string $prov
         'monto' => 500000.0,
     ];
 
-    $snapshot = SnapshotSgf::create([
-        'importacion_sgf_id' => $importacion->id,
-        'sgf_id' => $normalizado['sgf_id'],
+    $snapshot = SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $normalizado['sgf_id'],
         'payload_crudo' => $normalizado,
         'payload_normalizado' => $normalizado,
         'hash' => hash('sha256', json_encode($normalizado, JSON_THROW_ON_ERROR)),

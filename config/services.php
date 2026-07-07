@@ -45,4 +45,9 @@ return [
         'base_url' => env('MERCADOPUBLICO_API_BASE_URL', 'https://api.mercadopublico.cl/servicios/v1/publico'),
     ],
 
+    'sgf_playwright' => [
+        'api_key' => env('SGF_PLAYWRIGHT_API_KEY'),
+        'base_url' => env('SGF_PLAYWRIGHT_BASE_URL'),
+    ],
+
 ];

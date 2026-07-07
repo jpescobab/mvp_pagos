@@ -90,7 +90,7 @@ export type SnapshotSgf = {
     id: number;
     capturado_en: string;
     hash: string;
-    fuente: string | null;
+    metodo_captura: string | null;
     payload_crudo: Record<string, unknown>;
     payload_normalizado: Record<string, unknown>;
 };

@@ -1,4 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, usePoll } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { formatNumero } from '@/lib/format';
 import importaciones from '@/routes/sgf/importaciones';
 import type { ImportacionSgf } from '@/types/sgf';
@@ -9,10 +10,22 @@ type PageProps = {
 
 export default function ImportacionSgfShow() {
     const { importacion } = usePage<PageProps>().props;
+    const enProgreso = importacion.estado === 'en_progreso';
+
+    const { start, stop } = usePoll(2000, undefined, { autoStart: false });
+
+    useEffect(() => {
+        if (enProgreso) {
+            start();
+        } else {
+            stop();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enProgreso]);
 
     return (
         <>
-            <Head title={`Importación SGF — ${importacion.fuente}`} />
+            <Head title={`Importación SGF — ${importacion.tipo}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 <div>
@@ -20,7 +33,7 @@ export default function ImportacionSgfShow() {
                         Importación SGF
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Fuente: {importacion.fuente} · Iniciado por:{' '}
+                        Tipo: {importacion.tipo} · Iniciado por:{' '}
                         {importacion.iniciado_por ?? 'Sistema'} · Estado:{' '}
                         {importacion.estado}
                     </p>
@@ -35,17 +48,24 @@ export default function ImportacionSgfShow() {
                               ).toLocaleString()
                             : '—'}
                     </p>
+                    {importacion.error && (
+                        <p className="text-sm text-destructive">
+                            Error: {importacion.error}
+                        </p>
+                    )}
                 </div>
 
                 <section className="space-y-3 rounded-xl border p-4">
                     <h2 className="text-base font-medium">
                         Snapshots producidos (
-                        {formatNumero(importacion.total_filas)})
+                        {formatNumero(importacion.total_elementos)})
                     </h2>
 
                     {(importacion.snapshots ?? []).length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                            Sin snapshots producidos todavía.
+                            {importacion.estado === 'en_progreso'
+                                ? 'Importación en curso…'
+                                : 'Sin snapshots producidos todavía.'}
                         </p>
                     ) : (
                         <ul className="divide-y text-sm">
@@ -55,7 +75,7 @@ export default function ImportacionSgfShow() {
                                     className="flex items-center justify-between py-2"
                                 >
                                     <span className="font-mono">
-                                        {snapshot.sgf_id}
+                                        {snapshot.referencia_externa}
                                     </span>
                                     <span className="text-muted-foreground">
                                         {new Date(

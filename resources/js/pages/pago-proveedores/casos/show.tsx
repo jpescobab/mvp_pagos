@@ -33,10 +33,15 @@ import type {
 type PageProps = {
     caso: CasoPagoProveedor;
     tiposDocumento: TipoDocumentoSeleccionable[];
+    verificacionSgf?: {
+        encontrada: boolean;
+        payload_crudo: Record<string, unknown> | null;
+    };
 };
 
 export default function CasoShow() {
-    const { caso, tiposDocumento } = usePage<PageProps>().props;
+    const { caso, tiposDocumento, verificacionSgf } =
+        usePage<PageProps>().props;
     const [transicionConComentario, setTransicionConComentario] =
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
@@ -1094,9 +1099,38 @@ export default function CasoShow() {
                 </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">
-                        Historial de snapshots SGF
-                    </h2>
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-base font-medium">
+                            Historial de snapshots SGF
+                        </h2>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                router.post(
+                                    casos.verificarSgf(caso.id).url,
+                                    {},
+                                    { preserveScroll: true },
+                                )
+                            }
+                        >
+                            Verificar en SGF
+                        </Button>
+                    </div>
+
+                    {verificacionSgf && (
+                        <p
+                            className={
+                                verificacionSgf.encontrada
+                                    ? 'text-sm text-success'
+                                    : 'text-sm text-muted-foreground'
+                            }
+                        >
+                            {verificacionSgf.encontrada
+                                ? 'Se encontró este caso en SGF y se registró un nuevo snapshot.'
+                                : 'Este caso no fue encontrado en SGF.'}
+                        </p>
+                    )}
 
                     {(caso.snapshots_sgf ?? []).length === 0 ? (
                         <p className="text-sm text-muted-foreground">
@@ -1114,7 +1148,7 @@ export default function CasoShow() {
                                                 ).toLocaleString()}{' '}
                                                 <span className="text-muted-foreground">
                                                     ·{' '}
-                                                    {snapshot.fuente ??
+                                                    {snapshot.metodo_captura ??
                                                         'Sin fuente'}
                                                 </span>
                                             </span>
