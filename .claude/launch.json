@@ -18,13 +18,13 @@
     {
       "name": "Queue Listener",
       "runtimeExecutable": "php",
-      "runtimeArgs": ["artisan", "queue:listen", "--tries=1"]
+      "runtimeArgs": ["artisan", "queue:listen", "--tries=1", "--timeout=3700"]
     },
     {
       "name": "SGF Playwright Stub",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "services/sgf-playwright", "start"],
-      "port": 4100,
+      "port": 4101,
       "autoPort": false
     }
   ]

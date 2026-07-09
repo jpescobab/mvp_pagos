@@ -116,6 +116,11 @@ export type CasoPagoProveedor = {
     monto: string;
     sgf_status: string | null;
     sgf_current_group_raw: string | null;
+    periodo: string | null;
+    observacion: string | null;
+    folio_egreso: string | null;
+    numero: string | null;
+    fecha_sii: string | null;
     proceso: Proceso;
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
     registros_contables_cgu?: RegistroContableCgu[];

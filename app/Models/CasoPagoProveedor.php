@@ -19,12 +19,18 @@ class CasoPagoProveedor extends Model
         'monto',
         'sgf_status',
         'sgf_current_group_raw',
+        'periodo',
+        'observacion',
+        'folio_egreso',
+        'numero',
+        'fecha_sii',
     ];
 
     protected function casts(): array
     {
         return [
             'monto' => 'decimal:2',
+            'fecha_sii' => 'date',
         ];
     }
 

@@ -148,6 +148,9 @@ export const MAPEO_COLUMNAS_BANDEJA = {
     periodo: ['periodo'],
     rut: ['rut'],
     monto: ['monto'],
+    folio_egreso: ['folio egreso'],
+    numero: ['numero'],
+    fecha_sii: ['fecha sii'],
 };
 
 // El botón de menú de la fila de proceso vive en la primera columna

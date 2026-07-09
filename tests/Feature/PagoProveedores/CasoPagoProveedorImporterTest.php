@@ -23,9 +23,13 @@ function crearSnapshotSgf(array $overrides = []): SnapshotDatosExterno
         'sgf_id' => '12345',
         'estado' => 'EN_TRAMITE',
         'grupo_actual' => 'FINANZAS',
-        'observaciones' => null,
+        'observacion' => null,
         'rut' => '11111111-1',
         'monto' => 500000.0,
+        'periodo' => '2026-07',
+        'folio_egreso' => 'EGR-9001',
+        'numero' => '4521',
+        'fecha_sii' => '08-07-2026',
     ], $overrides);
 
     return SnapshotDatosExterno::create([
@@ -86,6 +90,18 @@ test('el proveedor_id se resuelve cuando el RUT coincide y queda null si no hay 
     expect($casoSinProveedor->proveedor_id)->toBeNull();
 });
 
+test('el proveedor_id se resuelve aunque el RUT de SGF venga con puntos y el de proveedores sin puntos', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $proveedor = Proveedor::create(['rutproveedor' => '9317442-9', 'nombre' => 'Proveedor con RUT normalizado']);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf(['sgf_id' => 'rut-con-puntos', 'rut' => '9.317.442-9']),
+    );
+
+    expect($caso->proveedor_id)->toBe($proveedor->id);
+});
+
 test('el workflow pago_proveedores sembrado permite ejecutar una transición real', function () {
     $this->seed(WorkflowPagoProveedoresSeeder::class);
 
@@ -94,6 +110,60 @@ test('el workflow pago_proveedores sembrado permite ejecutar una transición rea
     $resultado = app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
 
     expect($resultado->estadoActual->codigo)->toBe('recibida_finanzas');
+});
+
+test('reimportar un sgf_id existente actualiza periodo, observacion, folio_egreso, numero y fecha_sii sin alterar el proceso', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf());
+
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+
+    $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf([
+            'periodo' => '2026-08',
+            'observacion' => 'Reenviado por diferencia de monto',
+            'folio_egreso' => 'EGR-9002',
+            'numero' => '4600',
+            'fecha_sii' => '15-08-2026',
+        ]),
+    );
+
+    expect($casoActualizado->id)->toBe($caso->id);
+    expect($casoActualizado->periodo)->toBe('2026-08');
+    expect($casoActualizado->observacion)->toBe('Reenviado por diferencia de monto');
+    expect($casoActualizado->folio_egreso)->toBe('EGR-9002');
+    expect($casoActualizado->numero)->toBe('4600');
+    expect($casoActualizado->fecha_sii->toDateString())->toBe('2026-08-15');
+    expect($casoActualizado->proceso->refresh()->estadoActual->codigo)->toBe('recibida_finanzas');
+});
+
+test('un payload normalizado sin los campos nuevos deja esos campos en null sin fallar la importación', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf([
+        'periodo' => null,
+        'observacion' => null,
+        'folio_egreso' => null,
+        'numero' => null,
+        'fecha_sii' => null,
+    ]));
+
+    expect($caso->periodo)->toBeNull();
+    expect($caso->observacion)->toBeNull();
+    expect($caso->folio_egreso)->toBeNull();
+    expect($caso->numero)->toBeNull();
+    expect($caso->fecha_sii)->toBeNull();
+});
+
+test('fecha_sii con formato no parseable se guarda como null sin fallar la importación', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf([
+        'fecha_sii' => 'no-es-una-fecha',
+    ]));
+
+    expect($caso->fecha_sii)->toBeNull();
 });
 
 test('egresos_cgu_items asocia un egreso a varios casos', function () {

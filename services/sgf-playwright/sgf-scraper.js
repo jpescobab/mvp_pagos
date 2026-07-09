@@ -539,6 +539,9 @@ async function extraerDatosFila(filaLocator, encabezados) {
         observaciones: porColumna.observaciones,
         grupo_remitente: porColumna.grupo_remitente,
         periodo: porColumna.periodo,
+        folio_egreso: porColumna.folio_egreso,
+        numero: porColumna.numero,
+        fecha_sii: porColumna.fecha_sii,
     };
 }
 
