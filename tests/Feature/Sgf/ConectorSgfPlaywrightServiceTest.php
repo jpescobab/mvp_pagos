@@ -154,6 +154,59 @@ test('importarPendientes registra un snapshot por fila y vincula documentos entr
     expect(CasoPagoProveedor::where('sgf_id', '222')->exists())->toBeTrue();
 });
 
+test('importarGrupoPagoOperaciones solo persiste casos del grupo Pago Operaciones', function () {
+    autorizarConectorSgfDePrueba();
+
+    Http::fake(['*/casos/importar-grupo-pago-operaciones' => Http::response([
+        'filas' => [
+            ['sgf_id' => '333', 'payload_crudo' => ['sgf_id' => '333', 'grupo_actual' => 'Pago Operaciones', 'rut' => '33333333-3', 'monto' => '300.000']],
+        ],
+        'pasos' => [
+            ['orden' => 1, 'accion' => 'filtrar_grupo_pago_operaciones', 'estado' => 'completado'],
+        ],
+    ], 200)]);
+
+    $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+    $trabajo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_grupo_pago_operaciones',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now(),
+    ]);
+
+    $this->servicio->importarGrupoPagoOperaciones($trabajo);
+
+    $trabajo->refresh();
+    expect($trabajo->estado)->toBe('completado');
+    expect($trabajo->total_elementos)->toBe(1);
+    expect($trabajo->snapshotsDatosExternos)->toHaveCount(1);
+    expect($trabajo->snapshotsDatosExternos->sole()->referencia_externa)->toBe('333');
+
+    expect(CasoPagoProveedor::where('sgf_id', '333')->sole()->sgf_current_group_raw)->toBe('Pago Operaciones');
+});
+
+test('importarGrupoPagoOperaciones no guarda snapshots parciales cuando el microservicio falla', function () {
+    autorizarConectorSgfDePrueba();
+
+    Http::fake(['*/casos/importar-grupo-pago-operaciones' => Http::response(['error' => 'timeout de navegación'], 500)]);
+
+    $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+    $trabajo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_grupo_pago_operaciones',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now(),
+    ]);
+
+    $this->servicio->importarGrupoPagoOperaciones($trabajo);
+
+    $trabajo->refresh();
+    expect($trabajo->estado)->toBe('error');
+    expect($trabajo->snapshotsDatosExternos)->toHaveCount(0);
+});
+
 test('importarPendientes no guarda snapshots parciales cuando el microservicio falla', function () {
     autorizarConectorSgfDePrueba();
 

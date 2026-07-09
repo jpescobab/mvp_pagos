@@ -70,6 +70,16 @@ export default function ImportacionesSgfIndex() {
                         >
                             Importar pendientes de SGF
                         </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                router.post(
+                                    casos.importarGrupoPagoOperaciones().url,
+                                )
+                            }
+                        >
+                            Importar grupo Pago Operaciones
+                        </Button>
                     </div>
                 </div>
 

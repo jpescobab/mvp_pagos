@@ -121,6 +121,7 @@ export type CasoPagoProveedor = {
     folio_egreso: string | null;
     numero: string | null;
     fecha_sii: string | null;
+    observacion_egreso: string | null;
     proceso: Proceso;
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
     registros_contables_cgu?: RegistroContableCgu[];

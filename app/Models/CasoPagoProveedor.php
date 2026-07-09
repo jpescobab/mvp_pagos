@@ -24,6 +24,7 @@ class CasoPagoProveedor extends Model
         'folio_egreso',
         'numero',
         'fecha_sii',
+        'observacion_egreso',
     ];
 
     protected function casts(): array

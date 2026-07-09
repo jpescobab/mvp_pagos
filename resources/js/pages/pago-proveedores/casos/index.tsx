@@ -38,22 +38,25 @@ export default function CasosIndex() {
                     <table className="w-full table-fixed text-xs">
                         <thead className="bg-muted/50 text-left text-[10px] tracking-wide text-muted-foreground uppercase">
                             <tr>
-                                <th className="w-[18%] px-2.5 py-1 font-medium">
+                                <th className="w-[17%] px-2.5 py-1 font-medium">
                                     Proveedor
                                 </th>
                                 <th className="w-[6%] px-2.5 py-1 font-medium">
                                     ID
                                 </th>
-                                <th className="hidden w-[7%] px-2.5 py-1 font-medium lg:table-cell">
+                                <th className="hidden w-[6%] px-2.5 py-1 font-medium lg:table-cell">
                                     Periodo
                                 </th>
-                                <th className="hidden w-[16%] px-2.5 py-1 font-medium xl:table-cell">
+                                <th className="hidden w-[12%] px-2.5 py-1 font-medium lg:table-cell">
                                     Observación
                                 </th>
-                                <th className="hidden w-[9%] px-2.5 py-1 font-medium lg:table-cell">
+                                <th className="hidden w-[8%] px-2.5 py-1 font-medium lg:table-cell">
+                                    Obs. egreso
+                                </th>
+                                <th className="hidden w-[8%] px-2.5 py-1 font-medium lg:table-cell">
                                     Folio egreso
                                 </th>
-                                <th className="hidden w-[7%] px-2.5 py-1 font-medium lg:table-cell">
+                                <th className="hidden w-[6%] px-2.5 py-1 font-medium lg:table-cell">
                                     Número
                                 </th>
                                 <th className="hidden w-[9%] px-2.5 py-1 font-medium md:table-cell">
@@ -74,7 +77,7 @@ export default function CasosIndex() {
                             {pagina.data.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={10}
+                                        colSpan={11}
                                         className="px-2.5 py-5 text-center text-muted-foreground"
                                     >
                                         No hay casos de pago de proveedores
@@ -122,10 +125,16 @@ export default function CasosIndex() {
                                         {caso.periodo ?? '—'}
                                     </td>
                                     <td
-                                        className="hidden truncate px-2.5 py-1 text-muted-foreground xl:table-cell"
+                                        className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
                                         title={caso.observacion ?? undefined}
                                     >
                                         {caso.observacion ?? '—'}
+                                    </td>
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
+                                        title={caso.observacion_egreso ?? undefined}
+                                    >
+                                        {caso.observacion_egreso ?? '—'}
                                     </td>
                                     <td className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell">
                                         {caso.folio_egreso ?? '—'}

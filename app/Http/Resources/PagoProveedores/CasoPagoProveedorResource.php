@@ -34,6 +34,7 @@ class CasoPagoProveedorResource extends JsonResource
             'folio_egreso' => $this->folio_egreso,
             'numero' => $this->numero,
             'fecha_sii' => $this->fecha_sii,
+            'observacion_egreso' => $this->observacion_egreso,
             'proceso' => new ProcesoResource($this->proceso),
             'proceso_adquisicion' => $this->whenLoaded(
                 'procesoAdquisicion',

@@ -7,11 +7,11 @@ Exponer, de solo lectura, el historial de corridas de importación SGF (`trabajo
 ## Requirements
 
 ### Requirement: Listar las corridas de importación SGF
-El sistema SHALL exponer, a cualquier usuario autenticado, un listado paginado de los `trabajos_integracion` del sistema externo `SGF`, ordenado del más reciente al más antiguo, con su tipo (verificación puntual o importación masiva), mecanismo, quién lo inició, fecha de inicio y fin, total de elementos y estado.
+El sistema SHALL exponer, a cualquier usuario autenticado, un listado paginado de los `trabajos_integracion` del sistema externo `SGF`, ordenado del más reciente al más antiguo, con su tipo (verificación puntual, importación masiva o importación selectiva del grupo "Pago operaciones"), mecanismo, quién lo inició, fecha de inicio y fin, total de elementos y estado.
 
 #### Scenario: Listar corridas de importación
 - **WHEN** un usuario autenticado visita el listado de importaciones SGF
-- **THEN** la respuesta incluye los `trabajos_integracion` del sistema externo `SGF` paginados, ordenados del más reciente al más antiguo, cada uno con su tipo, usuario que lo inició, fechas de inicio/fin, total de elementos y estado
+- **THEN** la respuesta incluye los `trabajos_integracion` del sistema externo `SGF` paginados, ordenados del más reciente al más antiguo, cada uno con su tipo (incluyendo `importar_grupo_pago_operaciones` cuando corresponda), usuario que lo inició, fechas de inicio/fin, total de elementos y estado
 
 ### Requirement: Ver el detalle de una corrida de importación SGF
 El sistema SHALL exponer, a cualquier usuario autenticado, el detalle de un `trabajo_integracion` del sistema externo `SGF` junto con todos los `snapshots_datos_externos` que produjo.

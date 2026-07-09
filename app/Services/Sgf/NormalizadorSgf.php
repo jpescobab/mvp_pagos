@@ -21,6 +21,7 @@ class NormalizadorSgf
             'folio_egreso' => $this->trimONull($filaSgf['folio_egreso'] ?? null),
             'numero' => $this->trimONull($filaSgf['numero'] ?? null),
             'fecha_sii' => $this->trimONull($filaSgf['fecha_sii'] ?? null),
+            'observacion_egreso' => $this->trimONull($filaSgf['observacion_egreso'] ?? null),
         ];
     }
 

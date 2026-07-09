@@ -30,6 +30,7 @@ function crearSnapshotSgf(array $overrides = []): SnapshotDatosExterno
         'folio_egreso' => 'EGR-9001',
         'numero' => '4521',
         'fecha_sii' => '08-07-2026',
+        'observacion_egreso' => 'EGRESO-115',
     ], $overrides);
 
     return SnapshotDatosExterno::create([
@@ -147,6 +148,7 @@ test('un payload normalizado sin los campos nuevos deja esos campos en null sin 
         'folio_egreso' => null,
         'numero' => null,
         'fecha_sii' => null,
+        'observacion_egreso' => null,
     ]));
 
     expect($caso->periodo)->toBeNull();
@@ -154,6 +156,31 @@ test('un payload normalizado sin los campos nuevos deja esos campos en null sin 
     expect($caso->folio_egreso)->toBeNull();
     expect($caso->numero)->toBeNull();
     expect($caso->fecha_sii)->toBeNull();
+    expect($caso->observacion_egreso)->toBeNull();
+});
+
+test('reimportar un sgf_id existente actualiza observacion_egreso sin alterar el estado del proceso', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf(['observacion_egreso' => 'EGRESO-115']));
+
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+
+    $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf(['observacion_egreso' => 'EGRESO-200']),
+    );
+
+    expect($casoActualizado->id)->toBe($caso->id);
+    expect($casoActualizado->observacion_egreso)->toBe('EGRESO-200');
+    expect($casoActualizado->proceso->refresh()->estadoActual->codigo)->toBe('recibida_finanzas');
+});
+
+test('un payload normalizado sin observacion_egreso deja el campo en null sin fallar la importación', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf(['observacion_egreso' => null]));
+
+    expect($caso->observacion_egreso)->toBeNull();
 });
 
 test('fecha_sii con formato no parseable se guarda como null sin fallar la importación', function () {
