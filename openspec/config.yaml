@@ -90,3 +90,30 @@ context: |
   - Antes de proponer un fix de performance, medir el estado actual (build de
     producción, `toSql()`/query log, conteo de filas reales) y volver a medir después
     del cambio — no asumir el efecto de una optimización sin verificarlo empíricamente.
+
+  Jobs de larga duración y conectores Playwright — lecciones de la calibración real
+  del conector SGF (ver services/sgf-playwright/CALIBRACION.md y HARNESS_IA.md
+  sección 13 para el detalle completo), a tener en cuenta en toda propuesta nueva:
+  - `php artisan queue:listen` ejecuta cada job en un proceso hijo envuelto en un
+    `Symfony\Component\Process\Process` con su PROPIO timeout de 60s por defecto,
+    independiente del `$timeout` del Job (que solo aplica al límite interno vía
+    pcntl_alarm, no disponible en Windows). Si un Job puede tardar más de 60s, hay
+    que pasar `--timeout` explícito a `queue:listen` (ver composer.json, script
+    "dev") acorde a la duración esperada — si no, el Symfony Process mata el
+    proceso hijo Y crashea `queue:listen` completo sin dejar ningún registro de
+    error, dejando el `trabajo_integracion` huérfano en `en_progreso`.
+  - Todo Job con middleware `WithoutOverlapping` SHALL fijar `expireAfter()`
+    explícito. Sin él, el lock queda tomado ~24h por defecto; si el proceso muere
+    de forma abrupta sin liberarlo, cada reintento choca contra el lock viejo y
+    falla instantáneamente por "demasiados intentos" sin ejecutar nada.
+  - Un `trabajo_integracion` "en_progreso" puede quedar huérfano por causas fuera
+    del código (timeout de proceso, terminal cerrada, equipo suspendido, servicio
+    externo reiniciado a mitad de camino) — la capa transversal ya detecta y marca
+    esto automáticamente (ver requirement "Detectar y marcar automáticamente
+    trabajos de integración huérfanos" en `integraciones-api-browser-automation`);
+    no reinventar esta lógica en un conector nuevo, reutilizar
+    `IntegracionExternaService::expirarSiEsHuerfano()`.
+  - Todo conector Playwright SHALL cerrar la sesión de navegador autenticada al
+    terminar cada ejecución (éxito o error) — no reutilizar el navegador entre
+    corridas (ver requirement "No mantener viva una sesión de automatización
+    entre ejecuciones" en `integraciones-api-browser-automation`).
