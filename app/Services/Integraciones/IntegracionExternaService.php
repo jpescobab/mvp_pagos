@@ -104,4 +104,49 @@ class IntegracionExternaService
 
         return $trabajo->refresh();
     }
+
+    /**
+     * Marca un trabajo como huérfano: el proceso que lo ejecutaba
+     * probablemente murió sin poder reportar ni éxito ni error (timeout del
+     * worker de la cola, terminal cerrada, equipo suspendido, etc.). Distinto
+     * de `error` para no mezclar, en reportes, un rechazo real del sistema
+     * externo con un proceso que dejó de correr sin poder decir por qué.
+     */
+    public function marcarHuerfano(TrabajoIntegracion $trabajo): TrabajoIntegracion
+    {
+        $minutos = $trabajo->umbralHuerfanoEnMinutos();
+
+        return $this->finalizarTrabajo(
+            $trabajo,
+            'huerfano',
+            "Detectado automáticamente como huérfano: sin actividad tras {$minutos} minutos desde iniciado_en, se asume que el proceso que lo ejecutaba dejó de correr.",
+        );
+    }
+
+    /**
+     * Chequeo perezoso: si el trabajo ya no está en_progreso o sigue dentro
+     * de su umbral, lo devuelve sin tocar. Si superó su umbral, lo marca
+     * como huérfano y devuelve la versión actualizada — pensado para
+     * invocarse justo antes de evaluar una guarda de "ya hay uno en curso",
+     * así un reintento inmediato no tiene que esperar el próximo barrido
+     * programado.
+     */
+    public function expirarSiEsHuerfano(TrabajoIntegracion $trabajo): TrabajoIntegracion
+    {
+        return $trabajo->esHuerfano() ? $this->marcarHuerfano($trabajo) : $trabajo;
+    }
+
+    /**
+     * Barrido completo: marca como huérfano cada trabajo_integracion en
+     * en_progreso que superó el umbral de su tipo. Pensado para correr
+     * periódicamente vía Scheduler (ver routes/console.php).
+     */
+    public function expirarHuerfanos(): int
+    {
+        return TrabajoIntegracion::where('estado', 'en_progreso')
+            ->get()
+            ->filter(fn (TrabajoIntegracion $trabajo) => $trabajo->esHuerfano())
+            ->each(fn (TrabajoIntegracion $trabajo) => $this->marcarHuerfano($trabajo))
+            ->count();
+    }
 }

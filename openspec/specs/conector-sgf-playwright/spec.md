@@ -35,7 +35,7 @@ El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.importa
 - **AND** el usuario puede consultar el avance de ese `trabajo_integracion` mediante sondeo (polling)
 
 #### Scenario: Ya hay una importación masiva en curso
-- **WHEN** un usuario solicita importar los casos pendientes de SGF mientras ya existe un `trabajo_integracion` de importación masiva sin finalizar
+- **WHEN** un usuario solicita importar los casos pendientes de SGF mientras ya existe un `trabajo_integracion` de importación masiva en `en_progreso` dentro de su umbral de detección de huérfanos
 - **THEN** el sistema no encola un nuevo Job
 - **AND** informa al usuario que ya hay una importación en curso, señalando su `trabajo_integracion`
 
@@ -49,6 +49,10 @@ El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.importa
 - **THEN** el sistema no guarda ningún `snapshot_datos_externo` parcial de esa corrida
 - **AND** registra el `trabajo_integracion` en estado `error` con el detalle de la falla
 - **AND** permite a un usuario autorizado disparar un nuevo intento
+
+#### Scenario: Un trabajo de importación masiva huérfano permite un nuevo intento
+- **WHEN** un usuario solicita importar los casos pendientes de SGF mientras el `trabajo_integracion` de importación masiva existente ya fue marcado (o se detecta en ese momento) como `huerfano` por la capa transversal de integraciones
+- **THEN** el sistema encola un nuevo Job de importación masiva normalmente, como si no existiera ninguna importación en curso
 
 #### Scenario: Usuario sin permiso intenta importar masivamente
 - **WHEN** un usuario sin el permiso `pago_proveedores.importar_casos_sgf` intenta disparar una importación masiva

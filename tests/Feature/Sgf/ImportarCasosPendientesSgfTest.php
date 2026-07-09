@@ -65,6 +65,53 @@ test('si ya hay una importación masiva en curso no se despacha un Job nuevo', f
     Queue::assertNotPushed(ImportarCasosPendientesSgfJob::class);
 });
 
+test('un trabajo huérfano (fuera de su umbral) no bloquea un nuevo intento y se marca automáticamente', function () {
+    Queue::fake();
+    autorizarConectorSgfParaImportacionMasiva();
+
+    $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+    $huerfano = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now()->subMinutes(91),
+    ]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.importar_casos_sgf');
+
+    $response = $this->actingAs($usuario)->post(route('sgf.casos.importar-pendientes'));
+
+    $nuevoTrabajo = TrabajoIntegracion::where('estado', 'en_progreso')->sole();
+    $response->assertRedirect(route('sgf.importaciones.show', $nuevoTrabajo));
+    expect($huerfano->refresh()->estado)->toBe('huerfano');
+    Queue::assertPushed(ImportarCasosPendientesSgfJob::class, 1);
+});
+
+test('un trabajo en_progreso todavía dentro de su umbral sigue bloqueando el reintento', function () {
+    Queue::fake();
+    autorizarConectorSgfParaImportacionMasiva();
+
+    $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+    $trabajoEnCurso = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now()->subMinutes(10),
+    ]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.importar_casos_sgf');
+
+    $response = $this->actingAs($usuario)->post(route('sgf.casos.importar-pendientes'));
+
+    $response->assertRedirect(route('sgf.importaciones.show', $trabajoEnCurso));
+    expect($trabajoEnCurso->refresh()->estado)->toBe('en_progreso');
+    Queue::assertNotPushed(ImportarCasosPendientesSgfJob::class);
+});
+
 test('un usuario sin permiso no puede disparar la importación masiva', function () {
     $usuario = User::factory()->create();
 

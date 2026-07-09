@@ -82,7 +82,13 @@ class ConectorSgfPlaywrightService
 
         $ejecucion = $this->automatizacionNavegador->iniciarEjecucion($conector, trabajo: $trabajo);
 
-        $respuesta = $this->llamarMicroservicio('casos/importar-pendientes', [], timeout: 600, trabajo: $trabajo, ejecucion: $ejecucion);
+        // 3300s (55 min): por debajo del $timeout del Job (3600s) a propósito
+        // — si Node se cuelga de verdad, este timeout HTTP debe vencer
+        // primero y dejar un 'error' explícito vía finalizarConError(), en
+        // vez de que el worker mate el proceso del job con una señal que no
+        // deja ningún registro (justo lo que pasó antes de fijar $timeout
+        // en ImportarCasosPendientesSgfJob).
+        $respuesta = $this->llamarMicroservicio('casos/importar-pendientes', [], timeout: 3300, trabajo: $trabajo, ejecucion: $ejecucion);
 
         if ($respuesta === null) {
             return;

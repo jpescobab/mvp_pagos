@@ -19,3 +19,7 @@ Schedule::job(new ImportarDolarDiarioJob)
     ->dailyAt('07:00')
     ->timezone('America/Coyhaique')
     ->withoutOverlapping();
+
+Schedule::command('trabajos-integracion:expirar-huerfanos')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();

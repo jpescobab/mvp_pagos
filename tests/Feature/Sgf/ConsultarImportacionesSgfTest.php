@@ -45,6 +45,66 @@ test('un usuario autenticado puede listar las importaciones SGF ordenadas de la 
     );
 });
 
+test('el listado se puede filtrar por un término de búsqueda que coincide con el tipo o el usuario que la inició', function () {
+    $usuarioIniciador = User::factory()->create(['name' => 'Ana Iniciadora']);
+
+    $porTipo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'verificar_caso',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    $porUsuario = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_por' => $usuarioIniciador->id,
+        'iniciado_en' => now()->subHour(),
+        'estado' => 'completado',
+    ]);
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subHours(2),
+        'estado' => 'completado',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $porTipoResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'verificar_caso']));
+    $porTipoResponse->assertInertia(fn (Assert $page) => $page
+        ->has('importaciones.data', 1)
+        ->where('importaciones.data.0.id', $porTipo->id)
+    );
+
+    $porUsuarioResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'Ana Iniciadora']));
+    $porUsuarioResponse->assertInertia(fn (Assert $page) => $page
+        ->has('importaciones.data', 1)
+        ->where('importaciones.data.0.id', $porUsuario->id)
+    );
+});
+
+test('el listado queda vacío sin error cuando el término de búsqueda no coincide con nada', function () {
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'termino-inexistente']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('importaciones.data', 0)
+    );
+});
+
 test('el detalle de una importación incluye los snapshots que produjo', function () {
     $trabajo = TrabajoIntegracion::create([
         'sistema_externo_id' => $this->sistema->id,

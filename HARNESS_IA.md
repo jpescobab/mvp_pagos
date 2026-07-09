@@ -399,9 +399,12 @@ Prohibido:
 - evadir CAPTCHA;
 - saltar controles de acceso;
 - ejecutar pagos automáticos sin confirmación humana;
-- guardar credenciales/cookies en Git.
+- guardar credenciales/cookies en Git;
+- dejar viva una sesión autenticada de automatización entre ejecuciones. *(Verificado 2026-07-08 en el conector de SGF: se cierra el navegador/contexto de Playwright al terminar cada `ejecucion_automatizacion_navegador`, éxito o error — ver requirement equivalente en spec `integraciones-api-browser-automation`.)*
 
 Toda ejecución Playwright debe guardar run, pasos, artifacts, screenshots o trazas cuando corresponda.
+
+Un Job de importación masiva vía Playwright puede tardar mucho más que el timeout por defecto de un worker de cola. En Windows, `php artisan queue:listen` ejecuta cada job en un proceso hijo con su **propio** timeout (`Symfony\Process`, 60s por defecto) independiente del `$timeout` del Job — si vence, mata el proceso hijo y además crashea `queue:listen` completo, sin dejar ningún registro de error. Cualquier Job de integración de larga duración debe: (1) declarar su propio `$timeout` (documentación, no aplica bajo `queue:listen` en Windows), (2) que quien lo corra pase `--timeout` explícito a `queue:listen` acorde a la duración esperada, y (3) que su `WithoutOverlapping` (si aplica) tenga `expireAfter()` explícito — sin él, el lock por defecto queda tomado ~24h si el proceso muere de forma abrupta, bloqueando reintentos. Ver `services/sgf-playwright/CALIBRACION.md` para el caso real que expuso esto.
 
 ---
 

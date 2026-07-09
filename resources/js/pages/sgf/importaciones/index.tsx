@@ -1,6 +1,18 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { MoreHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ImportacionEstadoBadge } from '@/components/sgf/importacion-estado-badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
+import { useInitials } from '@/hooks/use-initials';
 import { formatNumero } from '@/lib/format';
 import casos from '@/routes/sgf/casos';
 import importaciones from '@/routes/sgf/importaciones';
@@ -9,10 +21,30 @@ import type { ImportacionSgf } from '@/types/sgf';
 
 type PageProps = {
     importaciones: Paginated<ImportacionSgf>;
+    q: string | null;
 };
 
 export default function ImportacionesSgfIndex() {
-    const { importaciones: pagina } = usePage<PageProps>().props;
+    const { importaciones: pagina, q } = usePage<PageProps>().props;
+    const [termino, setTermino] = useState(q ?? '');
+    const getInitials = useInitials();
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (termino === (q ?? '')) {
+                return;
+            }
+
+            router.get(
+                importaciones.index().url,
+                termino === '' ? {} : { q: termino },
+                { preserveState: true, preserveScroll: true },
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [termino]);
 
     return (
         <>
@@ -23,49 +55,58 @@ export default function ImportacionesSgfIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Importaciones SGF
                     </h1>
-                    <Button
-                        variant="outline"
-                        onClick={() =>
-                            router.post(casos.importarPendientes().url)
-                        }
-                    >
-                        Importar pendientes de SGF
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Buscar por tipo o usuario…"
+                            value={termino}
+                            onChange={(e) => setTermino(e.target.value)}
+                            className="w-64"
+                        />
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                router.post(casos.importarPendientes().url)
+                            }
+                        >
+                            Importar pendientes de SGF
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50 text-left text-muted-foreground">
+                <div className="overflow-x-auto rounded-xl border">
+                    <table className="w-full table-fixed text-xs">
+                        <thead className="bg-muted/50 text-left text-[10px] tracking-wide text-muted-foreground uppercase">
                             <tr>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="w-[20%] px-2.5 py-1 font-medium">
                                     Tipo
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="w-[18%] px-2.5 py-1 font-medium">
                                     Iniciado por
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="hidden w-[16%] px-2.5 py-1 font-medium md:table-cell">
                                     Iniciado en
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="hidden w-[16%] px-2.5 py-1 font-medium lg:table-cell">
                                     Finalizado en
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="w-[12%] px-2.5 py-1 text-right font-medium">
                                     Total elementos
                                 </th>
-                                <th className="px-4 py-2 font-medium">
+                                <th className="w-[12%] px-2.5 py-1 font-medium">
                                     Estado
                                 </th>
+                                <th className="w-[6%] px-2.5 py-1 font-medium"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {pagina.data.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="px-4 py-6 text-center text-muted-foreground"
+                                        colSpan={7}
+                                        className="px-2.5 py-5 text-center text-muted-foreground"
                                     >
-                                        Sin importaciones SGF registradas
-                                        todavía.
+                                        Sin importaciones SGF registradas que
+                                        coincidan.
                                     </td>
                                 </tr>
                             )}
@@ -80,32 +121,100 @@ export default function ImportacionesSgfIndex() {
                                         )
                                     }
                                 >
-                                    <td className="px-4 py-2">
+                                    <td
+                                        className="truncate px-2.5 py-1 font-medium"
+                                        title={importacion.tipo}
+                                    >
                                         {importacion.tipo}
                                     </td>
-                                    <td className="px-4 py-2 text-muted-foreground">
-                                        {importacion.iniciado_por ?? 'Sistema'}
+                                    <td className="px-2.5 py-1">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="size-6 shrink-0">
+                                                <AvatarFallback className="bg-accent text-[10px] font-semibold text-accent-foreground">
+                                                    {getInitials(
+                                                        importacion.iniciado_por ??
+                                                            'Sistema',
+                                                    )}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span
+                                                className="truncate text-muted-foreground"
+                                                title={
+                                                    importacion.iniciado_por ??
+                                                    'Sistema'
+                                                }
+                                            >
+                                                {importacion.iniciado_por ??
+                                                    'Sistema'}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-2 font-mono text-xs">
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 font-mono text-muted-foreground md:table-cell"
+                                        title={new Date(
+                                            importacion.iniciado_en,
+                                        ).toLocaleString()}
+                                    >
                                         {new Date(
                                             importacion.iniciado_en,
                                         ).toLocaleString()}
                                     </td>
-                                    <td className="px-4 py-2 font-mono text-xs">
+                                    <td
+                                        className="hidden truncate px-2.5 py-1 font-mono text-muted-foreground lg:table-cell"
+                                        title={
+                                            importacion.finalizado_en
+                                                ? new Date(
+                                                      importacion.finalizado_en,
+                                                  ).toLocaleString()
+                                                : '—'
+                                        }
+                                    >
                                         {importacion.finalizado_en
                                             ? new Date(
                                                   importacion.finalizado_en,
                                               ).toLocaleString()
                                             : '—'}
                                     </td>
-                                    <td className="px-4 py-2">
+                                    <td className="px-2.5 py-1 text-right">
                                         <Monto
                                             valor={importacion.total_elementos}
                                             variante="numero"
                                         />
                                     </td>
-                                    <td className="px-4 py-2">
-                                        {importacion.estado}
+                                    <td className="px-2.5 py-1">
+                                        <ImportacionEstadoBadge
+                                            estado={importacion.estado}
+                                        />
+                                    </td>
+                                    <td
+                                        className="px-2.5 py-1 text-right"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-6"
+                                                >
+                                                    <MoreHorizontal className="size-3.5" />
+                                                    <span className="sr-only">
+                                                        Acciones
+                                                    </span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem asChild>
+                                                    <Link
+                                                        href={importaciones.show.url(
+                                                            importacion.id,
+                                                        )}
+                                                    >
+                                                        Ver detalle
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             ))}
@@ -116,8 +225,8 @@ export default function ImportacionesSgfIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

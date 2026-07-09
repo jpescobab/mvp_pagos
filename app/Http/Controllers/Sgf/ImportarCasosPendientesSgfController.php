@@ -41,7 +41,14 @@ class ImportarCasosPendientesSgfController extends Controller
             ->latest('id')
             ->first();
 
+        // Chequeo perezoso: si el trabajo encontrado ya superó su umbral de
+        // inactividad, se marca como huérfano acá mismo (sin esperar el
+        // próximo barrido programado) y deja de bloquear un nuevo intento.
         if ($trabajoEnCurso !== null) {
+            $trabajoEnCurso = $this->integracionExterna->expirarSiEsHuerfano($trabajoEnCurso);
+        }
+
+        if ($trabajoEnCurso !== null && $trabajoEnCurso->estado === 'en_progreso') {
             Inertia::flash('toast', ['type' => 'info', 'message' => 'Ya hay una importación de casos pendientes de SGF en curso.']);
 
             return to_route('sgf.importaciones.show', $trabajoEnCurso);
