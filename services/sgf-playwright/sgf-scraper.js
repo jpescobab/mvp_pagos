@@ -18,7 +18,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { BANDEJA_PROCESOS, LOGIN, MAPEO_COLUMNAS_BANDEJA, MENU_ACCIONES_PROCESO, NAVEGACION_REDFLOW, PAGINACION_BANDEJA, SELECCION_UNIDAD_INGRESO, VER_DOCUMENTOS } from './selectors.js';
+import { BANDEJA_PROCESOS, FILTRO_BANDEJA, LOGIN, MAPEO_COLUMNAS_BANDEJA, MENU_ACCIONES_PROCESO, NAVEGACION_REDFLOW, PAGINACION_BANDEJA, SELECCION_UNIDAD_INGRESO, VER_DOCUMENTOS } from './selectors.js';
 
 // Tope defensivo de páginas a recorrer en la Bandeja: evita un bucle
 // infinito si la detección de "última página" (clase "disabled"/atributo
@@ -542,6 +542,7 @@ async function extraerDatosFila(filaLocator, encabezados) {
         folio_egreso: porColumna.folio_egreso,
         numero: porColumna.numero,
         fecha_sii: porColumna.fecha_sii,
+        observacion_egreso: porColumna.observacion_egreso,
     };
 }
 
@@ -703,9 +704,21 @@ async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
 /**
  * Procesa una única fila de proceso: extrae sus datos y descarga sus
  * documentos adjuntos.
+ *
+ * @param {{filtro?: (datos: object) => boolean}} [opciones] Si se pasa
+ * `filtro`, la fila se descarta (sin descargar sus documentos, el paso más
+ * costoso) cuando `filtro(datos)` da `false` — usado por
+ * importarGrupoPagoOperaciones() como red de seguridad adicional al filtro
+ * nativo de la Bandeja.
+ * @returns {Promise<{sgf_id: string, payload_crudo: object}|null>} `null` si
+ * `filtro` descartó la fila.
  */
-async function procesarFilaProceso(page, filaLocator, encabezados, pasos) {
+async function procesarFilaProceso(page, filaLocator, encabezados, pasos, opciones = {}) {
     const datos = await extraerDatosFila(filaLocator, encabezados);
+
+    if (opciones.filtro && !opciones.filtro(datos)) {
+        return null;
+    }
 
     if (!datos.sgf_id) {
         const celdas = await filaLocator.locator('td').allTextContents();
@@ -793,6 +806,109 @@ export async function importarPendientes() {
         for (let i = 0; i < total; i++) {
             const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
             resultado.push(await procesarFilaProceso(page, fila, encabezados, pasos));
+        }
+
+        pasos.push(paso(`pagina_bandeja_${numeroPagina}`, 'completado', { filas_procesadas: total }));
+
+        if (!(await avanzarSiguientePagina(page))) {
+            break;
+        }
+    }
+
+    return { filas: resultado, pasos: numerarPasos(pasos) };
+}
+
+/**
+ * Fecha (mismo día del mes, un mes atrás) en formato "YYYY-MM-DD" — el
+ * formato que espera .fill() en un <input type="date"> nativo,
+ * independientemente del formato que el navegador muestre visualmente al
+ * usuario. TODO-VERIFICAR: se asume que "Fecha inicial" es un input nativo;
+ * si el DOM real resulta ser un datepicker de terceros con otro formato de
+ * entrada, hay que ajustar este helper.
+ */
+function fechaHaceUnMes() {
+    const hoy = new Date();
+    const haceUnMes = new Date(hoy.getFullYear(), hoy.getMonth() - 1, hoy.getDate());
+
+    const año = haceUnMes.getFullYear();
+    const mes = String(haceUnMes.getMonth() + 1).padStart(2, '0');
+    const dia = String(haceUnMes.getDate()).padStart(2, '0');
+
+    return `${año}-${mes}-${dia}`;
+}
+
+/**
+ * Aplica el filtro "Grupo" + rango de fechas del formulario "Buscar" de la
+ * Bandeja y hace clic en "Buscar". A diferencia de navegarABandeja() (que
+ * evita deliberadamente ese botón para la importación masiva), esta función
+ * SÍ lo usa: calibración aportada por el usuario (2026-07-09) confirmó que,
+ * con un rango de fechas suficientemente amplio (un mes atrás hasta hoy) y
+ * un grupo seleccionado, "Buscar" no vacía la tabla — el vaciado
+ * VERIFICADO 2026-07-08 (ver navegarABandeja) ocurre porque el rango por
+ * defecto es "hoy a hoy", no por un problema del botón en sí.
+ *
+ * Reutiliza localizarDropdownPorEtiqueta()/seleccionarDropdownPorTexto() tal
+ * cual (su xpath "siguiente campo" es genérico, no específico de
+ * "unidad de ingreso"). TODO-VERIFICAR: el selector exacto del multiselect
+ * "Grupo" y del input "Fecha inicial" no está calibrado contra el DOM real
+ * (la captura aportada es visual, no HTML) — ver tarea 1.5 del change
+ * importar-casos-grupo-pago-operaciones-sgf.
+ */
+async function filtrarBandejaPorGrupoPagoOperaciones(page, pasos) {
+    await seleccionarDropdownPorTexto(
+        page,
+        FILTRO_BANDEJA.etiquetaGrupo,
+        FILTRO_BANDEJA.valorGrupoPagoOperaciones,
+        'filtro "Grupo" de la Bandeja',
+    );
+
+    const campoFechaInicial = localizarDropdownPorEtiqueta(page, FILTRO_BANDEJA.etiquetaFechaInicial);
+    await campoFechaInicial.fill(fechaHaceUnMes());
+
+    // "Fecha final" se deja en su valor precargado por defecto (hoy) — no
+    // se toca.
+
+    const botonBuscar = await primerSelectorExistente(page, BANDEJA_PROCESOS.botonBuscar, 'botón "Buscar" de la Bandeja');
+    await botonBuscar.click();
+    await page.waitForLoadState('networkidle');
+    await esperarSpinnerAusente(page);
+
+    pasos.push(paso('filtrar_grupo_pago_operaciones', 'completado'));
+}
+
+/**
+ * Lista los casos SGF cuyo grupo actual es "Pago Operaciones", usando el
+ * filtro nativo de la Bandeja (Decisión 1, design.md del change
+ * importar-casos-grupo-pago-operaciones-sgf) en vez de recorrer y descartar
+ * client-side. Como red de seguridad, cada fila igual se valida contra
+ * `grupo_actual` antes de descargar sus documentos, por si el filtro nativo
+ * devolviera alguna fila inesperada.
+ *
+ * @returns {Promise<{filas: Array<{sgf_id: string, payload_crudo: object}>, pasos: Array}>}
+ */
+export async function importarGrupoPagoOperaciones() {
+    const pasos = [];
+    const page = await obtenerPagina();
+
+    await asegurarSesionIniciada(page, pasos);
+    await navegarABandeja(page, pasos);
+    await filtrarBandejaPorGrupoPagoOperaciones(page, pasos);
+
+    const resultado = [];
+
+    for (let numeroPagina = 1; numeroPagina <= MAX_PAGINAS_BANDEJA; numeroPagina++) {
+        const encabezados = await leerEncabezadosTabla(page);
+        const total = await page.locator(BANDEJA_PROCESOS.filaProceso).count();
+
+        for (let i = 0; i < total; i++) {
+            const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
+            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos, {
+                filtro: (datos) => normalizarTexto(datos.grupo_actual) === normalizarTexto(FILTRO_BANDEJA.valorGrupoPagoOperaciones),
+            });
+
+            if (procesado) {
+                resultado.push(procesado);
+            }
         }
 
         pasos.push(paso(`pagina_bandeja_${numeroPagina}`, 'completado', { filas_procesadas: total }));

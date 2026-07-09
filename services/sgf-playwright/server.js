@@ -31,6 +31,7 @@ const CASOS = [
         estado: 'EN_TRAMITE',
         grupo_actual: 'FINANZAS',
         observaciones: 'Pendiente de revisión',
+        observacion_egreso: 'EGRESO-115',
         rut: '11.111.111-1',
         monto: '1.234.567,89',
         periodo: '2026-07',
@@ -72,6 +73,19 @@ const CASOS = [
             },
         ],
     },
+    {
+        sgf_id: '67601',
+        estado: 'EN_TRAMITE',
+        grupo_actual: 'Pago Operaciones',
+        observaciones: 'Reembolso gasto combustible',
+        rut: '44.444.444-4',
+        monto: '89.900',
+        periodo: '2026-07',
+        folio_egreso: 'EGR-10061',
+        numero: '87301',
+        fecha_sii: '08-07-2026',
+        pendiente: true,
+    },
 ];
 
 function pasosNavegacion(...acciones) {
@@ -110,6 +124,22 @@ async function manejarImportarPendientesStub() {
             'iniciar_sesion',
             'listar_pendientes',
             ...pendientes.map((c) => `abrir_caso_${c.sgf_id}`),
+        ),
+    };
+}
+
+const GRUPO_PAGO_OPERACIONES = 'pago operaciones';
+
+async function manejarImportarGrupoPagoOperacionesStub() {
+    const delGrupo = CASOS.filter((c) => c.grupo_actual.trim().toLowerCase() === GRUPO_PAGO_OPERACIONES);
+
+    return {
+        filas: delGrupo.map((c) => ({ sgf_id: c.sgf_id, payload_crudo: c })),
+        pasos: pasosNavegacion(
+            'iniciar_sesion',
+            'navegar_bandeja',
+            'filtrar_grupo_pago_operaciones',
+            ...delGrupo.map((c) => `abrir_caso_${c.sgf_id}`),
         ),
     };
 }
@@ -162,6 +192,15 @@ const server = createServer(async (req, res) => {
             const resultado = await ejecutarEnModoReal(
                 (scraper) => scraper.importarPendientes(),
                 () => manejarImportarPendientesStub(),
+            );
+
+            return json(res, 200, resultado);
+        }
+
+        if (req.method === 'POST' && req.url === '/casos/importar-grupo-pago-operaciones') {
+            const resultado = await ejecutarEnModoReal(
+                (scraper) => scraper.importarGrupoPagoOperaciones(),
+                () => manejarImportarGrupoPagoOperacionesStub(),
             );
 
             return json(res, 200, resultado);

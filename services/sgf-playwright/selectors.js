@@ -151,6 +151,26 @@ export const MAPEO_COLUMNAS_BANDEJA = {
     folio_egreso: ['folio egreso'],
     numero: ['numero'],
     fecha_sii: ['fecha sii'],
+    observacion_egreso: ['observacion'],
+};
+
+// VERIFICADO (2026-07-09, corrida real supervisada): la función
+// importarGrupoPagoOperaciones() corrió contra SGF real con estos
+// selectores (localizados por etiqueta, ver seleccionarDropdownPorTexto()/
+// localizarDropdownPorEtiqueta() en sgf-scraper.js) y devolvió los 6 casos
+// reales del grupo "Pago Operaciones" esperados (sgf_id 676, 677, 690, 713,
+// 715, 745), cada uno con sus documentos descargados. El texto exacto de la
+// opción del multiselect "GRUPO" coincide con "Pago Operaciones" (mayúscula
+// en ambas palabras). Confirma además, contra el DOM real, el hallazgo
+// VERIFICADO 2026-07-08 en sgf-scraper.js (navegarABandeja: "Buscar" con el
+// rango por defecto "hoy a hoy" vacía la tabla) — un rango más amplio (un
+// mes atrás hasta hoy) sí devuelve resultados. Se usa solo en
+// importarGrupoPagoOperaciones(), nunca en navegarABandeja()/
+// importarPendientes().
+export const FILTRO_BANDEJA = {
+    etiquetaGrupo: 'GRUPO',
+    etiquetaFechaInicial: 'FECHA INICIAL',
+    valorGrupoPagoOperaciones: 'Pago Operaciones',
 };
 
 // El botón de menú de la fila de proceso vive en la primera columna

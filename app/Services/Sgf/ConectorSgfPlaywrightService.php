@@ -105,6 +105,35 @@ class ConectorSgfPlaywrightService
         $this->integracionExterna->finalizarTrabajo($trabajo, 'completado');
     }
 
+    /**
+     * Análogo a importarPendientes(), pero llama al endpoint que filtra en
+     * origen (formulario "Buscar" de la Bandeja) los casos del grupo "Pago
+     * Operaciones" en vez de traer el 100% de la Bandeja.
+     */
+    public function importarGrupoPagoOperaciones(TrabajoIntegracion $trabajo): void
+    {
+        $sistema = $trabajo->sistemaExterno;
+        $conector = $this->conectorAutorizado($sistema);
+
+        $ejecucion = $this->automatizacionNavegador->iniciarEjecucion($conector, trabajo: $trabajo);
+
+        $respuesta = $this->llamarMicroservicio('casos/importar-grupo-pago-operaciones', [], timeout: 3300, trabajo: $trabajo, ejecucion: $ejecucion);
+
+        if ($respuesta === null) {
+            return;
+        }
+
+        $this->registrarPasos($ejecucion, $respuesta['pasos'] ?? []);
+
+        foreach ($respuesta['filas'] ?? [] as $fila) {
+            $this->registrarSnapshot($sistema, (string) $fila['sgf_id'], $fila['payload_crudo'] ?? [], $trabajo);
+            $trabajo->increment('total_elementos');
+        }
+
+        $this->automatizacionNavegador->finalizarEjecucion($ejecucion, 'completado');
+        $this->integracionExterna->finalizarTrabajo($trabajo, 'completado');
+    }
+
     private function conectorAutorizado(SistemaExterno $sistema): ConectorAutomatizacionNavegador
     {
         $conector = ConectorAutomatizacionNavegador::where('sistema_externo_id', $sistema->id)
