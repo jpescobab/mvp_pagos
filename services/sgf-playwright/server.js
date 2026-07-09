@@ -33,6 +33,10 @@ const CASOS = [
         observaciones: 'Pendiente de revisión',
         rut: '11.111.111-1',
         monto: '1.234.567,89',
+        periodo: '2026-07',
+        folio_egreso: 'EGR-10045',
+        numero: '87231',
+        fecha_sii: '05-07-2026',
         pendiente: true,
     },
     {
@@ -42,6 +46,10 @@ const CASOS = [
         observaciones: null,
         rut: '22.222.222-2',
         monto: '500.000',
+        periodo: '2026-06',
+        folio_egreso: 'EGR-10012',
+        numero: '87102',
+        fecha_sii: '18-06-2026',
         pendiente: false,
     },
     {
@@ -51,6 +59,10 @@ const CASOS = [
         observaciones: 'Con factura adjunta',
         rut: '33.333.333-3',
         monto: '750.000',
+        periodo: '2026-07',
+        folio_egreso: 'EGR-10050',
+        numero: '87240',
+        fecha_sii: '07-07-2026',
         pendiente: true,
         documentos: [
             {
