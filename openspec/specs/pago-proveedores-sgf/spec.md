@@ -3,9 +3,7 @@
 ## Purpose
 
 Primer módulo funcional activable: convierte la evidencia SGF (tarea 7) en casos de pago gobernados por workflow (tarea 5), con expediente documental (tarea 6) y evidencia de registro CGU/BancoEstado/egreso, sin reemplazar la lógica de esos sistemas oficiales.
-
 ## Requirements
-
 ### Requirement: Cada sgf_id es un caso de pago individual
 El sistema SHALL tratar cada `sgf_id` como un `caso_pago_proveedor` independiente, con su propio `Proceso` de workflow. Los datos SGF (`sgf_status`, `sgf_current_group_raw`, `periodo`, `observacion`, `observacion_egreso`, `folio_egreso`, `numero`, `fecha_sii`) SHALL conservarse solo como referencia externa, sin gobernar el estado interno del caso.
 
@@ -67,7 +65,6 @@ El sistema SHALL registrar referencias y respaldos de registro contable CGU, pag
 - **THEN** la respuesta incluye cada `egreso_cgu` asociado, con su número, fecha y el monto del item correspondiente a ese caso
 - **AND** cada egreso mostrado permite navegar a su propio detalle (`pago-proveedores.egresos-cgu.show`)
 
-
 ### Requirement: Vincular manualmente un caso de pago a un proceso de adquisición
 El sistema SHALL permitir vincular un `caso_pago_proveedor` a un `proceso_adquisicion` mediante una acción manual y explícita, distinta de cualquier transición de workflow. El vínculo SHALL ser opcional (nullable) y SHALL permitir que varios `caso_pago_proveedor` apunten al mismo `proceso_adquisicion`, pero un `caso_pago_proveedor` SHALL apuntar a lo sumo a un `proceso_adquisicion` a la vez.
 
@@ -95,7 +92,6 @@ El sistema SHALL exponer una búsqueda de `proceso_adquisicion` por código, obj
 - **THEN** el sistema devuelve los `proceso_adquisicion` cuyo código, objeto, proveedor o monto coincidan con el término, limitados a un máximo de resultados
 - **AND** cada resultado muestra su código `ADQ-XXXX` para confirmación visual antes de vincular
 
-
 ### Requirement: El checklist documental de un caso de pago se resuelve con una matriz real
 El sistema SHALL mantener una matriz de `requisitos_documentales` concreta para el workflow "pago_proveedores", asociada a un `conjunto_requisitos_documentales` propio, reutilizando el catálogo de `tipos_documento` ya existente. El `tipo_documento` con código `FACTURA` SHALL existir y aplicarse, dado que ya es referenciado por la transición `aprobar_documentacion` del workflow de Pago de Proveedores.
 
@@ -111,3 +107,36 @@ El sistema SHALL invocar la resolución del checklist documental al abrir el det
 - **WHEN** un usuario abre el detalle de un `caso_pago_proveedor`
 - **THEN** el backend resuelve o actualiza su `checklist_documental_proceso` usando las reglas de Pago de Proveedores
 - **AND** la respuesta incluye al menos el item correspondiente a `FACTURA`
+
+### Requirement: La revisión documental del workflow se ejecuta en dos instancias
+El workflow de Pago de Proveedores SHALL expandir su etapa de revisión documental en dos estados diferenciados —`en_revision_finanzas` y `en_revision_zonal`— ubicados antes del registro CGU. Las transiciones entre estos estados SHALL definirse en `WorkflowPagoProveedoresSeeder` con sus permisos requeridos (`pago_proveedores.revisar_finanzas`, `pago_proveedores.revisar_zonal`), comentario obligatorio en las devoluciones/rechazos y documentos requeridos donde corresponda. Estos estados internos SHALL gobernarse por el sistema propio y no derivarse de los grupos/estados de SGF.
+
+#### Scenario: El caso recorre las dos instancias antes de CGU
+- **WHEN** un caso importado desde SGF inicia su revisión documental
+- **THEN** pasa por `en_revision_finanzas` y luego `en_revision_zonal` antes de `lista_para_registro_cgu`
+- **AND** cada transición exige el permiso de su instancia
+
+#### Scenario: La aprobación de Finanzas requiere su permiso
+- **WHEN** un usuario sin `pago_proveedores.revisar_finanzas` intenta la transición de aprobación de Finanzas
+- **THEN** `TransicionWorkflowService` rechaza la transición por falta de permiso
+
+### Requirement: Agrupación automática de pagos en Egresos al importar desde SGF
+Al importar pagos desde SGF, el sistema SHALL agruparlos automáticamente en Egresos (`egresos_cgu`) usando el folio de egreso que entrega SGF (`folio_egreso`) como clave natural —SGF ya agrupa sus pagos en egresos—. El Egreso generado automáticamente SHALL quedar marcado como tal (`generado_automaticamente`) y registrar el período del caso; su centro financiero (`cfinanciero_id`) —del que se deriva la jurisdicción/zona— SHALL poblarse cuando sea determinable a partir de la vinculación del caso a su proceso de adquisición. La agrupación automática SHALL poder ajustarse manualmente antes de enviar el Egreso a revisión, sin romper la trazabilidad ni los snapshots de origen de cada caso.
+
+#### Scenario: Importación agrupa por folio de egreso de SGF
+- **WHEN** se importan casos que comparten el mismo `folio_egreso` desde SGF
+- **THEN** quedan asociados como items del mismo Egreso, marcado `generado_automaticamente`
+- **AND** el `monto_total` del Egreso refleja la suma de sus pagos
+
+#### Scenario: Casos con distinto folio de egreso quedan en Egresos separados
+- **WHEN** los casos importados tienen folios de egreso distintos
+- **THEN** se generan Egresos separados, uno por folio
+
+#### Scenario: Un caso sin folio de egreso no se agrupa automáticamente
+- **WHEN** se importa un caso sin `folio_egreso`
+- **THEN** no se crea ni modifica ningún Egreso automáticamente
+
+#### Scenario: Ajuste manual de la agrupación antes de revisar
+- **WHEN** un usuario reasigna manualmente un caso a otro Egreso antes de enviarlo a revisión
+- **THEN** el cambio se aplica sin alterar el `sgf_id`, los snapshots ni el historial del caso
+

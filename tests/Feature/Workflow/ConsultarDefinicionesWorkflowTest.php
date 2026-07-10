@@ -24,8 +24,8 @@ test('un usuario autenticado puede listar las definiciones de workflow con sus c
         ->where('definiciones.0.estados_count', 8)
         ->where('definiciones.0.transiciones_count', 8)
         ->where('definiciones.1.codigo', 'pago_proveedores')
-        ->where('definiciones.1.estados_count', 13)
-        ->where('definiciones.1.transiciones_count', 13)
+        ->where('definiciones.1.estados_count', 14)
+        ->where('definiciones.1.transiciones_count', 17)
     );
 });
 
@@ -40,16 +40,16 @@ test('el detalle de pago_proveedores incluye sus estados y transiciones con los 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('workflow/definiciones/show')
-        ->has('definicion.estados', 13)
-        ->has('definicion.transiciones', 13)
+        ->has('definicion.estados', 14)
+        ->has('definicion.transiciones', 17)
         ->where(
             'definicion.transiciones',
             fn ($transiciones) => collect($transiciones)
                 ->firstWhere('codigo', 'registrar_en_cgu')['permiso_requerido'] === 'pago_proveedores.registrar_cgu'
                 && collect($transiciones)
-                    ->firstWhere('codigo', 'aprobar_documentacion')['documentos_requeridos'] === ['FACTURA']
+                    ->firstWhere('codigo', 'aprobar_finanzas')['documentos_requeridos'] === ['FACTURA']
                 && collect($transiciones)
-                    ->firstWhere('codigo', 'observar')['requiere_comentario'] === true,
+                    ->firstWhere('codigo', 'observar_finanzas')['requiere_comentario'] === true,
         )
     );
 });

@@ -156,7 +156,7 @@ test('el dashboard expone los KPIs, indicadores económicos y casos recientes', 
     $proceso = $casoCerrado->proceso;
     $proceso = $servicioWorkflow->execute($proceso, 'recibir_en_finanzas');
     $proceso = $servicioWorkflow->execute($proceso, 'iniciar_revision_documental');
-    $proceso = $servicioWorkflow->execute($proceso, 'observar', 'Observación de prueba');
+    $proceso = $servicioWorkflow->execute($proceso, 'observar_finanzas', 'Observación de prueba');
     $servicioWorkflow->execute($proceso, 'rechazar', 'Rechazo de prueba');
 
     // Una adquisición activa.

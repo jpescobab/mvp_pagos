@@ -3,9 +3,7 @@
 ## Purpose
 
 Modelo documental real del expediente: catálogo de tipos documentales, documentos versionados con trazabilidad de validación, y una matriz de requisitos configurable por workflow/modalidad/monto/estado que el backend resuelve en un checklist por proceso. React nunca hardcodea requisitos documentales.
-
 ## Requirements
-
 ### Requirement: Mantener catálogo de tipos documentales reutilizable
 El sistema SHALL mantener un catálogo de `tipos_documento` (código único, nombre, si es obligatorio por defecto, activo) reutilizable por cualquier matriz de requisitos de cualquier módulo funcional futuro.
 
@@ -14,7 +12,7 @@ El sistema SHALL mantener un catálogo de `tipos_documento` (código único, nom
 - **THEN** debe referenciar un `tipo_documento` activo del catálogo
 
 ### Requirement: Versionar documentos con trazabilidad de validación
-Todo documento cargado al expediente SHALL quedar asociado a un tipo documental, conservar todas sus versiones (`versiones_documento`) y registrar un historial inmutable de eventos de validación (`validaciones_documento`). El estado vigente de un documento es el del evento de validación más reciente.
+Todo documento cargado al expediente SHALL quedar asociado a un tipo documental, conservar todas sus versiones (`versiones_documento`) y registrar un historial inmutable de eventos de validación (`validaciones_documento`). Cada evento de validación SHALL registrar la instancia de revisión que lo emitió (`validaciones_documento.instancia`, p. ej. `finanzas` o `zonal`) cuando la revisión ocurre por instancias. El estado vigente de un documento para una instancia dada es el del evento de validación más reciente de esa instancia; una validación emitida por una instancia no altera el estado del documento para otra instancia.
 
 #### Scenario: Subir una nueva versión de un documento
 - **WHEN** se carga un archivo para un documento existente
@@ -23,8 +21,13 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 
 #### Scenario: Validar un documento
 - **WHEN** un usuario autorizado valida o rechaza un documento
-- **THEN** se registra un nuevo evento en `validaciones_documento` con el resultado y la observación
-- **AND** el estado vigente del documento pasa a ser el de ese evento
+- **THEN** se registra un nuevo evento en `validaciones_documento` con el resultado, la observación y la instancia
+- **AND** el estado vigente del documento para esa instancia pasa a ser el de ese evento
+
+#### Scenario: Una validación por instancia no altera el estado en otra instancia
+- **WHEN** la instancia de Finanzas aprueba un documento y luego el mismo documento es revisado por la instancia Zonal
+- **THEN** el estado vigente del documento para la instancia Zonal parte como pendiente (sin evento propio)
+- **AND** el evento de aprobación de Finanzas permanece registrado y consultable
 
 #### Scenario: Validar o rechazar un documento vía HTTP requiere el permiso dedicado
 - **WHEN** un usuario con el permiso `documentos.validar` envía una validación (`valido` o `rechazado`) para un documento vinculado a un proceso
@@ -52,7 +55,7 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 
 #### Scenario: El historial de validaciones de un documento es consultable, no solo su estado vigente
 - **WHEN** un usuario consulta el detalle de un proceso que tiene un documento con más de un evento de validación
-- **THEN** la respuesta incluye el historial completo de `validaciones_documento` de ese documento, ordenado del más reciente al más antiguo, con su resultado, observación, usuario y fecha
+- **THEN** la respuesta incluye el historial completo de `validaciones_documento` de ese documento, ordenado del más reciente al más antiguo, con su resultado, observación, instancia, usuario y fecha
 - **AND** la observación de un evento de rechazo pasado sigue siendo visible aunque el documento haya sido validado posteriormente
 
 ### Requirement: Resolver checklist documental por proceso según reglas configurables
@@ -90,7 +93,6 @@ Un documento SHALL poder vincularse a cualquier entidad mediante `vinculos_docum
 - **WHEN** se desvincula un documento de una entidad
 - **THEN** el `vinculo_documento` correspondiente queda inactivo
 - **AND** no se elimina el registro ni el historial de versiones/validaciones del documento
-
 
 ### Requirement: Subir y vincular un documento a un proceso vía HTTP
 El sistema SHALL exponer endpoints autorizados (`documentos.gestionar`) para subir un archivo y vincularlo a un `Proceso` o a un `EgresoCgu`, creando un `Documento`, su primera `VersionDocumento` y un `VinculoDocumento` activo en una sola operación transaccional, sin que el modelo documental dependa de ningún módulo funcional específico.
@@ -142,3 +144,4 @@ El sistema SHALL permitir desvincular un documento de un proceso o de un egreso 
 - **WHEN** un usuario con el permiso `documentos.gestionar` desvincula un documento de un egreso CGU
 - **THEN** el `VinculoDocumento` correspondiente queda `activo = false`
 - **AND** el `Documento` y sus versiones permanecen en la base de datos
+

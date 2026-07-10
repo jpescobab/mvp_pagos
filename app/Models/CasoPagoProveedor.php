@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
+/**
+ * @property-read Proveedor|null $proveedor
+ * @property-read Proceso|null $proceso
+ * @property-read ProcesoAdquisicion|null $procesoAdquisicion
+ */
 class CasoPagoProveedor extends Model
 {
     protected $table = 'casos_pago_proveedor';
@@ -99,5 +104,23 @@ class CasoPagoProveedor extends Model
     public function egresoCguItems(): HasMany
     {
         return $this->hasMany(EgresoCguItem::class);
+    }
+
+    /**
+     * @return HasMany<RevisionPagoInstancia, $this>
+     */
+    public function revisionesInstancia(): HasMany
+    {
+        return $this->hasMany(RevisionPagoInstancia::class);
+    }
+
+    /**
+     * Centro financiero del caso, derivado del proceso de adquisición vinculado
+     * (caso -> proceso_adquisicion -> ccosto -> cfinanciero). Null si el caso
+     * aún no fue vinculado a un proceso de adquisición.
+     */
+    public function cfinancieroId(): ?int
+    {
+        return $this->procesoAdquisicion?->ccosto?->cfinanciero_id;
     }
 }

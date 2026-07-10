@@ -15,6 +15,9 @@ class EgresoCgu extends Model
         'numero_egreso',
         'fecha',
         'monto_total',
+        'periodo',
+        'cfinanciero_id',
+        'generado_automaticamente',
         'observaciones',
         'registrado_por',
     ];
@@ -24,6 +27,7 @@ class EgresoCgu extends Model
         return [
             'fecha' => 'date',
             'monto_total' => 'decimal:2',
+            'generado_automaticamente' => 'boolean',
         ];
     }
 
@@ -33,6 +37,23 @@ class EgresoCgu extends Model
     public function registradoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'registrado_por');
+    }
+
+    /**
+     * @return BelongsTo<Cfinanciero, $this>
+     */
+    public function cfinanciero(): BelongsTo
+    {
+        return $this->belongsTo(Cfinanciero::class);
+    }
+
+    /**
+     * Jurisdicción a la que pertenece el egreso, derivada de su centro
+     * financiero. Gobierna el alcance zonal del Administrador Zonal.
+     */
+    public function jurisdiccionId(): ?int
+    {
+        return $this->cfinanciero?->jurisdiccion_id;
     }
 
     /**

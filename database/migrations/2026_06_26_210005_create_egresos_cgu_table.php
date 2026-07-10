@@ -16,9 +16,14 @@ return new class extends Migration
             $table->string('numero_egreso')->unique();
             $table->date('fecha');
             $table->decimal('monto_total', 14, 2)->nullable();
+            $table->string('periodo')->nullable();
+            $table->foreignId('cfinanciero_id')->nullable()->constrained('cfinancieros')->nullOnDelete();
+            $table->boolean('generado_automaticamente')->default(false);
             $table->text('observaciones')->nullable();
             $table->foreignId('registrado_por')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+
+            $table->index(['periodo', 'cfinanciero_id']);
         });
     }
 

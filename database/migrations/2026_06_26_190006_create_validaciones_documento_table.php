@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('documento_id')->constrained('documentos')->cascadeOnDelete();
             $table->string('estado')->default('pendiente');
+            $table->string('instancia')->nullable();
             $table->text('observacion')->nullable();
             $table->foreignId('validado_por')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('validado_en')->nullable();
             $table->timestamp('created_at')->useCurrent();
+
+            $table->index(['documento_id', 'instancia']);
         });
     }
 
