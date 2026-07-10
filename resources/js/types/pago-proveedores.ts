@@ -158,7 +158,6 @@ export type EgresoCgu = {
     monto_total: string;
     observaciones: string | null;
     items: EgresoCguItem[];
-    documentos?: DocumentoVinculado[];
 };
 
 export type PaginationLink = {

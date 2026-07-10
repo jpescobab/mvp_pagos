@@ -22,11 +22,6 @@ class EgresoCguPolicy
         return $user->can('pago_proveedores.registrar_egreso');
     }
 
-    public function gestionarDocumentos(User $user, EgresoCgu $egreso): bool
-    {
-        return $user->can('documentos.gestionar');
-    }
-
     /**
      * Puede abrir/revisar el egreso si opera alguna de las dos instancias
      * de revisión. El Administrador Zonal, además, queda acotado a su zona.

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class EgresoCgu extends Model
 {
@@ -62,13 +61,5 @@ class EgresoCgu extends Model
     public function items(): HasMany
     {
         return $this->hasMany(EgresoCguItem::class);
-    }
-
-    /**
-     * @return MorphMany<VinculoDocumento, $this>
-     */
-    public function vinculosDocumento(): MorphMany
-    {
-        return $this->morphMany(VinculoDocumento::class, 'vinculable');
     }
 }
