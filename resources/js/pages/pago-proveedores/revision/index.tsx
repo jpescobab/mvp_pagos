@@ -10,7 +10,10 @@ import {
     transicion as transicionPago,
     verificarTotales,
 } from '@/routes/pago-proveedores/revision/pagos';
-import { validar as validarDocumento } from '@/routes/pago-proveedores/revision/pagos/documentos';
+import {
+    validar as validarDocumento,
+    ver as verDocumento,
+} from '@/routes/pago-proveedores/revision/pagos/documentos';
 
 /* ============================ Tipos ============================ */
 
@@ -51,6 +54,7 @@ type Egreso = {
     id: number;
     numero_egreso: string;
     periodo: string | null;
+    observaciones: string | null;
     monto_total: number;
     cantidad_pagos: number;
     proveedores: string[];
@@ -139,126 +143,6 @@ const ESTADO_EGRESO: Record<string, { label: string; cls: string }> = {
 
 const fmt = (n: number) => formatMonto(n);
 
-/* ==================== Vista previa de documento ==================== */
-
-function DocPreview({ pago, doc }: { pago: Pago; doc: Documento }) {
-    const kind = tipoMeta(doc.tipo_codigo).tpl;
-    const neto = Math.round(pago.totales.factura * 0.84);
-    const iva = pago.totales.factura - neto;
-    const numero = (doc.titulo.replace(/[^0-9]/g, '').slice(0, 7) || '0041231');
-
-    if (kind === 'factura') {
-        return (
-            <>
-                <div className="dp-head">
-                    <div>
-                        <div className="dp-brand">{pago.proveedor}</div>
-                        <div className="dp-tag">Factura electrónica</div>
-                    </div>
-                    <div>
-                        <div className="dp-num">N° {numero}</div>
-                        <div className="dp-date">Folio {pago.folio ?? '—'}</div>
-                    </div>
-                </div>
-                <div className="dp-grid">
-                    <div><div className="dp-k">RUT Emisor</div><div className="dp-v">{pago.rut}</div></div>
-                    <div><div className="dp-k">Referencia</div><div className="dp-v">{pago.folio ?? '—'}</div></div>
-                    <div><div className="dp-k">Señor(es)</div><div className="dp-v">Poder Judicial</div></div>
-                    <div><div className="dp-k">Monto a pagar</div><div className="dp-v">{fmt(pago.monto)}</div></div>
-                </div>
-                <table>
-                    <thead>
-                        <tr><th>Cant.</th><th>Descripción</th><th className="num">P. Unitario</th><th className="num">Total</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>1</td><td>Bienes/servicios — {pago.proveedor}</td><td className="num">{fmt(neto)}</td><td className="num">{fmt(neto)}</td></tr>
-                    </tbody>
-                </table>
-                <div className="dp-totals">
-                    <div className="dp-trow"><span>Neto</span><span>{fmt(neto)}</span></div>
-                    <div className="dp-trow"><span>IVA (19%)</span><span>{fmt(iva)}</span></div>
-                    <div className="dp-trow total"><span>Total</span><span>{fmt(pago.totales.factura)}</span></div>
-                </div>
-                <div className="dp-stamp">
-                    <div className="dp-sign">Firma autorizada</div>
-                    {doc.estado === 'valido' && (
-                        <div className="dp-seal">TIMBRE<br />ELECTRÓNICO<br />SII</div>
-                    )}
-                </div>
-            </>
-        );
-    }
-
-    if (kind === 'oc') {
-        return (
-            <>
-                <div className="dp-head">
-                    <div><div className="dp-brand">Poder Judicial</div><div className="dp-tag">Orden de compra</div></div>
-                    <div><div className="dp-num">{pago.folio ?? '—'}</div><div className="dp-date">Proveedor</div></div>
-                </div>
-                <div className="dp-grid">
-                    <div><div className="dp-k">Proveedor</div><div className="dp-v">{pago.proveedor}</div></div>
-                    <div><div className="dp-k">RUT</div><div className="dp-v">{pago.rut}</div></div>
-                    <div><div className="dp-k">Unidad requirente</div><div className="dp-v">Administración y Finanzas</div></div>
-                    <div><div className="dp-k">Monto</div><div className="dp-v">{fmt(pago.totales.recepcion)}</div></div>
-                </div>
-                <table>
-                    <thead><tr><th>Cant.</th><th>Descripción</th><th className="num">Total</th></tr></thead>
-                    <tbody><tr><td>1</td><td>Bienes/servicios</td><td className="num">{fmt(pago.totales.recepcion)}</td></tr></tbody>
-                </table>
-                <div className="dp-stamp"><div className="dp-sign">V°B° Jefe de Unidad</div></div>
-            </>
-        );
-    }
-
-    if (kind === 'recepcion') {
-        return (
-            <>
-                <div className="dp-head">
-                    <div><div className="dp-brand">Poder Judicial</div><div className="dp-tag">Recepción conforme</div></div>
-                    <div><div className="dp-num">RC-{pago.id}</div><div className="dp-date">{pago.folio ?? '—'}</div></div>
-                </div>
-                <div className="dp-body-text">
-                    <p>Se deja constancia que se recepcionan conforme los bienes/servicios asociados a {pago.folio ?? 'el pago'}, a favor de <strong>{pago.proveedor}</strong>, RUT {pago.rut}.</p>
-                    <p>La recepción se realiza sin observaciones, verificándose cantidad, calidad y especificaciones técnicas.</p>
-                    <p>Monto recepcionado conforme: <strong>{fmt(pago.totales.recepcion)}</strong>.</p>
-                </div>
-                <div className="dp-stamp"><div className="dp-sign">Funcionario receptor</div><div className="dp-sign">Jefe de Unidad</div></div>
-            </>
-        );
-    }
-
-    if (kind === 'contrato') {
-        return (
-            <>
-                <div className="dp-head">
-                    <div><div className="dp-brand">Poder Judicial</div><div className="dp-tag">Contrato / respaldo</div></div>
-                    <div><div className="dp-num">CT-{pago.id}</div><div className="dp-date">Vigencia 12 meses</div></div>
-                </div>
-                <div className="dp-body-text">
-                    <p><strong>Primero:</strong> {pago.proveedor}, RUT {pago.rut}, se obliga a la prestación de los bienes/servicios asociados al pago {pago.folio ?? ''}.</p>
-                    <p><strong>Segundo:</strong> El monto asciende a {fmt(pago.monto)}, IVA incluido.</p>
-                    <p><strong>Tercero:</strong> Ambas partes dan cumplimiento a las condiciones administrativas establecidas.</p>
-                </div>
-                <div className="dp-stamp"><div className="dp-sign">Representante proveedor</div><div className="dp-sign">Representante Poder Judicial</div></div>
-            </>
-        );
-    }
-
-    return (
-        <>
-            <div className="dp-head">
-                <div><div className="dp-brand">{pago.proveedor}</div><div className="dp-tag">Documento de respaldo</div></div>
-                <div><div className="dp-num">DOC-{pago.id}</div><div className="dp-date">{pago.folio ?? '—'}</div></div>
-            </div>
-            <div className="dp-body-text">
-                <p>Documento de respaldo asociado al pago {pago.folio ?? ''} de {pago.proveedor}, correspondiente a “{doc.titulo}”.</p>
-                <p>Se adjunta como antecedente complementario para la validación del monto de {fmt(pago.monto)}.</p>
-            </div>
-        </>
-    );
-}
-
 /* ============================ Página ============================ */
 
 export default function RevisionPagosIndex() {
@@ -288,7 +172,6 @@ export default function RevisionPagosIndex() {
         [pago, docId],
     );
 
-    const [zoom, setZoom] = useState(1);
     const [rejectingDoc, setRejectingDoc] = useState<number | null>(null);
     const [motivoDoc, setMotivoDoc] = useState('');
 
@@ -300,14 +183,12 @@ export default function RevisionPagosIndex() {
         setEgrId(e.id);
         setPagoId(e.pagos[0]?.id ?? null);
         setDocId(e.pagos[0]?.documentos[0]?.id ?? null);
-        setZoom(1);
         setRejectingDoc(null);
     }
 
     function seleccionarPago(p: Pago) {
         setPagoId(p.id);
         setDocId(p.documentos[0]?.id ?? null);
-        setZoom(1);
         setRejectingDoc(null);
     }
 
@@ -409,6 +290,10 @@ return;
                         <div className="proc-strip">
                             {egresos.map((e) => {
                                 const est = ESTADO_EGRESO[e.estado] ?? ESTADO_EGRESO.sin_pagos;
+                                const resumenProveedores =
+                                    (e.proveedores[0] ?? '—') +
+                                    (e.proveedores.length > 1 ? ` +${e.proveedores.length - 1}` : '');
+                                const descripcion = e.observaciones?.trim() || resumenProveedores;
 
                                 return (
                                     <button
@@ -421,9 +306,8 @@ return;
                                             <div className="pc-icon"><Icon path={IC.recibo} /></div>
                                             <div className="pc-text">
                                                 <span className="pc-id">{e.numero_egreso}</span>
-                                                <span className="pc-prov">
-                                                    {e.proveedores[0] ?? '—'}
-                                                    {e.proveedores.length > 1 ? ` +${e.proveedores.length - 1}` : ''}
+                                                <span className="pc-prov" title={descripcion}>
+                                                    {descripcion}
                                                 </span>
                                                 <span className="pc-monto">{fmt(e.monto_total)}</span>
                                             </div>
@@ -504,8 +388,9 @@ return;
                                                 type="button"
                                                 className={`doc-card${d.id === doc?.id ? ' active' : ''}`}
                                                 onClick={() => {
- setDocId(d.id); setZoom(1); setRejectingDoc(null); 
-}}
+                                                    setDocId(d.id);
+                                                    setRejectingDoc(null);
+                                                }}
                                             >
                                                 <div className="doc-ic" style={{ background: `${meta.color}22`, color: meta.color }}>
                                                     <Icon path={meta.icon} />
@@ -537,19 +422,27 @@ return;
                                             <div className="vt-title">{doc?.titulo ?? 'Documento'}</div>
                                             <div className="vt-sub">{doc?.tipo ?? ''} · {pago.proveedor}</div>
                                         </div>
-                                        <div className="zoom-ctl">
-                                            <button onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))}><Icon path={IC.zoomOut} /></button>
-                                            <span className="zlabel">{Math.round(zoom * 100)}%</span>
-                                            <button onClick={() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)))}><Icon path={IC.zoomIn} /></button>
-                                            <button onClick={() => setZoom(1)}><Icon path={IC.reset} /></button>
-                                        </div>
+                                        {doc && egreso && (
+                                            <a
+                                                className="expand-btn"
+                                                href={verDocumento({ egresoCgu: egreso.id, caso: pago.id, documento: doc.id }).url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title="Abrir en pestaña nueva"
+                                            >
+                                                <Icon path={IC.expand} />
+                                            </a>
+                                        )}
                                     </div>
                                     <div className="viewer-body">
                                         <div className="viewer-stage">
-                                            {doc ? (
-                                                <div className="doc-page" style={{ transform: `scale(${zoom})` }}>
-                                                    <DocPreview pago={pago} doc={doc} />
-                                                </div>
+                                            {doc && egreso ? (
+                                                <iframe
+                                                    key={doc.id}
+                                                    className="doc-frame"
+                                                    src={verDocumento({ egresoCgu: egreso.id, caso: pago.id, documento: doc.id }).url}
+                                                    title={doc.titulo}
+                                                />
                                             ) : (
                                                 <div className="empty-viewer">
                                                     <div className="ic"><Icon path={IC.eye} /></div>
@@ -760,11 +653,9 @@ html.dark .revpay{
 .revpay .viewer-toolbar{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--panel);flex-shrink:0;flex-wrap:wrap;}
 .revpay .viewer-toolbar .vt-title{font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);}
 .revpay .viewer-toolbar .vt-sub{font-size:11.5px;color:var(--fg-soft);}
-.revpay .zoom-ctl{display:flex;align-items:center;gap:2px;margin-left:auto;background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:2px;}
-.revpay .zoom-ctl button{width:28px;height:28px;border-radius:7px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:grid;place-items:center;}
-.revpay .zoom-ctl button:hover{background:var(--panel);color:var(--fg);}
-.revpay .zoom-ctl button svg{width:14px;height:14px;}
-.revpay .zoom-ctl .zlabel{font-size:11.5px;font-weight:700;color:var(--fg-muted);width:38px;text-align:center;font-family:ui-monospace,monospace;}
+.revpay .expand-btn{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--fg-muted);cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .15s;}
+.revpay .expand-btn:hover{border-color:var(--accent);color:var(--accent);}
+.revpay .expand-btn svg{width:15px;height:15px;}
 .revpay .viewer-body{display:flex;flex:1;min-height:0;}
 .revpay .viewer-stage{flex:1;min-height:200px;overflow:auto;display:flex;justify-content:center;padding:20px;}
 
@@ -795,27 +686,7 @@ html.dark .revpay{
 .revpay .motivo-wrap textarea:focus{border-color:var(--red);}
 .revpay .motivo-note{font-size:11px;color:var(--fg-soft);}
 
-.revpay .doc-page{width:600px;flex-shrink:0;background:#fff;color:#1a2030;border-radius:4px;box-shadow:0 12px 40px -12px rgba(15,23,42,0.35);transform-origin:top center;padding:44px 46px;font-size:12.5px;line-height:1.5;transition:transform .15s;height:fit-content;}
-.revpay .doc-page .dp-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a2030;padding-bottom:14px;margin-bottom:18px;}
-.revpay .doc-page .dp-brand{font-weight:800;font-size:15px;letter-spacing:-0.01em;}
-.revpay .doc-page .dp-tag{font-size:10px;color:#8a93a6;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
-.revpay .doc-page .dp-num{text-align:right;font-family:ui-monospace,monospace;font-weight:700;font-size:13px;}
-.revpay .doc-page .dp-date{text-align:right;font-size:11px;color:#8a93a6;margin-top:2px;}
-.revpay .doc-page .dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
-.revpay .doc-page .dp-k{font-size:9.5px;color:#8a93a6;text-transform:uppercase;letter-spacing:0.05em;}
-.revpay .doc-page .dp-v{font-size:12px;font-weight:700;margin-top:1px;}
-.revpay .doc-page table{width:100%;border-collapse:collapse;margin-bottom:14px;}
-.revpay .doc-page th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:0.04em;color:#8a93a6;padding:6px 8px;border-bottom:1px solid #dde2ec;}
-.revpay .doc-page td{padding:8px;font-size:11.5px;border-bottom:1px solid #eef1f6;}
-.revpay .doc-page td.num,.revpay .doc-page th.num{text-align:right;font-family:ui-monospace,monospace;}
-.revpay .doc-page .dp-totals{margin-left:auto;width:220px;display:flex;flex-direction:column;gap:5px;margin-top:6px;}
-.revpay .doc-page .dp-trow{display:flex;justify-content:space-between;font-size:11.5px;}
-.revpay .doc-page .dp-trow.total{font-weight:800;font-size:13px;border-top:2px solid #1a2030;padding-top:7px;margin-top:3px;}
-.revpay .doc-page .dp-stamp{margin-top:26px;display:flex;justify-content:space-between;align-items:flex-end;}
-.revpay .doc-page .dp-sign{border-top:1px solid #1a2030;width:160px;padding-top:5px;font-size:10px;color:#8a93a6;text-align:center;}
-.revpay .doc-page .dp-seal{width:74px;height:74px;border-radius:50%;border:3px solid #16a34a;color:#16a34a;display:grid;place-items:center;font-size:8.5px;font-weight:800;text-align:center;line-height:1.2;transform:rotate(-14deg);opacity:.85;}
-.revpay .doc-page .dp-body-text{font-size:11.5px;line-height:1.75;color:#333;}
-.revpay .doc-page .dp-body-text p{margin:0 0 10px;}
+.revpay .doc-frame{flex:1;min-height:520px;border:1px solid var(--border);border-radius:8px;background:#fff;box-shadow:0 12px 40px -12px rgba(15,23,42,0.35);}
 
 .revpay .empty-viewer{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--fg-soft);}
 .revpay .empty-viewer .ic{width:48px;height:48px;border-radius:12px;background:var(--panel);border:1px solid var(--border);display:grid;place-items:center;}

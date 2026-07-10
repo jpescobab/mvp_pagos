@@ -3,6 +3,7 @@
 namespace App\Services\Sgf;
 
 use App\Exceptions\ConectorAutomatizacionNoAutorizadoException;
+use App\Models\CasoPagoProveedor;
 use App\Models\ConectorAutomatizacionNavegador;
 use App\Models\Documento;
 use App\Models\EjecucionAutomatizacionNavegador;
@@ -211,11 +212,15 @@ class ConectorSgfPlaywrightService
             trabajo: $trabajo,
         );
 
-        foreach ($payloadCrudo['documentos'] ?? [] as $documentoSgf) {
-            $this->vincularDocumento($snapshot, $documentoSgf);
-        }
+        // El caso (y su Proceso) debe existir ANTES de vincular los
+        // documentos: cada documento se vincula tanto al snapshot (evidencia
+        // cruda) como al Proceso del caso (expediente documental variable —
+        // sin ese segundo vínculo, la revisión documental no encuentra nada).
+        $caso = $this->casoPagoProveedorImporter->importarDesdeSnapshot($snapshot);
 
-        $this->casoPagoProveedorImporter->importarDesdeSnapshot($snapshot);
+        foreach ($payloadCrudo['documentos'] ?? [] as $documentoSgf) {
+            $this->vincularDocumento($snapshot, $caso, $documentoSgf);
+        }
 
         return $snapshot;
     }
@@ -223,14 +228,17 @@ class ConectorSgfPlaywrightService
     /**
      * @param  array<string, mixed>  $documentoSgf
      */
-    private function vincularDocumento(SnapshotDatosExterno $snapshot, array $documentoSgf): void
+    private function vincularDocumento(SnapshotDatosExterno $snapshot, CasoPagoProveedor $caso, array $documentoSgf): void
     {
         $tipo = TipoDocumento::firstOrCreate(
             ['codigo' => $documentoSgf['tipo_documento_codigo']],
             ['nombre' => $documentoSgf['tipo_documento_codigo']],
         );
 
-        $documento = Documento::create(['tipo_documento_id' => $tipo->id]);
+        $documento = Documento::create([
+            'tipo_documento_id' => $tipo->id,
+            'titulo' => $documentoSgf['nombre_archivo'],
+        ]);
 
         $documento->versiones()->create([
             'numero_version' => 1,
@@ -239,5 +247,10 @@ class ConectorSgfPlaywrightService
         ]);
 
         $snapshot->documentos()->create(['documento_id' => $documento->id]);
+
+        $caso->proceso?->vinculosDocumento()->create([
+            'documento_id' => $documento->id,
+            'activo' => true,
+        ]);
     }
 }

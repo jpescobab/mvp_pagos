@@ -148,10 +148,19 @@ test('importarPendientes registra un snapshot por fila y vincula documentos entr
 
     $documento = Documento::find($snapshotConDocumentos->documentos->first()->documento_id);
     expect($documento->tipoDocumento->codigo)->toBe('FACTURA');
+    expect($documento->titulo)->toBe('factura.pdf');
     expect($documento->versiones->first()->nombre_archivo)->toBe('factura.pdf');
 
     expect(CasoPagoProveedor::where('sgf_id', '111')->exists())->toBeTrue();
-    expect(CasoPagoProveedor::where('sgf_id', '222')->exists())->toBeTrue();
+    $casoConDocumentos = CasoPagoProveedor::where('sgf_id', '222')->sole();
+
+    // El documento importado debe quedar vinculado al Proceso del caso (no
+    // solo al snapshot) — de lo contrario la revisión documental no lo
+    // encuentra (ValidacionDocumentoInstanciaService::documentosDelCaso()
+    // consulta $proceso->vinculosDocumento()).
+    $vinculo = $casoConDocumentos->proceso->vinculosDocumento()->sole();
+    expect($vinculo->documento_id)->toBe($documento->id);
+    expect($vinculo->activo)->toBeTrue();
 });
 
 test('importarGrupoPagoOperaciones solo persiste casos del grupo Pago Operaciones', function () {

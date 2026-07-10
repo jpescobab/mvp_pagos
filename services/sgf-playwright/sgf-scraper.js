@@ -27,8 +27,12 @@ import { BANDEJA_PROCESOS, FILTRO_BANDEJA, LOGIN, MAPEO_COLUMNAS_BANDEJA, MENU_A
 // procesos pendientes esperado.
 const MAX_PAGINAS_BANDEJA = 200;
 
+// El disco Laravel "local" (config/filesystems.php) resuelve rutas relativas
+// contra storage/app/private, no storage/app — GestorDocumentoProceso lee de
+// ahí. Si esto no calza, la descarga/vista de un documento importado por SGF
+// devuelve 404 aunque el archivo exista físicamente en el lugar equivocado.
 const RUTA_STORAGE_DOCUMENTOS =
-    process.env.LARAVEL_STORAGE_PATH ?? path.resolve(import.meta.dirname, '../../storage/app');
+    process.env.LARAVEL_STORAGE_PATH ?? path.resolve(import.meta.dirname, '../../storage/app/private');
 
 const RUTA_DEBUG = path.resolve(import.meta.dirname, 'debug');
 

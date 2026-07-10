@@ -11,6 +11,7 @@ use App\Http\Controllers\PagoProveedores\RevisionTotalesController;
 use App\Http\Controllers\PagoProveedores\RevisionTransicionEgresoController;
 use App\Http\Controllers\PagoProveedores\RevisionTransicionPagoController;
 use App\Http\Controllers\PagoProveedores\RevisionValidacionDocumentoController;
+use App\Http\Controllers\PagoProveedores\RevisionVerDocumentoController;
 use App\Http\Controllers\PagoProveedores\TransicionCasoPagoProveedorController;
 use App\Http\Controllers\PagoProveedores\VinculoAdquisicionCasoPagoProveedorController;
 use Illuminate\Support\Facades\Route;
@@ -41,4 +42,5 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::post('revision/{egresoCgu}/pagos/{caso}/verificar-totales', [RevisionTotalesController::class, 'store'])->name('revision.pagos.verificar-totales');
     Route::post('revision/{egresoCgu}/pagos/{caso}/transicion', [RevisionTransicionPagoController::class, 'store'])->name('revision.pagos.transicion');
     Route::post('revision/{egresoCgu}/pagos/{caso}/documentos/{documento}/validar', [RevisionValidacionDocumentoController::class, 'store'])->name('revision.pagos.documentos.validar');
+    Route::get('revision/{egresoCgu}/pagos/{caso}/documentos/{documento}/ver', [RevisionVerDocumentoController::class, 'show'])->name('revision.pagos.documentos.ver');
 });

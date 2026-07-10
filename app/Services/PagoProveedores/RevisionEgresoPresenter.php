@@ -21,30 +21,6 @@ class RevisionEgresoPresenter
     ) {}
 
     /**
-     * Fila resumida de un egreso para el listado de revisión.
-     *
-     * @return array<string, mixed>
-     */
-    public function fila(EgresoCgu $egreso, User $user): array
-    {
-        $casos = $this->revision->casos($egreso);
-        $instancia = $this->revision->instanciaActiva($egreso);
-
-        return [
-            'id' => $egreso->id,
-            'numero_egreso' => $egreso->numero_egreso,
-            'periodo' => $egreso->periodo,
-            'monto_total' => (float) ($egreso->monto_total ?? $casos->sum(fn (CasoPagoProveedor $c) => (float) $c->monto)),
-            'cantidad_pagos' => $casos->count(),
-            'proveedores' => $casos->map(fn (CasoPagoProveedor $c) => data_get($c, 'proveedor.nombre') ?? $c->rut_proveedor)
-                ->filter()->unique()->values()->all(),
-            'estado' => $this->revision->estadoDerivado($egreso),
-            'instancia_activa' => $instancia?->value,
-            'instancia_label' => $instancia?->label(),
-        ];
-    }
-
-    /**
      * Detalle completo del egreso para la pantalla de revisión.
      *
      * @return array<string, mixed>
@@ -61,6 +37,7 @@ class RevisionEgresoPresenter
             'id' => $egreso->id,
             'numero_egreso' => $egreso->numero_egreso,
             'periodo' => $egreso->periodo,
+            'observaciones' => $egreso->observaciones,
             'monto_total' => (float) ($egreso->monto_total ?? $casos->sum(fn (CasoPagoProveedor $c) => (float) $c->monto)),
             'cantidad_pagos' => $casos->count(),
             'proveedores' => $casos->map(fn (CasoPagoProveedor $c) => data_get($c, 'proveedor.nombre') ?? $c->rut_proveedor)
