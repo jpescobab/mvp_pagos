@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { formatNumero } from '@/lib/format';
+import { formatFecha, formatNumero } from '@/lib/format';
 import { formatearValorIndicador } from '@/lib/indicadores';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import type { IndicadorEconomico } from '@/types/indicadores';
@@ -117,9 +117,7 @@ export default function IndicadoresEconomicosIndex() {
                                     </td>
                                     <td className="px-4 py-2 font-mono text-xs">
                                         {indicador.fecha_valor
-                                            ? new Date(
-                                                  indicador.fecha_valor,
-                                              ).toLocaleDateString()
+                                            ? formatFecha(indicador.fecha_valor)
                                             : indicador.periodo}
                                     </td>
                                     <td className="px-4 py-2 font-mono tabular-nums">
@@ -137,8 +135,8 @@ export default function IndicadoresEconomicosIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

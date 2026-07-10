@@ -3,9 +3,7 @@
 ## Purpose
 
 Controla el acceso al sistema mediante roles y permisos (Spatie Permission) y provee un servicio de auditoría genérico y reutilizable para que cualquier dominio registre cambios sensibles.
-
 ## Requirements
-
 ### Requirement: Controlar acceso por roles y permisos
 El sistema SHALL validar permisos antes de ejecutar una acción autorizable, mediante roles y permisos gestionados con Spatie Permission. El rol `superadmin` SHALL tener acceso total sin necesidad de asignación de permisos individuales.
 
@@ -29,7 +27,6 @@ El sistema SHALL proveer un servicio de auditoría (`AuditLogger`) capaz de regi
 - **WHEN** `TransicionWorkflowService::execute()` ejecuta una transición de workflow
 - **THEN** se registra usuario, fecha, estado anterior, estado nuevo, comentario y metadata mediante `AuditLogger`
 
-
 ### Requirement: Permiso dedicado para vincular adquisiciones a casos de pago
 El sistema SHALL definir el permiso `pago_proveedores.vincular_adquisicion`, distinto de los permisos de gestión del ciclo de vida de Adquisiciones (`adquisiciones.publicar`, `adquisiciones.adjudicar`, `adquisiciones.anular`), para gobernar quién puede crear o quitar el vínculo entre un `caso_pago_proveedor` y un `proceso_adquisicion`.
 
@@ -37,7 +34,6 @@ El sistema SHALL definir el permiso `pago_proveedores.vincular_adquisicion`, dis
 - **WHEN** se ejecuta el seeder de roles y permisos del módulo Pago de Proveedores
 - **THEN** el permiso `pago_proveedores.vincular_adquisicion` existe
 - **AND** el rol `admin` lo tiene asignado
-
 
 ### Requirement: Permiso core para gestionar documentos del expediente
 El sistema SHALL definir el permiso core `documentos.gestionar` (distinto de los permisos de módulos funcionales), para gobernar quién puede subir y desvincular documentos de un `Proceso`, dado que el expediente documental es infraestructura no desactivable y no pertenece a ningún módulo funcional específico.
@@ -47,7 +43,6 @@ El sistema SHALL definir el permiso core `documentos.gestionar` (distinto de los
 - **THEN** el permiso `documentos.gestionar` existe
 - **AND** los roles `superadmin` y `admin` lo tienen asignado
 
-
 ### Requirement: Permiso core para validar documentos del expediente
 El sistema SHALL definir el permiso core `documentos.validar`, distinto de `documentos.gestionar`, para gobernar quién puede crear eventos de validación o rechazo sobre un documento del expediente.
 
@@ -55,7 +50,6 @@ El sistema SHALL definir el permiso core `documentos.validar`, distinto de `docu
 - **WHEN** se ejecuta `RolesAndPermissionsSeeder`
 - **THEN** el permiso `documentos.validar` existe
 - **AND** los roles `superadmin` y `admin` lo tienen asignado
-
 
 ### Requirement: Visualizar el historial de auditoría
 El sistema SHALL exponer una página autorizada (`auditoria.ver`) que liste los `audit_logs` paginados, ordenados del más reciente al más antiguo, con el usuario, la acción, la entidad afectada y los estados antes/después de cada registro.
@@ -81,7 +75,6 @@ El sistema SHALL definir el permiso core `auditoria.ver` (distinto de los permis
 - **THEN** el permiso `auditoria.ver` existe
 - **AND** los roles `superadmin` y `admin` lo tienen asignado
 
-
 ### Requirement: Permisos granulares para gestionar usuarios institucionales
 El sistema SHALL definir los permisos `usuarios.ver`, `usuarios.crear`, `usuarios.editar`, `usuarios.activar`, `usuarios.desactivar`, `usuarios.resetear_password` y `usuarios.asignar_roles`, en reemplazo del permiso único `usuarios.administrar`, para gobernar de forma auditable cada acción sobre usuarios institucionales por separado.
 
@@ -90,7 +83,6 @@ El sistema SHALL definir los permisos `usuarios.ver`, `usuarios.crear`, `usuario
 - **THEN** los siete permisos `usuarios.ver/crear/editar/activar/desactivar/resetear_password/asignar_roles` existen
 - **AND** los roles `superadmin` y `admin` los tienen asignados
 - **AND** el permiso `usuarios.administrar` ya no existe
-
 
 ### Requirement: Administrar roles y sus permisos
 El sistema SHALL exponer, gobernado por el permiso `roles.administrar`, un CRUD de roles: listar roles con su conteo de usuarios asignados y de permisos, crear un rol con nombre y un checklist de permisos existentes agrupados por módulo, editar el nombre y los permisos de un rol existente, y eliminar un rol. Los roles core `superadmin` y `admin` SHALL NOT poder eliminarse, y un rol con usuarios asignados SHALL NOT poder eliminarse.
@@ -147,3 +139,17 @@ El sistema SHALL definir el permiso `indicadores.importar`, distinto de la visib
 - **WHEN** se ejecuta `RolesAndPermissionsSeeder`
 - **THEN** el permiso `indicadores.importar` existe
 - **AND** los roles `superadmin` y `admin` lo tienen asignado
+
+### Requirement: Los permisos compartidos al frontend reflejan el acceso efectivo del usuario
+El sistema SHALL compartir al frontend, en cada request Inertia (`auth.permissions`), la lista de permisos que refleja el acceso **efectivo** del usuario autenticado para condicionar la UI (ítems de sidebar, acciones visibles). Para un usuario con el rol `superadmin` —que bypassea todos los gates vía `Gate::before`— la lista SHALL contener todos los permisos existentes; para cualquier otro usuario, los permisos de sus roles (`getAllPermissions()`). Un usuario no autenticado recibe una lista vacía.
+
+#### Scenario: El superadmin recibe todos los permisos, incluidos los de módulos
+- **WHEN** un usuario con rol `superadmin` carga cualquier página Inertia
+- **THEN** `auth.permissions` incluye todos los permisos existentes (por ejemplo `pago_proveedores.revisar_finanzas` y `pago_proveedores.revisar_zonal`), aunque no estén asignados a sus roles
+- **AND** la UI condicionada por permisos (sidebar, acciones) le muestra todas las opciones, en coherencia con su bypass de gates
+
+#### Scenario: Un usuario con rol funcional recibe solo los permisos de sus roles
+- **WHEN** un usuario con el rol `jefe_finanzas` (sin `superadmin`) carga una página Inertia
+- **THEN** `auth.permissions` contiene `pago_proveedores.revisar_finanzas`
+- **AND** no contiene `pago_proveedores.revisar_zonal`
+

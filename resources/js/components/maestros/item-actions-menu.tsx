@@ -46,9 +46,7 @@ export function ItemActionsMenu({ item }: { item: ItemPresupuestario }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                        <Link href={items.show(item.id).url}>
-                            Ver detalle
-                        </Link>
+                        <Link href={items.show(item.id).url}>Ver detalle</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link href={items.edit(item.id).url}>Editar</Link>
@@ -70,10 +68,9 @@ export function ItemActionsMenu({ item }: { item: ItemPresupuestario }) {
                     <DialogHeader>
                         <DialogTitle>Eliminar ítem presupuestario</DialogTitle>
                         <DialogDescription>
-                            ¿Confirmas eliminar "{item.nombre}"? Esta acción
-                            no se puede deshacer. Si tiene asignaciones o
-                            catálogos asociados, la eliminación será
-                            rechazada.
+                            ¿Confirmas eliminar "{item.nombre}"? Esta acción no
+                            se puede deshacer. Si tiene asignaciones o catálogos
+                            asociados, la eliminación será rechazada.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

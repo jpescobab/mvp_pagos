@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
-import { formatNumero } from '@/lib/format';
+import { formatFecha, formatNumero } from '@/lib/format';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { EgresoCgu, Paginated } from '@/types/pago-proveedores';
 
@@ -67,9 +67,7 @@ export default function EgresosCguIndex() {
                                         {egreso.numero_egreso}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {new Date(
-                                            egreso.fecha,
-                                        ).toLocaleDateString()}
+                                        {formatFecha(egreso.fecha)}
                                     </td>
                                     <td className="px-4 py-2">
                                         <Monto valor={egreso.monto_total} />

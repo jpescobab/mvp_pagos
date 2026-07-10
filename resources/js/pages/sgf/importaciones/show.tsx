@@ -1,6 +1,6 @@
 import { Head, usePage, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { formatNumero } from '@/lib/format';
+import { formatFechaHora, formatNumero } from '@/lib/format';
 import importaciones from '@/routes/sgf/importaciones';
 import type { ImportacionSgf } from '@/types/sgf';
 
@@ -38,15 +38,10 @@ export default function ImportacionSgfShow() {
                         {importacion.estado}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        Iniciado en:{' '}
-                        {new Date(importacion.iniciado_en).toLocaleString()}
+                        Iniciado en: {formatFechaHora(importacion.iniciado_en)}
                         {' · '}
                         Finalizado en:{' '}
-                        {importacion.finalizado_en
-                            ? new Date(
-                                  importacion.finalizado_en,
-                              ).toLocaleString()
-                            : '—'}
+                        {formatFechaHora(importacion.finalizado_en)}
                     </p>
                     {importacion.error && (
                         <p className="text-sm text-destructive">
@@ -78,9 +73,9 @@ export default function ImportacionSgfShow() {
                                         {snapshot.referencia_externa}
                                     </span>
                                     <span className="text-muted-foreground">
-                                        {new Date(
+                                        {formatFechaHora(
                                             snapshot.capturado_en,
-                                        ).toLocaleString()}{' '}
+                                        )}{' '}
                                         ·{' '}
                                         <span className="font-mono text-xs">
                                             {snapshot.hash.slice(0, 12)}…

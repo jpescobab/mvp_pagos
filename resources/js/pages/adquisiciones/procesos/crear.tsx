@@ -48,9 +48,7 @@ export default function ProcesosCrear() {
                 modalidad_id: modalidadId ? Number(modalidadId) : null,
                 ccosto_id: ccostoId ? Number(ccostoId) : null,
                 proveedor_id:
-                    proveedorId === SIN_PROVEEDOR
-                        ? null
-                        : Number(proveedorId),
+                    proveedorId === SIN_PROVEEDOR ? null : Number(proveedorId),
                 monto: monto || null,
                 objeto,
             },
@@ -98,10 +96,7 @@ export default function ProcesosCrear() {
                             value={modalidadId}
                             onValueChange={setModalidadId}
                         >
-                            <SelectTrigger
-                                id="modalidad_id"
-                                className="w-full"
-                            >
+                            <SelectTrigger id="modalidad_id" className="w-full">
                                 <SelectValue placeholder="Selecciona una modalidad" />
                             </SelectTrigger>
                             <SelectContent>
@@ -155,10 +150,7 @@ export default function ProcesosCrear() {
                             value={proveedorId}
                             onValueChange={setProveedorId}
                         >
-                            <SelectTrigger
-                                id="proveedor_id"
-                                className="w-full"
-                            >
+                            <SelectTrigger id="proveedor_id" className="w-full">
                                 <SelectValue placeholder="Sin proveedor" />
                             </SelectTrigger>
                             <SelectContent>

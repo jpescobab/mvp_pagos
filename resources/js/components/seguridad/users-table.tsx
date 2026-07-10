@@ -3,17 +3,11 @@ import { UserStatusBadge } from '@/components/seguridad/user-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useInitials } from '@/hooks/use-initials';
+import { formatFechaHora } from '@/lib/format';
 import type { PermisosUsuarios, UsuarioListado } from '@/types/seguridad';
 
 function formatearFecha(fecha: string | null) {
-    if (fecha === null) {
-        return '—';
-    }
-
-    return new Date(fecha).toLocaleString('es-CL', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-    });
+    return formatFechaHora(fecha);
 }
 
 type UsersTableProps = {

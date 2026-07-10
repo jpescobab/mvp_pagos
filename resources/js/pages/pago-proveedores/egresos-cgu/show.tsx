@@ -11,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatFecha } from '@/lib/format';
 import documentos from '@/routes/egresos-cgu/documentos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type {
@@ -77,7 +78,7 @@ export default function EgresoCguShow() {
                         Egreso {egreso.numero_egreso}
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        {new Date(egreso.fecha).toLocaleDateString()} · Monto
+                        {formatFecha(egreso.fecha)} · Monto
                         total <Monto valor={egreso.monto_total} />
                     </p>
                     {egreso.observaciones && (

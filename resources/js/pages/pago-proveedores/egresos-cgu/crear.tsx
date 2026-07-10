@@ -45,12 +45,10 @@ export default function EgresosCguCrear() {
                 numero_egreso: numeroEgreso,
                 fecha,
                 observaciones: observaciones || null,
-                casos: Object.entries(seleccion).map(
-                    ([casoId, monto]) => ({
-                        caso_pago_proveedor_id: Number(casoId),
-                        monto,
-                    }),
-                ),
+                casos: Object.entries(seleccion).map(([casoId, monto]) => ({
+                    caso_pago_proveedor_id: Number(casoId),
+                    monto,
+                })),
             },
             {
                 onError: (errores) =>
@@ -72,15 +70,14 @@ export default function EgresosCguCrear() {
                 <div className="grid max-w-xl gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="numero_egreso">
-                            N° de egreso<span className="text-destructive">*</span>
+                            N° de egreso
+                            <span className="text-destructive">*</span>
                         </Label>
                         <Input
                             id="numero_egreso"
                             className="font-mono"
                             value={numeroEgreso}
-                            onChange={(e) =>
-                                setNumeroEgreso(e.target.value)
-                            }
+                            onChange={(e) => setNumeroEgreso(e.target.value)}
                         />
                         {errors.numero_egreso && (
                             <p className="text-sm text-destructive">
@@ -112,9 +109,7 @@ export default function EgresosCguCrear() {
                             id="observaciones"
                             className="min-h-20 rounded-md border bg-background p-2 text-sm"
                             value={observaciones}
-                            onChange={(e) =>
-                                setObservaciones(e.target.value)
-                            }
+                            onChange={(e) => setObservaciones(e.target.value)}
                         />
                     </div>
                 </div>
@@ -147,15 +142,11 @@ export default function EgresosCguCrear() {
                                             seleccion[caso.id] !== undefined
                                         }
                                         onCheckedChange={(marcado) =>
-                                            alternarCaso(
-                                                caso,
-                                                marcado === true,
-                                            )
+                                            alternarCaso(caso, marcado === true)
                                         }
                                     />
                                     <span className="min-w-48 flex-1 text-sm">
-                                        {caso.proveedor.nombre ??
-                                            caso.sgf_id}{' '}
+                                        {caso.proveedor.nombre ?? caso.sgf_id}{' '}
                                         <span className="font-mono text-xs text-muted-foreground">
                                             {caso.sgf_id}
                                         </span>

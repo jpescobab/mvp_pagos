@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
 import { useInitials } from '@/hooks/use-initials';
+import { formatFechaHora } from '@/lib/format';
 import { formatNumero } from '@/lib/format';
 import casos from '@/routes/sgf/casos';
 import importaciones from '@/routes/sgf/importaciones';
@@ -161,29 +162,23 @@ export default function ImportacionesSgfIndex() {
                                     </td>
                                     <td
                                         className="hidden truncate px-2.5 py-1 font-mono text-muted-foreground md:table-cell"
-                                        title={new Date(
+                                        title={formatFechaHora(
                                             importacion.iniciado_en,
-                                        ).toLocaleString()}
+                                        )}
                                     >
-                                        {new Date(
+                                        {formatFechaHora(
                                             importacion.iniciado_en,
-                                        ).toLocaleString()}
+                                        )}
                                     </td>
                                     <td
                                         className="hidden truncate px-2.5 py-1 font-mono text-muted-foreground lg:table-cell"
-                                        title={
-                                            importacion.finalizado_en
-                                                ? new Date(
-                                                      importacion.finalizado_en,
-                                                  ).toLocaleString()
-                                                : '—'
-                                        }
+                                        title={formatFechaHora(
+                                            importacion.finalizado_en,
+                                        )}
                                     >
-                                        {importacion.finalizado_en
-                                            ? new Date(
-                                                  importacion.finalizado_en,
-                                              ).toLocaleString()
-                                            : '—'}
+                                        {formatFechaHora(
+                                            importacion.finalizado_en,
+                                        )}
                                     </td>
                                     <td className="px-2.5 py-1 text-right">
                                         <Monto

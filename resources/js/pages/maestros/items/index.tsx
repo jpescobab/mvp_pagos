@@ -83,8 +83,7 @@ export default function ItemsIndex() {
                                         colSpan={5}
                                         className="px-2.5 py-5 text-center text-muted-foreground"
                                     >
-                                        Sin ítems presupuestarios que
-                                        coincidan.
+                                        Sin ítems presupuestarios que coincidan.
                                     </td>
                                 </tr>
                             )}
@@ -106,9 +105,7 @@ export default function ItemsIndex() {
                                         {item.descripcion ?? '—'}
                                     </td>
                                     <td className="px-2.5 py-1">
-                                        <ItemStatusBadge
-                                            activo={item.activo}
-                                        />
+                                        <ItemStatusBadge activo={item.activo} />
                                     </td>
                                     <td className="px-2.5 py-1 text-right">
                                         <ItemActionsMenu item={item} />
@@ -122,8 +119,8 @@ export default function ItemsIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

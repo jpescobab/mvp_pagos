@@ -3,23 +3,13 @@ import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Monto } from '@/components/ui/monto';
 import { useInitials } from '@/hooks/use-initials';
-import { formatNumero } from '@/lib/format';
+import { formatFecha, formatNumero } from '@/lib/format';
 import casos from '@/routes/pago-proveedores/casos';
 import type { CasoPagoProveedor, Paginated } from '@/types/pago-proveedores';
 
 type PageProps = {
     casos: Paginated<CasoPagoProveedor>;
 };
-
-function formatFecha(valor: string | null): string {
-    if (!valor) {
-        return '—';
-    }
-
-    const [anio, mes, dia] = valor.slice(0, 10).split('-').map(Number);
-
-    return new Date(anio, mes - 1, dia).toLocaleDateString();
-}
 
 export default function CasosIndex() {
     const { casos: pagina } = usePage<PageProps>().props;
@@ -132,7 +122,9 @@ export default function CasosIndex() {
                                     </td>
                                     <td
                                         className="hidden truncate px-2.5 py-1 text-muted-foreground lg:table-cell"
-                                        title={caso.observacion_egreso ?? undefined}
+                                        title={
+                                            caso.observacion_egreso ?? undefined
+                                        }
                                     >
                                         {caso.observacion_egreso ?? '—'}
                                     </td>
@@ -166,8 +158,8 @@ export default function CasosIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

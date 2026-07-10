@@ -53,9 +53,7 @@ export default function DefinicionesInformeRazonadoIndex() {
                 </h1>
 
                 <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">
-                        Crear definición
-                    </h2>
+                    <h2 className="text-base font-medium">Crear definición</h2>
 
                     {error && (
                         <p className="text-sm text-destructive">{error}</p>
@@ -85,9 +83,7 @@ export default function DefinicionesInformeRazonadoIndex() {
                             <Input
                                 id="descripcion-definicion"
                                 value={descripcion}
-                                onChange={(e) =>
-                                    setDescripcion(e.target.value)
-                                }
+                                onChange={(e) => setDescripcion(e.target.value)}
                             />
                         </div>
                         <Button

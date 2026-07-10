@@ -79,8 +79,7 @@ export default function UsuariosEditar({
                     cfinancieroId === SIN_SELECCION
                         ? null
                         : Number(cfinancieroId),
-                ccosto_id:
-                    ccostoId === SIN_SELECCION ? null : Number(ccostoId),
+                ccosto_id: ccostoId === SIN_SELECCION ? null : Number(ccostoId),
             },
             {
                 onError: (errores) =>

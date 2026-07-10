@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Monto } from '@/components/ui/monto';
+import { formatFecha, formatFechaHora } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
 import type { EjecucionInformeRazonado } from '@/types/informes-razonados';
 import type { TransicionWorkflow } from '@/types/pago-proveedores';
@@ -66,7 +67,7 @@ export default function EjecucionInformeRazonadoShow() {
                     <p className="text-sm text-muted-foreground">
                         Corte del período {ejecucion.corte.periodo_codigo} ·
                         generado por {ejecucion.generado_por ?? 'Sistema'} el{' '}
-                        {new Date(ejecucion.generado_en).toLocaleDateString()}
+                        {formatFecha(ejecucion.generado_en)}
                     </p>
                 </div>
 
@@ -207,9 +208,7 @@ export default function EjecucionInformeRazonadoShow() {
                                         className="py-2 font-mono text-xs"
                                     >
                                         {snapshot.hash} ·{' '}
-                                        {new Date(
-                                            snapshot.capturado_en,
-                                        ).toLocaleString()}
+                                        {formatFechaHora(snapshot.capturado_en)}
                                     </li>
                                 ))}
                             </ul>
@@ -234,9 +233,7 @@ export default function EjecucionInformeRazonadoShow() {
                                                 {aprobacion.decision}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {new Date(
-                                                    aprobacion.decidido_en,
-                                                ).toLocaleString()}
+                                                {formatFechaHora(aprobacion.decidido_en)}
                                             </span>
                                         </div>
                                         <p className="text-muted-foreground">
@@ -270,9 +267,7 @@ export default function EjecucionInformeRazonadoShow() {
                                             {item.transicion.nombre}
                                         </span>
                                         <span className="text-muted-foreground">
-                                            {new Date(
-                                                item.created_at,
-                                            ).toLocaleString()}
+                                            {formatFechaHora(item.created_at)}
                                         </span>
                                     </div>
                                     <p className="text-muted-foreground">

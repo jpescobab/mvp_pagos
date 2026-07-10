@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatFecha, formatFechaHora } from '@/lib/format';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import documentos from '@/routes/procesos/documentos';
@@ -705,7 +706,7 @@ export default function CasoShow() {
                                                         {validacion.validado_por ??
                                                             'Sistema'}
                                                         {validacion.validado_en &&
-                                                            ` · ${new Date(validacion.validado_en).toLocaleString()}`}
+                                                            ` · ${formatFechaHora(validacion.validado_en)}`}
                                                         {validacion.observacion && (
                                                             <span className="italic">
                                                                 {' '}
@@ -800,9 +801,9 @@ export default function CasoShow() {
                                                 {registro.numero_registro}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {new Date(
+                                                {formatFecha(
                                                     registro.fecha_registro,
-                                                ).toLocaleDateString()}{' '}
+                                                )}{' '}
                                                 ·{' '}
                                                 <Monto valor={registro.monto} />
                                             </span>
@@ -905,9 +906,9 @@ export default function CasoShow() {
                                                 {registro.numero_operacion}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {new Date(
+                                                {formatFecha(
                                                     registro.fecha_pago,
-                                                ).toLocaleDateString()}{' '}
+                                                )}{' '}
                                                 ·{' '}
                                                 <Monto valor={registro.monto} />
                                             </span>
@@ -999,9 +1000,9 @@ export default function CasoShow() {
                                             {factura.folio}
                                         </span>
                                         <span className="text-muted-foreground">
-                                            {new Date(
+                                            {formatFecha(
                                                 factura.fecha_emision,
-                                            ).toLocaleDateString()}{' '}
+                                            )}{' '}
                                             · <Monto valor={factura.monto} />
                                         </span>
                                     </div>
@@ -1077,9 +1078,7 @@ export default function CasoShow() {
                                             {item.transicion.nombre}
                                         </span>
                                         <span className="text-muted-foreground">
-                                            {new Date(
-                                                item.created_at,
-                                            ).toLocaleString()}
+                                            {formatFechaHora(item.created_at)}
                                         </span>
                                     </div>
                                     <p className="text-muted-foreground">
@@ -1143,9 +1142,9 @@ export default function CasoShow() {
                                     <li className="py-2">
                                         <div className="flex items-center justify-between">
                                             <span>
-                                                {new Date(
+                                                {formatFechaHora(
                                                     snapshot.capturado_en,
-                                                ).toLocaleString()}{' '}
+                                                )}{' '}
                                                 <span className="text-muted-foreground">
                                                     ·{' '}
                                                     {snapshot.metodo_captura ??
@@ -1220,9 +1219,7 @@ export default function CasoShow() {
                                         {egreso.numero_egreso}
                                     </Link>
                                     <span className="text-muted-foreground">
-                                        {new Date(
-                                            egreso.fecha,
-                                        ).toLocaleDateString()}{' '}
+                                        {formatFecha(egreso.fecha)}{' '}
                                         · <Monto valor={egreso.monto} />
                                     </span>
                                 </li>

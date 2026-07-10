@@ -46,10 +46,7 @@ export function Pagination({
                         </SelectTrigger>
                         <SelectContent>
                             {TAMANOS_PAGINA.map((tamano) => (
-                                <SelectItem
-                                    key={tamano}
-                                    value={String(tamano)}
-                                >
+                                <SelectItem key={tamano} value={String(tamano)}>
                                     {tamano}
                                 </SelectItem>
                             ))}
@@ -85,9 +82,5 @@ export function Pagination({
 }
 
 export function navegarPaginacion(url: string) {
-    router.get(
-        url,
-        {},
-        { preserveState: true, preserveScroll: true },
-    );
+    router.get(url, {}, { preserveState: true, preserveScroll: true });
 }
