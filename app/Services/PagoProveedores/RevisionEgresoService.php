@@ -26,6 +26,31 @@ class RevisionEgresoService
     ) {}
 
     /**
+     * Avanza el proceso del caso, si corresponde, hasta dejarlo en la
+     * instancia de revisión de Finanzas. Se invoca al asignar el caso a un
+     * Egreso: recién ahí queda agrupado y listo para entrar a la revisión en
+     * dos instancias. No-op si el caso ya está en en_revision_finanzas o en
+     * un estado posterior — solo actúa sobre un caso recién importado.
+     */
+    public function iniciarRevision(CasoPagoProveedor $caso, User $user): void
+    {
+        $proceso = $caso->proceso?->fresh('estadoActual');
+
+        if ($proceso === null) {
+            return;
+        }
+
+        if ($proceso->estadoActual->codigo === 'importada_desde_sgf') {
+            $this->transicionWorkflow->execute($proceso, 'recibir_en_finanzas', user: $user);
+            $proceso = $proceso->fresh('estadoActual');
+        }
+
+        if ($proceso->estadoActual->codigo === 'recibida_finanzas') {
+            $this->transicionWorkflow->execute($proceso, 'iniciar_revision_documental', user: $user);
+        }
+    }
+
+    /**
      * Casos del egreso con su proceso y estado actual cargados.
      *
      * @return Collection<int, CasoPagoProveedor>
