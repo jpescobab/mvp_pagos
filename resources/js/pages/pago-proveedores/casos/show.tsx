@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Fragment, useEffect, useState } from 'react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -23,6 +24,7 @@ import {
 import { formatFecha, formatFechaHora } from '@/lib/format';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
+import revision from '@/routes/pago-proveedores/revision';
 import documentos from '@/routes/procesos/documentos';
 import type {
     CasoPagoProveedor,
@@ -40,14 +42,49 @@ type PageProps = {
     };
 };
 
+/**
+ * Transiciones que solo se ejecutan desde Revisión de Pagos
+ * (InstanciaRevision::codigosTransicionGobernados() en el backend, que las
+ * rechaza si llegan por este endpoint genérico).
+ */
+const CODIGOS_TRANSICION_GOBERNADOS = new Set([
+    'observar_finanzas',
+    'aprobar_finanzas',
+    'rechazar_finanzas',
+    'devolver_a_finanzas',
+    'aprobar_zonal',
+    'rechazar_zonal',
+]);
+
+const ESTADOS_EN_REVISION = new Set([
+    'en_revision_finanzas',
+    'en_revision_zonal',
+]);
+
+const NOMBRE_INSTANCIA: Record<string, string> = {
+    en_revision_finanzas: 'Jefe de Finanzas',
+    en_revision_zonal: 'Administrador Zonal',
+};
+
 export default function CasoShow() {
-    const { caso, tiposDocumento, verificacionSgf } =
+    const { caso, tiposDocumento, verificacionSgf, auth } =
         usePage<PageProps>().props;
     const [transicionConComentario, setTransicionConComentario] =
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
     const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
+
+    const enRevision = ESTADOS_EN_REVISION.has(caso.proceso.estado_actual.codigo);
+    const puedeRevisar =
+        auth.permissions.includes('pago_proveedores.revisar_finanzas') ||
+        auth.permissions.includes('pago_proveedores.revisar_zonal');
+    const egresoEnRevision = caso.egresos_cgu?.[0];
+    const transicionesVisibles =
+        caso.proceso.transiciones_disponibles.filter(
+            (transicion) =>
+                !CODIGOS_TRANSICION_GOBERNADOS.has(transicion.codigo),
+        );
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -416,6 +453,37 @@ export default function CasoShow() {
                     </div>
                 </div>
 
+                {enRevision && (
+                    <Alert className="border-transparent bg-warning-soft text-warning">
+                        <AlertTitle>
+                            Pago en revisión en dos instancias
+                        </AlertTitle>
+                        <AlertDescription className="text-warning/80">
+                            <span>
+                                Instancia actual:{' '}
+                                {
+                                    NOMBRE_INSTANCIA[
+                                        caso.proceso.estado_actual.codigo
+                                    ]
+                                }
+                                . Aprobar, rechazar, observar/devolver y
+                                validar documentos se hacen desde Revisión de
+                                Pagos.
+                            </span>
+                            {puedeRevisar && egresoEnRevision && (
+                                <Link
+                                    href={
+                                        revision.show(egresoEnRevision.id).url
+                                    }
+                                    className="font-medium underline"
+                                >
+                                    Ir a Revisión de Pagos →
+                                </Link>
+                            )}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <div className="text-sm">
                     <span className="text-muted-foreground">Monto: </span>
                     <Monto valor={caso.monto} />
@@ -432,31 +500,29 @@ export default function CasoShow() {
                         </p>
                     )}
 
-                    {caso.proceso.transiciones_disponibles.length === 0 ? (
+                    {transicionesVisibles.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                             No hay transiciones disponibles desde el estado
                             actual.
                         </p>
                     ) : (
                         <div className="flex flex-wrap gap-2">
-                            {caso.proceso.transiciones_disponibles.map(
-                                (transicion) => (
-                                    <Button
-                                        key={transicion.codigo}
-                                        variant="outline"
-                                        disabled={procesando}
-                                        onClick={() =>
-                                            transicion.requiere_comentario
-                                                ? setTransicionConComentario(
-                                                      transicion,
-                                                  )
-                                                : ejecutar(transicion)
-                                        }
-                                    >
-                                        {transicion.nombre}
-                                    </Button>
-                                ),
-                            )}
+                            {transicionesVisibles.map((transicion) => (
+                                <Button
+                                    key={transicion.codigo}
+                                    variant="outline"
+                                    disabled={procesando}
+                                    onClick={() =>
+                                        transicion.requiere_comentario
+                                            ? setTransicionConComentario(
+                                                  transicion,
+                                              )
+                                            : ejecutar(transicion)
+                                    }
+                                >
+                                    {transicion.nombre}
+                                </Button>
+                            ))}
                         </div>
                     )}
                 </section>
@@ -642,28 +708,32 @@ export default function CasoShow() {
                                             >
                                                 Descargar
                                             </a>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    validarDocumento(
-                                                        doc.documento_id,
-                                                    )
-                                                }
-                                            >
-                                                Validar
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    setDocumentoARechazar(
-                                                        doc.documento_id,
-                                                    )
-                                                }
-                                            >
-                                                Rechazar
-                                            </Button>
+                                            {!enRevision && (
+                                                <>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            validarDocumento(
+                                                                doc.documento_id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Validar
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setDocumentoARechazar(
+                                                                doc.documento_id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Rechazar
+                                                    </Button>
+                                                </>
+                                            )}
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -1213,7 +1283,12 @@ export default function CasoShow() {
                                     className="flex items-center justify-between py-2"
                                 >
                                     <Link
-                                        href={egresosCgu.show(egreso.id).url}
+                                        href={
+                                            enRevision
+                                                ? revision.show(egreso.id).url
+                                                : egresosCgu.show(egreso.id)
+                                                      .url
+                                        }
                                         className="underline"
                                     >
                                         {egreso.numero_egreso}

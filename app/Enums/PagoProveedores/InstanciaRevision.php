@@ -85,4 +85,24 @@ enum InstanciaRevision: string
             default => null,
         };
     }
+
+    /**
+     * Códigos de transición que solo SHALL ejecutarse desde Revisión de Pagos
+     * (vía RevisionEgresoService), nunca desde el endpoint genérico de
+     * transiciones de un caso.
+     *
+     * @return list<string>
+     */
+    public static function codigosTransicionGobernados(): array
+    {
+        $codigos = [];
+
+        foreach (self::cases() as $instancia) {
+            $codigos[] = $instancia->transicionAprobar();
+            $codigos[] = $instancia->transicionDevolver();
+            $codigos[] = $instancia->transicionRechazar();
+        }
+
+        return $codigos;
+    }
 }

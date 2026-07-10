@@ -20,7 +20,7 @@ El sistema SHALL renderizar una página que muestre los casos de pago de proveed
 - **THEN** la aplicación navega a la página de detalle de ese caso
 
 ### Requirement: Página de detalle de un caso con acciones de workflow
-El sistema SHALL renderizar una página de detalle de un caso que muestre su estado actual, el checklist documental del proceso, el historial de transiciones, y permita ejecutar cualquiera de las transiciones disponibles delegando en el endpoint genérico ya existente.
+El sistema SHALL renderizar una página de detalle de un caso que muestre su estado actual, el checklist documental del proceso, el historial de transiciones, y permita ejecutar las transiciones disponibles delegando en el endpoint genérico ya existente, salvo las transiciones gobernadas por la revisión de pagos en dos instancias (`observar_finanzas`, `aprobar_finanzas`, `rechazar_finanzas`, `devolver_a_finanzas`, `aprobar_zonal`, `rechazar_zonal`), que el sistema SHALL rechazar desde este endpoint y que solo se ejecutan desde Revisión de Pagos.
 
 #### Scenario: Ejecutar una transición sin comentario requerido
 - **WHEN** un usuario con el permiso requerido selecciona una transición disponible que no requiere comentario
@@ -34,9 +34,28 @@ El sistema SHALL renderizar una página de detalle de un caso que muestre su est
 - **WHEN** el backend rechaza una transición (sin permiso, código inválido, comentario faltante o documentos faltantes)
 - **THEN** la página muestra el mensaje de error devuelto por el backend sin alterar el estado mostrado
 
+#### Scenario: Transición gobernada por la revisión en dos instancias
+- **WHEN** se envía al endpoint genérico de transiciones de un caso un código gobernado por la revisión en dos instancias
+- **THEN** el sistema rechaza la operación sin ejecutar la transición, indicando que debe hacerse desde Revisión de Pagos
+
 #### Scenario: Checklist documental vacío
 - **WHEN** el `Proceso` del caso no tiene checklist documental generado todavía
 - **THEN** la página muestra un estado vacío explícito en lugar de asumir una estructura de datos
+
+### Requirement: Aviso y bloqueo de acciones gobernadas por Revisión de Pagos
+Mientras el `Proceso` de un caso esté en `en_revision_finanzas` o `en_revision_zonal`, el sistema SHALL mostrar en la página de detalle del caso un aviso indicando que el pago está en revisión en dos instancias, con un enlace a Revisión de Pagos cuando el usuario tenga el permiso correspondiente, y SHALL rechazar la validación o el rechazo de documentos desde el endpoint genérico de esta pantalla.
+
+#### Scenario: Aviso con enlace para un usuario con permiso de revisión
+- **WHEN** un usuario con el permiso `pago_proveedores.revisar_finanzas` o `pago_proveedores.revisar_zonal` abre el detalle de un caso en `en_revision_finanzas` o `en_revision_zonal`
+- **THEN** la página muestra un aviso con un enlace al egreso correspondiente en Revisión de Pagos
+
+#### Scenario: Aviso sin enlace para un usuario sin permiso de revisión
+- **WHEN** un usuario sin esos permisos abre el detalle de un caso en revisión
+- **THEN** la página muestra el mismo aviso informativo sin un enlace accionable
+
+#### Scenario: Validar o rechazar un documento queda bloqueado durante la revisión
+- **WHEN** se intenta validar o rechazar un documento del proceso de un caso que está en `en_revision_finanzas` o `en_revision_zonal`, desde el endpoint genérico de documentos
+- **THEN** el sistema rechaza la operación, indicando que debe hacerse desde Revisión de Pagos
 
 ### Requirement: Página de listado de egresos CGU
 El sistema SHALL renderizar una página que muestre los egresos CGU paginados junto con los casos de pago de proveedores que cada uno cubre, y cada fila SHALL navegar al detalle de ese egreso.
@@ -49,20 +68,12 @@ El sistema SHALL renderizar una página que muestre los egresos CGU paginados ju
 - **WHEN** un usuario hace clic en un egreso del listado
 - **THEN** la aplicación navega a la página de detalle de ese egreso CGU
 
-### Requirement: Página de detalle de egreso CGU con documentos vinculados
-El sistema SHALL renderizar una página de detalle de un egreso CGU que muestre sus `egresos_cgu_items` (caso cubierto y monto) y sus documentos vinculados, permitiendo subir, descargar y desvincular documentos para ese egreso.
+### Requirement: Página de detalle de egreso CGU
+El sistema SHALL renderizar una página de detalle de un egreso CGU que muestre sus `egresos_cgu_items` (caso cubierto y monto).
 
 #### Scenario: Ver el detalle de un egreso CGU
 - **WHEN** un usuario autenticado visita la página de detalle de un egreso CGU
 - **THEN** la página muestra el número de egreso, fecha, monto total, observaciones y la lista de casos cubiertos con su monto
-
-#### Scenario: Subir un documento al egreso
-- **WHEN** un usuario con el permiso `documentos.gestionar` sube un archivo válido junto con un tipo de documento desde la página de detalle de un egreso CGU
-- **THEN** el documento queda vinculado al egreso y aparece en la lista sin recargar la página completa
-
-#### Scenario: Sin documentos vinculados
-- **WHEN** un egreso CGU no tiene ningún documento vinculado todavía
-- **THEN** la página muestra un estado vacío explícito en lugar de una lista vacía sin contexto
 
 ### Requirement: Formulario de creación de egreso CGU
 El sistema SHALL renderizar un formulario que permita elegir uno o más `casos_pago_proveedor` existentes, asignar un monto a cada uno, y enviar la creación del egreso CGU al endpoint ya existente.
