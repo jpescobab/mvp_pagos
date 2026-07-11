@@ -155,11 +155,13 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
         title: 'Órdenes de Compra (Mercado Público)',
         href: ordenesCompraMercadoPublico(),
         icon: FileSearch,
+        permiso: 'adquisiciones.consultar_orden_compra_mp',
     },
     {
         title: 'Licitaciones (Mercado Público)',
         href: licitacionesMercadoPublico(),
         icon: FileSearch,
+        permiso: 'adquisiciones.consultar_licitacion_mp',
     },
 ];
 

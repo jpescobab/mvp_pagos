@@ -26,9 +26,12 @@ type PageProps = {
 };
 
 export default function ImportacionesSgfIndex() {
-    const { importaciones: pagina, q } = usePage<PageProps>().props;
+    const { importaciones: pagina, q, auth } = usePage<PageProps>().props;
     const [termino, setTermino] = useState(q ?? '');
     const getInitials = useInitials();
+    const puedeImportar = auth.permissions.includes(
+        'pago_proveedores.importar_casos_sgf',
+    );
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -63,24 +66,31 @@ export default function ImportacionesSgfIndex() {
                             onChange={(e) => setTermino(e.target.value)}
                             className="w-64"
                         />
-                        <Button
-                            variant="outline"
-                            onClick={() =>
-                                router.post(casos.importarPendientes().url)
-                            }
-                        >
-                            Importar pendientes de SGF
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() =>
-                                router.post(
-                                    casos.importarGrupoPagoOperaciones().url,
-                                )
-                            }
-                        >
-                            Importar grupo Pago Operaciones
-                        </Button>
+                        {puedeImportar && (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                        router.post(
+                                            casos.importarPendientes().url,
+                                        )
+                                    }
+                                >
+                                    Importar pendientes de SGF
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                        router.post(
+                                            casos.importarGrupoPagoOperaciones()
+                                                .url,
+                                        )
+                                    }
+                                >
+                                    Importar grupo Pago Operaciones
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </div>
 
