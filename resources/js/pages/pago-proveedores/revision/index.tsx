@@ -47,6 +47,7 @@ type Pago = {
     puede_operar: boolean;
     totales: Totales;
     listo_para_aprobar: boolean;
+    jurisdiccion_determinable: boolean;
     documentos: Documento[];
 };
 
@@ -352,14 +353,17 @@ return;
                                 <div className="ph-progress">
                                     <div className="bar"><div className="bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? 'var(--green)' : 'var(--orange)' }} /></div>
                                     <span>{docsOk}/{docsTotal} docs OK</span>
+                                    {!pago.jurisdiccion_determinable && (
+                                        <span className="jurisdiccion-warn">
+                                            Sin centro financiero determinable — vincula el caso a un Proceso de Adquisición antes de aprobar.
+                                        </span>
+                                    )}
                                 </div>
                                 {puedeOperar && (
                                     <div className="right">
-                                        {pago.instancia === 'zonal' && (
-                                            <button className="pbtn reject" onClick={() => accionPagoConMotivo('devolver')} disabled={finalizado}>
-                                                <Icon path={IC.devolver} />Devolver
-                                            </button>
-                                        )}
+                                        <button className="pbtn reject" onClick={() => accionPagoConMotivo('devolver')} disabled={finalizado}>
+                                            <Icon path={IC.devolver} />Devolver
+                                        </button>
                                         <button className="pbtn reject" onClick={() => accionPagoConMotivo('rechazar')} disabled={finalizado}>
                                             <Icon path={IC.trash} />Rechazar Pago
                                         </button>
@@ -625,6 +629,7 @@ html.dark .revpay{
 .revpay .ph-progress{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--fg-muted);}
 .revpay .ph-progress .bar{width:80px;height:6px;border-radius:99px;background:var(--panel-2);border:1px solid var(--border);overflow:hidden;}
 .revpay .ph-progress .bar-fill{height:100%;border-radius:99px;transition:width .25s;}
+.revpay .jurisdiccion-warn{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;background:var(--orange-soft);color:var(--orange);font-weight:600;}
 .revpay .pago-head .right{margin-left:auto;display:flex;gap:8px;}
 .revpay .pbtn{height:36px;padding:0 15px;border-radius:10px;font-weight:700;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;transition:all .15s;}
 .revpay .pbtn svg{width:15px;height:15px;}

@@ -2,6 +2,8 @@
 
 use App\Models\EgresoCgu;
 use App\Models\User;
+use Database\Seeders\ModalidadesAdquisicionSeeder;
+use Database\Seeders\WorkflowAdquisicionesSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -83,4 +85,48 @@ test('asignar un caso a un egreso lo avanza a en_revision_finanzas', function ()
 
     $response->assertSessionHasNoErrors();
     expect($caso->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_finanzas');
+});
+
+test('crear un egreso CGU completa su centro financiero si el caso ya está vinculado a una adquisición', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $this->seed(ModalidadesAdquisicionSeeder::class);
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+
+    $proceso = crearProcesoAdquisicionDePrueba();
+    $caso = crearCasoPagoProveedorDePrueba('sgf-crear-egreso-cfinanciero');
+    $caso->update(['proceso_adquisicion_id' => $proceso->id]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+
+    $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
+        'numero_egreso' => 'EGR-CFIN-001',
+        'fecha' => now()->toDateString(),
+        'casos' => [
+            ['caso_pago_proveedor_id' => $caso->id, 'monto' => $caso->monto],
+        ],
+    ]);
+
+    $egreso = EgresoCgu::where('numero_egreso', 'EGR-CFIN-001')->first();
+    expect($egreso->cfinanciero_id)->toBe($proceso->ccosto->cfinanciero_id);
+});
+
+test('crear un egreso CGU con un caso sin vincular deja su centro financiero en null', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = crearCasoPagoProveedorDePrueba('sgf-crear-egreso-sin-cfinanciero');
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+
+    $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
+        'numero_egreso' => 'EGR-SINCFIN-001',
+        'fecha' => now()->toDateString(),
+        'casos' => [
+            ['caso_pago_proveedor_id' => $caso->id, 'monto' => $caso->monto],
+        ],
+    ]);
+
+    $egreso = EgresoCgu::where('numero_egreso', 'EGR-SINCFIN-001')->first();
+    expect($egreso->cfinanciero_id)->toBeNull();
 });

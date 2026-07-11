@@ -62,4 +62,23 @@ class EgresoCgu extends Model
     {
         return $this->hasMany(EgresoCguItem::class);
     }
+
+    /**
+     * Completa el centro financiero del egreso a partir de un caso recién
+     * agregado o recién vinculado a un Proceso de Adquisición, si el egreso
+     * todavía no tiene uno determinado. Sin esto, jurisdiccionId() queda en
+     * null para siempre y ningún Administrador Zonal puede revisar el egreso.
+     */
+    public function actualizarCfinancieroSiFalta(CasoPagoProveedor $caso): void
+    {
+        if ($this->cfinanciero_id !== null) {
+            return;
+        }
+
+        $cfinancieroId = $caso->cfinancieroId();
+
+        if ($cfinancieroId !== null) {
+            $this->update(['cfinanciero_id' => $cfinancieroId]);
+        }
+    }
 }

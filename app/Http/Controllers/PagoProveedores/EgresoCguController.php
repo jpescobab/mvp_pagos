@@ -76,17 +76,18 @@ class EgresoCguController extends Controller
                     ->keyBy('id');
 
                 foreach ($datos['casos'] as $item) {
+                    $caso = $casos[$item['caso_pago_proveedor_id']];
+
                     $egreso->items()->create([
                         'caso_pago_proveedor_id' => $item['caso_pago_proveedor_id'],
                         'monto' => $item['monto'],
                     ]);
 
+                    $egreso->actualizarCfinancieroSiFalta($caso);
+
                     // Recién asignado a un Egreso, el caso queda agrupado y
                     // pasa a la instancia de revisión de Finanzas.
-                    $this->revisionEgreso->iniciarRevision(
-                        $casos[$item['caso_pago_proveedor_id']],
-                        $request->user(),
-                    );
+                    $this->revisionEgreso->iniciarRevision($caso, $request->user());
                 }
             });
         } catch (TransicionWorkflowException $e) {

@@ -176,8 +176,27 @@ class RevisionEgresoService
             return false;
         }
 
+        if (! $this->jurisdiccionDeterminable($caso, $instancia)) {
+            return false;
+        }
+
         return $this->validacionDocumentos->todosAprobados($caso, $instancia)
             && $this->totalesVerificados($caso, $instancia);
+    }
+
+    /**
+     * La jurisdicción del egreso SHALL ser determinable antes de aprobar
+     * desde Finanzas hacia la instancia Zonal — de lo contrario ningún
+     * Administrador Zonal podría revisarlo después. No aplica al aprobar
+     * desde la instancia Zonal, que ya no depende de la jurisdicción.
+     */
+    private function jurisdiccionDeterminable(CasoPagoProveedor $caso, InstanciaRevision $instancia): bool
+    {
+        if ($instancia !== InstanciaRevision::Finanzas) {
+            return true;
+        }
+
+        return $caso->cfinancieroId() !== null;
     }
 
     /**
@@ -187,6 +206,10 @@ class RevisionEgresoService
     public function aprobarPago(CasoPagoProveedor $caso, User $user): void
     {
         $instancia = $this->exigirInstancia($caso);
+
+        if (! $this->jurisdiccionDeterminable($caso, $instancia)) {
+            throw new RuntimeException('El caso no tiene un centro financiero determinable: vincúlalo a un Proceso de Adquisición antes de aprobar, para que un Administrador Zonal pueda revisarlo.');
+        }
 
         if (! $this->pagoListoParaAprobar($caso)) {
             throw new RuntimeException('El pago no está listo para aprobar: faltan documentos aprobados o verificar totales.');

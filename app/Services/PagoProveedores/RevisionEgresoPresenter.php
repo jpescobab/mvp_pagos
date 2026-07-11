@@ -81,6 +81,7 @@ class RevisionEgresoPresenter
                 'verificados' => $instancia !== null && $this->revision->totalesVerificados($caso, $instancia),
             ],
             'listo_para_aprobar' => $this->revision->pagoListoParaAprobar($caso),
+            'jurisdiccion_determinable' => $instancia !== InstanciaRevision::Finanzas || $caso->cfinancieroId() !== null,
             'documentos' => $documentos->map(fn (Documento $d) => $this->documento($d, $instancia))->all(),
         ];
     }

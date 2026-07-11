@@ -26,6 +26,9 @@ class VinculoAdquisicionCasoPagoProveedorController extends Controller
 
             $caso->update(['proceso_adquisicion_id' => $procesoAdquisicion->id]);
 
+            $casoActualizado = $caso->fresh();
+            $casoActualizado->egresoCguItems->first()?->egreso?->actualizarCfinancieroSiFalta($casoActualizado);
+
             $this->auditLogger->log(
                 action: 'caso_pago_proveedor.vincular_adquisicion',
                 auditable: $caso,

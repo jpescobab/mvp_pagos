@@ -278,3 +278,33 @@ test('la aprobación de Finanzas exige el permiso revisar_finanzas', function ()
     expect(fn () => $revision->aprobarPago($e['caso']->refresh(), $sinPermiso))
         ->toThrow(TransicionWorkflowException::class);
 });
+
+test('aprobar desde Finanzas es rechazado si el caso no tiene centro financiero determinable', function () {
+    $e = crearEscenarioRevision();
+    $e['caso']->update(['proceso_adquisicion_id' => null]);
+
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+
+    expect(fn () => $revision->aprobarPago($e['caso']->refresh(), $finanzas))
+        ->toThrow(RuntimeException::class);
+
+    expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_finanzas');
+});
+
+test('la instancia Finanzas puede devolver (observar) el pago con comentario vía HTTP', function () {
+    $e = crearEscenarioRevision();
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    $response = $this->actingAs($finanzas)->post(
+        route('pago-proveedores.revision.pagos.transicion', ['egresoCgu' => $e['egreso']->id, 'caso' => $e['caso']->id]),
+        ['accion' => 'devolver', 'comentario' => 'Falta corregir el monto de la factura.'],
+    );
+
+    $response->assertSessionHasNoErrors();
+    expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('observada');
+});
