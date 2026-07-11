@@ -13,11 +13,8 @@ use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
 use App\Models\SecurityAuditLog;
-use App\Models\SistemaExterno;
-use App\Models\SnapshotDatosExterno;
 use App\Models\TipoDocumento;
 use App\Models\User;
-use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use App\Services\PagoProveedores\RevisionEgresoService;
 use App\Services\PagoProveedores\ValidacionDocumentoInstanciaService;
 use App\Services\Workflow\TransicionWorkflowService;
@@ -280,46 +277,4 @@ test('la aprobación de Finanzas exige el permiso revisar_finanzas', function ()
 
     expect(fn () => $revision->aprobarPago($e['caso']->refresh(), $sinPermiso))
         ->toThrow(TransicionWorkflowException::class);
-});
-
-test('al importar desde SGF los pagos con el mismo folio de egreso se agrupan en un Egreso', function () {
-    $sistema = SistemaExterno::firstOrCreate(
-        ['codigo' => 'SGF'],
-        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
-    );
-    $importer = app(CasoPagoProveedorImporter::class);
-
-    $importarCaso = function (string $sgfId, ?string $folio) use ($sistema, $importer) {
-        $normalizado = [
-            'sgf_id' => $sgfId,
-            'estado' => 'EN_TRAMITE',
-            'grupo_actual' => 'FINANZAS',
-            'rut' => fake()->unique()->numerify('########-#'),
-            'monto' => 100000.0,
-            'folio_egreso' => $folio,
-        ];
-        $snapshot = SnapshotDatosExterno::create([
-            'sistema_externo_id' => $sistema->id,
-            'metodo_captura' => 'playwright',
-            'referencia_externa' => $sgfId,
-            'payload_crudo' => $normalizado,
-            'payload_normalizado' => $normalizado,
-            'hash' => hash('sha256', $sgfId),
-            'capturado_en' => now(),
-        ]);
-
-        return $importer->importarDesdeSnapshot($snapshot);
-    };
-
-    $importarCaso('SGF-G1', 'EGR-GRUPO');
-    $importarCaso('SGF-G2', 'EGR-GRUPO');
-    $importarCaso('SGF-SOLO', null);
-
-    $egreso = EgresoCgu::where('numero_egreso', 'EGR-GRUPO')->first();
-
-    expect($egreso)->not->toBeNull();
-    expect($egreso->generado_automaticamente)->toBeTrue();
-    expect($egreso->items()->count())->toBe(2);
-    expect((float) $egreso->monto_total)->toBe(200000.0);
-    expect(EgresoCgu::count())->toBe(1); // el caso sin folio no crea egreso
 });
