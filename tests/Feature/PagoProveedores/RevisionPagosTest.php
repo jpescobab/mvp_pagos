@@ -71,9 +71,12 @@ function crearEscenarioRevision(float $monto = 500000, string $sufijo = 'A'): ar
         'monto' => $monto,
     ]);
 
+    $preparador = User::factory()->create();
+    $preparador->givePermissionTo('pago_proveedores.gestionar_caso');
+
     $workflow = app(TransicionWorkflowService::class);
-    $proceso = $workflow->execute($proceso, 'recibir_en_finanzas');
-    $workflow->execute($proceso, 'iniciar_revision_documental');
+    $proceso = $workflow->execute($proceso, 'recibir_en_finanzas', user: $preparador);
+    $workflow->execute($proceso, 'iniciar_revision_documental', user: $preparador);
 
     $caso->facturas()->create(['proveedor_id' => $proveedor->id, 'folio' => "F-{$sufijo}", 'monto' => $monto, 'fecha_emision' => '2026-07-01']);
     $caso->registrosContablesCgu()->create(['numero_registro' => "RC-{$sufijo}", 'fecha_registro' => '2026-07-02', 'monto' => $monto]);
@@ -183,6 +186,23 @@ test('devolver un pago sin comentario vía HTTP es rechazado', function () {
 
     $response->assertSessionHasErrors('comentario');
     expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_zonal');
+});
+
+test('un Administrador Zonal no puede devolver un pago que todavía está en instancia Finanzas', function () {
+    $e = crearEscenarioRevision();
+    $zonal = usuarioConRol('administrador_zonal', $e['cfinancieroId']);
+
+    // El Gate de RevisionTransicionPagoController solo exige "revisar" (alguna
+    // de las dos instancias); el Zonal con la misma jurisdicción lo pasa aunque
+    // el caso siga en en_revision_finanzas. observar_finanzas SHALL exigir su
+    // propio permiso (revisar_finanzas) para que este intento sea rechazado.
+    $response = $this->actingAs($zonal)->post(
+        route('pago-proveedores.revision.pagos.transicion', ['egresoCgu' => $e['egreso']->id, 'caso' => $e['caso']->id]),
+        ['accion' => 'devolver', 'comentario' => 'Intento fuera de instancia.'],
+    );
+
+    $response->assertRedirect();
+    expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_finanzas');
 });
 
 test('no se puede aprobar un pago con el documento sin aprobar o totales sin verificar', function () {

@@ -152,12 +152,14 @@ test('el dashboard expone los KPIs, indicadores económicos y casos recientes', 
     // el camino de rechazo del workflow real (sin permisos ni documentos
     // exigidos) hasta llegar a un estado final, vía TransicionWorkflowService.
     $casoCerrado = crearCasoPagoProveedorDePruebaParaDashboard('sgf-dash-cerrado', 'Proveedor Cerrado');
+    $operador = User::factory()->create();
+    $operador->givePermissionTo(['pago_proveedores.gestionar_caso', 'pago_proveedores.revisar_finanzas']);
     $servicioWorkflow = app(TransicionWorkflowService::class);
     $proceso = $casoCerrado->proceso;
-    $proceso = $servicioWorkflow->execute($proceso, 'recibir_en_finanzas');
-    $proceso = $servicioWorkflow->execute($proceso, 'iniciar_revision_documental');
-    $proceso = $servicioWorkflow->execute($proceso, 'observar_finanzas', 'Observación de prueba');
-    $servicioWorkflow->execute($proceso, 'rechazar', 'Rechazo de prueba');
+    $proceso = $servicioWorkflow->execute($proceso, 'recibir_en_finanzas', user: $operador);
+    $proceso = $servicioWorkflow->execute($proceso, 'iniciar_revision_documental', user: $operador);
+    $proceso = $servicioWorkflow->execute($proceso, 'observar_finanzas', comentario: 'Observación de prueba', user: $operador);
+    $servicioWorkflow->execute($proceso, 'rechazar', comentario: 'Rechazo de prueba', user: $operador);
 
     // Una adquisición activa.
     crearProcesoAdquisicionDePruebaParaDashboard('ADQ-DASH-001');

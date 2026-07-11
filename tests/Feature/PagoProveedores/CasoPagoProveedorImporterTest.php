@@ -5,9 +5,18 @@ use App\Models\EgresoCgu;
 use App\Models\Proveedor;
 use App\Models\SistemaExterno;
 use App\Models\SnapshotDatosExterno;
+use App\Models\User;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use App\Services\Workflow\TransicionWorkflowService;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
+
+function usuarioQuePuedeGestionarCaso(): User
+{
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.gestionar_caso');
+
+    return $usuario;
+}
 
 /**
  * @param  array<string, mixed>  $overrides
@@ -62,7 +71,7 @@ test('reimportar un sgf_id existente actualiza la referencia SGF sin alterar el 
 
     $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf());
 
-    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas', user: usuarioQuePuedeGestionarCaso());
 
     $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
         crearSnapshotSgf(['estado' => 'PAGADA', 'monto' => 750000.0]),
@@ -108,7 +117,7 @@ test('el workflow pago_proveedores sembrado permite ejecutar una transición rea
 
     $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf());
 
-    $resultado = app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+    $resultado = app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas', user: usuarioQuePuedeGestionarCaso());
 
     expect($resultado->estadoActual->codigo)->toBe('recibida_finanzas');
 });
@@ -118,7 +127,7 @@ test('reimportar un sgf_id existente actualiza periodo, observacion, folio_egres
 
     $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf());
 
-    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas', user: usuarioQuePuedeGestionarCaso());
 
     $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
         crearSnapshotSgf([
@@ -164,7 +173,7 @@ test('reimportar un sgf_id existente actualiza observacion_egreso sin alterar el
 
     $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf(['observacion_egreso' => 'EGRESO-115']));
 
-    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas');
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas', user: usuarioQuePuedeGestionarCaso());
 
     $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
         crearSnapshotSgf(['observacion_egreso' => 'EGRESO-200']),

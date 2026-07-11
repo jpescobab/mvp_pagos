@@ -26,6 +26,15 @@ class IntegracionesSeeder extends Seeder
         $admin = Role::where('name', 'admin')->first();
         $admin?->givePermissionTo($permisos);
 
+        // Personal de Adquisiciones y Mantenimiento: solo consulta de Mercado
+        // Público, no gestión de conectores ni ejecución de Playwright (eso
+        // sigue reservado a admin).
+        $administrativoAdquisiciones = Role::firstOrCreate(['name' => 'administrativo_adquisiciones']);
+        $administrativoAdquisiciones->givePermissionTo([
+            'adquisiciones.consultar_orden_compra_mp',
+            'adquisiciones.consultar_licitacion_mp',
+        ]);
+
         $sistemas = [
             ['codigo' => 'SGF', 'nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
             ['codigo' => 'CGU', 'nombre' => 'CGU', 'tipo_integracion' => 'manual', 'activo' => false],

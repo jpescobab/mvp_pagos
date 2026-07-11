@@ -73,7 +73,7 @@ test('asignar un caso a un egreso lo avanza a en_revision_finanzas', function ()
     expect($caso->proceso->estadoActual->codigo)->toBe('importada_desde_sgf');
 
     $usuario = User::factory()->create();
-    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+    $usuario->givePermissionTo(['pago_proveedores.registrar_egreso', 'pago_proveedores.gestionar_caso']);
 
     $response = $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
         'numero_egreso' => 'EGR-AVANZA-001',
@@ -97,7 +97,7 @@ test('crear un egreso CGU completa su centro financiero si el caso ya está vinc
     $caso->update(['proceso_adquisicion_id' => $proceso->id]);
 
     $usuario = User::factory()->create();
-    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+    $usuario->givePermissionTo(['pago_proveedores.registrar_egreso', 'pago_proveedores.gestionar_caso']);
 
     $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
         'numero_egreso' => 'EGR-CFIN-001',
@@ -117,7 +117,7 @@ test('crear un egreso CGU con un caso sin vincular deja su centro financiero en 
     $caso = crearCasoPagoProveedorDePrueba('sgf-crear-egreso-sin-cfinanciero');
 
     $usuario = User::factory()->create();
-    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+    $usuario->givePermissionTo(['pago_proveedores.registrar_egreso', 'pago_proveedores.gestionar_caso']);
 
     $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
         'numero_egreso' => 'EGR-SINCFIN-001',

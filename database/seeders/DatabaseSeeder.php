@@ -37,6 +37,8 @@ class DatabaseSeeder extends Seeder
         $this->call(WorkflowAdquisicionesSeeder::class);
         $this->call(RequisitosDocumentalesAdquisicionesSeeder::class);
 
+        $this->call(FuncionariosCapjSeeder::class);
+
         // User::factory(10)->create();
 
         $testUser = User::factory()->create([
