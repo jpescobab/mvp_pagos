@@ -75,16 +75,39 @@ export default function CasoShow() {
     const [procesando, setProcesando] = useState(false);
     const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
 
-    const enRevision = ESTADOS_EN_REVISION.has(caso.proceso.estado_actual.codigo);
+    const enRevision = ESTADOS_EN_REVISION.has(
+        caso.proceso.estado_actual.codigo,
+    );
     const puedeRevisar =
         auth.permissions.includes('pago_proveedores.revisar_finanzas') ||
         auth.permissions.includes('pago_proveedores.revisar_zonal');
+    const puedeVincularAdquisicion = auth.permissions.includes(
+        'pago_proveedores.vincular_adquisicion',
+    );
+    const puedeGestionarDocumentos = auth.permissions.includes(
+        'documentos.gestionar',
+    );
+    const puedeValidarDocumentos =
+        auth.permissions.includes('documentos.validar');
+    const puedeRegistrarCgu = auth.permissions.includes(
+        'pago_proveedores.registrar_cgu',
+    );
+    const puedeRegistrarPagoBancario = auth.permissions.includes(
+        'pago_proveedores.pagar',
+    );
+    const puedeRegistrarFactura = auth.permissions.includes(
+        'pago_proveedores.registrar_factura',
+    );
+    const puedeVerificarSgf = auth.permissions.includes(
+        'pago_proveedores.verificar_caso_sgf',
+    );
     const egresoEnRevision = caso.egresos_cgu?.[0];
-    const transicionesVisibles =
-        caso.proceso.transiciones_disponibles.filter(
-            (transicion) =>
-                !CODIGOS_TRANSICION_GOBERNADOS.has(transicion.codigo),
-        );
+    const transicionesVisibles = caso.proceso.transiciones_disponibles.filter(
+        (transicion) =>
+            !CODIGOS_TRANSICION_GOBERNADOS.has(transicion.codigo) &&
+            (transicion.permiso_requerido === null ||
+                auth.permissions.includes(transicion.permiso_requerido)),
+    );
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -466,9 +489,8 @@ export default function CasoShow() {
                                         caso.proceso.estado_actual.codigo
                                     ]
                                 }
-                                . Aprobar, rechazar, observar/devolver y
-                                validar documentos se hacen desde Revisión de
-                                Pagos.
+                                . Aprobar, rechazar, observar/devolver y validar
+                                documentos se hacen desde Revisión de Pagos.
                             </span>
                             {puedeRevisar && egresoEnRevision && (
                                 <Link
@@ -546,14 +568,20 @@ export default function CasoShow() {
                                 </span>{' '}
                                 · {caso.proceso_adquisicion.objeto}
                             </span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={desvincularAdquisicion}
-                            >
-                                Desvincular
-                            </Button>
+                            {puedeVincularAdquisicion && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={desvincularAdquisicion}
+                                >
+                                    Desvincular
+                                </Button>
+                            )}
                         </div>
+                    ) : !puedeVincularAdquisicion ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin proceso de adquisición vinculado.
+                        </p>
                     ) : (
                         <div className="space-y-2">
                             <Input
@@ -708,62 +736,70 @@ export default function CasoShow() {
                                             >
                                                 Descargar
                                             </a>
-                                            {!enRevision && (
+                                            {!enRevision &&
+                                                puedeValidarDocumentos && (
+                                                    <>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                validarDocumento(
+                                                                    doc.documento_id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Validar
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                setDocumentoARechazar(
+                                                                    doc.documento_id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Rechazar
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            {puedeGestionarDocumentos && (
                                                 <>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() =>
-                                                            validarDocumento(
-                                                                doc.documento_id,
+                                                            desvincularDocumento(
+                                                                doc.vinculo_id,
                                                             )
                                                         }
                                                     >
-                                                        Validar
+                                                        Desvincular
                                                     </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            setDocumentoARechazar(
-                                                                doc.documento_id,
-                                                            )
-                                                        }
-                                                    >
-                                                        Rechazar
-                                                    </Button>
+                                                    <input
+                                                        type="file"
+                                                        accept=".pdf,.jpg,.jpeg,.png"
+                                                        className="w-32 text-xs"
+                                                        title="Subir nueva versión"
+                                                        onChange={(e) => {
+                                                            const archivoVersion =
+                                                                e.target
+                                                                    .files?.[0];
+
+                                                            if (
+                                                                archivoVersion
+                                                            ) {
+                                                                subirNuevaVersion(
+                                                                    doc.documento_id,
+                                                                    archivoVersion,
+                                                                );
+                                                            }
+
+                                                            e.target.value = '';
+                                                        }}
+                                                    />
                                                 </>
                                             )}
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    desvincularDocumento(
-                                                        doc.vinculo_id,
-                                                    )
-                                                }
-                                            >
-                                                Desvincular
-                                            </Button>
-                                            <input
-                                                type="file"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                className="w-32 text-xs"
-                                                title="Subir nueva versión"
-                                                onChange={(e) => {
-                                                    const archivoVersion =
-                                                        e.target.files?.[0];
-
-                                                    if (archivoVersion) {
-                                                        subirNuevaVersion(
-                                                            doc.documento_id,
-                                                            archivoVersion,
-                                                        );
-                                                    }
-
-                                                    e.target.value = '';
-                                                }}
-                                            />
                                         </div>
                                     </div>
 
@@ -797,53 +833,55 @@ export default function CasoShow() {
                         </ul>
                     )}
 
-                    <div className="flex flex-wrap items-end gap-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="tipo-documento">
-                                Tipo de documento
-                            </Label>
-                            <Select
-                                value={tipoDocumentoId}
-                                onValueChange={setTipoDocumentoId}
-                            >
-                                <SelectTrigger id="tipo-documento">
-                                    <SelectValue placeholder="Selecciona un tipo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {tiposDocumento.map((tipo) => (
-                                        <SelectItem
-                                            key={tipo.id}
-                                            value={String(tipo.id)}
-                                        >
-                                            {tipo.nombre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="archivo">Archivo</Label>
-                            <input
-                                id="archivo"
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) =>
-                                    setArchivo(e.target.files?.[0] ?? null)
+                    {puedeGestionarDocumentos && (
+                        <div className="flex flex-wrap items-end gap-2">
+                            <div className="space-y-1">
+                                <Label htmlFor="tipo-documento">
+                                    Tipo de documento
+                                </Label>
+                                <Select
+                                    value={tipoDocumentoId}
+                                    onValueChange={setTipoDocumentoId}
+                                >
+                                    <SelectTrigger id="tipo-documento">
+                                        <SelectValue placeholder="Selecciona un tipo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tiposDocumento.map((tipo) => (
+                                            <SelectItem
+                                                key={tipo.id}
+                                                value={String(tipo.id)}
+                                            >
+                                                {tipo.nombre}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="archivo">Archivo</Label>
+                                <input
+                                    id="archivo"
+                                    type="file"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    onChange={(e) =>
+                                        setArchivo(e.target.files?.[0] ?? null)
+                                    }
+                                    className="text-sm"
+                                />
+                            </div>
+                            <Button
+                                disabled={
+                                    subiendoDocumento ||
+                                    archivo === null ||
+                                    tipoDocumentoId === ''
                                 }
-                                className="text-sm"
-                            />
+                                onClick={subirDocumento}
+                            >
+                                Subir
+                            </Button>
                         </div>
-                        <Button
-                            disabled={
-                                subiendoDocumento ||
-                                archivo === null ||
-                                tipoDocumentoId === ''
-                            }
-                            onClick={subirDocumento}
-                        >
-                            Subir
-                        </Button>
-                    </div>
+                    )}
                 </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -890,65 +928,73 @@ export default function CasoShow() {
                         </ul>
                     )}
 
-                    <div className="flex flex-wrap items-end gap-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="numero-registro-cgu">
-                                N.º de registro
-                            </Label>
-                            <Input
-                                id="numero-registro-cgu"
-                                value={numeroRegistroCgu}
-                                onChange={(e) =>
-                                    setNumeroRegistroCgu(e.target.value)
+                    {puedeRegistrarCgu && (
+                        <div className="flex flex-wrap items-end gap-2">
+                            <div className="space-y-1">
+                                <Label htmlFor="numero-registro-cgu">
+                                    N.º de registro
+                                </Label>
+                                <Input
+                                    id="numero-registro-cgu"
+                                    value={numeroRegistroCgu}
+                                    onChange={(e) =>
+                                        setNumeroRegistroCgu(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="fecha-registro-cgu">
+                                    Fecha
+                                </Label>
+                                <Input
+                                    id="fecha-registro-cgu"
+                                    type="date"
+                                    value={fechaRegistroCgu}
+                                    onChange={(e) =>
+                                        setFechaRegistroCgu(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="monto-registro-cgu">
+                                    Monto
+                                </Label>
+                                <Input
+                                    id="monto-registro-cgu"
+                                    type="number"
+                                    value={montoRegistroCgu}
+                                    onChange={(e) =>
+                                        setMontoRegistroCgu(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="observaciones-registro-cgu">
+                                    Observaciones
+                                </Label>
+                                <Input
+                                    id="observaciones-registro-cgu"
+                                    value={observacionesRegistroCgu}
+                                    onChange={(e) =>
+                                        setObservacionesRegistroCgu(
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <Button
+                                disabled={
+                                    registrandoCgu ||
+                                    numeroRegistroCgu === '' ||
+                                    fechaRegistroCgu === '' ||
+                                    montoRegistroCgu === ''
                                 }
-                            />
+                                onClick={registrarContableCgu}
+                            >
+                                Registrar
+                            </Button>
                         </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="fecha-registro-cgu">Fecha</Label>
-                            <Input
-                                id="fecha-registro-cgu"
-                                type="date"
-                                value={fechaRegistroCgu}
-                                onChange={(e) =>
-                                    setFechaRegistroCgu(e.target.value)
-                                }
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="monto-registro-cgu">Monto</Label>
-                            <Input
-                                id="monto-registro-cgu"
-                                type="number"
-                                value={montoRegistroCgu}
-                                onChange={(e) =>
-                                    setMontoRegistroCgu(e.target.value)
-                                }
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="observaciones-registro-cgu">
-                                Observaciones
-                            </Label>
-                            <Input
-                                id="observaciones-registro-cgu"
-                                value={observacionesRegistroCgu}
-                                onChange={(e) =>
-                                    setObservacionesRegistroCgu(e.target.value)
-                                }
-                            />
-                        </div>
-                        <Button
-                            disabled={
-                                registrandoCgu ||
-                                numeroRegistroCgu === '' ||
-                                fechaRegistroCgu === '' ||
-                                montoRegistroCgu === ''
-                            }
-                            onClick={registrarContableCgu}
-                        >
-                            Registrar
-                        </Button>
-                    </div>
+                    )}
                 </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -995,57 +1041,65 @@ export default function CasoShow() {
                         </ul>
                     )}
 
-                    <div className="flex flex-wrap items-end gap-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="numero-operacion-pago">
-                                N.º de operación
-                            </Label>
-                            <Input
-                                id="numero-operacion-pago"
-                                value={numeroOperacionPago}
-                                onChange={(e) =>
-                                    setNumeroOperacionPago(e.target.value)
+                    {puedeRegistrarPagoBancario && (
+                        <div className="flex flex-wrap items-end gap-2">
+                            <div className="space-y-1">
+                                <Label htmlFor="numero-operacion-pago">
+                                    N.º de operación
+                                </Label>
+                                <Input
+                                    id="numero-operacion-pago"
+                                    value={numeroOperacionPago}
+                                    onChange={(e) =>
+                                        setNumeroOperacionPago(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="fecha-pago">Fecha</Label>
+                                <Input
+                                    id="fecha-pago"
+                                    type="date"
+                                    value={fechaPago}
+                                    onChange={(e) =>
+                                        setFechaPago(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="monto-pago">Monto</Label>
+                                <Input
+                                    id="monto-pago"
+                                    type="number"
+                                    value={montoPago}
+                                    onChange={(e) =>
+                                        setMontoPago(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="banco-pago">Banco</Label>
+                                <Input
+                                    id="banco-pago"
+                                    value={bancoPago}
+                                    onChange={(e) =>
+                                        setBancoPago(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <Button
+                                disabled={
+                                    registrandoPago ||
+                                    numeroOperacionPago === '' ||
+                                    fechaPago === '' ||
+                                    montoPago === ''
                                 }
-                            />
+                                onClick={registrarPagoBancario}
+                            >
+                                Registrar
+                            </Button>
                         </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="fecha-pago">Fecha</Label>
-                            <Input
-                                id="fecha-pago"
-                                type="date"
-                                value={fechaPago}
-                                onChange={(e) => setFechaPago(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="monto-pago">Monto</Label>
-                            <Input
-                                id="monto-pago"
-                                type="number"
-                                value={montoPago}
-                                onChange={(e) => setMontoPago(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="banco-pago">Banco</Label>
-                            <Input
-                                id="banco-pago"
-                                value={bancoPago}
-                                onChange={(e) => setBancoPago(e.target.value)}
-                            />
-                        </div>
-                        <Button
-                            disabled={
-                                registrandoPago ||
-                                numeroOperacionPago === '' ||
-                                fechaPago === '' ||
-                                montoPago === ''
-                            }
-                            onClick={registrarPagoBancario}
-                        >
-                            Registrar
-                        </Button>
-                    </div>
+                    )}
                 </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -1070,9 +1124,7 @@ export default function CasoShow() {
                                             {factura.folio}
                                         </span>
                                         <span className="text-muted-foreground">
-                                            {formatFecha(
-                                                factura.fecha_emision,
-                                            )}{' '}
+                                            {formatFecha(factura.fecha_emision)}{' '}
                                             · <Monto valor={factura.monto} />
                                         </span>
                                     </div>
@@ -1081,53 +1133,55 @@ export default function CasoShow() {
                         </ul>
                     )}
 
-                    <div className="flex flex-wrap items-end gap-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="folio-factura">Folio</Label>
-                            <Input
-                                id="folio-factura"
-                                value={folioFactura}
-                                onChange={(e) =>
-                                    setFolioFactura(e.target.value)
+                    {puedeRegistrarFactura && (
+                        <div className="flex flex-wrap items-end gap-2">
+                            <div className="space-y-1">
+                                <Label htmlFor="folio-factura">Folio</Label>
+                                <Input
+                                    id="folio-factura"
+                                    value={folioFactura}
+                                    onChange={(e) =>
+                                        setFolioFactura(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="fecha-emision-factura">
+                                    Fecha de emisión
+                                </Label>
+                                <Input
+                                    id="fecha-emision-factura"
+                                    type="date"
+                                    value={fechaEmisionFactura}
+                                    onChange={(e) =>
+                                        setFechaEmisionFactura(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="monto-factura">Monto</Label>
+                                <Input
+                                    id="monto-factura"
+                                    type="number"
+                                    value={montoFactura}
+                                    onChange={(e) =>
+                                        setMontoFactura(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <Button
+                                disabled={
+                                    registrandoFactura ||
+                                    folioFactura === '' ||
+                                    fechaEmisionFactura === '' ||
+                                    montoFactura === ''
                                 }
-                            />
+                                onClick={registrarFactura}
+                            >
+                                Registrar
+                            </Button>
                         </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="fecha-emision-factura">
-                                Fecha de emisión
-                            </Label>
-                            <Input
-                                id="fecha-emision-factura"
-                                type="date"
-                                value={fechaEmisionFactura}
-                                onChange={(e) =>
-                                    setFechaEmisionFactura(e.target.value)
-                                }
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="monto-factura">Monto</Label>
-                            <Input
-                                id="monto-factura"
-                                type="number"
-                                value={montoFactura}
-                                onChange={(e) =>
-                                    setMontoFactura(e.target.value)
-                                }
-                            />
-                        </div>
-                        <Button
-                            disabled={
-                                registrandoFactura ||
-                                folioFactura === '' ||
-                                fechaEmisionFactura === '' ||
-                                montoFactura === ''
-                            }
-                            onClick={registrarFactura}
-                        >
-                            Registrar
-                        </Button>
-                    </div>
+                    )}
                 </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
@@ -1172,19 +1226,21 @@ export default function CasoShow() {
                         <h2 className="text-base font-medium">
                             Historial de snapshots SGF
                         </h2>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                                router.post(
-                                    casos.verificarSgf(caso.id).url,
-                                    {},
-                                    { preserveScroll: true },
-                                )
-                            }
-                        >
-                            Verificar en SGF
-                        </Button>
+                        {puedeVerificarSgf && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    router.post(
+                                        casos.verificarSgf(caso.id).url,
+                                        {},
+                                        { preserveScroll: true },
+                                    )
+                                }
+                            >
+                                Verificar en SGF
+                            </Button>
+                        )}
                     </div>
 
                     {verificacionSgf && (
@@ -1286,16 +1342,15 @@ export default function CasoShow() {
                                         href={
                                             enRevision
                                                 ? revision.show(egreso.id).url
-                                                : egresosCgu.show(egreso.id)
-                                                      .url
+                                                : egresosCgu.show(egreso.id).url
                                         }
                                         className="underline"
                                     >
                                         {egreso.numero_egreso}
                                     </Link>
                                     <span className="text-muted-foreground">
-                                        {formatFecha(egreso.fecha)}{' '}
-                                        · <Monto valor={egreso.monto} />
+                                        {formatFecha(egreso.fecha)} ·{' '}
+                                        <Monto valor={egreso.monto} />
                                     </span>
                                 </li>
                             ))}

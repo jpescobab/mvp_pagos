@@ -9,6 +9,7 @@ export type TransicionWorkflow = {
     codigo: string;
     nombre: string;
     requiere_comentario: boolean;
+    permiso_requerido: string | null;
 };
 
 export type HistorialTransicion = {

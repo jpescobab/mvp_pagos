@@ -10,7 +10,10 @@ type PageProps = {
 };
 
 export default function EgresosCguIndex() {
-    const { egresos: pagina } = usePage<PageProps>().props;
+    const { egresos: pagina, auth } = usePage<PageProps>().props;
+    const puedeRegistrarEgreso = auth.permissions.includes(
+        'pago_proveedores.registrar_egreso',
+    );
 
     return (
         <>
@@ -21,9 +24,11 @@ export default function EgresosCguIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Egresos CGU
                     </h1>
-                    <Button asChild>
-                        <Link href={egresosCgu.create()}>Nuevo egreso</Link>
-                    </Button>
+                    {puedeRegistrarEgreso && (
+                        <Button asChild>
+                            <Link href={egresosCgu.create()}>Nuevo egreso</Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="overflow-hidden rounded-xl border">
