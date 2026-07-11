@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
 import { useInitials } from '@/hooks/use-initials';
-import { formatNumero } from '@/lib/format';
+import { formatFecha, formatNumero } from '@/lib/format';
 import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
 import type { OrdenCompraMercadoPublico } from '@/types/adquisiciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -140,9 +140,7 @@ export default function OrdenesCompraMercadoPublicoIndex() {
                                                 </div>
                                                 <div className="truncate font-mono text-[10px] text-muted-foreground">
                                                     {orden.fecha_emision
-                                                        ? new Date(
-                                                              orden.fecha_emision,
-                                                          ).toLocaleDateString()
+                                                        ? formatFecha(orden.fecha_emision)
                                                         : '—'}
                                                 </div>
                                             </div>
@@ -157,8 +155,7 @@ export default function OrdenesCompraMercadoPublicoIndex() {
                                     <td
                                         className="hidden truncate px-2.5 py-1 font-mono text-muted-foreground md:table-cell"
                                         title={
-                                            orden.proveedor?.rutproveedor ??
-                                            '—'
+                                            orden.proveedor?.rutproveedor ?? '—'
                                         }
                                     >
                                         {orden.proveedor?.rutproveedor ?? '—'}

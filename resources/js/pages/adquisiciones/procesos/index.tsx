@@ -102,8 +102,8 @@ export default function ProcesosIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

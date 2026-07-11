@@ -4,9 +4,12 @@ use App\Models\EgresoCgu;
 use App\Models\EstadoWorkflow;
 use App\Models\SistemaExterno;
 use App\Models\SnapshotDatosExterno;
+use App\Models\TipoDocumento;
 use App\Models\User;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /**
@@ -130,13 +133,77 @@ test('ejecutar un código de transición no válido para el estado actual no cam
     expect($caso->proceso->refresh()->estadoActual->codigo)->toBe('importada_desde_sgf');
 });
 
+test('ejecutar cerrar sin el permiso gestionar_caso no cambia el estado y refleja el error', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi());
+
+    $estadoAsociada = EstadoWorkflow::where('codigo', 'asociada_a_egreso_cgu')
+        ->where('definicion_workflow_id', $caso->proceso->definicion_workflow_id)
+        ->value('id');
+    $caso->proceso->update(['estado_actual_id' => $estadoAsociada]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->post(
+        route('pago-proveedores.casos.transiciones.store', $caso),
+        ['codigo' => 'cerrar'],
+    );
+
+    $response->assertSessionHasErrors('transicion');
+    expect($caso->proceso->refresh()->estadoActual->codigo)->toBe('asociada_a_egreso_cgu');
+});
+
+test('ejecutar cerrar con el permiso gestionar_caso cambia el estado del Proceso a cerrada', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi());
+
+    $estadoAsociada = EstadoWorkflow::where('codigo', 'asociada_a_egreso_cgu')
+        ->where('definicion_workflow_id', $caso->proceso->definicion_workflow_id)
+        ->value('id');
+    $caso->proceso->update(['estado_actual_id' => $estadoAsociada]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.gestionar_caso');
+
+    $response = $this->actingAs($usuario)->post(
+        route('pago-proveedores.casos.transiciones.store', $caso),
+        ['codigo' => 'cerrar'],
+    );
+
+    $response->assertSessionHasNoErrors();
+    expect($caso->proceso->refresh()->estadoActual->codigo)->toBe('cerrada');
+});
+
+test('un usuario con el rol administrativo_finanzas puede subir un documento al expediente de un caso', function () {
+    Storage::fake('local');
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi());
+
+    $usuario = User::factory()->create();
+    $usuario->assignRole('administrativo_finanzas');
+
+    $tipoDocumento = TipoDocumento::create([
+        'codigo' => 'TIPO_DOC_TEST',
+        'nombre' => 'Tipo de prueba',
+        'activo' => true,
+    ]);
+    $archivo = UploadedFile::fake()->create('factura.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($usuario)->post(
+        route('procesos.documentos.store', $caso->proceso),
+        ['archivo' => $archivo, 'tipo_documento_id' => $tipoDocumento->id],
+    );
+
+    $response->assertSessionHasNoErrors();
+});
+
 test('crear un egreso CGU con el permiso requerido crea el egreso y sus items cubriendo varios casos', function () {
     $this->seed(WorkflowPagoProveedoresSeeder::class);
     $casoUno = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-api-1']));
     $casoDos = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-api-2']));
 
     $usuario = User::factory()->create();
-    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+    $usuario->givePermissionTo(['pago_proveedores.registrar_egreso', 'pago_proveedores.gestionar_caso']);
 
     $response = $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
         'numero_egreso' => 'EGR-API-001',

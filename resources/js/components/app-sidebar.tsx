@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Building2,
+    ClipboardCheck,
     Coins,
     FileBarChart,
     FileSearch,
@@ -49,6 +50,7 @@ import { index as items } from '@/routes/maestros/items';
 import { index as proveedores } from '@/routes/maestros/proveedores';
 import { index as casos } from '@/routes/pago-proveedores/casos';
 import { index as egresosCgu } from '@/routes/pago-proveedores/egresos-cgu';
+import { index as revisionPagos } from '@/routes/pago-proveedores/revision';
 import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
 import { index as roles } from '@/routes/roles';
 import { index as importacionesSgf } from '@/routes/sgf/importaciones';
@@ -119,6 +121,12 @@ const administracionNavItems: NavItemConPermiso[] = [
     },
 ];
 
+const revisionPagosNavItem: NavItem = {
+    title: 'Revisión de Pagos',
+    href: revisionPagos(),
+    icon: ClipboardCheck,
+};
+
 const pagoProveedoresNavItems: NavItem[] = [
     {
         title: 'Casos',
@@ -147,11 +155,13 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
         title: 'Órdenes de Compra (Mercado Público)',
         href: ordenesCompraMercadoPublico(),
         icon: FileSearch,
+        permiso: 'adquisiciones.consultar_orden_compra_mp',
     },
     {
         title: 'Licitaciones (Mercado Público)',
         href: licitacionesMercadoPublico(),
         icon: FileSearch,
+        permiso: 'adquisiciones.consultar_licitacion_mp',
     },
 ];
 
@@ -225,6 +235,17 @@ export function AppSidebar() {
         auth.permissions,
     );
 
+    const puedeRevisar =
+        auth.permissions.includes('pago_proveedores.revisar_finanzas') ||
+        auth.permissions.includes('pago_proveedores.revisar_zonal');
+    const pagoProveedoresItems = puedeRevisar
+        ? [
+              pagoProveedoresNavItems[0],
+              revisionPagosNavItem,
+              ...pagoProveedoresNavItems.slice(1),
+          ]
+        : pagoProveedoresNavItems;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -249,7 +270,7 @@ export function AppSidebar() {
                 )}
                 <NavGroup
                     label="Pago de Proveedores"
-                    items={pagoProveedoresNavItems}
+                    items={pagoProveedoresItems}
                 />
                 <NavGroup label="Adquisiciones" items={adquisicionesItems} />
                 {reportabilidadItems.length > 0 && (

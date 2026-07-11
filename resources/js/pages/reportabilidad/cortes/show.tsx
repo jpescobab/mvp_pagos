@@ -1,5 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { formatFecha } from '@/lib/format';
 import cortes from '@/routes/reportabilidad/cortes';
 import type { CorteReportabilidad } from '@/types/reportabilidad';
 
@@ -11,7 +12,11 @@ export default function CorteReportabilidadShow() {
     const { corte } = usePage<PageProps>().props;
 
     function publicar() {
-        router.post(cortes.publicar(corte.id).url, {}, { preserveScroll: true });
+        router.post(
+            cortes.publicar(corte.id).url,
+            {},
+            { preserveScroll: true },
+        );
     }
 
     return (
@@ -40,7 +45,7 @@ export default function CorteReportabilidadShow() {
                             Fecha de corte
                         </dt>
                         <dd>
-                            {new Date(corte.fecha_corte).toLocaleDateString()}
+                            {formatFecha(corte.fecha_corte)}
                         </dd>
                     </div>
                     <div>
@@ -65,7 +70,7 @@ export default function CorteReportabilidadShow() {
                             <dd>
                                 {corte.publicado_por}
                                 {corte.publicado_en &&
-                                    ` el ${new Date(corte.publicado_en).toLocaleDateString()}`}
+                                    ` el ${formatFecha(corte.publicado_en)}`}
                             </dd>
                         </div>
                     )}

@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatFechaHora } from '@/lib/format';
 import procesos from '@/routes/adquisiciones/procesos';
 import documentos from '@/routes/procesos/documentos';
 import type { ProcesoAdquisicion } from '@/types/adquisiciones';
@@ -446,7 +447,7 @@ export default function ProcesoShow() {
                                                         {validacion.validado_por ??
                                                             'Sistema'}
                                                         {validacion.validado_en &&
-                                                            ` · ${new Date(validacion.validado_en).toLocaleString()}`}
+                                                            ` · ${formatFechaHora(validacion.validado_en)}`}
                                                         {validacion.observacion && (
                                                             <span className="italic">
                                                                 {' '}
@@ -534,9 +535,7 @@ export default function ProcesoShow() {
                                             {item.transicion.nombre}
                                         </span>
                                         <span className="text-muted-foreground">
-                                            {new Date(
-                                                item.created_at,
-                                            ).toLocaleString()}
+                                            {formatFechaHora(item.created_at)}
                                         </span>
                                     </div>
                                     <p className="text-muted-foreground">

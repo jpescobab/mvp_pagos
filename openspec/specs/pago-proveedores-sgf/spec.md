@@ -3,9 +3,7 @@
 ## Purpose
 
 Primer módulo funcional activable: convierte la evidencia SGF (tarea 7) en casos de pago gobernados por workflow (tarea 5), con expediente documental (tarea 6) y evidencia de registro CGU/BancoEstado/egreso, sin reemplazar la lógica de esos sistemas oficiales.
-
 ## Requirements
-
 ### Requirement: Cada sgf_id es un caso de pago individual
 El sistema SHALL tratar cada `sgf_id` como un `caso_pago_proveedor` independiente, con su propio `Proceso` de workflow. Los datos SGF (`sgf_status`, `sgf_current_group_raw`, `periodo`, `observacion`, `observacion_egreso`, `folio_egreso`, `numero`, `fecha_sii`) SHALL conservarse solo como referencia externa, sin gobernar el estado interno del caso.
 
@@ -67,7 +65,6 @@ El sistema SHALL registrar referencias y respaldos de registro contable CGU, pag
 - **THEN** la respuesta incluye cada `egreso_cgu` asociado, con su número, fecha y el monto del item correspondiente a ese caso
 - **AND** cada egreso mostrado permite navegar a su propio detalle (`pago-proveedores.egresos-cgu.show`)
 
-
 ### Requirement: Vincular manualmente un caso de pago a un proceso de adquisición
 El sistema SHALL permitir vincular un `caso_pago_proveedor` a un `proceso_adquisicion` mediante una acción manual y explícita, distinta de cualquier transición de workflow. El vínculo SHALL ser opcional (nullable) y SHALL permitir que varios `caso_pago_proveedor` apunten al mismo `proceso_adquisicion`, pero un `caso_pago_proveedor` SHALL apuntar a lo sumo a un `proceso_adquisicion` a la vez.
 
@@ -95,7 +92,6 @@ El sistema SHALL exponer una búsqueda de `proceso_adquisicion` por código, obj
 - **THEN** el sistema devuelve los `proceso_adquisicion` cuyo código, objeto, proveedor o monto coincidan con el término, limitados a un máximo de resultados
 - **AND** cada resultado muestra su código `ADQ-XXXX` para confirmación visual antes de vincular
 
-
 ### Requirement: El checklist documental de un caso de pago se resuelve con una matriz real
 El sistema SHALL mantener una matriz de `requisitos_documentales` concreta para el workflow "pago_proveedores", asociada a un `conjunto_requisitos_documentales` propio, reutilizando el catálogo de `tipos_documento` ya existente. El `tipo_documento` con código `FACTURA` SHALL existir y aplicarse, dado que ya es referenciado por la transición `aprobar_documentacion` del workflow de Pago de Proveedores.
 
@@ -111,3 +107,26 @@ El sistema SHALL invocar la resolución del checklist documental al abrir el det
 - **WHEN** un usuario abre el detalle de un `caso_pago_proveedor`
 - **THEN** el backend resuelve o actualiza su `checklist_documental_proceso` usando las reglas de Pago de Proveedores
 - **AND** la respuesta incluye al menos el item correspondiente a `FACTURA`
+
+### Requirement: La revisión documental del workflow se ejecuta en dos instancias
+El workflow de Pago de Proveedores SHALL expandir su etapa de revisión documental en dos estados diferenciados —`en_revision_finanzas` y `en_revision_zonal`— ubicados antes del registro CGU. Las transiciones entre estos estados SHALL definirse en `WorkflowPagoProveedoresSeeder` con sus permisos requeridos (`pago_proveedores.revisar_finanzas`, `pago_proveedores.revisar_zonal`), comentario obligatorio en las devoluciones/rechazos y documentos requeridos donde corresponda. Estos estados internos SHALL gobernarse por el sistema propio y no derivarse de los grupos/estados de SGF.
+
+#### Scenario: El caso recorre las dos instancias antes de CGU
+- **WHEN** un caso importado desde SGF inicia su revisión documental
+- **THEN** pasa por `en_revision_finanzas` y luego `en_revision_zonal` antes de `lista_para_registro_cgu`
+- **AND** cada transición exige el permiso de su instancia
+
+#### Scenario: La aprobación de Finanzas requiere su permiso
+- **WHEN** un usuario sin `pago_proveedores.revisar_finanzas` intenta la transición de aprobación de Finanzas
+- **THEN** `TransicionWorkflowService` rechaza la transición por falta de permiso
+
+### Requirement: Las transiciones de trámite general del caso exigen pertenecer a Finanzas
+El sistema SHALL exigir el permiso `pago_proveedores.gestionar_caso` para las transiciones de trámite general de un `caso_pago_proveedor` que no pertenecen a la revisión en dos instancias ni tienen ya un permiso propio: `recibir_en_finanzas`, `iniciar_revision_documental`, `subsanar`, `reenviar_revision`, `rechazar` (desde `observada`), `marcar_lista_para_pago`, `asociar_egreso_cgu` y `cerrar`. Este permiso SHALL otorgarse a los roles `jefe_finanzas` y `administrativo_finanzas` en `WorkflowPagoProveedoresSeeder`. La transición `observar_finanzas` SHALL exigir específicamente `pago_proveedores.revisar_finanzas` — el mismo permiso que sus transiciones hermanas `aprobar_finanzas` y `rechazar_finanzas` — y no `gestionar_caso`.
+
+#### Scenario: Usuario sin gestionar_caso no puede tramitar un caso
+- **WHEN** un usuario sin `pago_proveedores.gestionar_caso` intenta ejecutar una de las transiciones de trámite general
+- **THEN** `TransicionWorkflowService` rechaza la transición por falta de permiso
+
+#### Scenario: Observar en Finanzas exige el permiso de esa instancia, no gestionar_caso
+- **WHEN** un usuario con `pago_proveedores.revisar_zonal` pero sin `pago_proveedores.revisar_finanzas` intenta devolver (observar) un pago que aún está en `en_revision_finanzas`
+- **THEN** `TransicionWorkflowService` rechaza la transición por falta de permiso, aunque el usuario pueda operar el egreso en su instancia Zonal

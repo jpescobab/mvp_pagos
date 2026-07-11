@@ -18,6 +18,7 @@ class TransicionWorkflowResource extends JsonResource
             'codigo' => $this->codigo,
             'nombre' => $this->nombre,
             'requiere_comentario' => $this->requiere_comentario,
+            'permiso_requerido' => $this->permiso_requerido,
         ];
     }
 }

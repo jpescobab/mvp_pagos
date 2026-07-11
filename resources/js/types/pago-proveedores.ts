@@ -9,6 +9,7 @@ export type TransicionWorkflow = {
     codigo: string;
     nombre: string;
     requiere_comentario: boolean;
+    permiso_requerido: string | null;
 };
 
 export type HistorialTransicion = {
@@ -158,7 +159,6 @@ export type EgresoCgu = {
     monto_total: string;
     observaciones: string | null;
     items: EgresoCguItem[];
-    documentos?: DocumentoVinculado[];
 };
 
 export type PaginationLink = {

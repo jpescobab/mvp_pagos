@@ -3,6 +3,7 @@
 use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
 use App\Models\Ccosto;
+use App\Models\EgresoCgu;
 use App\Models\HistorialTransicionWorkflow;
 use App\Models\Institucion;
 use App\Models\ModalidadAdquisicion;
@@ -163,6 +164,49 @@ test('vincular o desvincular no crea ni modifica ningún Proceso ni historial de
     expect(Proceso::count())->toBe($totalProcesosAntes);
     expect(HistorialTransicionWorkflow::count())->toBe($totalHistorialAntes);
     expect($caso->proceso->refresh()->estado_actual_id)->toBe($estadoCasoAntes);
+});
+
+test('vincular un caso a una adquisición completa el centro financiero de su egreso si aún no lo tenía', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $this->seed(ModalidadesAdquisicionSeeder::class);
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+
+    $caso = crearCasoPagoProveedorDePrueba();
+    $egreso = EgresoCgu::create(['numero_egreso' => 'EGR-BACKFILL', 'fecha' => now(), 'monto_total' => $caso->monto]);
+    $egreso->items()->create(['caso_pago_proveedor_id' => $caso->id, 'monto' => $caso->monto]);
+    expect($egreso->cfinanciero_id)->toBeNull();
+
+    $proceso = crearProcesoAdquisicionDePrueba();
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.vincular_adquisicion');
+
+    $this->actingAs($usuario)->post(
+        route('pago-proveedores.casos.vincular-adquisicion.store', $caso),
+        ['proceso_adquisicion_id' => $proceso->id],
+    );
+
+    expect($egreso->refresh()->cfinanciero_id)->toBe($proceso->ccosto->cfinanciero_id);
+});
+
+test('desvincular un caso no borra el centro financiero ya completado en su egreso', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $this->seed(ModalidadesAdquisicionSeeder::class);
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+
+    $caso = crearCasoPagoProveedorDePrueba();
+    $proceso = crearProcesoAdquisicionDePrueba();
+    $caso->update(['proceso_adquisicion_id' => $proceso->id]);
+
+    $egreso = EgresoCgu::create(['numero_egreso' => 'EGR-BACKFILL-2', 'fecha' => now(), 'monto_total' => $caso->monto, 'cfinanciero_id' => $proceso->ccosto->cfinanciero_id]);
+    $egreso->items()->create(['caso_pago_proveedor_id' => $caso->id, 'monto' => $caso->monto]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.vincular_adquisicion');
+
+    $this->actingAs($usuario)->delete(route('pago-proveedores.casos.vincular-adquisicion.destroy', $caso));
+
+    expect($egreso->refresh()->cfinanciero_id)->toBe($proceso->ccosto->cfinanciero_id);
 });
 
 test('la búsqueda asistida devuelve coincidencias por código, objeto, proveedor y monto respetando el límite', function () {

@@ -2,9 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\Indicadores\IndicadorEconomicoSelector;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Middleware;
+use Spatie\Permission\Models\Permission;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -41,7 +44,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
-                'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
+                'permissions' => $this->permisosCompartidos($request->user()),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'appearance' => $request->cookie('appearance') ?? 'system',
@@ -49,5 +52,25 @@ class HandleInertiaRequests extends Middleware
                 ? app(IndicadorEconomicoSelector::class)->ultimosPorTipo(['UF', 'UTM', 'USD', 'IPC'])
                 : [],
         ];
+    }
+
+    /**
+     * Permisos que se comparten con el frontend para condicionar la UI. El
+     * superadmin bypassea todos los gates (Gate::before), por lo que su lista
+     * SHALL reflejar acceso total; el resto recibe sus permisos efectivos.
+     *
+     * @return Collection<int, string>
+     */
+    private function permisosCompartidos(?User $user): Collection
+    {
+        if ($user === null) {
+            return collect();
+        }
+
+        if ($user->hasRole('superadmin')) {
+            return Permission::query()->orderBy('name')->pluck('name');
+        }
+
+        return $user->getAllPermissions()->pluck('name');
     }
 }

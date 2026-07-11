@@ -29,3 +29,7 @@ yarn-error.log
 /.zed
 /openspec.bak
 /openspec_capj_app_pagos_optimizado_v9.zip
+
+# Datos reales de funcionarios (RUT, correo institucional) para sembrar
+# usuarios de prueba localmente. Nunca se commitea: el repo es público.
+/database/seeders/data/*.local.php

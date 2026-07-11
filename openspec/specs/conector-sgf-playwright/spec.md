@@ -3,9 +3,7 @@
 ## Purpose
 
 Conector Playwright de SGF: permite verificar puntualmente un caso o importar masivamente los casos pendientes de SGF bajo demanda, reutilizando la capa transversal de integraciones (`trabajos_integracion`, `snapshots_datos_externos`, `ejecucion_automatizacion_navegador`) en vez de tablas propias de SGF.
-
 ## Requirements
-
 ### Requirement: Verificar puntualmente un caso SGF bajo demanda
 El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.verificar_caso_sgf`, disparar de forma síncrona la verificación de un único `sgf_id` contra SGF vía el conector Playwright, devolviendo el resultado en la misma respuesta sin requerir Job en cola.
 
@@ -76,10 +74,11 @@ El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.importa
 - **THEN** el sistema no encola un nuevo Job
 - **AND** informa al usuario que ya hay una importación de ese grupo en curso, señalando su `trabajo_integracion`
 
-#### Scenario: El conector Playwright usa el filtro nativo de la Bandeja y descarta defensivamente lo que no corresponda
+#### Scenario: El conector Playwright confía en el filtro nativo de la Bandeja y registra los grupos observados
 - **WHEN** el Job de importación selectiva se ejecuta
 - **THEN** el conector Playwright selecciona "Pago Operaciones" en el filtro "Grupo" del formulario "Buscar" de la Bandeja, fija el rango de fechas (un mes atrás hasta hoy) y solo entonces lee las filas resultantes
-- **AND** como red de seguridad, el sistema solo crea `snapshot_datos_externo` para las filas cuyo `grupo_actual` coincide (sin distinguir mayúsculas/minúsculas ni espacios al inicio/final) con "Pago Operaciones", por si el filtro nativo devolviera alguna fila inesperada
+- **AND** crea un `snapshot_datos_externo` por cada fila que devuelve el filtro nativo, sin volver a filtrar por la columna "Grupo Actual" — ese es un campo distinto (el paso donde está parado el proceso) que no tiene por qué coincidir con el grupo filtrado, y descartarlo eliminaba filas legítimas (verificado en corrida real 2026-07-10)
+- **AND** registra en el detalle del paso `pagina_bandeja_N` los valores distintos de `grupo_actual` observados (`grupos_actuales`), como trazabilidad para diagnosticar cualquier fila inesperada devuelta por el filtro nativo
 - **AND** al finalizar, actualiza el `trabajo_integracion` a estado `completado` con el total de filas de ese grupo procesadas
 
 #### Scenario: El conector Playwright falla antes de completar la respuesta
@@ -87,11 +86,6 @@ El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.importa
 - **THEN** el sistema no guarda ningún `snapshot_datos_externo` parcial de esa corrida
 - **AND** registra el `trabajo_integracion` en estado `error` con el detalle de la falla
 - **AND** permite a un usuario autorizado disparar un nuevo intento
-
-#### Scenario: Usuario sin permiso intenta disparar la importación selectiva
-- **WHEN** un usuario sin el permiso `pago_proveedores.importar_casos_sgf` intenta disparar una importación selectiva del grupo "Pago operaciones"
-- **THEN** el sistema bloquea la operación
-- **AND** registra el evento de autorización denegada en `security_audit_logs`
 
 ### Requirement: Toda operación contra SGF exige el conector Playwright autorizado
 El sistema SHALL rechazar cualquier verificación puntual o importación masiva contra SGF si su `conector_automatizacion_navegador` no está activo y autorizado, reutilizando la regla ya existente de `integraciones-api-browser-automation`.
@@ -113,3 +107,4 @@ El sistema SHALL invocar el microservicio `services/sgf-playwright/` únicamente
 - **WHEN** el microservicio Playwright de SGF responde exitosamente con las filas solicitadas
 - **THEN** el sistema registra cada paso de navegación reportado como `paso_automatizacion_navegador`
 - **AND** procede a registrar los snapshots correspondientes
+

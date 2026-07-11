@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatFecha } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
 import type {
     CorteSeleccionable,
@@ -69,9 +70,7 @@ export default function EjecucionesInformeRazonadoIndex() {
                 </h1>
 
                 <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">
-                        Iniciar ejecución
-                    </h2>
+                    <h2 className="text-base font-medium">Iniciar ejecución</h2>
 
                     {error && (
                         <p className="text-sm text-destructive">{error}</p>
@@ -79,8 +78,7 @@ export default function EjecucionesInformeRazonadoIndex() {
 
                     {cortesPublicados.length === 0 && (
                         <p className="text-sm text-muted-foreground">
-                            No hay cortes de reportabilidad publicados
-                            todavía.
+                            No hay cortes de reportabilidad publicados todavía.
                         </p>
                     )}
 
@@ -114,9 +112,7 @@ export default function EjecucionesInformeRazonadoIndex() {
                                         key={corte.id}
                                         value={String(corte.id)}
                                     >
-                                        {new Date(
-                                            corte.fecha_corte,
-                                        ).toLocaleDateString()}
+                                        {formatFecha(corte.fecha_corte)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -142,9 +138,7 @@ export default function EjecucionesInformeRazonadoIndex() {
                                 <th className="px-4 py-2 font-medium">
                                     Definición
                                 </th>
-                                <th className="px-4 py-2 font-medium">
-                                    Corte
-                                </th>
+                                <th className="px-4 py-2 font-medium">Corte</th>
                                 <th className="px-4 py-2 font-medium">
                                     Estado
                                 </th>
@@ -170,8 +164,7 @@ export default function EjecucionesInformeRazonadoIndex() {
                                     className="cursor-pointer hover:bg-muted/30"
                                     onClick={() =>
                                         router.visit(
-                                            ejecuciones.show(ejecucion.id)
-                                                .url,
+                                            ejecuciones.show(ejecucion.id).url,
                                         )
                                     }
                                 >
@@ -186,9 +179,7 @@ export default function EjecucionesInformeRazonadoIndex() {
                                             .nombre ?? '—'}
                                     </td>
                                     <td className="px-4 py-2 text-muted-foreground">
-                                        {new Date(
-                                            ejecucion.generado_en,
-                                        ).toLocaleDateString()}
+                                        {formatFecha(ejecucion.generado_en)}
                                     </td>
                                 </tr>
                             ))}

@@ -46,8 +46,7 @@ export default function DefinicionesWorkflowIndex() {
                                         colSpan={5}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
-                                        Sin definiciones de workflow
-                                        todavía.
+                                        Sin definiciones de workflow todavía.
                                     </td>
                                 </tr>
                             )}

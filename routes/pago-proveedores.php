@@ -6,6 +6,12 @@ use App\Http\Controllers\PagoProveedores\EgresoCguController;
 use App\Http\Controllers\PagoProveedores\FacturaController;
 use App\Http\Controllers\PagoProveedores\RegistroContableCguController;
 use App\Http\Controllers\PagoProveedores\RegistroPagoBancarioController;
+use App\Http\Controllers\PagoProveedores\RevisionPagosController;
+use App\Http\Controllers\PagoProveedores\RevisionTotalesController;
+use App\Http\Controllers\PagoProveedores\RevisionTransicionEgresoController;
+use App\Http\Controllers\PagoProveedores\RevisionTransicionPagoController;
+use App\Http\Controllers\PagoProveedores\RevisionValidacionDocumentoController;
+use App\Http\Controllers\PagoProveedores\RevisionVerDocumentoController;
 use App\Http\Controllers\PagoProveedores\TransicionCasoPagoProveedorController;
 use App\Http\Controllers\PagoProveedores\VinculoAdquisicionCasoPagoProveedorController;
 use Illuminate\Support\Facades\Route;
@@ -28,4 +34,13 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::get('egresos-cgu/crear', [EgresoCguController::class, 'create'])->name('egresos-cgu.create');
     Route::post('egresos-cgu', [EgresoCguController::class, 'store'])->name('egresos-cgu.store');
     Route::get('egresos-cgu/{egresoCgu}', [EgresoCguController::class, 'show'])->name('egresos-cgu.show');
+
+    // Revisión de pagos en dos instancias (Jefe de Finanzas -> Administrador Zonal).
+    Route::get('revision', [RevisionPagosController::class, 'index'])->name('revision.index');
+    Route::get('revision/{egresoCgu}', [RevisionPagosController::class, 'show'])->name('revision.show');
+    Route::post('revision/{egresoCgu}/transicion', [RevisionTransicionEgresoController::class, 'store'])->name('revision.transicion');
+    Route::post('revision/{egresoCgu}/pagos/{caso}/verificar-totales', [RevisionTotalesController::class, 'store'])->name('revision.pagos.verificar-totales');
+    Route::post('revision/{egresoCgu}/pagos/{caso}/transicion', [RevisionTransicionPagoController::class, 'store'])->name('revision.pagos.transicion');
+    Route::post('revision/{egresoCgu}/pagos/{caso}/documentos/{documento}/validar', [RevisionValidacionDocumentoController::class, 'store'])->name('revision.pagos.documentos.validar');
+    Route::get('revision/{egresoCgu}/pagos/{caso}/documentos/{documento}/ver', [RevisionVerDocumentoController::class, 'show'])->name('revision.pagos.documentos.ver');
 });

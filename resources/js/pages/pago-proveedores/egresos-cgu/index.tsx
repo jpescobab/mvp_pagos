@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
-import { formatNumero } from '@/lib/format';
+import { formatFecha, formatNumero } from '@/lib/format';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { EgresoCgu, Paginated } from '@/types/pago-proveedores';
 
@@ -10,7 +10,10 @@ type PageProps = {
 };
 
 export default function EgresosCguIndex() {
-    const { egresos: pagina } = usePage<PageProps>().props;
+    const { egresos: pagina, auth } = usePage<PageProps>().props;
+    const puedeRegistrarEgreso = auth.permissions.includes(
+        'pago_proveedores.registrar_egreso',
+    );
 
     return (
         <>
@@ -21,9 +24,11 @@ export default function EgresosCguIndex() {
                     <h1 className="text-xl font-semibold tracking-tight">
                         Egresos CGU
                     </h1>
-                    <Button asChild>
-                        <Link href={egresosCgu.create()}>Nuevo egreso</Link>
-                    </Button>
+                    {puedeRegistrarEgreso && (
+                        <Button asChild>
+                            <Link href={egresosCgu.create()}>Nuevo egreso</Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="overflow-hidden rounded-xl border">
@@ -67,9 +72,7 @@ export default function EgresosCguIndex() {
                                         {egreso.numero_egreso}
                                     </td>
                                     <td className="px-4 py-2">
-                                        {new Date(
-                                            egreso.fecha,
-                                        ).toLocaleDateString()}
+                                        {formatFecha(egreso.fecha)}
                                     </td>
                                     <td className="px-4 py-2">
                                         <Monto valor={egreso.monto_total} />

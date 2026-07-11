@@ -31,7 +31,10 @@ type UserActionsMenuProps = {
     permissions: PermisosUsuarios;
 };
 
-export function UserActionsMenu({ usuario, permissions }: UserActionsMenuProps) {
+export function UserActionsMenu({
+    usuario,
+    permissions,
+}: UserActionsMenuProps) {
     const [confirmacion, setConfirmacion] = useState<Confirmacion>(null);
     const [procesando, setProcesando] = useState(false);
 
@@ -128,8 +131,7 @@ export function UserActionsMenu({ usuario, permissions }: UserActionsMenuProps) 
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            {confirmacion === 'activar' &&
-                                'Activar usuario'}
+                            {confirmacion === 'activar' && 'Activar usuario'}
                             {confirmacion === 'desactivar' &&
                                 'Desactivar usuario'}
                             {confirmacion === 'reset-password' &&

@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\PagoProveedores\InstanciaRevision;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $estado
+ * @property InstanciaRevision|null $instancia
+ * @property string|null $observacion
+ */
 class ValidacionDocumento extends Model
 {
     protected $table = 'validaciones_documento';
@@ -14,6 +20,7 @@ class ValidacionDocumento extends Model
     protected $fillable = [
         'documento_id',
         'estado',
+        'instancia',
         'observacion',
         'validado_por',
         'validado_en',
@@ -22,6 +29,7 @@ class ValidacionDocumento extends Model
     protected function casts(): array
     {
         return [
+            'instancia' => InstanciaRevision::class,
             'validado_en' => 'datetime',
         ];
     }

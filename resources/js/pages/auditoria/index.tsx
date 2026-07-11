@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Fragment, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { formatNumero } from '@/lib/format';
+import { formatFechaHora, formatNumero } from '@/lib/format';
 import auditoria from '@/routes/auditoria';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { AuditLogEntry } from '@/types/seguridad';
@@ -41,9 +41,7 @@ export default function AuditoriaIndex() {
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50 text-left text-muted-foreground">
                             <tr>
-                                <th className="px-4 py-2 font-medium">
-                                    Fecha
-                                </th>
+                                <th className="px-4 py-2 font-medium">Fecha</th>
                                 <th className="px-4 py-2 font-medium">
                                     Usuario
                                 </th>
@@ -71,9 +69,7 @@ export default function AuditoriaIndex() {
                                 <Fragment key={registro.id}>
                                     <tr>
                                         <td className="px-4 py-2 font-mono text-xs">
-                                            {new Date(
-                                                registro.created_at,
-                                            ).toLocaleString()}
+                                            {formatFechaHora(registro.created_at)}
                                         </td>
                                         <td className="px-4 py-2">
                                             {registro.user ?? 'Sistema'}
@@ -111,8 +107,7 @@ export default function AuditoriaIndex() {
                                                 <pre className="overflow-x-auto text-xs">
                                                     {JSON.stringify(
                                                         {
-                                                            before:
-                                                                registro.before,
+                                                            before: registro.before,
                                                             after: registro.after,
                                                             metadata:
                                                                 registro.metadata,
@@ -133,8 +128,8 @@ export default function AuditoriaIndex() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>
                         Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)}{' '}
-                        de {formatNumero(pagina.meta.total)}
+                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
+                        {formatNumero(pagina.meta.total)}
                     </span>
                     <div className="flex gap-2">
                         <Link

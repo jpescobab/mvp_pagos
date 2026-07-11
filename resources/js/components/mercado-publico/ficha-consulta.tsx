@@ -9,6 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { formatFecha, formatFechaHora } from '@/lib/format';
 
 /**
  * Componente genérico de "ficha" para consultas a Mercado Público: no conoce
@@ -169,13 +170,13 @@ function formatearFechaHora(fecha: string | null): string {
     }
 
     const soloFecha = /^\d{4}-\d{2}-\d{2}$/.test(fecha.trim());
-    const valor = new Date(fecha.replace(' ', 'T'));
+    const iso = fecha.replace(' ', 'T');
 
-    if (Number.isNaN(valor.getTime())) {
+    if (Number.isNaN(new Date(iso).getTime())) {
         return fecha;
     }
 
-    return soloFecha ? valor.toLocaleDateString() : valor.toLocaleString();
+    return soloFecha ? formatFecha(iso) : formatFechaHora(iso);
 }
 
 export function CronogramaTimeline({

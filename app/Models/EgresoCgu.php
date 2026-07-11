@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class EgresoCgu extends Model
 {
@@ -15,6 +14,9 @@ class EgresoCgu extends Model
         'numero_egreso',
         'fecha',
         'monto_total',
+        'periodo',
+        'cfinanciero_id',
+        'generado_automaticamente',
         'observaciones',
         'registrado_por',
     ];
@@ -24,6 +26,7 @@ class EgresoCgu extends Model
         return [
             'fecha' => 'date',
             'monto_total' => 'decimal:2',
+            'generado_automaticamente' => 'boolean',
         ];
     }
 
@@ -36,6 +39,23 @@ class EgresoCgu extends Model
     }
 
     /**
+     * @return BelongsTo<Cfinanciero, $this>
+     */
+    public function cfinanciero(): BelongsTo
+    {
+        return $this->belongsTo(Cfinanciero::class);
+    }
+
+    /**
+     * Jurisdicción a la que pertenece el egreso, derivada de su centro
+     * financiero. Gobierna el alcance zonal del Administrador Zonal.
+     */
+    public function jurisdiccionId(): ?int
+    {
+        return $this->cfinanciero?->jurisdiccion_id;
+    }
+
+    /**
      * @return HasMany<EgresoCguItem, $this>
      */
     public function items(): HasMany
@@ -44,10 +64,21 @@ class EgresoCgu extends Model
     }
 
     /**
-     * @return MorphMany<VinculoDocumento, $this>
+     * Completa el centro financiero del egreso a partir de un caso recién
+     * agregado o recién vinculado a un Proceso de Adquisición, si el egreso
+     * todavía no tiene uno determinado. Sin esto, jurisdiccionId() queda en
+     * null para siempre y ningún Administrador Zonal puede revisar el egreso.
      */
-    public function vinculosDocumento(): MorphMany
+    public function actualizarCfinancieroSiFalta(CasoPagoProveedor $caso): void
     {
-        return $this->morphMany(VinculoDocumento::class, 'vinculable');
+        if ($this->cfinanciero_id !== null) {
+            return;
+        }
+
+        $cfinancieroId = $caso->cfinancieroId();
+
+        if ($cfinancieroId !== null) {
+            $this->update(['cfinanciero_id' => $cfinancieroId]);
+        }
     }
 }

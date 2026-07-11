@@ -1,4 +1,10 @@
-import { AlertTriangle, CheckCircle2, Clock, Inbox, XCircle } from 'lucide-react';
+import {
+    AlertTriangle,
+    CheckCircle2,
+    Clock,
+    Inbox,
+    XCircle,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
     Tooltip,

@@ -27,8 +27,12 @@ import { BANDEJA_PROCESOS, FILTRO_BANDEJA, LOGIN, MAPEO_COLUMNAS_BANDEJA, MENU_A
 // procesos pendientes esperado.
 const MAX_PAGINAS_BANDEJA = 200;
 
+// El disco Laravel "local" (config/filesystems.php) resuelve rutas relativas
+// contra storage/app/private, no storage/app — GestorDocumentoProceso lee de
+// ahí. Si esto no calza, la descarga/vista de un documento importado por SGF
+// devuelve 404 aunque el archivo exista físicamente en el lugar equivocado.
 const RUTA_STORAGE_DOCUMENTOS =
-    process.env.LARAVEL_STORAGE_PATH ?? path.resolve(import.meta.dirname, '../../storage/app');
+    process.env.LARAVEL_STORAGE_PATH ?? path.resolve(import.meta.dirname, '../../storage/app/private');
 
 const RUTA_DEBUG = path.resolve(import.meta.dirname, 'debug');
 
@@ -899,19 +903,29 @@ export async function importarGrupoPagoOperaciones() {
     for (let numeroPagina = 1; numeroPagina <= MAX_PAGINAS_BANDEJA; numeroPagina++) {
         const encabezados = await leerEncabezadosTabla(page);
         const total = await page.locator(BANDEJA_PROCESOS.filaProceso).count();
+        const gruposActuales = new Set();
 
         for (let i = 0; i < total; i++) {
             const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
-            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos, {
-                filtro: (datos) => normalizarTexto(datos.grupo_actual) === normalizarTexto(FILTRO_BANDEJA.valorGrupoPagoOperaciones),
-            });
+            // El filtro nativo de la Bandeja (dropdown "GRUPO" = "Pago
+            // Operaciones") ya acotó el listado en origen: se confía en él. NO
+            // se vuelve a filtrar por la columna "Grupo Actual", que es un
+            // campo DISTINTO (el paso donde está parado el proceso ahora) y no
+            // tiene por qué coincidir con el grupo filtrado — hacerlo descartaba
+            // el 100% de las filas legítimas. Se registran los valores distintos
+            // de "grupo actual" vistos para trazabilidad/diagnóstico.
+            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
 
             if (procesado) {
+                gruposActuales.add(procesado.payload_crudo.grupo_actual || '(vacío)');
                 resultado.push(procesado);
             }
         }
 
-        pasos.push(paso(`pagina_bandeja_${numeroPagina}`, 'completado', { filas_procesadas: total }));
+        pasos.push(paso(`pagina_bandeja_${numeroPagina}`, 'completado', {
+            filas_procesadas: total,
+            grupos_actuales: [...gruposActuales],
+        }));
 
         if (!(await avanzarSiguientePagina(page))) {
             break;

@@ -26,9 +26,7 @@ export default function UsuariosCrear({ catalogs }: PageProps) {
     const [rut, setRut] = useState('');
     const [cargo, setCargo] = useState('');
     const [unidad, setUnidad] = useState('');
-    const [rolesSeleccionados, setRolesSeleccionados] = useState<number[]>(
-        [],
-    );
+    const [rolesSeleccionados, setRolesSeleccionados] = useState<number[]>([]);
     const [cfinancieroId, setCfinancieroId] = useState(SIN_SELECCION);
     const [ccostoId, setCcostoId] = useState(SIN_SELECCION);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -59,8 +57,7 @@ export default function UsuariosCrear({ catalogs }: PageProps) {
                     cfinancieroId === SIN_SELECCION
                         ? null
                         : Number(cfinancieroId),
-                ccosto_id:
-                    ccostoId === SIN_SELECCION ? null : Number(ccostoId),
+                ccosto_id: ccostoId === SIN_SELECCION ? null : Number(ccostoId),
             },
             {
                 onError: (errores) =>

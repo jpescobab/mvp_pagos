@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatFecha } from '@/lib/format';
 import cortes from '@/routes/reportabilidad/cortes';
 import periodos from '@/routes/reportabilidad/periodos';
 import type { PeriodoReportabilidad } from '@/types/reportabilidad';
@@ -45,7 +46,11 @@ export default function PeriodosReportabilidadIndex() {
     }
 
     function crearCorte(periodo: PeriodoReportabilidad) {
-        router.post(periodos.cortes.store(periodo.id).url, {}, { preserveScroll: true });
+        router.post(
+            periodos.cortes.store(periodo.id).url,
+            {},
+            { preserveScroll: true },
+        );
     }
 
     return (
@@ -82,15 +87,11 @@ export default function PeriodosReportabilidadIndex() {
                                 id="fecha-inicio-periodo"
                                 type="date"
                                 value={fechaInicio}
-                                onChange={(e) =>
-                                    setFechaInicio(e.target.value)
-                                }
+                                onChange={(e) => setFechaInicio(e.target.value)}
                             />
                         </div>
                         <div className="space-y-1">
-                            <Label htmlFor="fecha-fin-periodo">
-                                Fecha fin
-                            </Label>
+                            <Label htmlFor="fecha-fin-periodo">Fecha fin</Label>
                             <Input
                                 id="fecha-fin-periodo"
                                 type="date"
@@ -128,13 +129,9 @@ export default function PeriodosReportabilidadIndex() {
                                 {periodo.codigo}
                             </h2>
                             <span className="text-sm text-muted-foreground">
-                                {new Date(
-                                    periodo.fecha_inicio,
-                                ).toLocaleDateString()}{' '}
+                                {formatFecha(periodo.fecha_inicio)}{' '}
                                 –{' '}
-                                {new Date(
-                                    periodo.fecha_fin,
-                                ).toLocaleDateString()}
+                                {formatFecha(periodo.fecha_fin)}
                             </span>
                         </div>
 
@@ -153,9 +150,7 @@ export default function PeriodosReportabilidadIndex() {
                                             href={cortes.show(corte.id)}
                                             className="hover:underline"
                                         >
-                                            {new Date(
-                                                corte.fecha_corte,
-                                            ).toLocaleDateString()}
+                                            {formatFecha(corte.fecha_corte)}
                                         </Link>
                                         <span
                                             className={

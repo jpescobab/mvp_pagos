@@ -10,6 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { formatFecha } from '@/lib/format';
 import conectores from '@/routes/integraciones/conectores';
 import type {
     ConectorAutomatizacionNavegador,
@@ -55,7 +56,11 @@ export default function ConectoresIndex() {
     }
 
     function autorizar(conector: ConectorAutomatizacionNavegador) {
-        router.post(conectores.autorizar(conector.id).url, {}, { preserveScroll: true });
+        router.post(
+            conectores.autorizar(conector.id).url,
+            {},
+            { preserveScroll: true },
+        );
     }
 
     return (
@@ -192,7 +197,7 @@ function ConectorCard({
                     <span className="text-sm text-green-600">
                         Autorizado por {conector.autorizado_por}
                         {conector.autorizado_en &&
-                            ` el ${new Date(conector.autorizado_en).toLocaleDateString()}`}
+                            ` el ${formatFecha(conector.autorizado_en)}`}
                     </span>
                 ) : (
                     <Button variant="outline" onClick={onAutorizar}>
@@ -250,9 +255,7 @@ function ConectorCard({
                     <Input
                         id={`referencia-secreto-${conector.id}`}
                         value={referenciaSecreto}
-                        onChange={(e) =>
-                            setReferenciaSecreto(e.target.value)
-                        }
+                        onChange={(e) => setReferenciaSecreto(e.target.value)}
                         placeholder="secret/conectores/sgf"
                     />
                 </div>

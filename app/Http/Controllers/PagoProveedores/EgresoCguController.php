@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\PagoProveedores;
 
+use App\Exceptions\TransicionWorkflowException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PagoProveedores\CrearEgresoCguRequest;
 use App\Http\Resources\PagoProveedores\EgresoCguResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCgu;
-use App\Models\TipoDocumento;
+use App\Services\PagoProveedores\RevisionEgresoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -16,6 +17,8 @@ use Inertia\Response;
 
 class EgresoCguController extends Controller
 {
+    public function __construct(private readonly RevisionEgresoService $revisionEgreso) {}
+
     public function index(): Response
     {
         Gate::authorize('viewAny', EgresoCgu::class);
@@ -31,15 +34,10 @@ class EgresoCguController extends Controller
     {
         Gate::authorize('view', $egresoCgu);
 
-        $egresoCgu->load([
-            'items.caso',
-            'vinculosDocumento.documento.tipoDocumento',
-            'vinculosDocumento.documento.versiones',
-        ]);
+        $egresoCgu->load('items.caso');
 
         return Inertia::render('pago-proveedores/egresos-cgu/show', [
             'egreso' => new EgresoCguResource($egresoCgu),
-            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
         ]);
     }
 
@@ -47,7 +45,7 @@ class EgresoCguController extends Controller
     {
         Gate::authorize('create', EgresoCgu::class);
 
-        $casos = CasoPagoProveedor::with('proveedor')->get()->map(fn (CasoPagoProveedor $caso) => [
+        $casos = CasoPagoProveedor::whereDoesntHave('egresoCguItems')->with('proveedor')->get()->map(fn (CasoPagoProveedor $caso) => [
             'id' => $caso->id,
             'sgf_id' => $caso->sgf_id,
             'proveedor' => ['nombre' => $caso->proveedor?->nombre],
@@ -63,21 +61,38 @@ class EgresoCguController extends Controller
     {
         $datos = $request->validated();
 
-        DB::transaction(function () use ($datos) {
-            $egreso = EgresoCgu::create([
-                'numero_egreso' => $datos['numero_egreso'],
-                'fecha' => $datos['fecha'],
-                'observaciones' => $datos['observaciones'] ?? null,
-                'monto_total' => array_sum(array_column($datos['casos'], 'monto')),
-            ]);
-
-            foreach ($datos['casos'] as $item) {
-                $egreso->items()->create([
-                    'caso_pago_proveedor_id' => $item['caso_pago_proveedor_id'],
-                    'monto' => $item['monto'],
+        try {
+            DB::transaction(function () use ($datos, $request) {
+                $egreso = EgresoCgu::create([
+                    'numero_egreso' => $datos['numero_egreso'],
+                    'fecha' => $datos['fecha'],
+                    'observaciones' => $datos['observaciones'] ?? null,
+                    'monto_total' => array_sum(array_column($datos['casos'], 'monto')),
                 ]);
-            }
-        });
+
+                $casos = CasoPagoProveedor::with('proceso.estadoActual')
+                    ->whereIn('id', array_column($datos['casos'], 'caso_pago_proveedor_id'))
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($datos['casos'] as $item) {
+                    $caso = $casos[$item['caso_pago_proveedor_id']];
+
+                    $egreso->items()->create([
+                        'caso_pago_proveedor_id' => $item['caso_pago_proveedor_id'],
+                        'monto' => $item['monto'],
+                    ]);
+
+                    $egreso->actualizarCfinancieroSiFalta($caso);
+
+                    // Recién asignado a un Egreso, el caso queda agrupado y
+                    // pasa a la instancia de revisión de Finanzas.
+                    $this->revisionEgreso->iniciarRevision($caso, $request->user());
+                }
+            });
+        } catch (TransicionWorkflowException $e) {
+            return back()->withErrors(['casos' => $e->getMessage()]);
+        }
 
         return to_route('pago-proveedores.egresos-cgu.index');
     }
