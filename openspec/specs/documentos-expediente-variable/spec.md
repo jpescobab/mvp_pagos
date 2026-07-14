@@ -59,7 +59,7 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 - **AND** la observación de un evento de rechazo pasado sigue siendo visible aunque el documento haya sido validado posteriormente
 
 ### Requirement: Resolver checklist documental por proceso según reglas configurables
-El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), tipo de proceso de pago (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee.
+El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), tipo de proceso de pago (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee. Un `requisito_documental` cuyo `TipoDocumento` esté desactivado (`activo = false`) SHALL excluirse de la resolución, sin bloquear la resolución de los demás requisitos aplicables.
 
 #### Scenario: Generar checklist documental
 - **WHEN** el usuario abre el expediente de un proceso
@@ -89,6 +89,11 @@ El sistema SHALL determinar los documentos requeridos de un proceso según regla
 #### Scenario: Un proceso sin tipo de proceso de pago clasificado solo ve los requisitos universales
 - **WHEN** se resuelven los `requisitos_documentales` de un proceso cuyo `tipo_proceso_pago_id` es `null`
 - **THEN** solo se consideran los requisitos con `tipo_proceso_pago_id` nulo
+
+#### Scenario: Un requisito con tipo de documento desactivado no aparece en el checklist
+- **WHEN** se resuelven los `requisitos_documentales` de un proceso y alguno de ellos referencia un `TipoDocumento` con `activo = false`
+- **THEN** ese requisito se excluye del checklist generado
+- **AND** los demás requisitos aplicables se resuelven normalmente
 
 ### Requirement: Vincular documentos a cualquier entidad de negocio
 Un documento SHALL poder vincularse a cualquier entidad mediante `vinculos_documento` polimórfico (`vinculable_type`/`vinculable_id`), sin que el modelo documental dependa de un módulo funcional específico.
@@ -120,7 +125,7 @@ El sistema SHALL exponer endpoints autorizados (`documentos.gestionar`) para sub
 - **AND** registra el evento de autorización denegada en `security_audit_logs`
 
 ### Requirement: Listar y descargar los documentos vinculados a un proceso
-El sistema SHALL incluir los documentos vinculados activos de un `Proceso` (tipo, nombre de archivo, estado vigente) en la misma respuesta que expone su detalle, y SHALL exponer un endpoint de descarga protegido por autenticación, sin URLs públicas directas al archivo.
+El sistema SHALL incluir los documentos vinculados activos de un `Proceso` (tipo, nombre de archivo, estado vigente) en la misma respuesta que expone su detalle, y SHALL exponer un endpoint de descarga protegido por autenticación, sin URLs públicas directas al archivo. El sistema SHALL además exponer un endpoint separado para visualizar el mismo archivo embebido (disposition inline), bajo la misma protección de autenticación, sin forzar su descarga.
 
 #### Scenario: Ver documentos vinculados en el detalle de un proceso
 - **WHEN** un usuario abre el detalle de un proceso (de cualquier módulo) que tiene documentos vinculados activos
@@ -130,6 +135,10 @@ El sistema SHALL incluir los documentos vinculados activos de un `Proceso` (tipo
 - **WHEN** un usuario autenticado solicita la descarga de un documento vinculado a un proceso
 - **THEN** el sistema sirve el archivo desde el disco privado
 - **AND** un usuario no autenticado no puede acceder al archivo
+
+#### Scenario: Ver un documento vinculado embebido sin forzar la descarga
+- **WHEN** un usuario autenticado solicita ver (no descargar) un documento vinculado a un proceso
+- **THEN** el sistema sirve el archivo desde el disco privado con una respuesta cuya disposition no es `attachment`, apta para embeberse en un visor
 
 ### Requirement: Desvincular un documento sin perder su historial
 El sistema SHALL permitir desvincular un documento de un proceso marcando su `VinculoDocumento` como inactivo, sin eliminar el `Documento`, sus `VersionDocumento` ni su historial de validaciones.

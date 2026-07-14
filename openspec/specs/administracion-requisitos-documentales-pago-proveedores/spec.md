@@ -45,7 +45,7 @@ El sistema SHALL permitir, a un usuario con el permiso `core_institucional.admin
 - **THEN** el sistema bloquea la operación
 
 ### Requirement: Asignar obligatoriedad documental por tipo de proceso de pago mediante una matriz
-El sistema SHALL exponer, a un usuario con el permiso `pago_proveedores.administrar_requisitos_documentales`, una vista de matriz con los `TipoDocumento` activos como filas y los `TipoProcesoPago` activos como columnas (más una columna "Todos los tipos" que representa `tipo_proceso_pago_id = null`), donde cada celda permite fijar el estado obligatorio, opcional, o no aplica para esa combinación, dentro del conjunto de requisitos `pago_proveedores` exclusivamente. Un cambio en una celda SHALL crear, actualizar, o eliminar el `RequisitoDocumental` correspondiente de inmediato, sin afectar filas de otros conjuntos de requisitos documentales (ej. `adquisiciones`) ni las dimensiones `modalidad_id`, `estado_workflow_id`, `monto_desde`/`monto_hasta` (que la matriz siempre deja en `null`).
+El sistema SHALL exponer, a un usuario con el permiso `pago_proveedores.administrar_requisitos_documentales`, una vista de matriz con los `TipoDocumento` activos como filas y los `TipoProcesoPago` activos como columnas (más una columna "Todos los tipos" que representa `tipo_proceso_pago_id = null`), donde cada celda permite fijar el estado obligatorio, opcional, o no aplica para esa combinación, dentro del conjunto de requisitos `pago_proveedores` exclusivamente. Un cambio en una celda SHALL crear, actualizar, o eliminar el `RequisitoDocumental` correspondiente de inmediato, sin afectar filas de otros conjuntos de requisitos documentales (ej. `adquisiciones`) ni las dimensiones `modalidad_id`, `estado_workflow_id`, `monto_desde`/`monto_hasta` (que la matriz siempre deja en `null`). Eliminar un `RequisitoDocumental` (celda marcada "no aplica") SHALL tener éxito incluso si existen `checklist_documental_proceso_items` cacheados que lo referencian, dado que esos items son un caché regenerable de la resolución del checklist, no evidencia.
 
 #### Scenario: Marcar un documento como obligatorio para un tipo de proceso
 - **WHEN** un usuario con el permiso requerido fija la celda de un `TipoDocumento` y un `TipoProcesoPago` como "obligatorio"
@@ -55,6 +55,7 @@ El sistema SHALL exponer, a un usuario con el permiso `pago_proveedores.administ
 #### Scenario: Quitar un requisito marcando "no aplica"
 - **WHEN** un usuario fija una celda como "no aplica" sobre una combinación que ya tenía un `RequisitoDocumental`
 - **THEN** el sistema elimina esa fila de `requisitos_documentales`
+- **AND** la eliminación tiene éxito aunque existan `checklist_documental_proceso_items` de casos ya resueltos que referencien ese `RequisitoDocumental` (se eliminan en cascada junto con la fila)
 
 #### Scenario: Asignar un requisito universal vía la columna "Todos los tipos"
 - **WHEN** un usuario fija la celda de un `TipoDocumento` en la columna "Todos los tipos" como "obligatorio"
