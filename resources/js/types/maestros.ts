@@ -100,3 +100,19 @@ export type CfinancieroSeleccionable = {
     codigo: string;
     nombre: string;
 };
+
+export type TipoProcesoPagoMaestro = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    activo: boolean;
+};
+
+export type TipoDocumentoMaestro = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    descripcion: string | null;
+    es_obligatorio: boolean;
+    activo: boolean;
+};

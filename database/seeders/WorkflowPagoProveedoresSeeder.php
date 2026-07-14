@@ -23,6 +23,7 @@ class WorkflowPagoProveedoresSeeder extends Seeder
             'pago_proveedores.revisar_finanzas',
             'pago_proveedores.revisar_zonal',
             'pago_proveedores.gestionar_caso',
+            'pago_proveedores.administrar_requisitos_documentales',
         ];
 
         foreach ($permisos as $permiso) {
@@ -67,6 +68,7 @@ class WorkflowPagoProveedoresSeeder extends Seeder
             'pago_proveedores.registrar_factura',
             'pago_proveedores.verificar_caso_sgf',
             'pago_proveedores.gestionar_caso',
+            'pago_proveedores.administrar_requisitos_documentales',
             'documentos.gestionar',
         ]);
 

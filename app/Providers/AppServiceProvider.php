@@ -22,6 +22,8 @@ use App\Models\PeriodoReportabilidad;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
+use App\Models\TipoDocumento;
+use App\Models\TipoProcesoPago;
 use App\Models\User;
 use App\Policies\AsignacionPolicy;
 use App\Policies\AuditLogPolicy;
@@ -43,6 +45,8 @@ use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\ProcesoPolicy;
 use App\Policies\ProveedorPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\TipoDocumentoPolicy;
+use App\Policies\TipoProcesoPagoPolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
 use Carbon\CarbonImmutable;
@@ -126,6 +130,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(EjecucionInformeRazonado::class, EjecucionInformeRazonadoPolicy::class);
         Gate::policy(OrdenCompraMercadoPublico::class, OrdenCompraMercadoPublicoPolicy::class);
         Gate::policy(LicitacionMercadoPublico::class, LicitacionMercadoPublicoPolicy::class);
+        Gate::policy(TipoProcesoPago::class, TipoProcesoPagoPolicy::class);
+        Gate::policy(TipoDocumento::class, TipoDocumentoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

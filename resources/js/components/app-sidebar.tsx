@@ -6,10 +6,13 @@ import {
     Coins,
     FileBarChart,
     FileSearch,
+    FileStack,
     Gauge,
+    Grid3x3,
     History,
     KeyRound,
     Landmark,
+    Layers,
     LayoutGrid,
     Plug,
     PlugZap,
@@ -48,8 +51,11 @@ import { index as cfinancieros } from '@/routes/maestros/cfinancieros';
 import { index as clientesMedidores } from '@/routes/maestros/clientes-medidores';
 import { index as items } from '@/routes/maestros/items';
 import { index as proveedores } from '@/routes/maestros/proveedores';
+import { index as tiposDocumento } from '@/routes/maestros/tipos-documento';
+import { index as tiposProcesoPago } from '@/routes/maestros/tipos-proceso-pago';
 import { index as casos } from '@/routes/pago-proveedores/casos';
 import { index as egresosCgu } from '@/routes/pago-proveedores/egresos-cgu';
+import { index as requisitosDocumentales } from '@/routes/pago-proveedores/requisitos-documentales';
 import { index as revisionPagos } from '@/routes/pago-proveedores/revision';
 import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
 import { index as roles } from '@/routes/roles';
@@ -119,6 +125,12 @@ const administracionNavItems: NavItemConPermiso[] = [
         icon: Tags,
         permiso: 'core_institucional.administrar',
     },
+    {
+        title: 'Tipos de Documento',
+        href: tiposDocumento(),
+        icon: FileStack,
+        permiso: 'core_institucional.administrar',
+    },
 ];
 
 const revisionPagosNavItem: NavItem = {
@@ -127,7 +139,7 @@ const revisionPagosNavItem: NavItem = {
     icon: ClipboardCheck,
 };
 
-const pagoProveedoresNavItems: NavItem[] = [
+const pagoProveedoresNavItems: NavItemConPermiso[] = [
     {
         title: 'Casos',
         href: casos(),
@@ -142,6 +154,18 @@ const pagoProveedoresNavItems: NavItem[] = [
         title: 'Importaciones SGF',
         href: importacionesSgf(),
         icon: History,
+    },
+    {
+        title: 'Tipos de Proceso de Pago',
+        href: tiposProcesoPago(),
+        icon: Layers,
+        permiso: 'pago_proveedores.administrar_requisitos_documentales',
+    },
+    {
+        title: 'Requisitos Documentales',
+        href: requisitosDocumentales(),
+        icon: Grid3x3,
+        permiso: 'pago_proveedores.administrar_requisitos_documentales',
     },
 ];
 
@@ -238,13 +262,17 @@ export function AppSidebar() {
     const puedeRevisar =
         auth.permissions.includes('pago_proveedores.revisar_finanzas') ||
         auth.permissions.includes('pago_proveedores.revisar_zonal');
+    const pagoProveedoresItemsFiltrados = filtrarPorPermiso(
+        pagoProveedoresNavItems,
+        auth.permissions,
+    );
     const pagoProveedoresItems = puedeRevisar
         ? [
-              pagoProveedoresNavItems[0],
+              pagoProveedoresItemsFiltrados[0],
               revisionPagosNavItem,
-              ...pagoProveedoresNavItems.slice(1),
+              ...pagoProveedoresItemsFiltrados.slice(1),
           ]
-        : pagoProveedoresNavItems;
+        : pagoProveedoresItemsFiltrados;
 
     return (
         <Sidebar collapsible="icon" variant="inset">

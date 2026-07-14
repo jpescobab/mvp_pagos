@@ -114,6 +114,24 @@ test('un proceso sin tipo de proceso de pago clasificado solo ve los requisitos 
     expect($checklist->items->first()->tipo_documento_id)->toBe($universal->id);
 });
 
+test('cuando un tipo de documento tiene regla universal y regla específica simultáneas, no duplica el ítem y prevalece la específica', function () {
+    [$definicion, $estado] = crearWorkflowConEstado();
+    $tipoA = TipoProcesoPago::create(['codigo' => 'TPP_A', 'nombre' => 'Tipo de pago A']);
+    $proceso = crearProcesoChecklist($definicion, $estado, ['tipo_proceso_pago_id' => $tipoA->id]);
+
+    $tipoDocumento = TipoDocumento::create(['codigo' => 'TIPO_TEST', 'nombre' => 'Tipo de prueba']);
+    $conjunto = ConjuntoRequisitosDocumentales::create(['codigo' => 'set-test-'.fake()->unique()->numerify('####'), 'nombre' => 'Set de prueba']);
+
+    $conjunto->requisitos()->create(['tipo_documento_id' => $tipoDocumento->id, 'definicion_workflow_id' => $definicion->id, 'tipo_requisito' => 'opcional']);
+    $conjunto->requisitos()->create(['tipo_documento_id' => $tipoDocumento->id, 'definicion_workflow_id' => $definicion->id, 'tipo_proceso_pago_id' => $tipoA->id, 'tipo_requisito' => 'obligatorio']);
+
+    $checklist = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
+
+    expect($checklist->items)->toHaveCount(1);
+    expect($checklist->items->first()->tipo_documento_id)->toBe($tipoDocumento->id);
+    expect($checklist->items->first()->tipo_requisito)->toBe('obligatorio');
+});
+
 test('reclasificar el tipo de proceso de un caso y resolver de nuevo refleja los nuevos requisitos sin duplicar ítems', function () {
     [$definicion, $estado] = crearWorkflowConEstado();
     $tipoA = TipoProcesoPago::create(['codigo' => 'TPP_A', 'nombre' => 'Tipo de pago A']);

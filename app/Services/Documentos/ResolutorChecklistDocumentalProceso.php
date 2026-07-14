@@ -81,7 +81,7 @@ class ResolutorChecklistDocumentalProceso
      */
     private function requisitosAplicables(Proceso $proceso, ConjuntoRequisitosDocumentales $conjuntoRequisitos): Collection
     {
-        return $conjuntoRequisitos->requisitos()
+        $candidatos = $conjuntoRequisitos->requisitos()
             ->where('activo', true)
             ->where('definicion_workflow_id', $proceso->definicion_workflow_id)
             ->where(function ($query) use ($proceso) {
@@ -100,5 +100,22 @@ class ResolutorChecklistDocumentalProceso
                 $query->whereNull('monto_hasta')->orWhere('monto_hasta', '>=', $proceso->monto ?? 0);
             })
             ->get();
+
+        // Varias filas pueden aplicar al mismo tipo_documento_id (p. ej. una regla
+        // universal y una específica de tipo_proceso_pago/modalidad simultáneamente
+        // activas) — nos quedamos con la más específica para no duplicar el ítem.
+        return $candidatos
+            ->groupBy('tipo_documento_id')
+            ->map(fn (Collection $filas) => $filas->sortByDesc($this->especificidad(...))->first())
+            ->values();
+    }
+
+    private function especificidad(RequisitoDocumental $requisito): int
+    {
+        return (int) ($requisito->modalidad_id !== null)
+            + (int) ($requisito->tipo_proceso_pago_id !== null)
+            + (int) ($requisito->estado_workflow_id !== null)
+            + (int) ($requisito->monto_desde !== null)
+            + (int) ($requisito->monto_hasta !== null);
     }
 }
