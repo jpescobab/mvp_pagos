@@ -7,6 +7,8 @@ use App\Http\Controllers\Maestros\CfinancieroController;
 use App\Http\Controllers\Maestros\ClienteMedidorController;
 use App\Http\Controllers\Maestros\ItemController;
 use App\Http\Controllers\Maestros\ProveedorController;
+use App\Http\Controllers\Maestros\TipoDocumentoController;
+use App\Http\Controllers\Maestros\TipoProcesoPagoController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->prefix('maestros')->name('maestros.')->group(function () {
@@ -51,4 +53,18 @@ Route::middleware(['auth'])->prefix('maestros')->name('maestros.')->group(functi
     Route::post('items/{item}/catalogos', [CatalogoController::class, 'store'])->name('items.catalogos.store');
     Route::patch('items/{item}/catalogos/{catalogo}', [CatalogoController::class, 'update'])->name('items.catalogos.update');
     Route::delete('items/{item}/catalogos/{catalogo}', [CatalogoController::class, 'destroy'])->name('items.catalogos.destroy');
+    Route::get('tipos-proceso-pago', [TipoProcesoPagoController::class, 'index'])->name('tipos-proceso-pago.index');
+    Route::get('tipos-proceso-pago/crear', [TipoProcesoPagoController::class, 'create'])->name('tipos-proceso-pago.create');
+    Route::post('tipos-proceso-pago', [TipoProcesoPagoController::class, 'store'])->name('tipos-proceso-pago.store');
+    Route::get('tipos-proceso-pago/{tipoProcesoPago}', [TipoProcesoPagoController::class, 'show'])->name('tipos-proceso-pago.show');
+    Route::get('tipos-proceso-pago/{tipoProcesoPago}/editar', [TipoProcesoPagoController::class, 'edit'])->name('tipos-proceso-pago.edit');
+    Route::patch('tipos-proceso-pago/{tipoProcesoPago}', [TipoProcesoPagoController::class, 'update'])->name('tipos-proceso-pago.update');
+    Route::delete('tipos-proceso-pago/{tipoProcesoPago}', [TipoProcesoPagoController::class, 'destroy'])->name('tipos-proceso-pago.destroy');
+    Route::get('tipos-documento', [TipoDocumentoController::class, 'index'])->name('tipos-documento.index');
+    Route::get('tipos-documento/crear', [TipoDocumentoController::class, 'create'])->name('tipos-documento.create');
+    Route::post('tipos-documento', [TipoDocumentoController::class, 'store'])->name('tipos-documento.store');
+    Route::get('tipos-documento/{tipoDocumento}', [TipoDocumentoController::class, 'show'])->name('tipos-documento.show');
+    Route::get('tipos-documento/{tipoDocumento}/editar', [TipoDocumentoController::class, 'edit'])->name('tipos-documento.edit');
+    Route::patch('tipos-documento/{tipoDocumento}', [TipoDocumentoController::class, 'update'])->name('tipos-documento.update');
+    Route::delete('tipos-documento/{tipoDocumento}', [TipoDocumentoController::class, 'destroy'])->name('tipos-documento.destroy');
 });

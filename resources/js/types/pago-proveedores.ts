@@ -27,6 +27,19 @@ export type TipoProcesoPago = {
     nombre: string;
 };
 
+export type TipoDocumentoSeleccionableMatriz = {
+    id: number;
+    codigo: string;
+    nombre: string;
+};
+
+export type RequisitoDocumentalMatrizItem = {
+    id: number;
+    tipo_documento_id: number;
+    tipo_proceso_pago_id: number | null;
+    tipo_requisito: 'obligatorio' | 'opcional';
+};
+
 export type ChecklistItem = {
     tipo_documento: string | null;
     tipo_documento_id: number | null;

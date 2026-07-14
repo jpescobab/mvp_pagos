@@ -25,4 +25,12 @@ class TipoProcesoPago extends Model
     {
         return $this->hasMany(RequisitoDocumental::class, 'tipo_proceso_pago_id');
     }
+
+    /**
+     * @return HasMany<Proceso, $this>
+     */
+    public function procesos(): HasMany
+    {
+        return $this->hasMany(Proceso::class, 'tipo_proceso_pago_id');
+    }
 }
