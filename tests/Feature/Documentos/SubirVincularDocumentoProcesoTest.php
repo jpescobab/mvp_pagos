@@ -165,6 +165,27 @@ test('descargar un documento vinculado autenticado responde con el archivo', fun
     $respuestaConAuth->assertOk();
 });
 
+test('ver un documento vinculado responde con disposition inline en vez de forzar la descarga', function () {
+    Storage::fake('local');
+
+    $proceso = crearProcesoDePruebaParaDocumentos();
+    $tipoDocumento = crearTipoDocumentoDePrueba();
+    $documento = Documento::create(['tipo_documento_id' => $tipoDocumento->id, 'titulo' => 'contrato.pdf']);
+    $documento->versiones()->create([
+        'numero_version' => 1,
+        'ruta_archivo' => UploadedFile::fake()->create('contrato.pdf', 10)->store('documentos', 'local'),
+        'nombre_archivo' => 'contrato.pdf',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $respuesta = $this->actingAs($usuario)->get(route('procesos.documentos.ver', [$proceso, $documento]));
+    $respuesta->assertOk();
+
+    $disposition = $respuesta->headers->get('content-disposition');
+    expect($disposition === null || ! str_contains($disposition, 'attachment'))->toBeTrue();
+});
+
 test('desvincular un documento lo marca inactivo sin eliminar el documento ni sus versiones', function () {
     Storage::fake('local');
     $this->seed(RolesAndPermissionsSeeder::class);

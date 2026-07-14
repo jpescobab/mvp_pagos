@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, Eye, Link2, Unlink } from 'lucide-react';
 import type { Dispatch, SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +8,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import documentos from '@/routes/procesos/documentos';
 import type {
     CasoPagoProveedor,
     DocumentoVinculado,
@@ -30,6 +29,9 @@ type ChecklistDocumentalCardProps = {
         tipoDocumentoId: number,
         documentoId: string | undefined,
     ) => void;
+    documentoPreviewId: number | null;
+    onVerDocumento: (documentoId: number) => void;
+    desvincularDocumento: (vinculoId: number) => void;
 };
 
 export function ChecklistDocumentalCard({
@@ -43,6 +45,9 @@ export function ChecklistDocumentalCard({
     setHuerfanoSeleccionado,
     vinculandoHuerfano,
     vincularHuerfano,
+    documentoPreviewId,
+    onVerDocumento,
+    desvincularDocumento,
 }: ChecklistDocumentalCardProps) {
     return (
         <section className="space-y-3 rounded-xl border p-4">
@@ -72,9 +77,9 @@ export function ChecklistDocumentalCard({
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <span className="flex items-center gap-2">
                                         {esPendiente ? (
-                                            <Circle className="size-4 shrink-0 text-muted-foreground" />
+                                            <Circle className="size-4 shrink-0 text-warning" />
                                         ) : (
-                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
                                         )}
                                         {item.tipo_documento ??
                                             'Documento sin tipo'}{' '}
@@ -83,22 +88,52 @@ export function ChecklistDocumentalCard({
                                         </span>
                                     </span>
                                     <span className="flex items-center gap-2 text-muted-foreground">
-                                        {item.estado_cumplimiento}
                                         {item.documento_id !== null && (
-                                            <a
-                                                href={
-                                                    documentos.descargar({
-                                                        proceso:
-                                                            caso.proceso.id,
-                                                        documento:
-                                                            item.documento_id,
-                                                    }).url
+                                            <button
+                                                type="button"
+                                                title="Ver documento"
+                                                onClick={() =>
+                                                    onVerDocumento(
+                                                        item.documento_id as number,
+                                                    )
                                                 }
-                                                className="underline"
+                                                className={
+                                                    item.documento_id ===
+                                                    documentoPreviewId
+                                                        ? 'text-foreground'
+                                                        : 'hover:text-foreground'
+                                                }
                                             >
-                                                Ver documento
-                                            </a>
+                                                <Eye className="size-4" />
+                                            </button>
                                         )}
+                                        {puedeGestionarDocumentos &&
+                                            item.documento_id !== null &&
+                                            (() => {
+                                                const vinculo =
+                                                    caso.proceso.documentos?.find(
+                                                        (doc) =>
+                                                            doc.documento_id ===
+                                                            item.documento_id,
+                                                    );
+
+                                                return (
+                                                    vinculo && (
+                                                        <button
+                                                            type="button"
+                                                            title="Desvincular documento"
+                                                            onClick={() =>
+                                                                desvincularDocumento(
+                                                                    vinculo.vinculo_id,
+                                                                )
+                                                            }
+                                                            className="hover:text-destructive"
+                                                        >
+                                                            <Unlink className="size-4" />
+                                                        </button>
+                                                    )
+                                                );
+                                            })()}
                                         {puedeGestionarDocumentos &&
                                             esPendiente &&
                                             item.tipo_documento_id !== null && (
@@ -179,6 +214,7 @@ export function ChecklistDocumentalCard({
                                         <Button
                                             variant="outline"
                                             size="sm"
+                                            title="Vincular documento"
                                             disabled={
                                                 vinculandoHuerfano ||
                                                 !huerfanoSeleccionado[
@@ -194,7 +230,7 @@ export function ChecklistDocumentalCard({
                                                 )
                                             }
                                         >
-                                            Vincular
+                                            <Link2 className="size-4" />
                                         </Button>
                                     </div>
                                 )}

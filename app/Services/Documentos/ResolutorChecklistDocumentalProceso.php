@@ -83,6 +83,7 @@ class ResolutorChecklistDocumentalProceso
     {
         $candidatos = $conjuntoRequisitos->requisitos()
             ->where('activo', true)
+            ->whereRelation('tipoDocumento', 'activo', true)
             ->where('definicion_workflow_id', $proceso->definicion_workflow_id)
             ->where(function ($query) use ($proceso) {
                 $query->whereNull('modalidad_id')->orWhere('modalidad_id', $proceso->modalidad_id);
