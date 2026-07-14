@@ -53,6 +53,17 @@ class DocumentoProcesoController extends Controller
         return response()->download($this->gestorDocumento->descargarRutaArchivo($documento));
     }
 
+    /**
+     * Sirve el archivo real de un documento para visualizarlo embebido (disposition
+     * inline, a diferencia de la descarga forzada de descargar()) — ver también
+     * RevisionVerDocumentoController::show(), que sigue el mismo patrón para el
+     * panel de Revisión de Pagos.
+     */
+    public function ver(Proceso $proceso, Documento $documento): BinaryFileResponse
+    {
+        return response()->file($this->gestorDocumento->descargarRutaArchivo($documento));
+    }
+
     public function destroy(Proceso $proceso, VinculoDocumento $vinculo): RedirectResponse
     {
         Gate::authorize('gestionarDocumentos', $proceso);
