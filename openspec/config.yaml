@@ -40,7 +40,7 @@ context: |
     pago_proveedores.registrar_cgu, usuarios.resetear_password), consistente en todos los
     seeders reales. Usar siempre este formato al definir permisos nuevos.
 
-  Stack obligatorio: Laravel 13 (PHP ^8.3), PostgreSQL, Inertia 3 + React 19, Spatie
+  Stack obligatorio: Laravel 13 (PHP ^8.4), PostgreSQL, Inertia 3 + React 19, Spatie
   Laravel Permission, Sanctum si corresponde, Queue/Scheduler/Process, Laravel Boost.
   Controladores livianos; Form Requests para validación; Services para lógica de
   negocio; Policies/Gates/Middleware para autorización; Jobs para procesos pesados;
