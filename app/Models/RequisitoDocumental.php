@@ -14,6 +14,7 @@ class RequisitoDocumental extends Model
         'tipo_documento_id',
         'definicion_workflow_id',
         'modalidad_id',
+        'tipo_proceso_pago_id',
         'estado_workflow_id',
         'monto_desde',
         'monto_hasta',
@@ -60,6 +61,14 @@ class RequisitoDocumental extends Model
     public function modalidad(): BelongsTo
     {
         return $this->belongsTo(ModalidadAdquisicion::class, 'modalidad_id');
+    }
+
+    /**
+     * @return BelongsTo<TipoProcesoPago, $this>
+     */
+    public function tipoProcesoPago(): BelongsTo
+    {
+        return $this->belongsTo(TipoProcesoPago::class, 'tipo_proceso_pago_id');
     }
 
     /**

@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class TipoProcesoPago extends Model
+{
+    protected $table = 'tipos_proceso_pago';
+
+    protected $fillable = ['codigo', 'nombre', 'activo'];
+
+    protected function casts(): array
+    {
+        return [
+            'activo' => 'boolean',
+        ];
+    }
+
+    /**
+     * @return HasMany<RequisitoDocumental, $this>
+     */
+    public function requisitos(): HasMany
+    {
+        return $this->hasMany(RequisitoDocumental::class, 'tipo_proceso_pago_id');
+    }
+}

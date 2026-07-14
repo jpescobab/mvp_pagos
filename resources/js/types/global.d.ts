@@ -23,6 +23,10 @@ declare module '@inertiajs/core' {
             passwordTemporal?: string;
             usuarioNombre?: string;
             error?: string;
+            verificacionSgf?: {
+                encontrada: boolean;
+                payload_crudo: Record<string, unknown> | null;
+            };
         };
     }
 }

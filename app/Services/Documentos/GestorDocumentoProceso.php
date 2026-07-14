@@ -65,6 +65,11 @@ class GestorDocumentoProceso
         $vinculo->update(['activo' => false]);
     }
 
+    public function reclasificar(Documento $documento, TipoDocumento $tipoDocumento): void
+    {
+        $documento->update(['tipo_documento_id' => $tipoDocumento->id]);
+    }
+
     public function descargarRutaArchivo(Documento $documento): string
     {
         return Storage::disk('local')->path(

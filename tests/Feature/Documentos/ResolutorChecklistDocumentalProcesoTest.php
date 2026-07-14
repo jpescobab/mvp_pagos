@@ -8,6 +8,7 @@ use App\Models\Funcionario;
 use App\Models\ModalidadAdquisicion;
 use App\Models\Proceso;
 use App\Models\TipoDocumento;
+use App\Models\TipoProcesoPago;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 
 /**
@@ -72,6 +73,69 @@ test('no incluye requisitos de otra modalidad', function () {
     $checklist = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
 
     expect($checklist->items)->toHaveCount(0);
+});
+
+test('no incluye requisitos de otro tipo de proceso de pago', function () {
+    [$definicion, $estado] = crearWorkflowConEstado();
+    $tipoA = TipoProcesoPago::create(['codigo' => 'TPP_A', 'nombre' => 'Tipo de pago A']);
+    $tipoB = TipoProcesoPago::create(['codigo' => 'TPP_B', 'nombre' => 'Tipo de pago B']);
+    $proceso = crearProcesoChecklist($definicion, $estado, ['tipo_proceso_pago_id' => $tipoA->id]);
+
+    $tipoDocumento = TipoDocumento::create(['codigo' => 'TIPO_TEST', 'nombre' => 'Tipo de prueba']);
+    $conjunto = ConjuntoRequisitosDocumentales::create(['codigo' => 'set-test-'.fake()->unique()->numerify('####'), 'nombre' => 'Set de prueba']);
+
+    $conjunto->requisitos()->create([
+        'tipo_documento_id' => $tipoDocumento->id,
+        'definicion_workflow_id' => $definicion->id,
+        'tipo_proceso_pago_id' => $tipoB->id,
+        'tipo_requisito' => 'requerido',
+    ]);
+
+    $checklist = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
+
+    expect($checklist->items)->toHaveCount(0);
+});
+
+test('un proceso sin tipo de proceso de pago clasificado solo ve los requisitos universales', function () {
+    [$definicion, $estado] = crearWorkflowConEstado();
+    $tipoA = TipoProcesoPago::create(['codigo' => 'TPP_A', 'nombre' => 'Tipo de pago A']);
+    $proceso = crearProcesoChecklist($definicion, $estado);
+
+    $universal = TipoDocumento::create(['codigo' => 'TIPO_UNIVERSAL', 'nombre' => 'Universal']);
+    $especifico = TipoDocumento::create(['codigo' => 'TIPO_ESPECIFICO', 'nombre' => 'Específico']);
+    $conjunto = ConjuntoRequisitosDocumentales::create(['codigo' => 'set-test-'.fake()->unique()->numerify('####'), 'nombre' => 'Set de prueba']);
+
+    $conjunto->requisitos()->create(['tipo_documento_id' => $universal->id, 'definicion_workflow_id' => $definicion->id, 'tipo_requisito' => 'requerido']);
+    $conjunto->requisitos()->create(['tipo_documento_id' => $especifico->id, 'definicion_workflow_id' => $definicion->id, 'tipo_proceso_pago_id' => $tipoA->id, 'tipo_requisito' => 'requerido']);
+
+    $checklist = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
+
+    expect($checklist->items)->toHaveCount(1);
+    expect($checklist->items->first()->tipo_documento_id)->toBe($universal->id);
+});
+
+test('reclasificar el tipo de proceso de un caso y resolver de nuevo refleja los nuevos requisitos sin duplicar ítems', function () {
+    [$definicion, $estado] = crearWorkflowConEstado();
+    $tipoA = TipoProcesoPago::create(['codigo' => 'TPP_A', 'nombre' => 'Tipo de pago A']);
+    $tipoB = TipoProcesoPago::create(['codigo' => 'TPP_B', 'nombre' => 'Tipo de pago B']);
+    $proceso = crearProcesoChecklist($definicion, $estado, ['tipo_proceso_pago_id' => $tipoA->id]);
+
+    $docA = TipoDocumento::create(['codigo' => 'DOC_A', 'nombre' => 'Documento A']);
+    $docB = TipoDocumento::create(['codigo' => 'DOC_B', 'nombre' => 'Documento B']);
+    $conjunto = ConjuntoRequisitosDocumentales::create(['codigo' => 'set-test-'.fake()->unique()->numerify('####'), 'nombre' => 'Set de prueba']);
+
+    $conjunto->requisitos()->create(['tipo_documento_id' => $docA->id, 'definicion_workflow_id' => $definicion->id, 'tipo_proceso_pago_id' => $tipoA->id, 'tipo_requisito' => 'requerido']);
+    $conjunto->requisitos()->create(['tipo_documento_id' => $docB->id, 'definicion_workflow_id' => $definicion->id, 'tipo_proceso_pago_id' => $tipoB->id, 'tipo_requisito' => 'requerido']);
+
+    $checklistInicial = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
+    expect($checklistInicial->items)->toHaveCount(1);
+    expect($checklistInicial->items->first()->tipo_documento_id)->toBe($docA->id);
+
+    $proceso->update(['tipo_proceso_pago_id' => $tipoB->id]);
+
+    $checklistReclasificado = app(ResolutorChecklistDocumentalProceso::class)->resolve($proceso, $conjunto);
+    expect($checklistReclasificado->items)->toHaveCount(1);
+    expect($checklistReclasificado->items->first()->tipo_documento_id)->toBe($docB->id);
 });
 
 test('respeta el rango de monto', function () {

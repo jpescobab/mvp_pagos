@@ -22,6 +22,11 @@ class CasoPagoProveedorPolicy
         return $user->can('pago_proveedores.vincular_adquisicion');
     }
 
+    public function clasificarTipoProcesoPago(User $user, CasoPagoProveedor $caso): bool
+    {
+        return $user->can('pago_proveedores.gestionar_caso');
+    }
+
     public function registrarCgu(User $user, CasoPagoProveedor $caso): bool
     {
         return $user->can('pago_proveedores.registrar_cgu');

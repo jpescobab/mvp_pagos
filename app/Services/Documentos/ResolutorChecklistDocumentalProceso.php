@@ -88,6 +88,9 @@ class ResolutorChecklistDocumentalProceso
                 $query->whereNull('modalidad_id')->orWhere('modalidad_id', $proceso->modalidad_id);
             })
             ->where(function ($query) use ($proceso) {
+                $query->whereNull('tipo_proceso_pago_id')->orWhere('tipo_proceso_pago_id', $proceso->tipo_proceso_pago_id);
+            })
+            ->where(function ($query) use ($proceso) {
                 $query->whereNull('estado_workflow_id')->orWhere('estado_workflow_id', $proceso->estado_actual_id);
             })
             ->where(function ($query) use ($proceso) {

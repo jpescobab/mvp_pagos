@@ -59,11 +59,11 @@ Todo documento cargado al expediente SHALL quedar asociado a un tipo documental,
 - **AND** la observación de un evento de rechazo pasado sigue siendo visible aunque el documento haya sido validado posteriormente
 
 ### Requirement: Resolver checklist documental por proceso según reglas configurables
-El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee.
+El sistema SHALL determinar los documentos requeridos de un proceso según reglas configurables por workflow, modalidad (opcional), tipo de proceso de pago (opcional), rango de monto y estado (opcional) en `requisitos_documentales`, sin que el frontend las hardcodee.
 
 #### Scenario: Generar checklist documental
 - **WHEN** el usuario abre el expediente de un proceso
-- **THEN** el backend resuelve los `requisitos_documentales` aplicables a ese proceso según su workflow, modalidad, monto y estado actual
+- **THEN** el backend resuelve los `requisitos_documentales` aplicables a ese proceso según su workflow, modalidad, tipo de proceso de pago, monto y estado actual
 - **AND** genera o actualiza `checklists_documentales_proceso` y sus `checklist_documental_proceso_items`
 - **AND** cada item indica si es requerido, opcional, condicional o recomendado
 - **AND** React solo renderiza la respuesta recibida, sin lógica de negocio propia
@@ -81,6 +81,14 @@ El sistema SHALL determinar los documentos requeridos de un proceso según regla
 #### Scenario: Varios documentos del mismo tipo vinculados al proceso
 - **WHEN** existen varios `VinculoDocumento` activos cuyo documento comparte el mismo `tipo_documento_id` exigido por un item
 - **THEN** el item queda asociado al documento vinculado más recientemente
+
+#### Scenario: Un requisito con tipo de proceso de pago específico solo aplica a esa clasificación
+- **WHEN** se resuelven los `requisitos_documentales` de un proceso cuyo `tipo_proceso_pago_id` está asignado
+- **THEN** solo se consideran los requisitos con `tipo_proceso_pago_id` nulo (universales) o igual al del proceso
+
+#### Scenario: Un proceso sin tipo de proceso de pago clasificado solo ve los requisitos universales
+- **WHEN** se resuelven los `requisitos_documentales` de un proceso cuyo `tipo_proceso_pago_id` es `null`
+- **THEN** solo se consideran los requisitos con `tipo_proceso_pago_id` nulo
 
 ### Requirement: Vincular documentos a cualquier entidad de negocio
 Un documento SHALL poder vincularse a cualquier entidad mediante `vinculos_documento` polimórfico (`vinculable_type`/`vinculable_id`), sin que el modelo documental dependa de un módulo funcional específico.
@@ -130,4 +138,20 @@ El sistema SHALL permitir desvincular un documento de un proceso marcando su `Vi
 - **WHEN** un usuario con el permiso `documentos.gestionar` desvincula un documento de un proceso
 - **THEN** el `VinculoDocumento` correspondiente queda `activo = false`
 - **AND** el `Documento` y sus versiones permanecen en la base de datos
+
+### Requirement: Reclasificar el tipo de un documento vinculado
+El sistema SHALL permitir cambiar el `tipo_documento_id` de un `Documento` ya vinculado activamente a un `Proceso`, a un usuario con el permiso `documentos.gestionar`, sin requerir volver a subir el archivo. El sistema SHALL rechazar la operación si el documento no está vinculado activamente al proceso indicado.
+
+#### Scenario: Reclasificar un documento a un tipo distinto
+- **WHEN** un usuario con `documentos.gestionar` cambia el tipo de un documento vinculado activamente a un proceso
+- **THEN** el `tipo_documento_id` del `Documento` se actualiza
+- **AND** la siguiente resolución del checklist documental de ese proceso refleja el nuevo tipo
+
+#### Scenario: Usuario sin permiso intenta reclasificar
+- **WHEN** un usuario sin `documentos.gestionar` intenta reclasificar un documento
+- **THEN** el sistema bloquea la operación
+
+#### Scenario: Reclasificar un documento no vinculado al proceso indicado
+- **WHEN** se intenta reclasificar un documento que no tiene un `VinculoDocumento` activo con el proceso de la URL
+- **THEN** el sistema rechaza la operación
 
