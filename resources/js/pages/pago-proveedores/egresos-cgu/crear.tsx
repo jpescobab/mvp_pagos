@@ -6,6 +6,7 @@ import type { CasoSeleccionable } from '@/types/pago-proveedores';
 
 type PageProps = {
     casos: CasoSeleccionable[];
+    trabajoIntegracionId: number | null;
 };
 
 const IC = {
@@ -30,12 +31,21 @@ function Icon({ path, className }: { path: string; className?: string }) {
 }
 
 export default function EgresosCguCrear() {
-    const { casos } = usePage<PageProps>().props;
+    const { casos, trabajoIntegracionId } = usePage<PageProps>().props;
+    const desdeImportacion = trabajoIntegracionId !== null;
 
     const [numeroEgreso, setNumeroEgreso] = useState('');
     const [fecha, setFecha] = useState('');
     const [observaciones, setObservaciones] = useState('');
-    const [seleccion, setSeleccion] = useState<Set<number>>(new Set());
+    const [seleccion, setSeleccion] = useState<Set<number>>(() =>
+        desdeImportacion
+            ? new Set(
+                  casos
+                      .filter((caso) => caso.listo)
+                      .map((caso) => caso.id),
+              )
+            : new Set(),
+    );
     const [busqueda, setBusqueda] = useState('');
     const [camposInvalidos, setCamposInvalidos] = useState<{
         numero?: boolean;
@@ -140,6 +150,14 @@ export default function EgresosCguCrear() {
                         Asigna un número de egreso a los procesos de pago
                         pendientes y selecciona los casos que cubrirá.
                     </p>
+                    {desdeImportacion && (
+                        <p className="ctx-banner">
+                            Viniendo de una importación SGF: los casos ya
+                            revisados y listos quedaron preseleccionados.
+                            Puedes ajustar la selección antes de crear el
+                            egreso.
+                        </p>
+                    )}
                 </div>
 
                 <div className="card">
@@ -409,6 +427,7 @@ html.dark .eg-crear{
 
 .eg-crear .page-head h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.02em;}
 .eg-crear .page-head p{margin:6px 0 0;font-size:13px;color:var(--fg-muted);}
+.eg-crear .page-head .ctx-banner{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent-2);font-weight:600;font-size:12.5px;}
 
 .eg-crear .badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;}
 .eg-crear .badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;}

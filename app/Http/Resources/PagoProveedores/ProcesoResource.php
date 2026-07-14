@@ -20,6 +20,12 @@ class ProcesoResource extends JsonResource
             'id' => $this->id,
             'estado_actual' => new EstadoWorkflowResource($this->estadoActual),
             'cerrado_en' => $this->cerrado_en,
+            'tipo_proceso_pago_id' => $this->tipo_proceso_pago_id,
+            'tipo_proceso_pago' => $this->whenLoaded('tipoProcesoPago', fn () => $this->tipoProcesoPago === null ? null : [
+                'id' => $this->tipoProcesoPago->id,
+                'codigo' => $this->tipoProcesoPago->codigo,
+                'nombre' => $this->tipoProcesoPago->nombre,
+            ]),
             'historial_transiciones' => HistorialTransicionResource::collection($this->whenLoaded('historialTransiciones')),
             'transiciones_disponibles' => TransicionWorkflowResource::collection(
                 $this->definicionWorkflow->transiciones
@@ -29,6 +35,7 @@ class ProcesoResource extends JsonResource
             'checklist' => $this->whenLoaded('checklist', fn () => $this->checklist === null ? null : [
                 'items' => $this->checklist->items->map(fn ($item) => [
                     'tipo_documento' => $item->tipoDocumento?->nombre,
+                    'tipo_documento_id' => $item->tipo_documento_id,
                     'tipo_requisito' => $item->tipo_requisito,
                     'estado_cumplimiento' => $item->estado_cumplimiento,
                     'documento_id' => $item->documento_id,
@@ -46,12 +53,19 @@ class ProcesoResource extends JsonResource
      */
     private function mapDocumentosVinculados(): array
     {
+        $tiposEnChecklist = $this->checklist?->items
+            ->pluck('tipo_documento_id')
+            ->filter()
+            ->all() ?? [];
+
         return array_values($this->vinculosDocumento
             ->where('activo', true)
             ->map(fn (VinculoDocumento $vinculo) => [
                 'vinculo_id' => $vinculo->id,
                 'documento_id' => $vinculo->documento->id,
                 'tipo_documento' => $vinculo->documento->tipoDocumento?->nombre,
+                'tipo_documento_id' => $vinculo->documento->tipo_documento_id,
+                'coincide_checklist' => in_array($vinculo->documento->tipo_documento_id, $tiposEnChecklist, true),
                 'nombre_archivo' => $vinculo->documento->versiones->last()?->nombre_archivo,
                 'estado_vigente' => $vinculo->documento->estadoVigente(),
                 'validaciones' => $this->mapHistorialValidaciones($vinculo->documento),

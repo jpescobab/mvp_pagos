@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PagoProveedores\CfinancieroPorDefectoResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -116,11 +117,14 @@ class CasoPagoProveedor extends Model
 
     /**
      * Centro financiero del caso, derivado del proceso de adquisición vinculado
-     * (caso -> proceso_adquisicion -> ccosto -> cfinanciero). Null si el caso
-     * aún no fue vinculado a un proceso de adquisición.
+     * (caso -> proceso_adquisicion -> ccosto -> cfinanciero). Si el caso no
+     * tiene proceso_adquisicion vinculado, cae al cfinanciero por defecto
+     * configurado (ver CfinancieroPorDefectoResolver); null si tampoco hay
+     * default resoluble.
      */
     public function cfinancieroId(): ?int
     {
-        return $this->procesoAdquisicion?->ccosto?->cfinanciero_id;
+        return $this->procesoAdquisicion?->ccosto->cfinanciero_id
+            ?? app(CfinancieroPorDefectoResolver::class)->resolver();
     }
 }

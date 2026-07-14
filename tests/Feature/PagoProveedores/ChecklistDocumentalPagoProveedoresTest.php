@@ -1,18 +1,25 @@
 <?php
 
 use App\Models\ConjuntoRequisitosDocumentales;
+use App\Models\Documento;
 use App\Models\TipoDocumento;
+use App\Models\TipoProcesoPago;
 use App\Models\User;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use Database\Seeders\RequisitosDocumentalesPagoProveedoresSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\TiposDocumentoSeeder;
+use Database\Seeders\TiposProcesoPagoSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function sembrarRequisitosDocumentalesPagoProveedores(): void
 {
     test()->seed(WorkflowPagoProveedoresSeeder::class);
     test()->seed(TiposDocumentoSeeder::class);
+    test()->seed(TiposProcesoPagoSeeder::class);
     test()->seed(RequisitosDocumentalesPagoProveedoresSeeder::class);
 }
 
@@ -49,6 +56,112 @@ test('abrir el detalle de un caso de pago genera un checklist con factura', func
     });
 });
 
+test('el checklist expone el tipo_documento_id de cada ítem', function () {
+    $this->withoutVite();
+    sembrarRequisitosDocumentalesPagoProveedores();
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-checklist-tipo-id']));
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $page->component('pago-proveedores/casos/show', shouldExist: false);
+        $items = $page->toArray()['props']['caso']['proceso']['checklist']['items'];
+        $factura = TipoDocumento::where('codigo', 'FACTURA')->firstOrFail();
+        $itemFactura = collect($items)->firstWhere('tipo_documento', 'Factura');
+
+        expect($itemFactura)->not->toBeNull();
+        expect($itemFactura['tipo_documento_id'])->toBe($factura->id);
+    });
+});
+
+test('el detalle del caso incluye los tipos de proceso de pago disponibles y el clasificado en el proceso', function () {
+    $this->withoutVite();
+    sembrarRequisitosDocumentalesPagoProveedores();
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-tipo-proceso-pago-1']));
+    $tipoContrato = TipoProcesoPago::where('codigo', 'CONTRATO')->firstOrFail();
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipoContrato->id]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) use ($tipoContrato) {
+        $page->component('pago-proveedores/casos/show', shouldExist: false);
+        $props = $page->toArray()['props'];
+
+        $codigos = array_column($props['tiposProcesoPago'], 'codigo');
+        expect($codigos)->toContain('COMPRA', 'CONTRATO', 'CONVENIO', 'REEMBOLSO', 'ANTICIPO', 'OTRO');
+
+        expect($props['caso']['proceso']['tipo_proceso_pago_id'])->toBe($tipoContrato->id);
+        expect($props['caso']['proceso']['tipo_proceso_pago']['codigo'])->toBe('CONTRATO');
+    });
+});
+
+test('subir un documento usando el tipo_documento_id de un ítem pendiente del checklist lo marca como cargado', function () {
+    $this->withoutVite();
+    Storage::fake('local');
+    $this->seed(RolesAndPermissionsSeeder::class);
+    sembrarRequisitosDocumentalesPagoProveedores();
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-checklist-subida-directa']));
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('documentos.gestionar');
+
+    $primeraCarga = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+    $items = $primeraCarga->viewData('page')['props']['caso']['proceso']['checklist']['items'];
+    $itemFactura = collect($items)->firstWhere('tipo_documento', 'Factura');
+
+    expect($itemFactura['estado_cumplimiento'])->toBe('pendiente');
+
+    $archivo = UploadedFile::fake()->create('factura.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($usuario)->post(
+        route('procesos.documentos.store', $caso->proceso),
+        ['archivo' => $archivo, 'tipo_documento_id' => $itemFactura['tipo_documento_id']],
+    );
+
+    $response->assertSessionHasNoErrors();
+
+    $segundaCarga = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+    $itemsActualizados = $segundaCarga->viewData('page')['props']['caso']['proceso']['checklist']['items'];
+    $itemFacturaActualizado = collect($itemsActualizados)->firstWhere('tipo_documento', 'Factura');
+
+    expect($itemFacturaActualizado['estado_cumplimiento'])->toBe('cargado');
+    expect($itemFacturaActualizado['documento_id'])->not->toBeNull();
+});
+
+test('un documento vinculado que no coincide con ningún ítem del checklist se expone como no coincidente', function () {
+    $this->withoutVite();
+    sembrarRequisitosDocumentalesPagoProveedores();
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgfParaApi(['sgf_id' => 'caso-huerfano-1']));
+
+    $tipoOtro = TipoDocumento::firstOrCreate(['codigo' => 'OTRO'], ['nombre' => 'Otro', 'activo' => true]);
+    $documento = Documento::create(['tipo_documento_id' => $tipoOtro->id, 'titulo' => 'huerfano.pdf']);
+    $caso->proceso->vinculosDocumento()->create(['documento_id' => $documento->id, 'activo' => true]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) use ($documento) {
+        $page->component('pago-proveedores/casos/show', shouldExist: false);
+        $documentos = $page->toArray()['props']['caso']['proceso']['documentos'];
+        $docHuerfano = collect($documentos)->firstWhere('documento_id', $documento->id);
+
+        expect($docHuerfano)->not->toBeNull();
+        expect($docHuerfano['coincide_checklist'])->toBeFalse();
+    });
+});
+
 test('abrir el detalle de un caso de pago dos veces no duplica los items del checklist', function () {
     $this->withoutVite();
     sembrarRequisitosDocumentalesPagoProveedores();
@@ -58,11 +171,11 @@ test('abrir el detalle de un caso de pago dos veces no duplica los items del che
     $usuario = User::factory()->create();
 
     $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+    $cantidadItemsPrimeraCarga = $caso->proceso->checklist->items()->count();
+
     $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+    $cantidadItemsSegundaCarga = $caso->proceso->checklist->items()->count();
 
-    $conjunto = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->first();
-    $cantidadItems = $caso->proceso->checklist->items()->count();
-    $cantidadRequisitosEsperados = $conjunto->requisitos()->count();
-
-    expect($cantidadItems)->toBe($cantidadRequisitosEsperados);
+    expect($cantidadItemsPrimeraCarga)->toBeGreaterThan(0);
+    expect($cantidadItemsSegundaCarga)->toBe($cantidadItemsPrimeraCarga);
 });

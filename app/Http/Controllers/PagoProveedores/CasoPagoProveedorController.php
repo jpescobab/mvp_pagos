@@ -8,6 +8,7 @@ use App\Http\Resources\PagoProveedores\CasoPagoProveedorResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\TipoDocumento;
+use App\Models\TipoProcesoPago;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use App\Services\Sgf\ConectorSgfPlaywrightService;
 use Illuminate\Http\RedirectResponse;
@@ -44,10 +45,11 @@ class CasoPagoProveedorController extends Controller
         return Inertia::render('pago-proveedores/casos/show', [
             'caso' => new CasoPagoProveedorResource($caso),
             'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
+            'tiposProcesoPago' => TipoProcesoPago::where('activo', true)->get(['id', 'codigo', 'nombre']),
         ]);
     }
 
-    public function verificarSgf(CasoPagoProveedor $caso, Request $request): Response|RedirectResponse
+    public function verificarSgf(CasoPagoProveedor $caso): RedirectResponse
     {
         Gate::authorize('verificarCasoSgf', CasoPagoProveedor::class);
 
@@ -59,16 +61,12 @@ class CasoPagoProveedorController extends Controller
             return back();
         }
 
-        $this->cargarDetalle($caso, $request);
-
-        return Inertia::render('pago-proveedores/casos/show', [
-            'caso' => new CasoPagoProveedorResource($caso),
-            'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
-            'verificacionSgf' => [
-                'encontrada' => $resultado['encontrada'],
-                'payload_crudo' => $resultado['snapshot']?->payload_crudo,
-            ],
+        Inertia::flash('verificacionSgf', [
+            'encontrada' => $resultado['encontrada'],
+            'payload_crudo' => $resultado['snapshot']?->payload_crudo,
         ]);
+
+        return to_route('pago-proveedores.casos.show', $caso);
     }
 
     private function cargarDetalle(CasoPagoProveedor $caso, Request $request): void
@@ -97,6 +95,7 @@ class CasoPagoProveedorController extends Controller
 
         $caso->proceso->load([
             'checklist.items',
+            'tipoProcesoPago',
             'vinculosDocumento.documento.tipoDocumento',
             'vinculosDocumento.documento.versiones',
             'vinculosDocumento.documento.validaciones.validadoPor',

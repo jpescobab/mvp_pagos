@@ -7,7 +7,6 @@ use App\Models\User;
 use Database\Seeders\IntegracionesSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Illuminate\Support\Facades\Http;
-use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     $this->seed(IntegracionesSeeder::class);
@@ -35,11 +34,8 @@ test('un usuario con permiso verifica un caso en SGF y ve el resultado en la pá
 
     $response = $this->actingAs($usuario)->post(route('pago-proveedores.casos.verificar-sgf', $caso));
 
-    $response->assertOk();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('pago-proveedores/casos/show')
-        ->where('verificacionSgf.encontrada', true)
-    );
+    $response->assertRedirect(route('pago-proveedores.casos.show', $caso));
+    $response->assertInertiaFlash('verificacionSgf.encontrada', true);
 });
 
 test('un usuario sin permiso no puede verificar un caso en SGF', function () {

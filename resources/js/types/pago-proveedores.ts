@@ -21,8 +21,15 @@ export type HistorialTransicion = {
     created_at: string;
 };
 
+export type TipoProcesoPago = {
+    id: number;
+    codigo: string;
+    nombre: string;
+};
+
 export type ChecklistItem = {
     tipo_documento: string | null;
+    tipo_documento_id: number | null;
     tipo_requisito: string;
     estado_cumplimiento: string;
     documento_id: number | null;
@@ -43,6 +50,8 @@ export type DocumentoVinculado = {
     vinculo_id: number;
     documento_id: number;
     tipo_documento: string | null;
+    tipo_documento_id: number | null;
+    coincide_checklist: boolean;
     nombre_archivo: string | null;
     estado_vigente: string;
     validaciones: ValidacionDocumentoHistorial[];
@@ -61,6 +70,8 @@ export type Proceso = {
     transiciones_disponibles: TransicionWorkflow[];
     checklist?: Checklist | null;
     documentos?: DocumentoVinculado[];
+    tipo_proceso_pago_id: number | null;
+    tipo_proceso_pago?: TipoProcesoPago | null;
 };
 
 export type ProcesoAdquisicionVinculado = {
@@ -145,6 +156,7 @@ export type CasoSeleccionable = {
     sgf_id: string;
     proveedor: { nombre: string | null };
     monto: string;
+    listo?: boolean;
 };
 
 export type EgresoCguItem = {

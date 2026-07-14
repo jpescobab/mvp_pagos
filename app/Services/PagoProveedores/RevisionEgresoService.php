@@ -215,6 +215,10 @@ class RevisionEgresoService
             throw new RuntimeException('El pago no está listo para aprobar: faltan documentos aprobados o verificar totales.');
         }
 
+        if ($instancia === InstanciaRevision::Finanzas) {
+            $caso->egresoCguItems->first()?->egreso?->actualizarCfinancieroSiFalta($caso);
+        }
+
         $this->transicionWorkflow->execute(
             $caso->proceso,
             $instancia->transicionAprobar(),

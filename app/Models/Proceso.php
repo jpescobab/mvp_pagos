@@ -17,6 +17,7 @@ class Proceso extends Model
         'sujeto_type',
         'sujeto_id',
         'modalidad_id',
+        'tipo_proceso_pago_id',
         'monto',
         'iniciado_por',
         'cerrado_en',
@@ -60,6 +61,14 @@ class Proceso extends Model
     public function modalidad(): BelongsTo
     {
         return $this->belongsTo(ModalidadAdquisicion::class, 'modalidad_id');
+    }
+
+    /**
+     * @return BelongsTo<TipoProcesoPago, $this>
+     */
+    public function tipoProcesoPago(): BelongsTo
+    {
+        return $this->belongsTo(TipoProcesoPago::class, 'tipo_proceso_pago_id');
     }
 
     /**

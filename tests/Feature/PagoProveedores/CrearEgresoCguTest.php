@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\EgresoCgu;
+use App\Models\SistemaExterno;
+use App\Models\SnapshotDatosExterno;
+use App\Models\TrabajoIntegracion;
 use App\Models\User;
 use Database\Seeders\ModalidadesAdquisicionSeeder;
 use Database\Seeders\WorkflowAdquisicionesSeeder;
@@ -109,6 +112,67 @@ test('crear un egreso CGU completa su centro financiero si el caso ya está vinc
 
     $egreso = EgresoCgu::where('numero_egreso', 'EGR-CFIN-001')->first();
     expect($egreso->cfinanciero_id)->toBe($proceso->ccosto->cfinanciero_id);
+});
+
+test('el formulario de crear egreso sin trabajo_integracion_id no cambia su comportamiento por defecto', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = crearCasoPagoProveedorDePrueba('sgf-sin-param-1');
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.egresos-cgu.create'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('pago-proveedores/egresos-cgu/crear', shouldExist: false)
+        ->where('trabajoIntegracionId', null)
+        ->where('casos', fn ($casos) => collect($casos)->pluck('id')->contains($caso->id))
+    );
+});
+
+test('el formulario de crear egreso con trabajo_integracion_id devuelve solo los casos de esa corrida', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $sistema = SistemaExterno::firstOrCreate(
+        ['codigo' => 'SGF'],
+        ['nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
+    );
+
+    $casoDeLaCorrida = crearCasoPagoProveedorDePrueba('sgf-corrida-1');
+    $casoDeOtraCorrida = crearCasoPagoProveedorDePrueba('sgf-otra-corrida-1');
+
+    $trabajo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_grupo_pago_operaciones',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+
+    SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistema->id,
+        'trabajo_integracion_id' => $trabajo->id,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => 'sgf-corrida-1',
+        'payload_crudo' => [],
+        'payload_normalizado' => ['rut' => '11111111-1', 'monto' => 500000],
+        'hash' => 'hash-corrida-1',
+        'capturado_en' => now(),
+    ]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.egresos-cgu.create', ['trabajo_integracion_id' => $trabajo->id]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('trabajoIntegracionId', $trabajo->id)
+        ->where('casos', fn ($casos) => collect($casos)->pluck('id')->contains($casoDeLaCorrida->id)
+            && ! collect($casos)->pluck('id')->contains($casoDeOtraCorrida->id))
+    );
 });
 
 test('crear un egreso CGU con un caso sin vincular deja su centro financiero en null', function () {

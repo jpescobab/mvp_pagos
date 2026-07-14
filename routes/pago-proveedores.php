@@ -12,6 +12,7 @@ use App\Http\Controllers\PagoProveedores\RevisionTransicionEgresoController;
 use App\Http\Controllers\PagoProveedores\RevisionTransicionPagoController;
 use App\Http\Controllers\PagoProveedores\RevisionValidacionDocumentoController;
 use App\Http\Controllers\PagoProveedores\RevisionVerDocumentoController;
+use App\Http\Controllers\PagoProveedores\TipoProcesoPagoCasoPagoProveedorController;
 use App\Http\Controllers\PagoProveedores\TransicionCasoPagoProveedorController;
 use App\Http\Controllers\PagoProveedores\VinculoAdquisicionCasoPagoProveedorController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,8 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::get('casos/{caso}/buscar-adquisiciones', BuscarProcesoAdquisicionController::class)->name('casos.buscar-adquisiciones');
     Route::post('casos/{caso}/vincular-adquisicion', [VinculoAdquisicionCasoPagoProveedorController::class, 'store'])->name('casos.vincular-adquisicion.store');
     Route::delete('casos/{caso}/vincular-adquisicion', [VinculoAdquisicionCasoPagoProveedorController::class, 'destroy'])->name('casos.vincular-adquisicion.destroy');
+
+    Route::post('casos/{caso}/tipo-proceso-pago', [TipoProcesoPagoCasoPagoProveedorController::class, 'store'])->name('casos.tipo-proceso-pago.store');
 
     Route::post('casos/{caso}/registros-contables-cgu', [RegistroContableCguController::class, 'store'])->name('casos.registros-contables-cgu.store');
     Route::post('casos/{caso}/registros-pago-bancario', [RegistroPagoBancarioController::class, 'store'])->name('casos.registros-pago-bancario.store');

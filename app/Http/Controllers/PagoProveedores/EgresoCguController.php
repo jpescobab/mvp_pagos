@@ -7,9 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PagoProveedores\CrearEgresoCguRequest;
 use App\Http\Resources\PagoProveedores\EgresoCguResource;
 use App\Models\CasoPagoProveedor;
+use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\EgresoCgu;
+use App\Models\TrabajoIntegracion;
+use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
+use App\Services\PagoProveedores\ListoParaEgresoResolver;
 use App\Services\PagoProveedores\RevisionEgresoService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -17,7 +22,10 @@ use Inertia\Response;
 
 class EgresoCguController extends Controller
 {
-    public function __construct(private readonly RevisionEgresoService $revisionEgreso) {}
+    public function __construct(
+        private readonly RevisionEgresoService $revisionEgreso,
+        private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist,
+    ) {}
 
     public function index(): Response
     {
@@ -41,19 +49,46 @@ class EgresoCguController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         Gate::authorize('create', EgresoCgu::class);
 
-        $casos = CasoPagoProveedor::whereDoesntHave('egresoCguItems')->with('proveedor')->get()->map(fn (CasoPagoProveedor $caso) => [
-            'id' => $caso->id,
-            'sgf_id' => $caso->sgf_id,
-            'proveedor' => ['nombre' => $caso->proveedor?->nombre],
-            'monto' => $caso->monto,
+        $trabajoIntegracionId = $request->integer('trabajo_integracion_id') ?: null;
+
+        $query = CasoPagoProveedor::whereDoesntHave('egresoCguItems')->with([
+            'proveedor',
+            'proceso.checklist.items',
+            'proceso.tipoProcesoPago',
+            'registrosContablesCgu',
         ]);
+
+        if ($trabajoIntegracionId !== null) {
+            $trabajoIntegracion = TrabajoIntegracion::with('snapshotsDatosExternos')->find($trabajoIntegracionId);
+            $sgfIds = $trabajoIntegracion?->snapshotsDatosExternos->pluck('referencia_externa')->unique() ?? collect();
+
+            $query->whereIn('sgf_id', $sgfIds);
+        }
+
+        $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->first();
+
+        $casos = $query->get()->map(function (CasoPagoProveedor $caso) use ($conjuntoRequisitos) {
+            if ($conjuntoRequisitos !== null && $caso->proceso !== null) {
+                $this->resolutorChecklist->resolve($caso->proceso, $conjuntoRequisitos);
+                $caso->proceso->load('checklist.items');
+            }
+
+            return [
+                'id' => $caso->id,
+                'sgf_id' => $caso->sgf_id,
+                'proveedor' => ['nombre' => $caso->proveedor?->nombre],
+                'monto' => $caso->monto,
+                'listo' => app(ListoParaEgresoResolver::class)->resuelve($caso),
+            ];
+        });
 
         return Inertia::render('pago-proveedores/egresos-cgu/crear', [
             'casos' => $casos,
+            'trabajoIntegracionId' => $trabajoIntegracionId,
         ]);
     }
 

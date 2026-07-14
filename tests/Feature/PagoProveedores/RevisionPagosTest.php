@@ -299,7 +299,9 @@ test('la aprobación de Finanzas exige el permiso revisar_finanzas', function ()
         ->toThrow(TransicionWorkflowException::class);
 });
 
-test('aprobar desde Finanzas es rechazado si el caso no tiene centro financiero determinable', function () {
+test('aprobar desde Finanzas es rechazado si el caso no tiene centro financiero determinable y no hay default configurado', function () {
+    config(['pago-proveedores.cfinanciero_default_codigo' => null]);
+
     $e = crearEscenarioRevision();
     $e['caso']->update(['proceso_adquisicion_id' => null]);
 
@@ -314,6 +316,24 @@ test('aprobar desde Finanzas es rechazado si el caso no tiene centro financiero 
         ->toThrow(RuntimeException::class);
 
     expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_finanzas');
+});
+
+test('aprobar desde Finanzas sin adquisición vinculada usa el cfinanciero por defecto y no bloquea', function () {
+    $e = crearEscenarioRevision();
+    config(['pago-proveedores.cfinanciero_default_codigo' => $e['egreso']->cfinanciero->codigo]);
+    $e['caso']->update(['proceso_adquisicion_id' => null]);
+    $e['egreso']->update(['cfinanciero_id' => null]);
+
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+    $revision->aprobarPago($e['caso']->refresh(), $finanzas);
+
+    expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('en_revision_zonal');
+    expect($e['egreso']->refresh()->cfinanciero_id)->toBe($e['cfinancieroId']);
 });
 
 test('la instancia Finanzas puede devolver (observar) el pago con comentario vía HTTP', function () {

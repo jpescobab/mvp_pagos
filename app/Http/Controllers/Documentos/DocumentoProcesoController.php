@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Documentos;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Documentos\ReclasificarDocumentoRequest;
 use App\Http\Requests\Documentos\SubirDocumentoProcesoRequest;
 use App\Http\Requests\Documentos\SubirNuevaVersionDocumentoRequest;
 use App\Models\Documento;
@@ -57,6 +58,24 @@ class DocumentoProcesoController extends Controller
         Gate::authorize('gestionarDocumentos', $proceso);
 
         $this->gestorDocumento->desvincular($vinculo);
+
+        return back();
+    }
+
+    public function reclasificar(Proceso $proceso, Documento $documento, ReclasificarDocumentoRequest $request): RedirectResponse
+    {
+        Gate::authorize('gestionarDocumentos', $proceso);
+
+        $vinculado = $proceso->vinculosDocumento()
+            ->where('documento_id', $documento->id)
+            ->where('activo', true)
+            ->exists();
+
+        abort_unless($vinculado, 404);
+
+        $tipoDocumento = TipoDocumento::findOrFail($request->integer('tipo_documento_id'));
+
+        $this->gestorDocumento->reclasificar($documento, $tipoDocumento);
 
         return back();
     }
