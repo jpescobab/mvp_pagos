@@ -1,4 +1,7 @@
+import { Link, usePage } from '@inertiajs/react';
 import { CheckCircle2, Circle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { CasoPagoProveedor } from '@/types/pago-proveedores';
 
 type CriterioPreparacion = {
@@ -53,9 +56,15 @@ function calcularPreparacionEgreso(
 }
 
 export function PreparacionEgresoCard({ caso }: { caso: CasoPagoProveedor }) {
+    const { auth } = usePage().props;
     const criterios = calcularPreparacionEgreso(caso);
     const completados = criterios.filter((c) => c.cumplido).length;
     const porcentaje = (completados / criterios.length) * 100;
+    const listoParaEgreso = completados === criterios.length;
+    const sinEgresoAsociado = (caso.egresos_cgu ?? []).length === 0;
+    const puedeRegistrarEgreso = auth.permissions.includes(
+        'pago_proveedores.registrar_egreso',
+    );
 
     return (
         <section className="space-y-3 rounded-xl border p-4">
@@ -69,15 +78,33 @@ export function PreparacionEgresoCard({ caso }: { caso: CasoPagoProveedor }) {
                         importación SGF
                     </p>
                 </div>
-                <span
-                    className={`font-mono text-sm font-semibold ${
-                        completados === criterios.length
-                            ? 'text-success'
-                            : 'text-warning'
-                    }`}
-                >
-                    {completados} / {criterios.length} completo
-                </span>
+                <div className="flex items-center gap-3">
+                    <span
+                        className={`font-mono text-sm font-semibold ${
+                            listoParaEgreso ? 'text-success' : 'text-warning'
+                        }`}
+                    >
+                        {completados} / {criterios.length} completo
+                    </span>
+                    {listoParaEgreso &&
+                        sinEgresoAsociado &&
+                        puedeRegistrarEgreso && (
+                            <Button asChild size="sm">
+                                <Link
+                                    href={
+                                        egresosCgu.create({
+                                            query: {
+                                                caso_pago_proveedor_id:
+                                                    caso.id,
+                                            },
+                                        }).url
+                                    }
+                                >
+                                    Crear Egreso CGU con este caso
+                                </Link>
+                            </Button>
+                        )}
+                </div>
             </div>
 
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">

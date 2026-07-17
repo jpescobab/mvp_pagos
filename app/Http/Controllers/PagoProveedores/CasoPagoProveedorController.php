@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PagoProveedores\CasoPagoProveedorResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\ConjuntoRequisitosDocumentales;
+use App\Models\DefinicionWorkflow;
 use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
+use App\Services\PagoProveedores\ListadoCasoPagoProveedorService;
 use App\Services\Sgf\ConectorSgfPlaywrightService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,17 +24,26 @@ class CasoPagoProveedorController extends Controller
     public function __construct(
         private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist,
         private readonly ConectorSgfPlaywrightService $conectorSgf,
+        private readonly ListadoCasoPagoProveedorService $listadoCasos,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         Gate::authorize('viewAny', CasoPagoProveedor::class);
 
-        $casos = CasoPagoProveedor::with(['proveedor', 'proceso.estadoActual', 'proceso.definicionWorkflow.transiciones'])
-            ->paginate(20);
+        $estadoFiltro = $request->string('estado')->toString();
+        $estadoFiltro = $estadoFiltro === '' ? null : $estadoFiltro;
+
+        $casos = $this->listadoCasos->paginar($estadoFiltro);
 
         return Inertia::render('pago-proveedores/casos/index', [
             'casos' => CasoPagoProveedorResource::collection($casos),
+            'estadosWorkflow' => DefinicionWorkflow::where('codigo', 'pago_proveedores')
+                ->first()
+                ?->estados()
+                ->orderBy('id')
+                ->get(['codigo', 'nombre']) ?? [],
+            'filtroEstado' => $estadoFiltro,
         ]);
     }
 

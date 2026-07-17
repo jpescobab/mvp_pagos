@@ -7,6 +7,7 @@ import type { CasoSeleccionable } from '@/types/pago-proveedores';
 type PageProps = {
     casos: CasoSeleccionable[];
     trabajoIntegracionId: number | null;
+    casoPagoProveedorId: number | null;
 };
 
 const IC = {
@@ -31,21 +32,29 @@ function Icon({ path, className }: { path: string; className?: string }) {
 }
 
 export default function EgresosCguCrear() {
-    const { casos, trabajoIntegracionId } = usePage<PageProps>().props;
+    const { casos, trabajoIntegracionId, casoPagoProveedorId } =
+        usePage<PageProps>().props;
     const desdeImportacion = trabajoIntegracionId !== null;
 
     const [numeroEgreso, setNumeroEgreso] = useState('');
     const [fecha, setFecha] = useState('');
     const [observaciones, setObservaciones] = useState('');
-    const [seleccion, setSeleccion] = useState<Set<number>>(() =>
-        desdeImportacion
-            ? new Set(
-                  casos
-                      .filter((caso) => caso.listo)
-                      .map((caso) => caso.id),
-              )
-            : new Set(),
-    );
+    const [seleccion, setSeleccion] = useState<Set<number>>(() => {
+        if (desdeImportacion) {
+            return new Set(
+                casos.filter((caso) => caso.listo).map((caso) => caso.id),
+            );
+        }
+
+        if (
+            casoPagoProveedorId !== null &&
+            casos.some((caso) => caso.id === casoPagoProveedorId)
+        ) {
+            return new Set([casoPagoProveedorId]);
+        }
+
+        return new Set();
+    });
     const [busqueda, setBusqueda] = useState('');
     const [camposInvalidos, setCamposInvalidos] = useState<{
         numero?: boolean;
