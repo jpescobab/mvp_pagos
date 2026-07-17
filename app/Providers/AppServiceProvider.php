@@ -49,6 +49,7 @@ use App\Policies\TipoDocumentoPolicy;
 use App\Policies\TipoProcesoPagoPolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
+use App\Services\Indicadores\IndicadorEconomicoSelector;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -67,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(IndicadorEconomicoSelector::class);
     }
 
     /**

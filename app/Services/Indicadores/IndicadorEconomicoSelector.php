@@ -14,6 +14,18 @@ class IndicadorEconomicoSelector
     private const CACHE_MISS = '__miss__';
 
     /**
+     * Memo de instancia: códigos ya resueltos (desde caché o BD) durante
+     * este request. El selector se registra como singleton (ver
+     * AppServiceProvider), así que esta propiedad vive mientras dura el
+     * request HTTP y evita que dos callers distintos (HandleInertiaRequests
+     * y DashboardController, típicamente) repitan operaciones de caché para
+     * los códigos que se solapan entre ambos.
+     *
+     * @var array<string, array{codigo: string, valor: string, fecha_valor: ?string, periodo: ?string}|null>
+     */
+    private array $resueltosEnRequest = [];
+
+    /**
      * Select a daily indicator (UF, USD) by its exact fecha_valor. For USD,
      * apply the configured fallback rule when no exact match exists.
      */
@@ -41,7 +53,10 @@ class IndicadorEconomicoSelector
     /**
      * Latest registered value per codigo, for display chips (login, dashboard).
      * Cached per codigo (TTL corto) para no recalcularlo en cada request; los
-     * códigos sin entrada vigente se resuelven en una sola consulta.
+     * códigos sin entrada vigente se resuelven en una sola consulta. Dentro
+     * de un mismo request, un código ya resuelto por una llamada anterior
+     * sobre esta misma instancia no vuelve a tocar ni el store de caché ni
+     * la base de datos.
      *
      * @param  list<string>  $codigos
      * @return list<array{codigo: string, valor: string, fecha_valor: ?string, periodo: ?string}>
@@ -49,29 +64,54 @@ class IndicadorEconomicoSelector
     public function ultimosPorTipo(array $codigos): array
     {
         $porCodigo = [];
-        $faltantes = [];
+        $codigosSinMemo = [];
 
         foreach ($codigos as $codigo) {
-            $valor = Cache::get($this->cacheKeyUltimo($codigo), self::CACHE_MISS);
-
-            if ($valor === self::CACHE_MISS) {
-                $faltantes[] = $codigo;
+            if (array_key_exists($codigo, $this->resueltosEnRequest)) {
+                $porCodigo[$codigo] = $this->resueltosEnRequest[$codigo];
 
                 continue;
             }
 
-            $porCodigo[$codigo] = $valor;
+            $codigosSinMemo[] = $codigo;
         }
 
-        if ($faltantes !== []) {
-            $resueltos = $this->resolverUltimosPorTipo($faltantes);
+        if ($codigosSinMemo !== []) {
+            $claves = [];
 
-            foreach ($faltantes as $codigo) {
-                $valor = $resueltos[$codigo] ?? null;
+            foreach ($codigosSinMemo as $codigo) {
+                $claves[$this->cacheKeyUltimo($codigo)] = self::CACHE_MISS;
+            }
 
-                Cache::put($this->cacheKeyUltimo($codigo), $valor, now()->addMinutes(self::CACHE_TTL_MINUTOS));
+            $cacheados = Cache::many($claves);
+            $faltantes = [];
+
+            foreach ($codigosSinMemo as $codigo) {
+                $valor = $cacheados[$this->cacheKeyUltimo($codigo)];
+
+                if ($valor === self::CACHE_MISS) {
+                    $faltantes[] = $codigo;
+
+                    continue;
+                }
 
                 $porCodigo[$codigo] = $valor;
+                $this->resueltosEnRequest[$codigo] = $valor;
+            }
+
+            if ($faltantes !== []) {
+                $resueltos = $this->resolverUltimosPorTipo($faltantes);
+                $paraCachear = [];
+
+                foreach ($faltantes as $codigo) {
+                    $valor = $resueltos[$codigo] ?? null;
+
+                    $paraCachear[$this->cacheKeyUltimo($codigo)] = $valor;
+                    $porCodigo[$codigo] = $valor;
+                    $this->resueltosEnRequest[$codigo] = $valor;
+                }
+
+                Cache::putMany($paraCachear, now()->addMinutes(self::CACHE_TTL_MINUTOS));
             }
         }
 
@@ -81,11 +121,14 @@ class IndicadorEconomicoSelector
     }
 
     /**
-     * Invalida el último valor cacheado de un código. Se invoca cuando el
-     * servicio de persistencia registra un nuevo valor para ese código.
+     * Invalida el último valor cacheado de un código, tanto en el memo de
+     * instancia como en el store de caché. Se invoca cuando el servicio de
+     * persistencia registra un nuevo valor para ese código.
      */
     public function invalidarUltimoPorTipo(string $codigo): void
     {
+        unset($this->resueltosEnRequest[$codigo]);
+
         Cache::forget($this->cacheKeyUltimo($codigo));
     }
 
@@ -95,18 +138,27 @@ class IndicadorEconomicoSelector
     }
 
     /**
+     * Trae, en una sola consulta, únicamente la fila más reciente de cada
+     * código solicitado (no todas las filas que matcheen) mediante una
+     * función de ventana particionada por código. Portable entre PostgreSQL
+     * y SQLite (no usa DISTINCT ON, exclusivo de Postgres).
+     *
      * @param  list<string>  $codigos
      * @return array<string, array{codigo: string, valor: string, fecha_valor: ?string, periodo: ?string}>
      */
     private function resolverUltimosPorTipo(array $codigos): array
     {
-        return IndicadorEconomico::whereIn('codigo', $codigos)
-            ->orderByDesc('fecha_valor')
-            ->orderByDesc('periodo')
+        $conRn = IndicadorEconomico::query()
+            ->select('*')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY codigo ORDER BY fecha_valor DESC, periodo DESC) AS rn')
+            ->whereIn('codigo', $codigos);
+
+        return IndicadorEconomico::query()
+            ->fromSub($conRn, 'indicadores_economicos')
+            ->where('rn', 1)
             ->get()
-            ->groupBy('codigo')
-            ->map(function ($indicadores) {
-                $indicador = $indicadores->first();
+            ->keyBy('codigo')
+            ->map(function (IndicadorEconomico $indicador): array {
                 $fechaValor = $indicador->fecha_valor;
 
                 return [
