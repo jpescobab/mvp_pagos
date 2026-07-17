@@ -12,7 +12,10 @@ class GestionRolesService
     /** @var list<string> */
     public const ROLES_CORE = ['superadmin', 'admin'];
 
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly PermisosCompartidosResolver $permisosCompartidos,
+    ) {}
 
     public static function esRolCore(Role $rol): bool
     {
@@ -25,6 +28,9 @@ class GestionRolesService
     public function crear(array $datos): Role
     {
         return DB::transaction(function () use ($datos): Role {
+            // Rol recién creado en esta misma transacción: todavía no tiene
+            // usuarios asignados (se asignan después vía asignarRoles), no
+            // hay ninguna caché de permisos por usuario que invalidar.
             $rol = Role::query()->create(['name' => $datos['name']]);
             $rol->syncPermissions($datos['permissions']);
 
@@ -52,6 +58,8 @@ class GestionRolesService
 
             $rol->forceFill(['name' => $datos['name']])->save();
             $rol->syncPermissions($datos['permissions']);
+
+            $this->permisosCompartidos->invalidarParaRol($rol);
 
             $this->auditLogger->log(
                 'editar_rol',
