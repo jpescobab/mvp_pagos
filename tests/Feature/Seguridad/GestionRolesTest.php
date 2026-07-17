@@ -3,6 +3,7 @@
 use App\Models\AuditLog;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -88,6 +89,43 @@ test('un usuario con roles.administrar puede editar los permisos de un rol', fun
     expect($rol->hasPermissionTo('usuarios.ver'))->toBeTrue();
     expect($rol->hasPermissionTo('auditoria.ver'))->toBeFalse();
     expect(AuditLog::where('action', 'editar_rol')->where('auditable_id', $rol->id)->exists())->toBeTrue();
+});
+
+test('editar los permisos de un rol invalida la caché de permisos compartidos de sus usuarios asignados', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('roles.administrar');
+
+    $rol = Role::firstOrCreate(['name' => 'auditor']);
+    $permisoInicial = Permission::where('name', 'auditoria.ver')->firstOrFail();
+    $rol->givePermissionTo($permisoInicial);
+
+    $usuario = User::factory()->create();
+    $usuario->assignRole('auditor');
+
+    // Precalienta la caché de permisos compartidos del usuario con el rol antes de editar.
+    $antes = $this->actingAs($usuario)->get(route('dashboard'));
+    $antes->assertInertia(fn (Assert $page) => $page
+        ->where('auth.permissions', fn ($permisos) => collect($permisos)->contains('auditoria.ver')
+            && ! collect($permisos)->contains('usuarios.ver')));
+
+    $permisoNuevo = Permission::where('name', 'usuarios.ver')->firstOrFail();
+
+    $this->actingAs($actor)->patch(route('roles.update', $rol), [
+        'name' => 'auditor',
+        'permissions' => [$permisoNuevo->id],
+    ]);
+
+    // $usuario ya tiene roles.permissions cargado en memoria desde la
+    // request "antes" (Eloquent cachea relaciones por instancia); una
+    // request real siempre resuelve un modelo User nuevo, así que se
+    // refresca aquí para simular eso y no confundir un artefacto del test
+    // con un bug real.
+    $despues = $this->actingAs($usuario->fresh())->get(route('dashboard'));
+    $despues->assertInertia(fn (Assert $page) => $page
+        ->where('auth.permissions', fn ($permisos) => ! collect($permisos)->contains('auditoria.ver')
+            && collect($permisos)->contains('usuarios.ver')));
 });
 
 test('un usuario sin roles.administrar no puede editar un rol', function () {

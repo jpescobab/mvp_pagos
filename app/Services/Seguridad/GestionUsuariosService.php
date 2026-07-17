@@ -16,7 +16,10 @@ class GestionUsuariosService
     /** @var list<string> */
     private const ROLES_ADMINISTRADOR = ['admin', 'superadmin'];
 
-    public function __construct(private readonly AuditLogger $auditLogger) {}
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+        private readonly PermisosCompartidosResolver $permisosCompartidos,
+    ) {}
 
     /**
      * @param  array{name: string, email: string, rut: string, cargo: ?string, unidad: ?string, roles: array<int, int>, cfinanciero_id: ?int, ccosto_id: ?int}  $datos
@@ -45,6 +48,8 @@ class GestionUsuariosService
                 'ccosto_id' => $datos['ccosto_id'] ?? null,
             ]);
 
+            // Usuario recién creado en esta misma transacción: no puede
+            // existir una entrada de caché de permisos previa que invalidar.
             $usuario->syncRoles($datos['roles']);
 
             $this->auditLogger->log(
@@ -161,6 +166,8 @@ class GestionUsuariosService
         }
 
         $usuario->syncRoles($roles);
+
+        $this->permisosCompartidos->invalidarParaUsuario($usuario->id);
 
         $this->auditLogger->log(
             'reasignar_roles_usuario',

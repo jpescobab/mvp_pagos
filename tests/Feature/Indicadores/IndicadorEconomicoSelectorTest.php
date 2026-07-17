@@ -107,3 +107,95 @@ test('invalidarUltimoPorTipo hace que ultimosPorTipo refleje el nuevo valor sin 
     $actualizado = $selector->ultimosPorTipo(['USD']);
     expect($actualizado[0]['valor'])->toBe('910.0000');
 });
+
+test('resolverUltimosPorTipo trae solo la fila más reciente por código cuando hay varias filas históricas', function () {
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-08', 'valor' => 40700.0]);
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-09', 'valor' => 40720.5]);
+
+    crearIndicador(['codigo' => 'UTM', 'periodo' => '2026-05', 'valor' => 71000, 'periodicidad_valor' => 'mensual']);
+    crearIndicador(['codigo' => 'UTM', 'periodo' => '2026-06', 'valor' => 71506, 'periodicidad_valor' => 'mensual']);
+
+    $porCodigo = collect(app(IndicadorEconomicoSelector::class)->ultimosPorTipo(['UF', 'UTM']))->keyBy('codigo');
+
+    expect($porCodigo['UF']['valor'])->toBe('40765.9700');
+    expect($porCodigo['UF']['fecha_valor'])->toBe('2026-06-10');
+    expect($porCodigo['UTM']['valor'])->toBe('71506.0000');
+    expect($porCodigo['UTM']['periodo'])->toBe('2026-06');
+});
+
+// Los tests de abajo fuerzan CACHE_STORE=database porque el store `array`
+// de test (phpunit.xml) no cuesta ninguna query — bajo ese store cualquier
+// assertion de conteo de queries sobre Cache::get/many/put pasaría en verde
+// sin probar nada del comportamiento real de producción, donde cada
+// operación de caché es una query SQL real (DatabaseStore::get()/many()
+// delegan en 1 sola query por invocación).
+
+test('ultimosPorTipo bajo CACHE_STORE=database resuelve un código sin caché con exactamente 3 queries (caché miss, BD, caché put)', function () {
+    config(['cache.default' => 'database']);
+
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
+
+    $selector = app(IndicadorEconomicoSelector::class);
+
+    DB::enableQueryLog();
+    $resultado = $selector->ultimosPorTipo(['UF']);
+    $consultas = DB::getQueryLog();
+    DB::disableQueryLog();
+
+    expect($resultado)->toHaveCount(1);
+    expect($consultas)->toHaveCount(3);
+});
+
+test('ultimosPorTipo bajo CACHE_STORE=database no repite ninguna query para un código ya resuelto por una llamada anterior sobre la misma instancia', function () {
+    config(['cache.default' => 'database']);
+
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
+
+    $selector = app(IndicadorEconomicoSelector::class);
+    $primero = $selector->ultimosPorTipo(['UF']);
+
+    DB::enableQueryLog();
+    $segundo = $selector->ultimosPorTipo(['UF']);
+    $consultas = DB::getQueryLog();
+    DB::disableQueryLog();
+
+    expect($consultas)->toBeEmpty();
+    expect($segundo)->toBe($primero);
+});
+
+test('ultimosPorTipo bajo CACHE_STORE=database, con códigos parcialmente solapados entre dos llamadas sobre la misma instancia, la segunda solo consulta el código nuevo', function () {
+    config(['cache.default' => 'database']);
+
+    crearIndicador(['codigo' => 'UF', 'fecha_valor' => '2026-06-10', 'valor' => 40765.97]);
+    crearIndicador(['codigo' => 'USD', 'fecha_valor' => '2026-06-10', 'valor' => 916.97]);
+    crearIndicador(['codigo' => 'UTM', 'periodo' => '2026-06', 'valor' => 71506, 'periodicidad_valor' => 'mensual']);
+
+    $selector = app(IndicadorEconomicoSelector::class);
+    $selector->ultimosPorTipo(['UF', 'USD']);
+
+    DB::enableQueryLog();
+    $resultado = $selector->ultimosPorTipo(['UF', 'USD', 'UTM']);
+    $consultas = DB::getQueryLog();
+    DB::disableQueryLog();
+
+    expect($resultado)->toHaveCount(3);
+    expect($consultas)->toHaveCount(3);
+});
+
+test('ultimosPorTipo bajo CACHE_STORE=database memoiza un código sin ningún indicador registrado y no lo vuelve a consultar en la misma instancia', function () {
+    config(['cache.default' => 'database']);
+
+    $selector = app(IndicadorEconomicoSelector::class);
+
+    $primero = $selector->ultimosPorTipo(['CODIGO_INEXISTENTE']);
+    expect($primero)->toBeEmpty();
+
+    DB::enableQueryLog();
+    $segundo = $selector->ultimosPorTipo(['CODIGO_INEXISTENTE']);
+    $consultas = DB::getQueryLog();
+    DB::disableQueryLog();
+
+    expect($segundo)->toBeEmpty();
+    expect($consultas)->toBeEmpty();
+});
