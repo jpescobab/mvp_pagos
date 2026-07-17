@@ -91,6 +91,28 @@ context: |
     producción, `toSql()`/query log, conteo de filas reales) y volver a medir después
     del cambio — no asumir el efecto de una optimización sin verificarlo empíricamente.
 
+  Controladores livianos — disciplina obligatoria en propose/apply, no solo directriz
+  pasiva (lección de una auditoría real, ver openspec/changes/archive/2026-07-16-
+  extraer-logica-negocio-controllers-pago-proveedores para el detalle completo):
+  - Al escribir tasks.md en /opsx:propose, NUNCA dejar la ubicación de la lógica como
+    opción abierta ("en el controlador o en un service, lo que quede más simple"). Si
+    el método hace más que un find/paginate/create 1:1 desde el request, la tarea
+    nombra explícitamente el Service y su método — dejarlo abierto ya causó que
+    lógica de negocio (listas de estado hardcodeadas + whereHas, una DB::transaction
+    completa, app(Service::class) como service locator dentro de un map()) quedara
+    en el controller de changes ya aprobados.
+  - Al ejecutar /opsx:apply, antes de marcar una tarea como hecha: si el método de
+    controller recién escrito tiene whereHas/where anidados expresando una regla de
+    negocio, un DB::transaction, 2+ ramas condicionales de negocio, o un
+    app(Clase::class), extraerlo a un Service en app/Services/<Dominio>/ antes de
+    continuar — no dejarlo para una auditoría posterior.
+  - Reutilizar las convenciones de nombrado ya establecidas por dominio: sufijo
+    Service (orquestación multi-operación), Presenter (payload de una pantalla),
+    Resolver (una pregunta booleana/de negocio), Importer/Creador (creación
+    transaccional).
+  - Antes de /opsx:archive, revisar los controllers tocados contra esta regla — que
+    los tests pasen no confirma que la lógica esté en el lugar correcto.
+
   Jobs de larga duración y conectores Playwright — lecciones de la calibración real
   del conector SGF (ver services/sgf-playwright/CALIBRACION.md y HARNESS_IA.md
   sección 13 para el detalle completo), a tener en cuenta en toda propuesta nueva:

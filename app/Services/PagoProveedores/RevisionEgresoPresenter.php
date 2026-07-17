@@ -7,6 +7,7 @@ use App\Models\CasoPagoProveedor;
 use App\Models\Documento;
 use App\Models\EgresoCgu;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -15,10 +16,39 @@ use Illuminate\Support\Facades\Gate;
  */
 class RevisionEgresoPresenter
 {
+    /**
+     * Estados del workflow del caso que corresponden a una instancia de revisión.
+     *
+     * @var list<string>
+     */
+    private const ESTADOS_EN_REVISION = ['en_revision_finanzas', 'en_revision_zonal'];
+
     public function __construct(
         private readonly RevisionEgresoService $revision,
         private readonly ValidacionDocumentoInstanciaService $validaciones,
     ) {}
+
+    /**
+     * Todos los egresos en revisión visibles para el usuario, con su detalle
+     * completo (pagos + documentos) para alimentar el workbench de una sola
+     * pantalla.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function listadoEnRevision(User $user): Collection
+    {
+        return EgresoCgu::query()
+            ->whereHas(
+                'items.caso.proceso.estadoActual',
+                fn ($query) => $query->whereIn('codigo', self::ESTADOS_EN_REVISION),
+            )
+            ->with('cfinanciero')
+            ->orderByDesc('id')
+            ->get()
+            ->filter(fn (EgresoCgu $egreso) => Gate::forUser($user)->allows('revisar', $egreso))
+            ->map(fn (EgresoCgu $egreso) => $this->detalle($egreso, $user))
+            ->values();
+    }
 
     /**
      * Detalle completo del egreso para la pantalla de revisión.
