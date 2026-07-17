@@ -46,7 +46,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                         autoFocus
                                         tabIndex={1}
                                         autoComplete="email"
-                                        placeholder="tuCorreo@pjud.cl"
+                                        placeholder="Correo@pjud.cl"
                                         className="h-11 rounded-xl pl-10"
                                     />
                                 </div>

@@ -52,10 +52,6 @@ export default function AuthSimpleLayout({
                     />
 
                     <div className="relative z-10 flex flex-col gap-1.5">
-                        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold tracking-wider text-accent-foreground uppercase">
-                            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-                            CAPJ +
-                        </span>
                         <h1 className="mt-2 text-[20px] leading-tight font-bold tracking-tight">
                             {title}
                         </h1>
@@ -65,17 +61,12 @@ export default function AuthSimpleLayout({
                     </div>
 
                     <div className="relative z-10">{children}</div>
-
-                    <div className="relative z-10 mt-5 flex items-center justify-between border-t border-dashed pt-4 font-mono text-[11px] text-muted-foreground">
-                        <span>Conexión cifrada · TLS 1.3</span>
-                        <span>CAPJ +</span>
-                    </div>
                 </div>
             </main>
 
             {/* Footer */}
             <footer className="pointer-events-none fixed inset-x-0 bottom-5 z-[3] text-center text-xs text-muted-foreground">
-                © 2026 Poder Judicial · República de Chile
+                © 2026 Corporación Administrativa del Poder Judicial - Zonal Coyhaique
             </footer>
         </div>
     );
