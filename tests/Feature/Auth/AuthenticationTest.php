@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Support\SessionKey;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
@@ -61,6 +62,14 @@ test('users can logout', function () {
     $response->assertRedirect(route('home'));
 
     $this->assertGuest();
+});
+
+test('logging out clears the client-side history so the back button cannot reveal authenticated pages', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('logout'));
+
+    expect(session(SessionKey::CLEAR_HISTORY))->toBeTrue();
 });
 
 test('users are rate limited', function () {

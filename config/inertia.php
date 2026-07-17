@@ -24,6 +24,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | History Encryption
+    |--------------------------------------------------------------------------
+    |
+    | Encrypts the Inertia page data stored in the browser's history state.
+    | Enabled by default because the whole application exposes institutional
+    | data (pagos, proveedores, expedientes): without this, pressing "back"
+    | after logout restores the last authenticated page from history without
+    | a fresh request to the server. Cleared on logout via Inertia::clearHistory().
+    |
+    | Requires a secure context (HTTPS, or the literal "localhost" host) —
+    | window.crypto.subtle is unavailable otherwise, which makes the Inertia
+    | client's history-encryption promise chain hang indefinitely instead of
+    | rejecting (upstream bug: getPageData() calls encryptHistory().then(resolve)
+    | with no reject handler). Disable via INERTIA_HISTORY_ENCRYPT=false in local
+    | .env when developing over plain HTTP on a non-"localhost" host (e.g. a
+    | Laragon *.test vhost without SSL) — production has no env override, so it
+    | stays protected by default.
+    |
+    | See: https://inertiajs.com/docs/v3/security/history-encryption
+    |
+    */
+
+    'history' => [
+        'encrypt' => env('INERTIA_HISTORY_ENCRYPT', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Pages
     |--------------------------------------------------------------------------
     |
