@@ -148,6 +148,7 @@ export type CasoPagoProveedor = {
     fecha_sii: string | null;
     observacion_egreso: string | null;
     proceso: Proceso;
+    listo_para_aprobar: boolean;
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
     registros_contables_cgu?: RegistroContableCgu[];
     registros_pago_bancario?: RegistroPagoBancario[];

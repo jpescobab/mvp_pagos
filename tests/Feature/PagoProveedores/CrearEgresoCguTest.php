@@ -175,6 +175,29 @@ test('el formulario de crear egreso con trabajo_integracion_id devuelve solo los
     );
 });
 
+test('crear un egreso CGU con varios casos suma sus montos en monto_total', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $casoUno = crearCasoPagoProveedorDePrueba('sgf-monto-total-1');
+    $casoDos = crearCasoPagoProveedorDePrueba('sgf-monto-total-2');
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo(['pago_proveedores.registrar_egreso', 'pago_proveedores.gestionar_caso']);
+
+    $this->actingAs($usuario)->post(route('pago-proveedores.egresos-cgu.store'), [
+        'numero_egreso' => 'EGR-MONTOTOTAL-001',
+        'fecha' => now()->toDateString(),
+        'casos' => [
+            ['caso_pago_proveedor_id' => $casoUno->id, 'monto' => $casoUno->monto],
+            ['caso_pago_proveedor_id' => $casoDos->id, 'monto' => $casoDos->monto],
+        ],
+    ]);
+
+    $egreso = EgresoCgu::where('numero_egreso', 'EGR-MONTOTOTAL-001')->first();
+    expect((float) $egreso->monto_total)->toBe((float) $casoUno->monto + (float) $casoDos->monto);
+    expect($egreso->items()->count())->toBe(2);
+});
+
 test('crear un egreso CGU con un caso sin vincular deja su centro financiero en null', function () {
     $this->seed(WorkflowPagoProveedoresSeeder::class);
 

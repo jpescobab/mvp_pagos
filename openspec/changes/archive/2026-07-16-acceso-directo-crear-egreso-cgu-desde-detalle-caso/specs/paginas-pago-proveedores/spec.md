@@ -1,47 +1,4 @@
-## Purpose
-
-Esta capability cubre las páginas React/Inertia del dominio de pago de proveedores: listado y detalle de casos de pago de proveedores, y listado/creación de egresos CGU, consumiendo la capa HTTP de `api-pago-proveedores`.
-
-## Requirements
-
-### Requirement: Página de listado de casos de pago de proveedores
-El sistema SHALL renderizar una página que muestre los casos de pago de proveedores paginados, con id (`sgf_id`), periodo, observación, observación de egreso, folio de egreso, RUT y nombre del proveedor, número, fecha SII, monto, estado SGF y estado actual del workflow. Los campos de referencia SGF que no estén disponibles para un caso SHALL mostrarse con un fallback explícito en vez de una celda vacía. La página SHALL soportar un filtro por estado del workflow, con los códigos de `EstadoWorkflow` del workflow `pago_proveedores` resueltos dinámicamente desde el backend (no hardcodeados en el frontend), enviado como parámetro de querystring y preservando la paginación existente. Cuando la página se visita sin ese parámetro, el sistema SHALL aplicar por defecto un filtro que excluye los casos en estado `lista_para_registro_cgu`, `registrada_en_cgu`, `lista_para_pago`, `pagada_bancoestado`, `asociada_a_egreso_cgu`, `cerrada`, `rechazada` o `anulada`, mostrando el resto. Un valor explícito de "todos los estados" en el parámetro SHALL desactivar ese filtro por defecto. Para cada caso cuyo `Proceso` esté en `en_revision_finanzas` o `en_revision_zonal`, la página SHALL mostrar además un indicador "Listo para revisar" cuando el caso cumpla, para la instancia de revisión correspondiente a su estado actual, el mismo criterio ya usado para habilitar la aprobación en Revisión de Pagos (documentos del checklist obligatorio aprobados y totales verificados); ese indicador es únicamente informativo y su presencia SHALL NOT disparar ni implicar ningún cambio de estado del `Proceso`.
-
-#### Scenario: Listado con casos
-- **WHEN** un usuario autenticado visita la página de casos de pago de proveedores
-- **THEN** la página muestra una fila por cada caso recibido, con su `sgf_id`, periodo, observación, observación de egreso, folio de egreso, RUT y nombre del proveedor, número, fecha SII, monto y un badge del estado actual del `Proceso`
-
-#### Scenario: Campo de referencia SGF no disponible
-- **WHEN** un caso listado tiene `periodo`, `observacion`, `observacion_egreso`, `folio_egreso`, `numero` o `fecha_sii` en `null`
-- **THEN** la columna correspondiente muestra `"—"` en vez de una celda vacía
-
-#### Scenario: Navegar al detalle desde el listado
-- **WHEN** un usuario hace clic en un caso del listado
-- **THEN** la aplicación navega a la página de detalle de ese caso
-
-#### Scenario: Visita sin filtro de estado aplica el filtro por defecto
-- **WHEN** un usuario autenticado visita la página de casos de pago de proveedores sin parámetro de estado en la URL
-- **THEN** la página muestra únicamente casos en estado `importada_desde_sgf`, `recibida_finanzas`, `en_revision_finanzas`, `en_revision_zonal`, `observada` o `subsanada`
-
-#### Scenario: Usuario elige ver todos los estados
-- **WHEN** un usuario selecciona la opción de mostrar todos los estados en el filtro
-- **THEN** la página incluye también los casos en estado `lista_para_registro_cgu`, `registrada_en_cgu`, `lista_para_pago`, `pagada_bancoestado`, `asociada_a_egreso_cgu`, `cerrada`, `rechazada` y `anulada`
-
-#### Scenario: Usuario filtra por un estado específico
-- **WHEN** un usuario selecciona un estado puntual del workflow en el filtro
-- **THEN** la página muestra únicamente los casos cuyo `Proceso` está en ese estado, preservando la paginación
-
-#### Scenario: Caso en revisión que cumple el criterio de aprobación muestra el indicador
-- **WHEN** un caso está en `en_revision_finanzas` o `en_revision_zonal` y, para esa instancia, todos los documentos obligatorios del checklist están aprobados y los totales están verificados
-- **THEN** la fila del caso muestra el indicador "Listo para revisar" junto al badge de estado
-
-#### Scenario: Caso en revisión que no cumple el criterio no muestra el indicador
-- **WHEN** un caso está en `en_revision_finanzas` o `en_revision_zonal` y falta al menos un documento obligatorio aprobado o los totales no están verificados para esa instancia
-- **THEN** la fila del caso no muestra el indicador "Listo para revisar"
-
-#### Scenario: El indicador no altera el estado del caso
-- **WHEN** un caso alcanza el criterio de "Listo para revisar" en el listado
-- **THEN** el estado del `Proceso` del caso permanece sin cambios hasta que un revisor con permiso ejecute la aprobación manual desde Revisión de Pagos
+## MODIFIED Requirements
 
 ### Requirement: Página de detalle de un caso con acciones de workflow
 El sistema SHALL renderizar una página de detalle de un caso que muestre su estado actual, el checklist documental del proceso, el historial de transiciones, y permita ejecutar las transiciones disponibles delegando en el endpoint genérico ya existente, salvo las transiciones gobernadas por la revisión de pagos en dos instancias (`observar_finanzas`, `aprobar_finanzas`, `rechazar_finanzas`, `devolver_a_finanzas`, `aprobar_zonal`, `rechazar_zonal`), que el sistema SHALL rechazar desde este endpoint y que solo se ejecutan desde Revisión de Pagos. Cada ítem del checklist documental sin documento vinculado SHALL exponer un acceso directo para subir ese documento específico cuando el usuario tenga el permiso `documentos.gestionar`, sin requerir navegar a otra sección de la página ni seleccionar el tipo de documento manualmente; SHALL además exponer, cuando existan, los documentos del caso ya vinculados que no coinciden con ningún ítem del checklist actual ("huérfanos"), permitiendo vincular uno de ellos a ese ítem sin volver a subirlo. Cada ítem del checklist con un documento vinculado SHALL exponer una vista previa embebida de ese documento y, cuando el usuario tenga el permiso `documentos.gestionar`, un control para desvincularlo, ambos sin salir de la página ni descargar el archivo. La página NO SHALL mostrar el volcado crudo (`payload_crudo`/`payload_normalizado`) del historial de snapshots SGF ni el estado SGF crudo (`sgf_status`) por separado del estado del workflow interno; la única acción relacionada con SGF que la página SHALL exponer es verificar el caso contra SGF cuando el usuario tenga el permiso correspondiente. La página SHALL además mostrar, al inicio, un panel de preparación para Asignar Egreso con los 4 criterios de disposición del caso (tipo de proceso de pago clasificado, al menos un registro contable CGU/Traspaso, todos los ítems obligatorios del checklist con documento vinculado, `Proveedor` identificado), derivados de los datos ya presentes en la respuesta de la página sin requerir una petición adicional. Cuando el caso no tiene ningún Egreso CGU asociado todavía y los 4 criterios de ese panel están completos, la página SHALL mostrar un acceso directo hacia el formulario de creación de Egreso CGU con este caso preseleccionado, sin ejecutar ninguna transición de workflow por sí misma.
@@ -121,39 +78,6 @@ El sistema SHALL renderizar una página de detalle de un caso que muestre su est
 #### Scenario: Acceso directo ausente cuando el caso no está listo
 - **WHEN** un caso no tiene Egreso CGU asociado pero le falta al menos uno de los 4 criterios de preparación
 - **THEN** la página no muestra el acceso directo de creación de egreso
-
-### Requirement: Aviso y bloqueo de acciones gobernadas por Revisión de Pagos
-Mientras el `Proceso` de un caso esté en `en_revision_finanzas` o `en_revision_zonal`, el sistema SHALL mostrar en la página de detalle del caso un aviso indicando que el pago está en revisión en dos instancias, con un enlace a Revisión de Pagos cuando el usuario tenga el permiso correspondiente, y SHALL rechazar la validación o el rechazo de documentos desde el endpoint genérico de esta pantalla.
-
-#### Scenario: Aviso con enlace para un usuario con permiso de revisión
-- **WHEN** un usuario con el permiso `pago_proveedores.revisar_finanzas` o `pago_proveedores.revisar_zonal` abre el detalle de un caso en `en_revision_finanzas` o `en_revision_zonal`
-- **THEN** la página muestra un aviso con un enlace al egreso correspondiente en Revisión de Pagos
-
-#### Scenario: Aviso sin enlace para un usuario sin permiso de revisión
-- **WHEN** un usuario sin esos permisos abre el detalle de un caso en revisión
-- **THEN** la página muestra el mismo aviso informativo sin un enlace accionable
-
-#### Scenario: Validar o rechazar un documento queda bloqueado durante la revisión
-- **WHEN** se intenta validar o rechazar un documento del proceso de un caso que está en `en_revision_finanzas` o `en_revision_zonal`, desde el endpoint genérico de documentos
-- **THEN** el sistema rechaza la operación, indicando que debe hacerse desde Revisión de Pagos
-
-### Requirement: Página de listado de egresos CGU
-El sistema SHALL renderizar una página que muestre los egresos CGU paginados junto con los casos de pago de proveedores que cada uno cubre, y cada fila SHALL navegar al detalle de ese egreso.
-
-#### Scenario: Listado con egresos
-- **WHEN** un usuario autenticado visita la página de egresos CGU
-- **THEN** la página muestra una fila por cada egreso, con su número, fecha, monto total y los `sgf_id` de los casos que cubre
-
-#### Scenario: Navegar al detalle desde el listado
-- **WHEN** un usuario hace clic en un egreso del listado
-- **THEN** la aplicación navega a la página de detalle de ese egreso CGU
-
-### Requirement: Página de detalle de egreso CGU
-El sistema SHALL renderizar una página de detalle de un egreso CGU que muestre sus `egresos_cgu_items` (caso cubierto y monto).
-
-#### Scenario: Ver el detalle de un egreso CGU
-- **WHEN** un usuario autenticado visita la página de detalle de un egreso CGU
-- **THEN** la página muestra el número de egreso, fecha, monto total, observaciones y la lista de casos cubiertos con su monto
 
 ### Requirement: Formulario de creación de egreso CGU
 El sistema SHALL renderizar un formulario que permita elegir uno o más `casos_pago_proveedor` existentes, asignar un monto a cada uno, y enviar la creación del egreso CGU al endpoint ya existente. Cuando la página se visita con un parámetro que identifica una corrida de importación SGF, el sistema SHALL limitar la lista de casos disponibles a los de esa corrida que aún no tengan un Egreso CGU asignado, y SHALL preseleccionar únicamente los que estén marcados como listos para Asignar Egreso, dejando visibles pero sin marcar los que no lo estén. Cuando la página se visita con un parámetro que identifica un caso puntual (llegado desde el acceso directo del detalle de ese caso), el sistema SHALL preseleccionar únicamente ese caso dentro de la lista completa de casos disponibles, sin restringir la lista a ese caso ni excluir a los demás.

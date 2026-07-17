@@ -2,12 +2,14 @@
 
 namespace App\Http\Resources\PagoProveedores;
 
+use App\Enums\PagoProveedores\InstanciaRevision;
 use App\Models\CasoPagoProveedor;
 use App\Models\EgresoCguItem;
 use App\Models\Factura;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SnapshotDatosExterno;
+use App\Services\PagoProveedores\RevisionEgresoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,6 +38,7 @@ class CasoPagoProveedorResource extends JsonResource
             'fecha_sii' => $this->fecha_sii,
             'observacion_egreso' => $this->observacion_egreso,
             'proceso' => new ProcesoResource($this->proceso),
+            'listo_para_aprobar' => $this->listoParaAprobar(),
             'proceso_adquisicion' => $this->whenLoaded(
                 'procesoAdquisicion',
                 fn () => $this->procesoAdquisicion === null ? null : [
@@ -65,6 +68,25 @@ class CasoPagoProveedorResource extends JsonResource
                 fn () => $this->mapFacturas(),
             ),
         ];
+    }
+
+    /**
+     * Indicador puramente informativo para el listado: refleja si el caso
+     * cumple, en su instancia de revisión activa, el mismo criterio que ya
+     * habilita la aprobación manual en Revisión de Pagos (documentos
+     * obligatorios aprobados y totales verificados). No implica ningún
+     * cambio de estado — el `Proceso` solo avanza cuando un revisor con
+     * permiso ejecuta la aprobación vía RevisionEgresoService::aprobarPago().
+     */
+    private function listoParaAprobar(): bool
+    {
+        $codigoEstado = $this->proceso?->estadoActual?->codigo;
+
+        if (! in_array($codigoEstado, [InstanciaRevision::Finanzas->estado(), InstanciaRevision::Zonal->estado()], true)) {
+            return false;
+        }
+
+        return app(RevisionEgresoService::class)->pagoListoParaAprobar($this->resource);
     }
 
     /**

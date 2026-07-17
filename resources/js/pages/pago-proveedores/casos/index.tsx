@@ -1,28 +1,85 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
+import { ListoParaRevisarBadge } from '@/components/pago-proveedores/listo-para-revisar-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Monto } from '@/components/ui/monto';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectSeparator,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useInitials } from '@/hooks/use-initials';
 import { formatFecha, formatNumero } from '@/lib/format';
 import casos from '@/routes/pago-proveedores/casos';
-import type { CasoPagoProveedor, Paginated } from '@/types/pago-proveedores';
+import type {
+    CasoPagoProveedor,
+    EstadoWorkflow,
+    Paginated,
+} from '@/types/pago-proveedores';
 
 type PageProps = {
     casos: Paginated<CasoPagoProveedor>;
+    estadosWorkflow: EstadoWorkflow[];
+    filtroEstado: string | null;
 };
 
+const FILTRO_PENDIENTES = 'pendientes';
+const FILTRO_TODOS = 'todos';
+
 export default function CasosIndex() {
-    const { casos: pagina } = usePage<PageProps>().props;
+    const {
+        casos: pagina,
+        estadosWorkflow,
+        filtroEstado,
+    } = usePage<PageProps>().props;
     const getInitials = useInitials();
+
+    function cambiarFiltroEstado(valor: string) {
+        router.get(
+            casos.index.url(),
+            valor === FILTRO_PENDIENTES ? {} : { estado: valor },
+            { preserveState: true, preserveScroll: true },
+        );
+    }
 
     return (
         <>
             <Head title="Casos de pago de proveedores" />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">
-                    Casos de pago de proveedores
-                </h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-xl font-semibold tracking-tight">
+                        Casos de pago de proveedores
+                    </h1>
+                    <Select
+                        value={filtroEstado ?? FILTRO_PENDIENTES}
+                        onValueChange={cambiarFiltroEstado}
+                    >
+                        <SelectTrigger className="w-64">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={FILTRO_PENDIENTES}>
+                                Pendientes de revisión
+                            </SelectItem>
+                            <SelectItem value={FILTRO_TODOS}>
+                                Todos los estados
+                            </SelectItem>
+                            <SelectSeparator />
+                            {estadosWorkflow.map((estado) => (
+                                <SelectItem
+                                    key={estado.codigo}
+                                    value={estado.codigo}
+                                >
+                                    {estado.nombre}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
                 <div className="overflow-x-auto rounded-xl border">
                     <table className="w-full table-fixed text-xs">
@@ -143,11 +200,18 @@ export default function CasosIndex() {
                                     <td className="hidden truncate px-2.5 py-1 text-muted-foreground md:table-cell">
                                         {caso.sgf_status ?? '—'}
                                     </td>
-                                    <td className="px-2.5 py-1 text-center">
-                                        <EstadoBadge
-                                            estado={caso.proceso.estado_actual}
-                                            compact
-                                        />
+                                    <td className="px-2.5 py-1">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <EstadoBadge
+                                                estado={
+                                                    caso.proceso.estado_actual
+                                                }
+                                                compact
+                                            />
+                                            {caso.listo_para_aprobar && (
+                                                <ListoParaRevisarBadge />
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
