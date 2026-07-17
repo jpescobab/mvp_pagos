@@ -13,7 +13,7 @@ Antes de modificar código, leer:
 - No convertir procesos institucionales en CRUDs planos.
 - No usar estados/grupos SGF como estados/grupos internos.
 - No consultar APIs externas desde React.
-- No cambiar estados fuera de `WorkflowTransitionService`.
+- No cambiar estados fuera de `TransicionWorkflowService::execute()`.
 - No borrar snapshots, documentos ni auditoría.
 - No usar Playwright para evadir MFA, CAPTCHA o controles.
 - Todo dato externo usado en gestión, cálculo o informe debe tener snapshot.

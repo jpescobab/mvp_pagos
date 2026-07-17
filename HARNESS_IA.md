@@ -263,9 +263,9 @@ Todo caso de pago proveniente de SGF debe conservar snapshot de datos y document
 
 ### Tablas
 
-- `sgf_payment_case_imports`
-- `sgf_payment_case_snapshots`
-- `sgf_payment_case_snapshot_documents`
+- `importaciones_sgf`
+- `snapshots_sgf`
+- `snapshots_sgf_documentos`
 
 ### El snapshot debe conservar
 
@@ -303,14 +303,14 @@ No crear:
 ### Tablas del módulo
 
 - `casos_pago_proveedor`
-- `invoices`
-- `sgf_payment_case_imports`
-- `sgf_payment_case_snapshots`
-- `sgf_payment_case_snapshot_documents`
-- `cgu_accounting_records`
-- `bank_payment_records`
-- `cgu_egresses`
-- `cgu_egress_items`
+- `facturas`
+- `importaciones_sgf`
+- `snapshots_sgf`
+- `snapshots_sgf_documentos`
+- `registros_contables_cgu`
+- `registros_pago_bancario`
+- `egresos_cgu`
+- `egresos_cgu_items`
 
 ### Estados internos sugeridos
 
