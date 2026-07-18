@@ -1,9 +1,7 @@
 ## Purpose
 
 Esta capacidad cubre el dominio y el servicio de integración que trae Órdenes de Compra (OC) desde la API de Mercado Público hacia el sistema propio: búsqueda local primero, consulta a la API solo cuando se pide explícitamente, comparación campo a campo sin sobrescribir datos automáticamente, verificación del proveedor emisor contra el catálogo, y guardado únicamente tras confirmación explícita del usuario. Toda consulta a la API deja evidencia trazable (snapshot + solicitud) reutilizando la capa transversal de integraciones (`sistemas_externos`, `solicitudes_api_externas`, `snapshots_datos_externos`). Mercado Público es origen de evidencia, nunca gobierno del workflow interno.
-
 ## Requirements
-
 ### Requirement: Buscar una Orden de Compra por código, primero localmente
 El sistema SHALL buscar una Orden de Compra de Mercado Público (`orden_compra_mercado_publico`) por su código primero en la base de datos local, antes de considerar cualquier consulta a la API externa.
 
@@ -58,19 +56,25 @@ El sistema SHALL registrar, para toda consulta realizada a la API de Mercado Pú
 - **THEN** el sistema guarda el payload crudo recibido, su hash, la fecha de captura y el usuario que inició la consulta en un `snapshot_datos_externos` vinculado a la OC
 
 ### Requirement: Verificar y vincular al proveedor emisor de la OC
-El sistema SHALL resolver automáticamente al proveedor emisor de una OC nueva como parte de la misma operación transaccional de guardado, sin bloquear ni exigir un paso manual previo del usuario.
+El sistema SHALL resolver automáticamente al proveedor emisor de una OC nueva como parte de la misma operación transaccional de guardado, sin bloquear ni exigir un paso manual previo del usuario. La resolución SHALL poblar y completar el proveedor con todos los campos que el payload de Mercado Público aporta y para los que el catálogo de proveedores tiene columna (RUT, nombre, dirección, comuna, región, giro, correo y datos de contacto), normalizando a nulo los valores que Mercado Público entrega vacíos o con solo espacios. Cuando el payload no aporta un RUT de proveedor identificable y el usuario no indica un override, el sistema SHALL rechazar el guardado de esa OC con un mensaje claro, sin crear un proveedor con RUT vacío ni abortar la operación por una violación de unicidad.
 
 #### Scenario: El proveedor ya existe y está completo
 - **WHEN** el proveedor emisor de una OC obtenida de la API ya existe en el catálogo de proveedores (identificado por su RUT normalizado) y sus datos ya están completos
 - **THEN** el sistema vincula ese proveedor a la OC sin modificar ninguno de sus campos
 
 #### Scenario: El proveedor ya existe pero tiene campos vacíos
-- **WHEN** el proveedor emisor ya existe en el catálogo pero tiene campos vacíos que el payload de Mercado Público sí aporta (p. ej. `nombre`)
+- **WHEN** el proveedor emisor ya existe en el catálogo pero tiene campos vacíos que el payload de Mercado Público sí aporta (p. ej. `nombre`, `direccion`, `comuna`, `region`, `giro`, `correo` o datos de contacto)
 - **THEN** el sistema completa únicamente esos campos vacíos con los datos del payload, sin sobreescribir ningún campo que ya tenga un valor cargado
 
 #### Scenario: El proveedor no existe
 - **WHEN** el proveedor emisor de una OC obtenida de la API no existe en el catálogo de proveedores
-- **THEN** el sistema crea el proveedor con los datos disponibles del payload (RUT normalizado y nombre) como parte de la misma transacción de guardado de la OC
+- **THEN** el sistema crea el proveedor con todos los datos disponibles del payload (RUT normalizado, nombre, dirección, comuna, región, giro, correo y datos de contacto), como parte de la misma transacción de guardado de la OC
+- **AND** los campos que el payload entrega vacíos o con solo espacios se guardan como nulos, no como cadenas vacías
+
+#### Scenario: El payload no trae un RUT de proveedor identificable
+- **WHEN** se intenta guardar una OC cuyo payload no aporta un RUT de proveedor identificable y el usuario no indicó un `proveedor_id` de override
+- **THEN** el sistema rechaza el guardado con un mensaje claro
+- **AND** no crea ningún proveedor con RUT vacío ni persiste la OC
 
 #### Scenario: Falla el guardado de la OC tras resolver el proveedor
 - **WHEN** la creación o actualización del registro `orden_compra_mercado_publico` falla después de haberse creado o actualizado el proveedor dentro de la misma operación
@@ -135,3 +139,4 @@ El sistema SHALL resolver, a partir del código de una Orden de Compra, el enlac
 #### Scenario: No se persiste el HTML consultado
 - **WHEN** el sistema resuelve el enlace de descarga de PDF
 - **THEN** no se crea ningún `snapshot_datos_externos` a partir de esa consulta, porque no es un dato de negocio que el sistema gobierne
+

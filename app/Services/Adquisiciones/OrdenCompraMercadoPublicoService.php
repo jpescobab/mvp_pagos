@@ -2,6 +2,7 @@
 
 namespace App\Services\Adquisiciones;
 
+use App\Exceptions\OrdenCompraSinProveedorException;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\OrdenCompraMercadoPublicoItem;
 use App\Models\Proveedor;
@@ -173,12 +174,35 @@ class OrdenCompraMercadoPublicoService
     }
 
     /**
+     * Columnas del catálogo de proveedores que se pueblan/completan con los
+     * datos del payload de Mercado Público (además de `rutproveedor`, que es la
+     * identidad, y `activo`). La clave del payload normalizado coincide con la
+     * columna del modelo.
+     *
+     * @var list<string>
+     */
+    private const CAMPOS_COMPLETABLES_PROVEEDOR = [
+        'nombre',
+        'direccion',
+        'comuna',
+        'region',
+        'giro',
+        'correo',
+        'contacto',
+        'contacto_cargo',
+        'contacto_telefono',
+    ];
+
+    /**
      * Resuelve el proveedor emisor de una OC nueva: si se indica un override manual, se usa
-     * tal cual; si no, se busca por RUT normalizado y, de no existir, se crea con los datos
-     * del payload; si ya existe, se completan únicamente sus campos vacíos.
+     * tal cual; si no, se exige un RUT identificable y se busca por RUT normalizado; de no
+     * existir se crea con todos los datos disponibles del payload, y si ya existe se completan
+     * únicamente sus campos vacíos sin sobrescribir los ya cargados.
      *
      * @param  array<string, mixed>  $payloadNormalizado
      * @return array{proveedor: Proveedor, resultado: string}
+     *
+     * @throws OrdenCompraSinProveedorException cuando el payload no aporta un RUT identificable
      */
     private function resolverProveedor(array $payloadNormalizado, ?int $proveedorIdOverride): array
     {
@@ -186,22 +210,36 @@ class OrdenCompraMercadoPublicoService
             return ['proveedor' => Proveedor::findOrFail($proveedorIdOverride), 'resultado' => 'sin_cambios'];
         }
 
-        $proveedor = $this->verificarProveedor($payloadNormalizado);
+        /** @var array<string, mixed> $datosProveedor */
         $datosProveedor = $payloadNormalizado['proveedor'] ?? [];
+
+        if (Proveedor::normalizarRut((string) ($datosProveedor['rut'] ?? '')) === '') {
+            throw new OrdenCompraSinProveedorException;
+        }
+
+        $proveedor = $this->verificarProveedor($payloadNormalizado);
+        $camposPayload = $this->camposCompletablesProveedor($datosProveedor);
 
         if ($proveedor === null) {
             $proveedor = Proveedor::create([
-                'rutproveedor' => $datosProveedor['rut'] ?? '',
-                'nombre' => $datosProveedor['nombre'] ?? '',
+                'rutproveedor' => $datosProveedor['rut'],
+                'nombre' => '',
                 'activo' => true,
+                ...$camposPayload,
             ]);
 
             return ['proveedor' => $proveedor, 'resultado' => 'creado'];
         }
 
-        $camposFaltantes = array_filter([
-            'nombre' => $proveedor->nombre === '' ? ($datosProveedor['nombre'] ?? null) : null,
-        ], fn ($valor) => $valor !== null && $valor !== '');
+        $camposFaltantes = [];
+
+        foreach ($camposPayload as $columna => $valor) {
+            $actual = $proveedor->{$columna};
+
+            if ($actual === null || $actual === '') {
+                $camposFaltantes[$columna] = $valor;
+            }
+        }
 
         if ($camposFaltantes === []) {
             return ['proveedor' => $proveedor, 'resultado' => 'sin_cambios'];
@@ -210,6 +248,43 @@ class OrdenCompraMercadoPublicoService
         $proveedor->fill($camposFaltantes)->save();
 
         return ['proveedor' => $proveedor, 'resultado' => 'actualizado'];
+    }
+
+    /**
+     * Extrae del payload del proveedor solo los campos completables que traen un valor
+     * no vacío, mapeados a sus columnas del modelo `Proveedor`.
+     *
+     * @param  array<string, mixed>  $datosProveedor
+     * @return array<string, string>
+     */
+    private function camposCompletablesProveedor(array $datosProveedor): array
+    {
+        $campos = [];
+
+        foreach (self::CAMPOS_COMPLETABLES_PROVEEDOR as $columna) {
+            $valor = $this->trimONull($datosProveedor[$columna] ?? null);
+
+            if ($valor !== null) {
+                $campos[$columna] = $valor;
+            }
+        }
+
+        return $campos;
+    }
+
+    /**
+     * Trimea un valor y lo deja en `null` si viene ausente o queda vacío tras el trim
+     * (Mercado Público entrega strings vacíos o con solo espacios en varios campos).
+     */
+    private function trimONull(mixed $valor): ?string
+    {
+        if ($valor === null) {
+            return null;
+        }
+
+        $texto = trim((string) $valor);
+
+        return $texto === '' ? null : $texto;
     }
 
     /**
@@ -393,7 +468,15 @@ class OrdenCompraMercadoPublicoService
             'cronograma' => $this->cronogramaDesdeFechas($fechas),
             'proveedor' => [
                 'rut' => $orden['Proveedor']['RutSucursal'] ?? null,
-                'nombre' => $orden['Proveedor']['Nombre'] ?? null,
+                'nombre' => $this->trimONull($orden['Proveedor']['Nombre'] ?? null),
+                'direccion' => $this->trimONull($orden['Proveedor']['Direccion'] ?? null),
+                'comuna' => $this->trimONull($orden['Proveedor']['Comuna'] ?? null),
+                'region' => $this->trimONull($orden['Proveedor']['Region'] ?? null),
+                'giro' => $this->trimONull($orden['Proveedor']['Actividad'] ?? null),
+                'correo' => $this->trimONull($orden['Proveedor']['MailContacto'] ?? null),
+                'contacto' => $this->trimONull($orden['Proveedor']['NombreContacto'] ?? null),
+                'contacto_cargo' => $this->trimONull($orden['Proveedor']['CargoContacto'] ?? null),
+                'contacto_telefono' => $this->trimONull($orden['Proveedor']['FonoContacto'] ?? null),
             ],
             'items' => $items,
         ];

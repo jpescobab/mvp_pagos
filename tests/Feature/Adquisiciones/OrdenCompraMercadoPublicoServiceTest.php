@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\OrdenCompraSinProveedorException;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\OrdenCompraMercadoPublicoItem;
 use App\Models\Proveedor;
@@ -307,4 +308,112 @@ test('resolverUrlPdf retorna null y registra la solicitud como error si la petic
 
     expect($url)->toBeNull();
     expect(SolicitudApiExterna::first()->estado)->toBe('error');
+});
+
+test('guardarDesdeApi crea el proveedor nuevo con todos los datos disponibles del payload y deja en null los campos vacíos', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-PROV-COMPLETO-NUEVO', [
+        'Proveedor' => [
+            'RutSucursal' => '77.634.019-7',
+            'Nombre' => 'Asesoría y Defensa ADA Aysén Limitada',
+            'Actividad' => 'OTRAS ACTIVIDADES AUXILIARES DE SEGUROS',
+            'Direccion' => 'Prolongación Alte Simpson 5045',
+            'Comuna' => 'Coyhaique',
+            'Region' => 'Región Aysén',
+            'NombreContacto' => 'María Contreras',
+            'CargoContacto' => 'Encargada',
+            'FonoContacto' => '+56 9 8765 4321',
+            'MailContacto' => '   ',
+        ],
+    ]), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-PROV-COMPLETO-NUEVO');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+    );
+
+    expect($proveedorResultado)->toBe('creado');
+    $proveedor = $oc->proveedor;
+    expect($proveedor->rutproveedor)->toBe('77634019-7');
+    expect($proveedor->nombre)->toBe('Asesoría y Defensa ADA Aysén Limitada');
+    expect($proveedor->direccion)->toBe('Prolongación Alte Simpson 5045');
+    expect($proveedor->comuna)->toBe('Coyhaique');
+    expect($proveedor->region)->toBe('Región Aysén');
+    expect($proveedor->giro)->toBe('OTRAS ACTIVIDADES AUXILIARES DE SEGUROS');
+    expect($proveedor->contacto)->toBe('María Contreras');
+    expect($proveedor->contacto_cargo)->toBe('Encargada');
+    expect($proveedor->contacto_telefono)->toBe('+56 9 8765 4321');
+    // MailContacto venía con solo espacios: se guarda como null, no como cadena vacía.
+    expect($proveedor->correo)->toBeNull();
+});
+
+test('guardarDesdeApi completa los campos vacíos de un proveedor existente con los datos del payload sin sobrescribir los ya cargados', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-PROV-COMPLETAR', [
+        'Proveedor' => [
+            'RutSucursal' => '76.123.456-7',
+            'Nombre' => 'Proveedor de Prueba SpA',
+            'Direccion' => 'Calle Nueva 123',
+            'Comuna' => 'Puerto Aysén',
+            'Region' => 'Región Aysén',
+        ],
+    ]), 200)]);
+
+    $proveedor = Proveedor::create([
+        'rutproveedor' => '76.123.456-7',
+        'nombre' => 'Proveedor de Prueba SpA',
+        'comuna' => 'Comuna Ya Cargada',
+        'activo' => true,
+    ]);
+    $resultado = $this->servicio->consultarApi('OC-PROV-COMPLETAR');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+    );
+
+    expect($proveedorResultado)->toBe('actualizado');
+    expect($oc->proveedor_id)->toBe($proveedor->id);
+    expect($oc->proveedor->direccion)->toBe('Calle Nueva 123');
+    expect($oc->proveedor->region)->toBe('Región Aysén');
+    // La comuna ya tenía un valor cargado: no se sobrescribe con la del payload.
+    expect($oc->proveedor->comuna)->toBe('Comuna Ya Cargada');
+});
+
+test('guardarDesdeApi rechaza el guardado y no crea proveedor ni OC cuando el payload no trae un RUT de proveedor identificable', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-SIN-RUT-PROV', [
+        'Proveedor' => ['Nombre' => 'Proveedor Sin Rut SpA'],
+    ]), 200)]);
+
+    $resultado = $this->servicio->consultarApi('OC-SIN-RUT-PROV');
+
+    expect(fn () => $this->servicio->guardarDesdeApi($resultado['payload_normalizado'], $resultado['snapshot']))
+        ->toThrow(OrdenCompraSinProveedorException::class);
+
+    expect(OrdenCompraMercadoPublico::where('codigo', 'OC-SIN-RUT-PROV')->exists())->toBeFalse();
+    expect(Proveedor::where('nombre', 'Proveedor Sin Rut SpA')->exists())->toBeFalse();
+});
+
+test('guardarDesdeApi con override manual vincula ese proveedor sin completar sus campos vacíos', function () {
+    Http::fake(['*/ordenesdecompra.json*' => Http::response(payloadCrudoOcMercadoPublico('OC-OVERRIDE-SIN-COMPLETAR', [
+        'Proveedor' => [
+            'RutSucursal' => '76.123.456-7',
+            'Nombre' => 'Proveedor de Prueba SpA',
+            'Direccion' => 'Calle del Payload 999',
+        ],
+    ]), 200)]);
+
+    $proveedorOverride = Proveedor::create(['rutproveedor' => '80.000.000-0', 'nombre' => 'Override SpA', 'activo' => true]);
+    $resultado = $this->servicio->consultarApi('OC-OVERRIDE-SIN-COMPLETAR');
+
+    ['orden' => $oc, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+        $resultado['payload_normalizado'],
+        $resultado['snapshot'],
+        proveedorIdOverride: $proveedorOverride->id,
+    );
+
+    expect($proveedorResultado)->toBe('sin_cambios');
+    expect($oc->proveedor_id)->toBe($proveedorOverride->id);
+    // El override no ejecuta la lógica de completado: no toma la dirección del payload.
+    expect($oc->proveedor->direccion)->toBeNull();
 });
