@@ -97,7 +97,7 @@ Esta jerarquía guía permisos, filtros, usuarios, funcionarios, reportes, dashb
 
 ## 6. Tablas core institucionales iniciales
 
-Estas tablas deben existir desde el inicio del proyecto:
+Tablas core institucionales de la plataforma. Las marcadas con **(planeada)** forman parte del diseño del core pero aún **no tienen migración** — no asumir que existen; proponerlas vía OpenSpec antes de crearlas. El resto ya está implementado:
 
 ### Institución y estructura
 
@@ -141,13 +141,13 @@ Estas tablas deben existir desde el inicio del proyecto:
 
 ### Core funcional transversal
 
-- `system_modules`
-- `system_module_dependencies`
-- `system_module_settings`
-- `parameter_groups`
-- `parameters`
-- `parameter_values`
-- `parameter_change_logs`
+- `system_modules` **(planeada)**
+- `system_module_dependencies` **(planeada)**
+- `system_module_settings` **(planeada)**
+- `parameter_groups` **(planeada)**
+- `parameters` **(planeada)**
+- `parameter_values` **(planeada)**
+- `parameter_change_logs` **(planeada)**
 - `definiciones_workflow`
 - `estados_workflow`
 - `transiciones_workflow`
@@ -156,7 +156,7 @@ Estas tablas deben existir desde el inicio del proyecto:
 - `asignaciones_tareas_workflow`
 - `historial_transiciones_workflow`
 - `notifications`
-- `notification_events`
+- `notification_events` **(planeada)**
 - `audit_logs`
 - `security_audit_logs`
 - `tipos_documento`
