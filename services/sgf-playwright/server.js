@@ -38,6 +38,7 @@ const CASOS = [
         folio_egreso: 'EGR-10045',
         numero: '87231',
         fecha_sii: '05-07-2026',
+        numero_traspaso: 'TR-2026-0087',
         pendiente: true,
     },
     {
@@ -51,6 +52,7 @@ const CASOS = [
         folio_egreso: 'EGR-10012',
         numero: '87102',
         fecha_sii: '18-06-2026',
+        numero_traspaso: 'TR-2026-0042',
         pendiente: false,
     },
     {
@@ -64,6 +66,7 @@ const CASOS = [
         folio_egreso: 'EGR-10050',
         numero: '87240',
         fecha_sii: '07-07-2026',
+        numero_traspaso: 'TR-2026-0091',
         pendiente: true,
         documentos: [
             {

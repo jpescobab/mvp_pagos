@@ -8,10 +8,11 @@ class ListoParaEgresoResolver
 {
     /**
      * Un caso está listo para Asignar Egreso cuando: tiene tipo de proceso
-     * de pago clasificado, al menos un Traspaso (RegistroContableCgu)
-     * registrado, todos los ítems obligatorios del checklist documental
-     * cargados, y el proveedor identificado. Asume que el checklist del
-     * proceso ya fue resuelto (ver ResolutorChecklistDocumentalProceso).
+     * de pago clasificado, un Traspaso presente —sea el importado de SGF
+     * (`sgf_numero_traspaso`) o al menos un `RegistroContableCgu` manual—,
+     * todos los ítems obligatorios del checklist documental cargados, y el
+     * proveedor identificado. Asume que el checklist del proceso ya fue
+     * resuelto (ver ResolutorChecklistDocumentalProceso).
      */
     public function resuelve(?CasoPagoProveedor $caso): bool
     {
@@ -23,7 +24,7 @@ class ListoParaEgresoResolver
             return false;
         }
 
-        if ($caso->registrosContablesCgu->isEmpty()) {
+        if ($caso->registrosContablesCgu->isEmpty() && $caso->sgf_numero_traspaso === null) {
             return false;
         }
 

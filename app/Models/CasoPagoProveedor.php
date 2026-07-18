@@ -31,6 +31,7 @@ class CasoPagoProveedor extends Model
         'numero',
         'fecha_sii',
         'observacion_egreso',
+        'sgf_numero_traspaso',
     ];
 
     protected function casts(): array

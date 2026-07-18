@@ -9,6 +9,7 @@ use App\Models\Proveedor;
 use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
 use App\Models\User;
+use App\Services\PagoProveedores\ListoParaEgresoResolver;
 use Database\Seeders\RequisitosDocumentalesPagoProveedoresSeeder;
 use Database\Seeders\TiposDocumentoSeeder;
 use Database\Seeders\TiposProcesoPagoSeeder;
@@ -157,4 +158,45 @@ test('el formulario de crear egreso sin caso_pago_proveedor_id expone la prop en
         ->where('casoPagoProveedorId', null)
         ->where('casos', fn ($casos) => collect($casos)->pluck('id')->contains($caso->id))
     );
+});
+
+test('un caso con sgf_numero_traspaso y sin registro contable manual cumple el criterio de traspaso para egreso', function () {
+    $caso = crearCasoListoParaEgresoDePrueba('sgf-traspaso-listo');
+    $caso->registrosContablesCgu()->delete();
+    $caso->update(['sgf_numero_traspaso' => 'TR-2026-0087']);
+
+    // El checklist_documental_proceso se resuelve/persiste al abrir el detalle.
+    $this->actingAs(User::factory()->create())
+        ->get(route('pago-proveedores.casos.show', $caso))
+        ->assertOk();
+
+    $casoFresco = CasoPagoProveedor::find($caso->id);
+
+    expect(app(ListoParaEgresoResolver::class)->resuelve($casoFresco))->toBeTrue();
+});
+
+test('un caso sin registro contable manual ni sgf_numero_traspaso no cumple el criterio de traspaso', function () {
+    $caso = crearCasoListoParaEgresoDePrueba('sgf-traspaso-faltante');
+    $caso->registrosContablesCgu()->delete();
+    $caso->update(['sgf_numero_traspaso' => null]);
+
+    $casoFresco = CasoPagoProveedor::find($caso->id);
+
+    expect(app(ListoParaEgresoResolver::class)->resuelve($casoFresco))->toBeFalse();
+});
+
+test('el detalle de un caso expone sgf_numero_traspaso en la respuesta', function () {
+    $caso = crearCasoListoParaEgresoDePrueba('sgf-traspaso-serial');
+    $caso->update(['sgf_numero_traspaso' => 'TR-2026-0087']);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $props = $page->toArray()['props']['caso'];
+
+        expect($props['sgf_numero_traspaso'])->toBe('TR-2026-0087');
+    });
 });

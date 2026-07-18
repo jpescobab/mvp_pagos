@@ -38,6 +38,7 @@ class CasoPagoProveedorImporter
                 'numero' => $normalizado['numero'] ?? null,
                 'fecha_sii' => $this->parseFechaSii($normalizado['fecha_sii'] ?? null),
                 'observacion_egreso' => $normalizado['observacion_egreso'] ?? null,
+                'sgf_numero_traspaso' => $normalizado['numero_traspaso'] ?? null,
             ]);
 
             $caso->proceso?->update(['monto' => $normalizado['monto']]);
@@ -59,6 +60,7 @@ class CasoPagoProveedorImporter
                 'numero' => $normalizado['numero'] ?? null,
                 'fecha_sii' => $this->parseFechaSii($normalizado['fecha_sii'] ?? null),
                 'observacion_egreso' => $normalizado['observacion_egreso'] ?? null,
+                'sgf_numero_traspaso' => $normalizado['numero_traspaso'] ?? null,
             ]);
 
             $definicion = DefinicionWorkflow::where('codigo', 'pago_proveedores')->firstOrFail();

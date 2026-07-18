@@ -40,7 +40,11 @@ consistente en tres corridas distintas):
 - ~~Selectores exactos de la fila/tarjeta de proceso~~ (`BANDEJA_PROCESOS` en
   `selectors.js`) — la extracción de RUT/monto/columnas por
   `MAPEO_COLUMNAS_BANDEJA` funcionó correctamente contra los encabezados
-  reales.
+  reales. Desde 2026-07-17 el mapa incluye también la columna `"n° traspaso"`
+  (penúltima, junto a `"monto"`; ya listada en los encabezados calibrados del
+  comentario de `selectors.js`) → se captura como `numero_traspaso` y se
+  conserva en el caso como `sgf_numero_traspaso`. Pendiente de confirmar el
+  valor real en la próxima corrida supervisada contra SGF.
 - ~~El selector del botón de menú (kebab) por fila~~ (`MENU_ACCIONES_PROCESO.botonMenu`)
   — funcionó.
 - ~~Si "Ver Documentos" abre un modal/panel o navega a otra vista~~ — abre un

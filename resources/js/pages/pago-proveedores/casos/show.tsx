@@ -193,8 +193,12 @@ export default function CasoShow() {
         null,
     );
 
+    const hayTraspaso =
+        caso.sgf_numero_traspaso !== null ||
+        (caso.registros_contables_cgu ?? []).length > 0;
+
     const [numeroRegistroCgu, setNumeroRegistroCgu] = useState(
-        ultimoRegistroCgu?.numero_registro ?? '',
+        ultimoRegistroCgu?.numero_registro ?? caso.sgf_numero_traspaso ?? '',
     );
     const [fechaRegistroCgu, setFechaRegistroCgu] = useState(
         ultimoRegistroCgu?.fecha_registro?.slice(0, 10) ?? '',
@@ -424,8 +428,9 @@ export default function CasoShow() {
                                     </p>
                                 )}
 
-                                {(caso.registros_contables_cgu ?? []).length ===
-                                0 ? (
+                                {caso.sgf_numero_traspaso === null &&
+                                (caso.registros_contables_cgu ?? []).length ===
+                                    0 ? (
                                     <p className="text-sm text-muted-foreground">
                                         Sin Traspaso registrado todavía.
                                     </p>
@@ -457,6 +462,7 @@ export default function CasoShow() {
                                                     </span>
                                                 </div>
                                                 <p className="text-muted-foreground">
+                                                    Corrección ·{' '}
                                                     {registro.registrado_por ??
                                                         'Sistema'}
                                                     {registro.observaciones &&
@@ -464,11 +470,38 @@ export default function CasoShow() {
                                                 </p>
                                             </li>
                                         ))}
+                                        {caso.sgf_numero_traspaso !== null && (
+                                            <li className="py-2">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-mono">
+                                                        {
+                                                            caso.sgf_numero_traspaso
+                                                        }
+                                                    </span>
+                                                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                                                        desde SGF
+                                                    </span>
+                                                </div>
+                                                <p className="text-muted-foreground">
+                                                    Importado automáticamente
+                                                    desde SGF
+                                                </p>
+                                            </li>
+                                        )}
                                     </ul>
                                 )}
 
                                 {puedeRegistrarCgu && (
                                     <div className="flex flex-wrap items-end gap-2">
+                                        {caso.sgf_numero_traspaso !== null && (
+                                            <p className="basis-full text-xs text-muted-foreground">
+                                                El traspaso se importa desde
+                                                SGF. Usa este formulario solo
+                                                para registrar una corrección
+                                                manual; el valor de SGF se
+                                                conserva como referencia.
+                                            </p>
+                                        )}
                                         <div className="space-y-1">
                                             <Label htmlFor="numero-registro-cgu">
                                                 N.º de Traspaso
@@ -538,7 +571,9 @@ export default function CasoShow() {
                                                 }
                                                 onClick={registrarContableCgu}
                                             >
-                                                Registrar Traspaso
+                                                {hayTraspaso
+                                                    ? 'Corregir traspaso'
+                                                    : 'Registrar Traspaso'}
                                             </Button>
                                             {registroCguSinCambios && (
                                                 <p className="text-xs text-muted-foreground">

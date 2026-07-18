@@ -147,6 +147,7 @@ export type CasoPagoProveedor = {
     numero: string | null;
     fecha_sii: string | null;
     observacion_egreso: string | null;
+    sgf_numero_traspaso: string | null;
     proceso: Proceso;
     listo_para_aprobar: boolean;
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
