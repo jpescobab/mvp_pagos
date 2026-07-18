@@ -53,11 +53,13 @@ class ProveedorController extends Controller
         Gate::authorize('viewAny', Proveedor::class);
 
         $q = $request->string('q')->toString();
+        $rutNormalizado = $q !== '' ? Proveedor::normalizarRut($q) : '';
 
         $proveedores = Proveedor::query()
             ->when($q !== '', fn ($query) => $query->where(
                 fn ($sub) => $sub
                     ->where('rutproveedor', 'like', "%{$q}%")
+                    ->when($rutNormalizado !== '', fn ($s) => $s->orWhere('rutproveedor', 'like', "%{$rutNormalizado}%"))
                     ->orWhere('nombre', 'like', "%{$q}%"),
             ))
             ->orderBy('nombre')
