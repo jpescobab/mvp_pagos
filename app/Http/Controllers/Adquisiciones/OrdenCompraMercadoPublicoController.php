@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Adquisiciones;
 
+use App\Exceptions\OrdenCompraSinProveedorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Adquisiciones\BuscarOrdenCompraMercadoPublicoRequest;
 use App\Http\Requests\Adquisiciones\GuardarOrdenCompraMercadoPublicoRequest;
@@ -107,12 +108,16 @@ class OrdenCompraMercadoPublicoController extends Controller
         $proveedorId = $request->integer('proveedor_id');
         $procesoAdquisicionId = $request->integer('proceso_adquisicion_id');
 
-        ['orden' => $orden, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
-            $resultado['payload_normalizado'],
-            $resultado['snapshot'],
-            $procesoAdquisicionId !== 0 ? $procesoAdquisicionId : null,
-            $proveedorId !== 0 ? $proveedorId : null,
-        );
+        try {
+            ['orden' => $orden, 'proveedor_resultado' => $proveedorResultado] = $this->servicio->guardarDesdeApi(
+                $resultado['payload_normalizado'],
+                $resultado['snapshot'],
+                $procesoAdquisicionId !== 0 ? $procesoAdquisicionId : null,
+                $proveedorId !== 0 ? $proveedorId : null,
+            );
+        } catch (OrdenCompraSinProveedorException $e) {
+            return back()->withErrors(['codigo' => $e->getMessage()]);
+        }
 
         $mensajeProveedor = match ($proveedorResultado) {
             'creado' => 'Se creó el proveedor emisor en el catálogo.',
