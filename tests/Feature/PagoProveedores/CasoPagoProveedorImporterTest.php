@@ -202,6 +202,42 @@ test('fecha_sii con formato no parseable se guarda como null sin fallar la impor
     expect($caso->fecha_sii)->toBeNull();
 });
 
+test('importar un snapshot con numero_traspaso lo persiste como sgf_numero_traspaso', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf(['numero_traspaso' => 'TR-2026-0087']),
+    );
+
+    expect($caso->sgf_numero_traspaso)->toBe('TR-2026-0087');
+});
+
+test('reimportar un sgf_id existente actualiza sgf_numero_traspaso sin alterar el estado del proceso', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf(['numero_traspaso' => 'TR-2026-0087']),
+    );
+
+    app(TransicionWorkflowService::class)->execute($caso->proceso, 'recibir_en_finanzas', user: usuarioQuePuedeGestionarCaso());
+
+    $casoActualizado = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgf(['numero_traspaso' => 'TR-2026-0099']),
+    );
+
+    expect($casoActualizado->id)->toBe($caso->id);
+    expect($casoActualizado->sgf_numero_traspaso)->toBe('TR-2026-0099');
+    expect($casoActualizado->proceso->refresh()->estadoActual->codigo)->toBe('recibida_finanzas');
+});
+
+test('un payload normalizado sin numero_traspaso deja sgf_numero_traspaso en null sin fallar la importación', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(crearSnapshotSgf());
+
+    expect($caso->sgf_numero_traspaso)->toBeNull();
+});
+
 test('egresos_cgu_items asocia un egreso a varios casos', function () {
     $this->seed(WorkflowPagoProveedoresSeeder::class);
 

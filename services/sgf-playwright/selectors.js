@@ -152,6 +152,7 @@ export const MAPEO_COLUMNAS_BANDEJA = {
     numero: ['numero'],
     fecha_sii: ['fecha sii'],
     observacion_egreso: ['observacion'],
+    numero_traspaso: ['n° traspaso'],
 };
 
 // VERIFICADO (2026-07-09, corrida real supervisada): la función

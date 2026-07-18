@@ -57,3 +57,26 @@ test('propaga periodo y observacion desde las claves crudas del scraper', functi
     expect($normalizado['periodo'])->toBe('6/2026');
     expect($normalizado['observacion'])->toBe('RENDICION CAJA CHICA CORTE APELACIONES DE COYHAIQUE');
 });
+
+test('propaga numero_traspaso desde la clave cruda y lo deja null cuando viene vacío', function () {
+    $conValor = (new NormalizadorSgf)->normalizar([
+        'sgf_id' => '710',
+        'estado' => 'PENDIENTE',
+        'grupo_actual' => 'FINANZAS',
+        'rut' => '9.317.442-9',
+        'monto' => '0',
+        'numero_traspaso' => 'TR-2026-0087',
+    ]);
+
+    $vacio = (new NormalizadorSgf)->normalizar([
+        'sgf_id' => '711',
+        'estado' => 'PENDIENTE',
+        'grupo_actual' => 'FINANZAS',
+        'rut' => '9.317.442-9',
+        'monto' => '0',
+        'numero_traspaso' => '',
+    ]);
+
+    expect($conValor['numero_traspaso'])->toBe('TR-2026-0087');
+    expect($vacio['numero_traspaso'])->toBeNull();
+});

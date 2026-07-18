@@ -1,9 +1,7 @@
 ## Purpose
 
 Esta capability cubre las páginas React/Inertia del dominio de pago de proveedores: listado y detalle de casos de pago de proveedores, y listado/creación de egresos CGU, consumiendo la capa HTTP de `api-pago-proveedores`.
-
 ## Requirements
-
 ### Requirement: Página de listado de casos de pago de proveedores
 El sistema SHALL renderizar una página que muestre los casos de pago de proveedores paginados, con id (`sgf_id`), periodo, observación, observación de egreso, folio de egreso, RUT y nombre del proveedor, número, fecha SII, monto, estado SGF y estado actual del workflow. Los campos de referencia SGF que no estén disponibles para un caso SHALL mostrarse con un fallback explícito en vez de una celda vacía. La página SHALL soportar un filtro por estado del workflow, con los códigos de `EstadoWorkflow` del workflow `pago_proveedores` resueltos dinámicamente desde el backend (no hardcodeados en el frontend), enviado como parámetro de querystring y preservando la paginación existente. Cuando la página se visita sin ese parámetro, el sistema SHALL aplicar por defecto un filtro que excluye los casos en estado `lista_para_registro_cgu`, `registrada_en_cgu`, `lista_para_pago`, `pagada_bancoestado`, `asociada_a_egreso_cgu`, `cerrada`, `rechazada` o `anulada`, mostrando el resto. Un valor explícito de "todos los estados" en el parámetro SHALL desactivar ese filtro por defecto. Para cada caso cuyo `Proceso` esté en `en_revision_finanzas` o `en_revision_zonal`, la página SHALL mostrar además un indicador "Listo para revisar" cuando el caso cumpla, para la instancia de revisión correspondiente a su estado actual, el mismo criterio ya usado para habilitar la aprobación en Revisión de Pagos (documentos del checklist obligatorio aprobados y totales verificados); ese indicador es únicamente informativo y su presencia SHALL NOT disparar ni implicar ningún cambio de estado del `Proceso`.
 
@@ -183,3 +181,25 @@ El sistema SHALL renderizar un formulario que permita elegir uno o más `casos_p
 #### Scenario: El caso puntual ya no está disponible al llegar al formulario
 - **WHEN** un usuario visita el formulario de creación de egreso con el identificador de un caso puntual que mientras tanto ya obtuvo un Egreso CGU
 - **THEN** la lista no incluye ese caso y ninguna fila queda preseleccionada por ese parámetro
+
+### Requirement: El detalle del caso muestra el traspaso importado de SGF y degrada el registro manual a corrección
+En la página de detalle de un `caso_pago_proveedor`, el sistema SHALL mostrar el número de traspaso importado de SGF (`sgf_numero_traspaso`) como el Traspaso vigente en solo-lectura, identificado como proveniente de SGF, cuando exista y no haya un registro contable manual más reciente que lo corrija. El formulario de ingreso manual de Traspaso SHALL presentarse como una corrección puntual gateada por el permiso `pago_proveedores.registrar_cgu`, no como el ingreso primario. El criterio "al menos un registro contable CGU/Traspaso" del panel de preparación para Asignar Egreso SHALL considerarse cumplido cuando el caso tiene `sgf_numero_traspaso` no nulo o al menos un registro contable manual.
+
+#### Scenario: El caso tiene traspaso importado de SGF
+- **WHEN** un usuario abre el detalle de un caso con `sgf_numero_traspaso` no nulo y sin registro contable manual
+- **THEN** la página muestra ese número como el Traspaso vigente, en solo-lectura, identificado como "desde SGF"
+- **AND** no muestra el estado "Sin Traspaso registrado todavía"
+
+#### Scenario: El panel de preparación cuenta el traspaso de SGF
+- **WHEN** un caso tiene `sgf_numero_traspaso` no nulo y cumple los demás criterios de preparación
+- **THEN** el criterio "al menos un Traspaso registrado" del panel se muestra como cumplido
+
+#### Scenario: Corrección manual del traspaso desde el detalle
+- **WHEN** un usuario con el permiso `pago_proveedores.registrar_cgu` registra una corrección de Traspaso sobre un caso que ya tiene `sgf_numero_traspaso`
+- **THEN** la página muestra la corrección manual como el Traspaso vigente por encima del valor de SGF
+- **AND** el valor importado de SGF permanece disponible como referencia
+
+#### Scenario: Usuario sin permiso no ve la acción de corrección
+- **WHEN** un usuario sin el permiso `pago_proveedores.registrar_cgu` abre el detalle de un caso con traspaso importado de SGF
+- **THEN** la página muestra el Traspaso en solo-lectura, sin el formulario de corrección
+

@@ -34,9 +34,12 @@ function calcularPreparacionEgreso(
         },
         {
             etiqueta: 'Traspaso (CGU)',
-            cumplido: (caso.registros_contables_cgu ?? []).length > 0,
+            cumplido:
+                (caso.registros_contables_cgu ?? []).length > 0 ||
+                caso.sgf_numero_traspaso !== null,
             detalle:
                 caso.registros_contables_cgu?.[0]?.numero_registro ??
+                caso.sgf_numero_traspaso ??
                 'Sin registrar',
         },
         {
