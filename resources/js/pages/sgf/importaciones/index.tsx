@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, MoreHorizontal } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ImportacionEstadoBadge } from '@/components/sgf/importacion-estado-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,21 @@ export default function ImportacionesSgfIndex() {
         'pago_proveedores.importar_casos_sgf',
     );
 
+    // El debounce de búsqueda solo debe reiniciarse cuando cambia `termino`
+    // (si dependiera también de `filtroEstado`, cada cambio del <Select>
+    // -que ya navega al instante en cambiarFiltroEstado()- reprogramaría
+    // este timeout y dispararía una segunda navegación redundante 300ms
+    // después). Pero el callback igual necesita el `filtroEstado` más
+    // reciente al momento de disparar, no el que existía cuando el usuario
+    // empezó a escribir: si el usuario cambia el filtro de estado mientras
+    // una búsqueda sigue en el debounce, sin este ref el timeout ya
+    // agendado dispara con el `filtroEstado` viejo (capturado por closure)
+    // y revierte en silencio la elección recién hecha en el <Select>.
+    const filtroEstadoRef = useRef(filtroEstado);
+    useEffect(() => {
+        filtroEstadoRef.current = filtroEstado;
+    }, [filtroEstado]);
+
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (termino === (q ?? '')) {
@@ -60,7 +75,9 @@ export default function ImportacionesSgfIndex() {
                 importaciones.index().url,
                 {
                     ...(termino !== '' ? { q: termino } : {}),
-                    ...(filtroEstado ? { estado: filtroEstado } : {}),
+                    ...(filtroEstadoRef.current
+                        ? { estado: filtroEstadoRef.current }
+                        : {}),
                 },
                 { preserveState: true, preserveScroll: true },
             );
