@@ -1,11 +1,13 @@
 <?php
 
 use App\Models\CasoPagoProveedor;
+use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\DefinicionWorkflow;
 use App\Models\Documento;
 use App\Models\EgresoCgu;
 use App\Models\Proceso;
 use App\Models\Proveedor;
+use App\Models\RequisitoDocumental;
 use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
 use App\Models\User;
@@ -198,5 +200,80 @@ test('el detalle de un caso expone sgf_numero_traspaso en la respuesta', functio
         $props = $page->toArray()['props']['caso'];
 
         expect($props['sgf_numero_traspaso'])->toBe('TR-2026-0087');
+    });
+});
+
+test('un caso con un tipo de proceso sin documentos obligatorios queda listo para egreso end-to-end (caso Remesa)', function () {
+    test()->seed(WorkflowPagoProveedoresSeeder::class);
+    test()->seed(TiposDocumentoSeeder::class);
+    test()->seed(TiposProcesoPagoSeeder::class);
+    test()->seed(RequisitosDocumentalesPagoProveedoresSeeder::class);
+
+    $proveedor = Proveedor::create(['rutproveedor' => '44444444-4', 'nombre' => 'Proveedor Remesa E2E SPA', 'activo' => true]);
+    $caso = CasoPagoProveedor::create([
+        'sgf_id' => 'sgf-remesa-e2e-1',
+        'proveedor_id' => $proveedor->id,
+        'rut_proveedor' => $proveedor->rutproveedor,
+        'monto' => 100000,
+        'sgf_status' => 'EN_TRAMITE',
+        'sgf_numero_traspaso' => 'TR-REMESA-1',
+    ]);
+
+    $definicion = DefinicionWorkflow::where('codigo', 'pago_proveedores')->firstOrFail();
+    Proceso::create([
+        'definicion_workflow_id' => $definicion->id,
+        'estado_actual_id' => $definicion->estados()->where('es_inicial', true)->value('id'),
+        'sujeto_type' => CasoPagoProveedor::class,
+        'sujeto_id' => $caso->id,
+        'monto' => 100000,
+    ]);
+
+    // Réplica del mecanismo real usado para "Remesa" en producción: se
+    // marcan FACTURA/COMPROBANTE (universales por defecto) como "opcional"
+    // específicamente para este tipo — la fila más específica gana sobre la
+    // universal (ResolutorChecklistDocumentalProceso::especificidad()) — sin
+    // tocar ningún seeder ni seleccionar el mecanismo "no aplica" de la matriz
+    // sobre la regla universal en sí (eso rompería FACTURA/COMPROBANTE para
+    // el resto de los tipos, fuera de alcance de este cambio).
+    $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->firstOrFail();
+    $tipoRemesa = TipoProcesoPago::create(['codigo' => 'REMESA_E2E', 'nombre' => 'Remesa', 'activo' => true]);
+
+    foreach (['FACTURA', 'COMPROBANTE'] as $codigoDocumento) {
+        RequisitoDocumental::create([
+            'conjunto_requisitos_documentales_id' => $conjuntoRequisitos->id,
+            'tipo_documento_id' => TipoDocumento::where('codigo', $codigoDocumento)->value('id'),
+            'definicion_workflow_id' => $definicion->id,
+            'tipo_proceso_pago_id' => $tipoRemesa->id,
+            'tipo_requisito' => 'opcional',
+            'activo' => true,
+        ]);
+    }
+    RequisitoDocumental::create([
+        'conjunto_requisitos_documentales_id' => $conjuntoRequisitos->id,
+        'tipo_documento_id' => TipoDocumento::where('codigo', 'OTRO')->value('id'),
+        'definicion_workflow_id' => $definicion->id,
+        'tipo_proceso_pago_id' => $tipoRemesa->id,
+        'tipo_requisito' => 'opcional',
+        'activo' => true,
+    ]);
+
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipoRemesa->id]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_egreso');
+
+    // El checklist real se resuelve al abrir el detalle (cargarDetalle() en
+    // CasoPagoProveedorController) — no se stubea aquí.
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $props = $page->toArray()['props']['caso'];
+        $criterios = collect($props['preparacion_egreso'])->keyBy('criterio');
+
+        expect($criterios['checklist_documental']['cumplido'])->toBeTrue();
+        expect($criterios['checklist_documental']['detalle'])->toBe('Sin ítems obligatorios');
+        expect(collect($props['preparacion_egreso'])->every(fn ($c) => $c['cumplido']))->toBeTrue();
+        expect($props['egresos_cgu'] ?? [])->toBe([]);
     });
 });

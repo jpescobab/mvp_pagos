@@ -96,6 +96,10 @@ El sistema SHALL renderizar una página de detalle de un caso que muestre su est
 - **WHEN** a un caso le falta al menos uno de los 4 criterios de preparación
 - **THEN** el panel de preparación muestra únicamente ese criterio como pendiente, sin afectar la disponibilidad de las demás acciones de la página
 
+#### Scenario: El criterio de checklist documental se cumple sin ítems obligatorios
+- **WHEN** el checklist documental de un caso ya fue resuelto y no contiene ningún ítem de tipo `obligatorio` (todos sus ítems son `opcional`, o no tiene ítems)
+- **THEN** el panel de preparación muestra el criterio "Checklist documental" como cumplido
+
 #### Scenario: Ver un documento del checklist embebido sin descargarlo
 - **WHEN** un usuario visualiza un ítem del checklist que ya tiene un documento vinculado
 - **THEN** la página permite abrir una vista previa embebida de ese documento sin descargarlo ni navegar fuera de la página

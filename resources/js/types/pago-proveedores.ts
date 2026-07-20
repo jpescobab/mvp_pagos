@@ -134,6 +134,13 @@ export type Factura = {
     fecha_emision: string;
 };
 
+export type CriterioPreparacionEgreso = {
+    criterio: string;
+    etiqueta: string;
+    cumplido: boolean;
+    detalle: string;
+};
+
 export type CasoPagoProveedor = {
     id: number;
     sgf_id: string;
@@ -150,6 +157,7 @@ export type CasoPagoProveedor = {
     sgf_numero_traspaso: string | null;
     proceso: Proceso;
     listo_para_aprobar: boolean;
+    preparacion_egreso?: CriterioPreparacionEgreso[];
     proceso_adquisicion: ProcesoAdquisicionVinculado | null;
     registros_contables_cgu?: RegistroContableCgu[];
     registros_pago_bancario?: RegistroPagoBancario[];

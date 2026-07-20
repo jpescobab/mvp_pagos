@@ -9,6 +9,7 @@ use App\Models\Factura;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SnapshotDatosExterno;
+use App\Services\PagoProveedores\PreparacionEgresoPresenter;
 use App\Services\PagoProveedores\RevisionEgresoService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,6 +17,21 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin CasoPagoProveedor */
 class CasoPagoProveedorResource extends JsonResource
 {
+    private bool $incluirPreparacionEgreso = false;
+
+    /**
+     * Habilita la clave `preparacion_egreso`. Opt-in porque requiere
+     * relaciones (`proceso.checklist.items`, `proceso.tipoProcesoPago`,
+     * `registrosContablesCgu`) que el listado paginado de casos no carga —
+     * calcularlo ahí sin querer introduciría un N+1 por fila.
+     */
+    public function withPreparacionEgreso(bool $incluir = true): self
+    {
+        $this->incluirPreparacionEgreso = $incluir;
+
+        return $this;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -40,6 +56,10 @@ class CasoPagoProveedorResource extends JsonResource
             'sgf_numero_traspaso' => $this->sgf_numero_traspaso,
             'proceso' => new ProcesoResource($this->proceso),
             'listo_para_aprobar' => $this->listoParaAprobar(),
+            'preparacion_egreso' => $this->when(
+                $this->incluirPreparacionEgreso,
+                fn () => app(PreparacionEgresoPresenter::class)->criterios($this->resource),
+            ),
             'proceso_adquisicion' => $this->whenLoaded(
                 'procesoAdquisicion',
                 fn () => $this->procesoAdquisicion === null ? null : [

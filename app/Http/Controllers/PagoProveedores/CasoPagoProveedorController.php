@@ -54,7 +54,7 @@ class CasoPagoProveedorController extends Controller
         $this->cargarDetalle($caso, $request);
 
         return Inertia::render('pago-proveedores/casos/show', [
-            'caso' => new CasoPagoProveedorResource($caso),
+            'caso' => (new CasoPagoProveedorResource($caso))->withPreparacionEgreso(),
             'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
             'tiposProcesoPago' => TipoProcesoPago::where('activo', true)->get(['id', 'codigo', 'nombre']),
         ]);

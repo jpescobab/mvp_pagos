@@ -4,66 +4,14 @@ import { Button } from '@/components/ui/button';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
 import type { CasoPagoProveedor } from '@/types/pago-proveedores';
 
-type CriterioPreparacion = {
-    etiqueta: string;
-    cumplido: boolean;
-    detalle: string;
-};
-
-/**
- * Replica en el cliente el mismo criterio de ListoParaEgresoResolver
- * (app/Services/PagoProveedores/ListoParaEgresoResolver.php), que es la
- * fuente de verdad — si ese criterio cambia, este helper debe actualizarse
- * junto con él.
- */
-function calcularPreparacionEgreso(
-    caso: CasoPagoProveedor,
-): CriterioPreparacion[] {
-    const itemsObligatorios = (caso.proceso.checklist?.items ?? []).filter(
-        (item) => item.tipo_requisito === 'obligatorio',
-    );
-    const checklistCompleto =
-        itemsObligatorios.length > 0 &&
-        itemsObligatorios.every((item) => item.documento_id !== null);
-
-    return [
-        {
-            etiqueta: 'Tipo de proceso',
-            cumplido: caso.proceso.tipo_proceso_pago_id !== null,
-            detalle: caso.proceso.tipo_proceso_pago?.nombre ?? 'Sin clasificar',
-        },
-        {
-            etiqueta: 'Traspaso (CGU)',
-            cumplido:
-                (caso.registros_contables_cgu ?? []).length > 0 ||
-                caso.sgf_numero_traspaso !== null,
-            detalle:
-                caso.registros_contables_cgu?.[0]?.numero_registro ??
-                caso.sgf_numero_traspaso ??
-                'Sin registrar',
-        },
-        {
-            etiqueta: 'Checklist documental',
-            cumplido: checklistCompleto,
-            detalle:
-                itemsObligatorios.length > 0
-                    ? `${itemsObligatorios.filter((item) => item.documento_id !== null).length} / ${itemsObligatorios.length} obligatorios`
-                    : 'Sin checklist generado',
-        },
-        {
-            etiqueta: 'Proveedor identificado',
-            cumplido: caso.proveedor.nombre !== null,
-            detalle: caso.proveedor.nombre ?? 'No identificado',
-        },
-    ];
-}
-
 export function PreparacionEgresoCard({ caso }: { caso: CasoPagoProveedor }) {
     const { auth } = usePage().props;
-    const criterios = calcularPreparacionEgreso(caso);
+    const criterios = caso.preparacion_egreso ?? [];
     const completados = criterios.filter((c) => c.cumplido).length;
-    const porcentaje = (completados / criterios.length) * 100;
-    const listoParaEgreso = completados === criterios.length;
+    const porcentaje =
+        criterios.length > 0 ? (completados / criterios.length) * 100 : 0;
+    const listoParaEgreso =
+        criterios.length > 0 && completados === criterios.length;
     const sinEgresoAsociado = (caso.egresos_cgu ?? []).length === 0;
     const puedeRegistrarEgreso = auth.permissions.includes(
         'pago_proveedores.registrar_egreso',
@@ -120,7 +68,7 @@ export function PreparacionEgresoCard({ caso }: { caso: CasoPagoProveedor }) {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {criterios.map((criterio) => (
                     <div
-                        key={criterio.etiqueta}
+                        key={criterio.criterio}
                         className={`flex flex-col gap-1 rounded-md border p-2.5 ${
                             criterio.cumplido
                                 ? 'border-transparent bg-success-soft'
