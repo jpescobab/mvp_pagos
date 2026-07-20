@@ -112,8 +112,15 @@ async function primerSelectorExistente(contexto, candidatos, descripcion) {
         }
     }
 
+    // `contexto` puede ser la Page o un Locator acotado (ej. una fila),
+    // según el call site. Locator expone .page() para llegar a la Page real;
+    // Page no tiene ese método, así que en ese caso `contexto` ya es lo que
+    // necesitamos.
+    const pagina = typeof contexto.page === 'function' ? contexto.page() : contexto;
+    const diagnostico = await capturarDiagnostico(pagina, descripcion.replace(/[^a-z0-9]+/gi, '_'));
+
     throw new Error(
-        `Ningún selector candidato para "${descripcion}" existe en la página actual — hay que calibrar selectors.js contra el DOM real.`,
+        `Ningún selector candidato para "${descripcion}" existe en la página actual — hay que calibrar selectors.js contra el DOM real. ${diagnostico}`,
     );
 }
 
@@ -458,6 +465,18 @@ function normalizarTexto(texto) {
         .trim();
 }
 
+// RESUELTO (2026-07-20): cuando la Bandeja no tiene procesos que mostrar,
+// SGF renderiza una única fila placeholder ("No hay datos disponibles en la
+// tabla") dentro de <tbody> en vez de cero filas — BANDEJA_PROCESOS.filaProceso
+// la cuenta igual que a una fila de proceso real. Se detecta por estructura
+// (una sola celda, sin las ~22 columnas de una fila real) además del texto,
+// para no depender de que el mensaje exacto de SGF no cambie nunca.
+async function filaEsPlaceholderTablaVacia(filaLocator) {
+    const celdas = await filaLocator.locator('td').allTextContents();
+
+    return celdas.length === 1 && normalizarTexto(celdas[0]).includes('no hay datos disponibles');
+}
+
 /**
  * Lee los encabezados de columna de la tabla de la Bandeja una sola vez
  * (no por fila, para no repetir la misma consulta N veces).
@@ -719,6 +738,15 @@ async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
  * `filtro` descartó la fila.
  */
 async function procesarFilaProceso(page, filaLocator, encabezados, pasos, opciones = {}) {
+    // RESUELTO (2026-07-20): sin este chequeo, la fila placeholder de "tabla
+    // vacía" (ver filaEsPlaceholderTablaVacia) llegaba hasta el throw de más
+    // abajo intentando leer una columna "Id" que no existe en ella — un error
+    // de calibración confuso pese a que los selectores estaban bien y la
+    // Bandeja simplemente no tenía procesos pendientes.
+    if (await filaEsPlaceholderTablaVacia(filaLocator)) {
+        return null;
+    }
+
     const datos = await extraerDatosFila(filaLocator, encabezados);
 
     if (opciones.filtro && !opciones.filtro(datos)) {
@@ -810,7 +838,15 @@ export async function importarPendientes() {
         // lista.
         for (let i = 0; i < total; i++) {
             const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
-            resultado.push(await procesarFilaProceso(page, fila, encabezados, pasos));
+            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
+
+            // null = fila placeholder de "tabla vacía" (ver
+            // filaEsPlaceholderTablaVacia) — se descarta en vez de empujarla
+            // al resultado, igual que importarGrupoPagoOperaciones() ya hace
+            // con las filas que su propio filtro descarta.
+            if (procesado) {
+                resultado.push(procesado);
+            }
         }
 
         pasos.push(paso(`pagina_bandeja_${numeroPagina}`, 'completado', { filas_procesadas: total }));

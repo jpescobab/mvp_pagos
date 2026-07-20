@@ -23,6 +23,8 @@ class ImportacionSgfController extends Controller
     {
         $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
         $q = $request->string('q')->trim()->toString();
+        $estado = $request->string('estado')->trim()->toString();
+        $estado = $estado !== '' ? $estado : null;
 
         $importaciones = TrabajoIntegracion::where('sistema_externo_id', $sistema->id)
             ->with('iniciadoPor')
@@ -30,6 +32,8 @@ class ImportacionSgfController extends Controller
                 fn ($sub) => $sub->where('tipo', 'like', "%{$q}%")
                     ->orWhereHas('iniciadoPor', fn ($usuario) => $usuario->where('name', 'like', "%{$q}%"))
             ))
+            ->when($estado === null, fn ($query) => $query->where('estado', '!=', 'completado'))
+            ->when($estado !== null && $estado !== 'todos', fn ($query) => $query->where('estado', $estado))
             ->latest('iniciado_en')
             ->paginate(20)
             ->withQueryString();
@@ -37,6 +41,7 @@ class ImportacionSgfController extends Controller
         return Inertia::render('sgf/importaciones/index', [
             'importaciones' => ImportacionSgfResource::collection($importaciones),
             'q' => $q !== '' ? $q : null,
+            'filtroEstado' => $estado,
         ]);
     }
 

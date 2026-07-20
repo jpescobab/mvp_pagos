@@ -106,6 +106,53 @@ proceso hijo y además **crashea `queue:listen` por completo**
 mano (sin `composer dev`), agrega ese flag manualmente o esto va a volver a
 morir en silencio a los 60s con importaciones grandes.
 
+**Resuelto (2026-07-20) — fila placeholder de "Bandeja vacía" rompía
+`importarPendientes()`**: cuando "Mis pendientes" no tiene procesos, SGF
+renderiza una única fila dentro de `<tbody>` con una sola celda ("No hay
+datos disponibles en la tabla") en vez de cero filas. `BANDEJA_PROCESOS.filaProceso`
+(`table:visible tbody tr`) la cuenta igual que a una fila de proceso real, y
+el código intentaba leerle la columna "Id" (inexistente en esa fila),
+lanzando `"No se pudo determinar el N° de proceso..."` — un error de
+calibración confuso pese a que los selectores estaban bien y la Bandeja
+simplemente no tenía nada pendiente. `verificarCaso()` no se veía afectado
+(filtra las filas por `texto.includes(sgfId)` antes de procesarlas, y el
+placeholder nunca matchea un ID numérico), pero `importarPendientes()`
+procesa todas las filas sin ese filtro previo. Fix: `filaEsPlaceholderTablaVacia()`
+en `sgf-scraper.js` detecta la fila por estructura (una sola celda) + texto,
+y `procesarFilaProceso()` la descarta (`return null`) antes de intentar leer
+ninguna columna; `importarPendientes()` ahora filtra esos `null` en vez de
+empujarlos al resultado (mismo patrón que ya usaba `importarGrupoPagoOperaciones()`
+para las filas que su propio filtro descarta). Adicionalmente,
+`primerSelectorExistente()` (usada por ejemplo para `MENU_ACCIONES_PROCESO.botonMenu`)
+no guardaba diagnóstico (screenshot + HTML) al fallar, a diferencia de
+`esperarYObtenerPrimero()` — quedaba sin evidencia para calibrar selectores
+calibrados antes que dejaron de calzar (posible cambio de HTML en SGF). Ahora
+también captura diagnóstico en `services/sgf-playwright/debug/` al fallar,
+tanto si `contexto` es la `Page` como si es un `Locator` acotado (usa
+`.page()` para llegar a la `Page` real en ese caso).
+
+Ese diagnóstico se usó de inmediato: en la siguiente corrida, `botonMenu`
+volvió a fallar contra una fila real (Id 779, no el placeholder), esta vez
+con screenshot + HTML guardados. Cargar ese HTML en un Playwright headless
+aparte (`page.setContent()`, sin tocar SGF real) y probar cada selector
+candidato contra él reveló la causa: la primera `<td>` de la fila (tabla
+Angular DataTables) contiene tanto el botón toggle como, ya montadas en el
+DOM aunque el menú nunca se abrió, las ~11 opciones del menú ("Generar
+ebook", "Editar", "Ver documentos", etc. — confirmado que "Ver documentos"
+sí está entre ellas, así que `MENU_ACCIONES_PROCESO.opcionVerDocumentos` no
+necesita cambios) — todas `<button class="dropdown-item">`. `td:first-child
+button` matchea las ~12 (ambiguo) y depende de que Playwright ".first()"
+agarre por suerte el toggle en vez de una opción del menú; funcionó en la
+calibración de 2026-07-08/09 pero es frágil. El botón real es
+`<button ngbdropdowntoggle class="dropdown-toggle btn btn-purpura m-0">`
+(ícono por fuente `<em class="ft-more-vertical">`, no SVG). Fix: se agregó
+`button[ngbdropdowntoggle]` (el atributo que la propia directiva
+ng-bootstrap agrega solo al botón que abre el dropdown, inequívoco) como
+primer candidato de `MENU_ACCIONES_PROCESO.botonMenu` en `selectors.js`,
+antes que los candidatos viejos — verificado 1-a-1 contra el HTML real
+guardado que gana como primer match y apunta al elemento correcto
+(`id="dropdownBasic1"`).
+
 ## Pasos para calibrar
 
 1. Instalar dependencias (una sola vez):
