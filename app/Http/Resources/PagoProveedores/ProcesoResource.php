@@ -25,6 +25,7 @@ class ProcesoResource extends JsonResource
                 'id' => $this->tipoProcesoPago->id,
                 'codigo' => $this->tipoProcesoPago->codigo,
                 'nombre' => $this->tipoProcesoPago->nombre,
+                'requiere_traspaso_cgu' => $this->tipoProcesoPago->requiere_traspaso_cgu,
             ]),
             'historial_transiciones' => HistorialTransicionResource::collection($this->whenLoaded('historialTransiciones')),
             'transiciones_disponibles' => TransicionWorkflowResource::collection(

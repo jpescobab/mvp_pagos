@@ -78,6 +78,21 @@ function crearTipoProcesoPagoSinObligatorios(string $codigo): TipoProcesoPago
     return $tipo;
 }
 
+/**
+ * Crea un TipoProcesoPago con `requiere_traspaso_cgu = false` — replica el
+ * mecanismo real usado para el tipo "Remesa" (ver migración
+ * add_requiere_traspaso_cgu_to_tipos_proceso_pago_table).
+ */
+function crearTipoProcesoPagoSinTraspaso(string $codigo): TipoProcesoPago
+{
+    return TipoProcesoPago::create([
+        'codigo' => $codigo,
+        'nombre' => $codigo,
+        'activo' => true,
+        'requiere_traspaso_cgu' => false,
+    ]);
+}
+
 function resolverChecklistDe(CasoPagoProveedor $caso): void
 {
     $conjunto = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->firstOrFail();
@@ -184,6 +199,27 @@ test('sin traspaso de ningún tipo no cumple el criterio', function () {
 
     $criterios = criteriosDe($caso);
 
+    expect($criterios['traspaso_cgu']['cumplido'])->toBeFalse();
+    expect($criterios['traspaso_cgu']['detalle'])->toBe('Sin registrar');
+});
+
+test('un tipo de proceso que no requiere traspaso cumple el criterio sin ningún registro', function () {
+    $caso = crearCasoBaseParaPresenter('sgf-presenter-sin-requerir-traspaso');
+    $tipo = crearTipoProcesoPagoSinTraspaso('SIN_TRASPASO_TEST');
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipo->id]);
+
+    $criterios = criteriosDe($caso);
+
+    expect($criterios['traspaso_cgu']['cumplido'])->toBeTrue();
+    expect($criterios['traspaso_cgu']['detalle'])->toBe('No requiere traspaso');
+});
+
+test('un caso sin tipo de proceso clasificado sigue exigiendo traspaso por defecto', function () {
+    $caso = crearCasoBaseParaPresenter('sgf-presenter-sin-clasificar-traspaso');
+
+    $criterios = criteriosDe($caso);
+
+    expect($caso->proceso->tipo_proceso_pago_id)->toBeNull();
     expect($criterios['traspaso_cgu']['cumplido'])->toBeFalse();
     expect($criterios['traspaso_cgu']['detalle'])->toBe('Sin registrar');
 });

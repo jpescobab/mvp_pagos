@@ -34,6 +34,61 @@ test('un usuario con el permiso puede crear un tipo de proceso de pago', functio
     expect($tipo->activo)->toBeTrue();
 });
 
+test('un tipo de proceso de pago nuevo se crea con requiere_traspaso_cgu en true por defecto', function () {
+    sembrarPermisoAdministrarRequisitosDocumentales();
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.administrar_requisitos_documentales');
+
+    $response = $this->actingAs($usuario)->post(route('maestros.tipos-proceso-pago.store'), [
+        'codigo' => 'SIN_TRASPASO_DEFAULT',
+        'nombre' => 'Sin traspaso default',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $tipo = TipoProcesoPago::where('codigo', 'SIN_TRASPASO_DEFAULT')->first();
+    expect($tipo->requiere_traspaso_cgu)->toBeTrue();
+});
+
+test('un usuario con permiso puede crear un tipo de proceso de pago que no requiere traspaso CGU', function () {
+    sembrarPermisoAdministrarRequisitosDocumentales();
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.administrar_requisitos_documentales');
+
+    $response = $this->actingAs($usuario)->post(route('maestros.tipos-proceso-pago.store'), [
+        'codigo' => 'SIN_TRASPASO',
+        'nombre' => 'Sin traspaso',
+        'requiere_traspaso_cgu' => false,
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $tipo = TipoProcesoPago::where('codigo', 'SIN_TRASPASO')->first();
+    expect($tipo->requiere_traspaso_cgu)->toBeFalse();
+});
+
+test('editar un tipo de proceso de pago puede desmarcar requiere_traspaso_cgu sin afectar código ni nombre', function () {
+    sembrarPermisoAdministrarRequisitosDocumentales();
+    $tipo = TipoProcesoPago::create(['codigo' => 'COMPRA', 'nombre' => 'Compra']);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.administrar_requisitos_documentales');
+
+    $response = $this->actingAs($usuario)->patch(route('maestros.tipos-proceso-pago.update', $tipo), [
+        'codigo' => $tipo->codigo,
+        'nombre' => $tipo->nombre,
+        'requiere_traspaso_cgu' => false,
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $tipo->refresh();
+    expect($tipo->requiere_traspaso_cgu)->toBeFalse();
+    expect($tipo->codigo)->toBe('COMPRA');
+    expect($tipo->nombre)->toBe('Compra');
+});
+
 test('crear un tipo de proceso de pago con un código ya existente (sin distinguir mayúsculas) falla la validación', function () {
     sembrarPermisoAdministrarRequisitosDocumentales();
     TipoProcesoPago::create(['codigo' => 'COMPRA', 'nombre' => 'Compra']);

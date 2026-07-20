@@ -25,13 +25,13 @@ import type {
     CasoPagoProveedor,
     RegistroContableCgu,
     TipoDocumentoSeleccionable,
-    TipoProcesoPago,
+    TipoProcesoPagoSeleccionable,
 } from '@/types/pago-proveedores';
 
 type PageProps = {
     caso: CasoPagoProveedor;
     tiposDocumento: TipoDocumentoSeleccionable[];
-    tiposProcesoPago: TipoProcesoPago[];
+    tiposProcesoPago: TipoProcesoPagoSeleccionable[];
 };
 
 const ESTADOS_EN_REVISION = new Set([
@@ -196,6 +196,9 @@ export default function CasoShow() {
     const hayTraspaso =
         caso.sgf_numero_traspaso !== null ||
         (caso.registros_contables_cgu ?? []).length > 0;
+
+    const requiereTraspasoCgu =
+        caso.proceso.tipo_proceso_pago?.requiere_traspaso_cgu ?? true;
 
     const [numeroRegistroCgu, setNumeroRegistroCgu] = useState(
         ultimoRegistroCgu?.numero_registro ?? caso.sgf_numero_traspaso ?? '',
@@ -428,12 +431,21 @@ export default function CasoShow() {
                                     </p>
                                 )}
 
+                                {!requiereTraspasoCgu && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Este tipo de proceso no requiere
+                                        Traspaso (CGU).
+                                    </p>
+                                )}
+
                                 {caso.sgf_numero_traspaso === null &&
                                 (caso.registros_contables_cgu ?? []).length ===
                                     0 ? (
-                                    <p className="text-sm text-muted-foreground">
-                                        Sin Traspaso registrado todavía.
-                                    </p>
+                                    requiereTraspasoCgu && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Sin Traspaso registrado todavía.
+                                        </p>
+                                    )
                                 ) : (
                                     <ul className="divide-y text-sm">
                                         {(
@@ -491,7 +503,7 @@ export default function CasoShow() {
                                     </ul>
                                 )}
 
-                                {puedeRegistrarCgu && (
+                                {puedeRegistrarCgu && requiereTraspasoCgu && (
                                     <div className="flex flex-wrap items-end gap-2">
                                         {caso.sgf_numero_traspaso !== null && (
                                             <p className="basis-full text-xs text-muted-foreground">

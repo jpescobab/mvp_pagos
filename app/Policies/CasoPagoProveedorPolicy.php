@@ -29,7 +29,7 @@ class CasoPagoProveedorPolicy
 
     public function registrarCgu(User $user, CasoPagoProveedor $caso): bool
     {
-        return $user->can('pago_proveedores.registrar_cgu');
+        return $user->can('pago_proveedores.registrar_cgu') && $caso->requiereTraspasoCgu();
     }
 
     public function registrarPagoBancario(User $user, CasoPagoProveedor $caso): bool

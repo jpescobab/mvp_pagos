@@ -128,4 +128,15 @@ class CasoPagoProveedor extends Model
         return $this->procesoAdquisicion?->ccosto->cfinanciero_id
             ?? app(CfinancieroPorDefectoResolver::class)->resolver();
     }
+
+    /**
+     * ¿Este caso exige un Traspaso (CGU) para avanzar? Derivado del
+     * TipoProcesoPago del caso; se asume `true` (comportamiento histórico)
+     * cuando el caso todavía no tiene tipo de proceso clasificado, para que
+     * "sin clasificar" no se confunda con "no requiere".
+     */
+    public function requiereTraspasoCgu(): bool
+    {
+        return $this->proceso?->tipoProcesoPago->requiere_traspaso_cgu ?? true;
+    }
 }

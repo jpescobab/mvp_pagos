@@ -25,6 +25,13 @@ export type TipoProcesoPago = {
     id: number;
     codigo: string;
     nombre: string;
+    requiere_traspaso_cgu: boolean;
+};
+
+export type TipoProcesoPagoSeleccionable = {
+    id: number;
+    codigo: string;
+    nombre: string;
 };
 
 export type TipoDocumentoSeleccionableMatriz = {

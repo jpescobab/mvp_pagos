@@ -4,6 +4,7 @@ use App\Models\AuditLog;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SecurityAuditLog;
+use App\Models\TipoProcesoPago;
 use App\Models\User;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -47,6 +48,26 @@ test('un usuario sin el permiso registrar_cgu es bloqueado y queda auditado como
     $response = $this->actingAs($usuario)->post(
         route('pago-proveedores.casos.registros-contables-cgu.store', $caso),
         ['numero_registro' => 'CGU-2026-001', 'fecha_registro' => '2026-06-28', 'monto' => 500000],
+    );
+
+    $response->assertForbidden();
+    expect(RegistroContableCgu::where('caso_pago_proveedor_id', $caso->id)->exists())->toBeFalse();
+    expect(SecurityAuditLog::where('event', 'acceso_denegado')->exists())->toBeTrue();
+});
+
+test('un usuario con el permiso registrar_cgu es bloqueado si el tipo de proceso del caso no requiere traspaso, y queda auditado', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $caso = crearCasoPagoProveedorDePrueba();
+    $tipo = TipoProcesoPago::create(['codigo' => 'SIN_TRASPASO_EVIDENCIA', 'nombre' => 'Sin traspaso', 'requiere_traspaso_cgu' => false]);
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipo->id]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('pago_proveedores.registrar_cgu');
+
+    $response = $this->actingAs($usuario)->post(
+        route('pago-proveedores.casos.registros-contables-cgu.store', $caso),
+        ['numero_registro' => 'CGU-2026-002', 'fecha_registro' => '2026-06-28', 'monto' => 500000],
     );
 
     $response->assertForbidden();
