@@ -39,6 +39,7 @@ class UpdateTipoProcesoPagoRequest extends FormRequest
             ],
             'nombre' => ['required', 'string', 'max:150'],
             'activo' => ['boolean'],
+            'requiere_traspaso_cgu' => ['boolean'],
         ];
     }
 }

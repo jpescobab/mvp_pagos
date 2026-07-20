@@ -47,6 +47,16 @@ export default function TiposProcesoPagoShow() {
                             />
                         </dd>
                     </div>
+                    <div>
+                        <dt className="text-muted-foreground">
+                            Requiere Traspaso (CGU)
+                        </dt>
+                        <dd>
+                            {tipoProcesoPago.requiere_traspaso_cgu
+                                ? 'Sí'
+                                : 'No'}
+                        </dd>
+                    </div>
                 </dl>
             </div>
         </>

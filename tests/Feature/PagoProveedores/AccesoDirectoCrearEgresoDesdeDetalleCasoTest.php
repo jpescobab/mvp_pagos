@@ -277,3 +277,29 @@ test('un caso con un tipo de proceso sin documentos obligatorios queda listo par
         expect($props['egresos_cgu'] ?? [])->toBe([]);
     });
 });
+
+test('el detalle de un caso cuyo tipo de proceso no requiere traspaso oculta el formulario y expone el criterio cumplido', function () {
+    // crearCasoBaseParaPresenter/crearTipoProcesoPagoSinTraspaso están
+    // definidas en PreparacionEgresoPresenterTest.php (mismo directorio,
+    // convención ya usada en este repo para compartir helpers entre tests
+    // hermanos — ver crearCasoPagoProveedorDePrueba más arriba en este mismo
+    // archivo).
+    $caso = crearCasoBaseParaPresenter('sgf-detalle-sin-traspaso');
+    $tipo = crearTipoProcesoPagoSinTraspaso('DETALLE_SIN_TRASPASO');
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipo->id]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $props = $page->toArray()['props']['caso'];
+
+        expect($props['proceso']['tipo_proceso_pago']['requiere_traspaso_cgu'])->toBeFalse();
+
+        $criterios = collect($props['preparacion_egreso'])->keyBy('criterio');
+        expect($criterios['traspaso_cgu']['cumplido'])->toBeTrue();
+        expect($criterios['traspaso_cgu']['detalle'])->toBe('No requiere traspaso');
+    });
+});

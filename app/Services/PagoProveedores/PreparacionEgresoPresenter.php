@@ -41,6 +41,15 @@ class PreparacionEgresoPresenter
      */
     private function traspasoCgu(CasoPagoProveedor $caso): array
     {
+        if (! $caso->requiereTraspasoCgu()) {
+            return [
+                'criterio' => 'traspaso_cgu',
+                'etiqueta' => 'Traspaso (CGU)',
+                'cumplido' => true,
+                'detalle' => 'No requiere traspaso',
+            ];
+        }
+
         $registro = $caso->registrosContablesCgu->first();
 
         return [

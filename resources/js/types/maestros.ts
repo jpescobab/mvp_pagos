@@ -106,6 +106,7 @@ export type TipoProcesoPagoMaestro = {
     codigo: string;
     nombre: string;
     activo: boolean;
+    requiere_traspaso_cgu: boolean;
 };
 
 export type TipoDocumentoMaestro = {

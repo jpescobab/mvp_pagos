@@ -17,6 +17,9 @@ export default function TiposProcesoPagoEditar() {
     const [codigo, setCodigo] = useState(tipoProcesoPago.codigo);
     const [nombre, setNombre] = useState(tipoProcesoPago.nombre);
     const [activo, setActivo] = useState(tipoProcesoPago.activo);
+    const [requiereTraspasoCgu, setRequiereTraspasoCgu] = useState(
+        tipoProcesoPago.requiere_traspaso_cgu,
+    );
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [procesando, setProcesando] = useState(false);
 
@@ -26,7 +29,12 @@ export default function TiposProcesoPagoEditar() {
 
         router.patch(
             tiposProcesoPago.update(tipoProcesoPago.id).url,
-            { codigo, nombre, activo },
+            {
+                codigo,
+                nombre,
+                activo,
+                requiere_traspaso_cgu: requiereTraspasoCgu,
+            },
             {
                 onError: (errores) =>
                     setErrors(errores as Record<string, string>),
@@ -88,6 +96,25 @@ export default function TiposProcesoPagoEditar() {
                             onCheckedChange={setActivo}
                         />
                         <Label htmlFor="activo">Activo</Label>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                id="requiere-traspaso-cgu"
+                                checked={requiereTraspasoCgu}
+                                onCheckedChange={setRequiereTraspasoCgu}
+                            />
+                            <Label htmlFor="requiere-traspaso-cgu">
+                                Requiere Traspaso (CGU)
+                            </Label>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Desactiva esta opción para tipos de proceso que
+                            nunca generan un Traspaso (CGU), como Remesa. El
+                            formulario de registro quedará oculto en el
+                            detalle de esos casos.
+                        </p>
                     </div>
                 </div>
 

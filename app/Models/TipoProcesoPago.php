@@ -9,12 +9,13 @@ class TipoProcesoPago extends Model
 {
     protected $table = 'tipos_proceso_pago';
 
-    protected $fillable = ['codigo', 'nombre', 'activo'];
+    protected $fillable = ['codigo', 'nombre', 'activo', 'requiere_traspaso_cgu'];
 
     protected function casts(): array
     {
         return [
             'activo' => 'boolean',
+            'requiere_traspaso_cgu' => 'boolean',
         ];
     }
 

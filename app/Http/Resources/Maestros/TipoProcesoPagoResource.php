@@ -19,6 +19,7 @@ class TipoProcesoPagoResource extends JsonResource
             'codigo' => $this->codigo,
             'nombre' => $this->nombre,
             'activo' => $this->activo,
+            'requiere_traspaso_cgu' => $this->requiere_traspaso_cgu,
         ];
     }
 }

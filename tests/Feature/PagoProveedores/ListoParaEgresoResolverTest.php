@@ -24,6 +24,18 @@ test('los 4 criterios completos con checklist de cero obligatorios están listos
     expect(app(ListoParaEgresoResolver::class)->resuelve($caso->fresh()))->toBeTrue();
 });
 
+test('los 4 criterios completos con un tipo que no requiere traspaso están listos sin ningún registro de traspaso', function () {
+    $proveedor = Proveedor::create(['rutproveedor' => '33333333-3', 'nombre' => 'Proveedor Resolver Sin Traspaso SPA', 'activo' => true]);
+    $caso = crearCasoBaseParaPresenter('sgf-resolver-sin-traspaso-requerido', $proveedor->id);
+    $tipo = crearTipoProcesoPagoSinObligatorios('RESOLVER_SIN_TRASPASO');
+    $tipo->update(['requiere_traspaso_cgu' => false]);
+    $caso->proceso->update(['tipo_proceso_pago_id' => $tipo->id]);
+    resolverChecklistDe($caso);
+
+    expect($caso->fresh()->sgf_numero_traspaso)->toBeNull();
+    expect(app(ListoParaEgresoResolver::class)->resuelve($caso->fresh()))->toBeTrue();
+});
+
 /**
  * El checklist_documental_proceso se resuelve/persiste al abrir el
  * detalle del caso (CasoPagoProveedorController::cargarDetalle()) —

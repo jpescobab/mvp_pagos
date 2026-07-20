@@ -7,7 +7,7 @@ Permitir administrar, sin tocar código ni correr seeders, los catálogos `TipoP
 ## Requirements
 
 ### Requirement: Administrar el catálogo de tipos de proceso de pago
-El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.administrar_requisitos_documentales`, crear, editar y activar/desactivar registros de `TipoProcesoPago` (código único, nombre, activo). El sistema SHALL rechazar la eliminación de un `TipoProcesoPago` que tenga `RequisitoDocumental` asociados.
+El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.administrar_requisitos_documentales`, crear, editar y activar/desactivar registros de `TipoProcesoPago` (código único, nombre, activo, y si requiere Traspaso (CGU)). El sistema SHALL rechazar la eliminación de un `TipoProcesoPago` que tenga `RequisitoDocumental` asociados. Un `TipoProcesoPago` nuevo SHALL crearse con `requiere_traspaso_cgu = true` por defecto, salvo que el usuario lo desmarque explícitamente.
 
 #### Scenario: Crear un tipo de proceso de pago
 - **WHEN** un usuario con el permiso requerido crea un `TipoProcesoPago` con un código único y un nombre
@@ -28,6 +28,14 @@ El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.adminis
 #### Scenario: Usuario sin permiso no puede administrar tipos de proceso de pago
 - **WHEN** un usuario sin el permiso `pago_proveedores.administrar_requisitos_documentales` intenta crear, editar o eliminar un `TipoProcesoPago`
 - **THEN** el sistema bloquea la operación
+
+#### Scenario: Un tipo de proceso de pago nuevo requiere Traspaso (CGU) por defecto
+- **WHEN** un usuario con el permiso requerido crea un `TipoProcesoPago` sin especificar `requiere_traspaso_cgu`
+- **THEN** el sistema lo persiste con `requiere_traspaso_cgu = true`
+
+#### Scenario: Marcar un tipo de proceso de pago como que no requiere Traspaso (CGU)
+- **WHEN** un usuario con el permiso requerido crea o edita un `TipoProcesoPago` marcando `requiere_traspaso_cgu` en `false`
+- **THEN** el sistema lo persiste así
 
 ### Requirement: Administrar el catálogo general de tipos de documento
 El sistema SHALL permitir, a un usuario con el permiso `core_institucional.administrar`, crear, editar y activar/desactivar registros de `TipoDocumento` (código único, nombre, descripción opcional, activo). El sistema SHALL rechazar la eliminación de un `TipoDocumento` que tenga `RequisitoDocumental` o `Documento` asociados.
