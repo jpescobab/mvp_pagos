@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ImportacionEstadoBadge } from '@/components/sgf/importacion-estado-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,6 +12,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectSeparator,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useInitials } from '@/hooks/use-initials';
 import { formatFechaHora } from '@/lib/format';
 import { formatNumero } from '@/lib/format';
@@ -20,13 +28,22 @@ import importaciones from '@/routes/sgf/importaciones';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { ImportacionSgf } from '@/types/sgf';
 
+const FILTRO_NO_COMPLETADAS = 'no_completadas';
+const FILTRO_TODOS = 'todos';
+
 type PageProps = {
     importaciones: Paginated<ImportacionSgf>;
     q: string | null;
+    filtroEstado: string | null;
 };
 
 export default function ImportacionesSgfIndex() {
-    const { importaciones: pagina, q, auth } = usePage<PageProps>().props;
+    const {
+        importaciones: pagina,
+        q,
+        filtroEstado,
+        auth,
+    } = usePage<PageProps>().props;
     const [termino, setTermino] = useState(q ?? '');
     const getInitials = useInitials();
     const puedeImportar = auth.permissions.includes(
@@ -41,7 +58,10 @@ export default function ImportacionesSgfIndex() {
 
             router.get(
                 importaciones.index().url,
-                termino === '' ? {} : { q: termino },
+                {
+                    ...(termino !== '' ? { q: termino } : {}),
+                    ...(filtroEstado ? { estado: filtroEstado } : {}),
+                },
                 { preserveState: true, preserveScroll: true },
             );
         }, 300);
@@ -49,6 +69,17 @@ export default function ImportacionesSgfIndex() {
         return () => clearTimeout(timeout);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [termino]);
+
+    function cambiarFiltroEstado(valor: string) {
+        router.get(
+            importaciones.index().url,
+            {
+                ...(termino !== '' ? { q: termino } : {}),
+                ...(valor !== FILTRO_NO_COMPLETADAS ? { estado: valor } : {}),
+            },
+            { preserveState: true, preserveScroll: true },
+        );
+    }
 
     return (
         <>
@@ -66,6 +97,33 @@ export default function ImportacionesSgfIndex() {
                             onChange={(e) => setTermino(e.target.value)}
                             className="w-64"
                         />
+                        <Select
+                            value={filtroEstado ?? FILTRO_NO_COMPLETADAS}
+                            onValueChange={cambiarFiltroEstado}
+                        >
+                            <SelectTrigger className="w-48">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={FILTRO_NO_COMPLETADAS}>
+                                    No completadas
+                                </SelectItem>
+                                <SelectItem value={FILTRO_TODOS}>
+                                    Todos los estados
+                                </SelectItem>
+                                <SelectSeparator />
+                                <SelectItem value="en_progreso">
+                                    En progreso
+                                </SelectItem>
+                                <SelectItem value="completado">
+                                    Completado
+                                </SelectItem>
+                                <SelectItem value="error">Error</SelectItem>
+                                <SelectItem value="huerfano">
+                                    Huérfano
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                         {puedeImportar && (
                             <>
                                 <Button
@@ -225,6 +283,7 @@ export default function ImportacionesSgfIndex() {
                                                             importacion.id,
                                                         )}
                                                     >
+                                                        <Eye className="size-3.5" />
                                                         Ver detalle
                                                     </Link>
                                                 </DropdownMenuItem>

@@ -106,7 +106,7 @@ test('un usuario autenticado puede listar las importaciones SGF ordenadas de la 
 
     $usuario = User::factory()->create();
 
-    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index'));
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'todos']));
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -147,13 +147,13 @@ test('el listado se puede filtrar por un término de búsqueda que coincide con 
 
     $usuario = User::factory()->create();
 
-    $porTipoResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'verificar_caso']));
+    $porTipoResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'verificar_caso', 'estado' => 'todos']));
     $porTipoResponse->assertInertia(fn (Assert $page) => $page
         ->has('importaciones.data', 1)
         ->where('importaciones.data.0.id', $porTipo->id)
     );
 
-    $porUsuarioResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'Ana Iniciadora']));
+    $porUsuarioResponse = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'Ana Iniciadora', 'estado' => 'todos']));
     $porUsuarioResponse->assertInertia(fn (Assert $page) => $page
         ->has('importaciones.data', 1)
         ->where('importaciones.data.0.id', $porUsuario->id)
@@ -171,11 +171,146 @@ test('el listado queda vacío sin error cuando el término de búsqueda no coinc
 
     $usuario = User::factory()->create();
 
-    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'termino-inexistente']));
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'termino-inexistente', 'estado' => 'todos']));
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->has('importaciones.data', 0)
+    );
+});
+
+test('por defecto el listado excluye los trabajos de importación en estado completado', function () {
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    $enProgreso = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'en_progreso',
+    ]);
+    $error = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinutes(2),
+        'estado' => 'error',
+    ]);
+    $huerfano = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinutes(3),
+        'estado' => 'huerfano',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('filtroEstado', null)
+        ->has('importaciones.data', 3)
+        ->where('importaciones.data.0.id', $enProgreso->id)
+        ->where('importaciones.data.1.id', $error->id)
+        ->where('importaciones.data.2.id', $huerfano->id)
+    );
+});
+
+test('el filtro estado=todos incluye también los trabajos completados', function () {
+    $completado = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    $enProgreso = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'en_progreso',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'todos']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('filtroEstado', 'todos')
+        ->has('importaciones.data', 2)
+        ->where('importaciones.data.0.id', $completado->id)
+        ->where('importaciones.data.1.id', $enProgreso->id)
+    );
+});
+
+test('el filtro por un estado puntual muestra únicamente los trabajos en ese estado', function () {
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'en_progreso',
+    ]);
+    $error = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinutes(2),
+        'estado' => 'error',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'error']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('filtroEstado', 'error')
+        ->has('importaciones.data', 1)
+        ->where('importaciones.data.0.id', $error->id)
+    );
+});
+
+test('el filtro de estado por defecto se combina con el término de búsqueda', function () {
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    $enProgreso = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'en_progreso',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['q' => 'importar_pendientes']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('importaciones.data', 1)
+        ->where('importaciones.data.0.id', $enProgreso->id)
     );
 });
 

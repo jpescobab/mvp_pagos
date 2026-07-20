@@ -183,8 +183,33 @@ export const FILTRO_BANDEJA = {
 // "show" agregada (patrón estándar de Bootstrap) — sin acotar a eso,
 // ".first()" agarra el de la primera fila del DOM, no el que efectivamente
 // se abrió.
+//
+// RECALIBRADO (2026-07-20, diagnóstico real vía services/sgf-playwright/debug/
+// tras un fallo de "botonMenu" tal cual — evidencia comparada empíricamente
+// con Playwright headless contra el HTML guardado, no solo leído a ojo): la
+// tabla es un componente Angular DataTables (ng-bootstrap por debajo). La
+// primera <td> de la fila contiene TANTO el botón toggle como, ya montadas
+// en el DOM aunque el menú nunca se abrió, las ~11 opciones del menú
+// ("Generar ebook", "Editar", "Ver documentos", etc.) — todas son
+// <button class="dropdown-item">. `td:first-child button` matchea las 12
+// (ambiguo, 12 candidatos) y depende de que ".first()" agarre por suerte el
+// toggle (primero en el orden del DOM) — funcionó en la calibración de
+// 2026-07-08/09 pero volvió a fallar acá. El botón real es
+// `<button ngbdropdowntoggle class="dropdown-toggle btn btn-purpura m-0">`
+// (ícono por fuente `<em class="ft-more-vertical">`, no SVG — de ahí que
+// `button:has(svg)` tampoco calzaba). `[ngbdropdowntoggle]` es el atributo
+// que agrega la propia directiva ng-bootstrap al botón que abre el dropdown
+// — inequívoco (ninguna opción del menú lo tiene) y no depende de la clase
+// custom de estilo "btn-purpura", que sí podría cambiar. Verificado 1-a-1
+// contra el HTML real: `button[ngbdropdowntoggle]` → 1 match exacto en la
+// fila (vs. 12 de `td:first-child button`). Los candidatos viejos quedan
+// como último respaldo (resiliencia mientras se sigue calibrando), no como
+// primera opción.
 export const MENU_ACCIONES_PROCESO = {
     botonMenu: [
+        'button[ngbdropdowntoggle]',
+        'button.btn-purpura',
+        'button:has(em.ft-more-vertical)',
         'td:first-child button',
         'button[aria-haspopup="menu"]',
         '[class*="kebab"]',
