@@ -6,36 +6,26 @@ use App\Models\CasoPagoProveedor;
 
 class ListoParaEgresoResolver
 {
+    public function __construct(
+        private readonly PreparacionEgresoPresenter $preparacionEgreso,
+    ) {}
+
     /**
-     * Un caso está listo para Asignar Egreso cuando: tiene tipo de proceso
-     * de pago clasificado, un Traspaso presente —sea el importado de SGF
-     * (`sgf_numero_traspaso`) o al menos un `RegistroContableCgu` manual—,
-     * todos los ítems obligatorios del checklist documental cargados, y el
-     * proveedor identificado. Asume que el checklist del proceso ya fue
+     * Un caso está listo para Asignar Egreso cuando los 4 criterios del
+     * panel de preparación (ver PreparacionEgresoPresenter) están
+     * cumplidos: tipo de proceso de pago clasificado, un Traspaso presente,
+     * todos los ítems obligatorios del checklist documental cargados (o
+     * ninguno, si el tipo de proceso no exige documentos obligatorios), y
+     * el proveedor identificado. Asume que el checklist del proceso ya fue
      * resuelto (ver ResolutorChecklistDocumentalProceso).
      */
     public function resuelve(?CasoPagoProveedor $caso): bool
     {
-        if ($caso === null || $caso->proceso === null || $caso->proveedor_id === null) {
+        if ($caso === null) {
             return false;
         }
 
-        if ($caso->proceso->tipo_proceso_pago_id === null) {
-            return false;
-        }
-
-        if ($caso->registrosContablesCgu->isEmpty() && $caso->sgf_numero_traspaso === null) {
-            return false;
-        }
-
-        $checklist = $caso->proceso->checklist;
-
-        if ($checklist === null) {
-            return false;
-        }
-
-        return $checklist->items
-            ->where('tipo_requisito', 'obligatorio')
-            ->every(fn ($item) => $item->documento_id !== null);
+        return collect($this->preparacionEgreso->criterios($caso))
+            ->every(fn (array $criterio) => $criterio['cumplido']);
     }
 }
