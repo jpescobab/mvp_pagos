@@ -153,6 +153,26 @@ antes que los candidatos viejos — verificado 1-a-1 contra el HTML real
 guardado que gana como primer match y apunta al elemento correcto
 (`id="dropdownBasic1"`).
 
+**Resuelto (2026-07-21) — `botonMenu` volvió a fallar, esta vez por timing y
+no por selector**: en una corrida real la búsqueda del botón de menú de la
+fila lanzó otra vez "ningún selector candidato existe" — pero el primario
+`button[ngbdropdowntoggle]` **sí estaba en el DOM capturado**. Cargar el HTML
+de diagnóstico (`...19-53-11...`) en un Playwright headless aparte y contar
+matches lo confirmó: 6 `button[ngbdropdowntoggle]` en la página, 6 filas
+(`table:visible tbody tr`), **exactamente 1 botón toggle por fila** — el
+selector resuelve perfecto. La causa era timing: `descargarDocumentosDeFila()`
+buscaba el botón con `primerSelectorExistente` (chequeo puntual, sin
+reintento) justo después de `esperarSpinnerAusente`, pero que el spinner
+desaparezca no garantiza que Angular DataTables ya haya montado el dropdown de
+la fila — el mismo falso negativo ya resuelto para la pestaña "Lista
+documentos" (2026-07-08). Fix: la búsqueda del botón de la fila usa ahora
+`esperarYObtenerPrimero` (polling hasta 8s), consistente con el resto de los
+lookups post-transición del scraper. De paso, `esperarYObtenerPrimero` ahora
+deriva la `Page` cuando recibe un `Locator` acotado (para poder guardar
+diagnóstico en ese caso), igual que ya hacía `primerSelectorExistente` desde
+2026-07-20. **No se cambió ningún selector** — los candidatos de
+`MENU_ACCIONES_PROCESO.botonMenu` siguen siendo correctos.
+
 ## Pasos para calibrar
 
 1. Instalar dependencias (una sola vez):

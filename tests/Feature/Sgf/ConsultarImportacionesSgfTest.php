@@ -3,6 +3,7 @@
 use App\Models\CasoPagoProveedor;
 use App\Models\DefinicionWorkflow;
 use App\Models\Documento;
+use App\Models\EstadoWorkflow;
 use App\Models\Proceso;
 use App\Models\Proveedor;
 use App\Models\RegistroContableCgu;
@@ -12,11 +13,13 @@ use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
 use App\Models\TrabajoIntegracion;
 use App\Models\User;
+use App\Services\Sgf\ImportacionesSgfPresenter;
 use Database\Seeders\IntegracionesSeeder;
 use Database\Seeders\RequisitosDocumentalesPagoProveedoresSeeder;
 use Database\Seeders\TiposDocumentoSeeder;
 use Database\Seeders\TiposProcesoPagoSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /**
@@ -79,6 +82,23 @@ function crearCasoPagoProveedorParaImportacion(string $sgfId, string $rutProveed
     ]);
 
     return $caso->refresh();
+}
+
+/**
+ * Crea un snapshot mínimo asociado a una corrida, enlazado por sgf_id.
+ */
+function crearSnapshotDeImportacion(int $sistemaId, int $trabajoId, string $sgfId): SnapshotDatosExterno
+{
+    return SnapshotDatosExterno::create([
+        'sistema_externo_id' => $sistemaId,
+        'trabajo_integracion_id' => $trabajoId,
+        'metodo_captura' => 'playwright',
+        'referencia_externa' => $sgfId,
+        'payload_crudo' => [],
+        'payload_normalizado' => ['rut' => '11.111.111-1', 'monto' => 100000],
+        'hash' => "hash-{$sgfId}",
+        'capturado_en' => now(),
+    ]);
 }
 
 beforeEach(function () {
@@ -179,7 +199,49 @@ test('el listado queda vacío sin error cuando el término de búsqueda no coinc
     );
 });
 
-test('por defecto el listado excluye los trabajos de importación en estado completado', function () {
+test('por defecto el listado muestra solo los trabajos de importación completados', function () {
+    $completado = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'en_progreso',
+    ]);
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinutes(2),
+        'estado' => 'error',
+    ]);
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinutes(3),
+        'estado' => 'huerfano',
+    ]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('filtroEstado', null)
+        ->has('importaciones.data', 1)
+        ->where('importaciones.data.0.id', $completado->id)
+    );
+});
+
+test('el filtro no_completadas muestra solo los trabajos en_progreso, error y huerfano', function () {
     TrabajoIntegracion::create([
         'sistema_externo_id' => $this->sistema->id,
         'tipo' => 'importar_pendientes',
@@ -211,11 +273,11 @@ test('por defecto el listado excluye los trabajos de importación en estado comp
 
     $usuario = User::factory()->create();
 
-    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index'));
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'no_completadas']));
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->where('filtroEstado', null)
+        ->where('filtroEstado', 'no_completadas')
         ->has('importaciones.data', 3)
         ->where('importaciones.data.0.id', $enProgreso->id)
         ->where('importaciones.data.1.id', $error->id)
@@ -287,19 +349,28 @@ test('el filtro por un estado puntual muestra únicamente los trabajos en ese es
     );
 });
 
-test('el filtro de estado por defecto se combina con el término de búsqueda', function () {
-    TrabajoIntegracion::create([
+test('el filtro de estado por defecto (completadas) se combina con el término de búsqueda', function () {
+    $completadoCoincide = TrabajoIntegracion::create([
         'sistema_externo_id' => $this->sistema->id,
         'tipo' => 'importar_pendientes',
         'mecanismo' => 'playwright',
         'iniciado_en' => now(),
         'estado' => 'completado',
     ]);
-    $enProgreso = TrabajoIntegracion::create([
+    // Completada pero no coincide con el término de búsqueda.
+    TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'verificar_caso',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now()->subMinute(),
+        'estado' => 'completado',
+    ]);
+    // Coincide con la búsqueda pero no está completada: el default la excluye.
+    TrabajoIntegracion::create([
         'sistema_externo_id' => $this->sistema->id,
         'tipo' => 'importar_pendientes',
         'mecanismo' => 'playwright',
-        'iniciado_en' => now()->subMinute(),
+        'iniciado_en' => now()->subMinutes(2),
         'estado' => 'en_progreso',
     ]);
 
@@ -310,7 +381,7 @@ test('el filtro de estado por defecto se combina con el término de búsqueda', 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->has('importaciones.data', 1)
-        ->where('importaciones.data.0.id', $enProgreso->id)
+        ->where('importaciones.data.0.id', $completadoCoincide->id)
     );
 });
 
@@ -766,6 +837,97 @@ test('el resumen de la corrida cuenta correctamente los casos listos y pendiente
         ->where('importacion.resumen.casos_listos', 1)
         ->where('importacion.resumen.casos_pendientes', 1)
     );
+});
+
+test('el listado incluye el desglose de etapas del workflow de los casos que produjo la corrida', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+
+    $trabajo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_grupo_pago_operaciones',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+
+    $finanzas = EstadoWorkflow::where('codigo', 'en_revision_finanzas')->firstOrFail();
+    $zonal = EstadoWorkflow::where('codigo', 'en_revision_zonal')->firstOrFail();
+
+    // Dos casos en Finanzas, uno en Zonal.
+    foreach (['sgf-desglose-1', 'sgf-desglose-2'] as $sgfId) {
+        $caso = crearCasoPagoProveedorParaImportacion($sgfId, '11.111.111-1', null);
+        $caso->proceso->update(['estado_actual_id' => $finanzas->id]);
+        crearSnapshotDeImportacion($this->sistema->id, $trabajo->id, $sgfId);
+    }
+    $casoZonal = crearCasoPagoProveedorParaImportacion('sgf-desglose-3', '22.222.222-2', null);
+    $casoZonal->proceso->update(['estado_actual_id' => $zonal->id]);
+    crearSnapshotDeImportacion($this->sistema->id, $trabajo->id, 'sgf-desglose-3');
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'todos']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('importaciones.data.0.desglose_estados', [
+            ['estado_codigo' => 'en_revision_finanzas', 'estado_nombre' => 'En revisión — Jefe de Finanzas', 'cantidad' => 2],
+            ['estado_codigo' => 'en_revision_zonal', 'estado_nombre' => 'En revisión — Administrador Zonal', 'cantidad' => 1],
+        ])
+    );
+});
+
+test('una corrida sin casos expone un desglose de etapas vacío', function () {
+    $trabajo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $this->sistema->id,
+        'tipo' => 'importar_grupo_pago_operaciones',
+        'mecanismo' => 'playwright',
+        'iniciado_en' => now(),
+        'estado' => 'completado',
+    ]);
+
+    // Snapshot cuyo sgf_id no corresponde a ningún caso.
+    crearSnapshotDeImportacion($this->sistema->id, $trabajo->id, 'sgf-sin-caso-desglose');
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('sgf.importaciones.index', ['estado' => 'todos']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('importaciones.data.0.desglose_estados', [])
+    );
+});
+
+test('el desglose de etapas se calcula en un número acotado de consultas sin escalar por corrida', function () {
+    $this->seed(WorkflowPagoProveedoresSeeder::class);
+    $finanzas = EstadoWorkflow::where('codigo', 'en_revision_finanzas')->firstOrFail();
+
+    $trabajos = collect();
+    for ($i = 0; $i < 5; $i++) {
+        $trabajo = TrabajoIntegracion::create([
+            'sistema_externo_id' => $this->sistema->id,
+            'tipo' => 'importar_grupo_pago_operaciones',
+            'mecanismo' => 'playwright',
+            'iniciado_en' => now()->subMinutes($i),
+            'estado' => 'completado',
+        ]);
+        $sgfId = "sgf-nplus-{$i}";
+        $caso = crearCasoPagoProveedorParaImportacion($sgfId, '11.111.111-1', null);
+        $caso->proceso->update(['estado_actual_id' => $finanzas->id]);
+        crearSnapshotDeImportacion($this->sistema->id, $trabajo->id, $sgfId);
+        $trabajos->push($trabajo->fresh());
+    }
+
+    DB::enableQueryLog();
+    $contexto = app(ImportacionesSgfPresenter::class)->contextoListado($trabajos);
+    $consultas = count(DB::getQueryLog());
+    DB::disableQueryLog();
+
+    // Dos consultas en bloque (snapshots + casos con proceso.estadoActual eager):
+    // no debe crecer con la cantidad de corridas.
+    expect($consultas)->toBeLessThanOrEqual(5);
+    expect($contexto['desglosePorTrabajo'][$trabajos->first()->id])->toHaveCount(1);
+    expect($contexto['eliminablePorTrabajo'][$trabajos->first()->id])->toBeFalse();
 });
 
 test('un usuario no autenticado es redirigido al login', function () {

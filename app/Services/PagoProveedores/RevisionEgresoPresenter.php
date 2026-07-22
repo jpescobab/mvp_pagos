@@ -90,7 +90,22 @@ class RevisionEgresoPresenter
     {
         $instancia = $this->revision->instanciaDelCaso($caso);
         $totales = $this->revision->totales($caso);
-        $documentos = $this->validaciones->documentosDelCaso($caso);
+        $clasificados = $this->validaciones->documentosDelCaso($caso);
+
+        /** @var Collection<int, Documento> $obligatorios */
+        $obligatorios = $clasificados['obligatorios'];
+        /** @var Collection<int, Documento> $opcionales */
+        $opcionales = $clasificados['opcionales'];
+        $faltantes = $clasificados['faltantes'];
+
+        $documentos = $obligatorios
+            ->map(fn (Documento $d) => $this->documento($d, $instancia, 'obligatorio'))
+            ->concat($opcionales->map(fn (Documento $d) => $this->documento($d, $instancia, 'opcional')))
+            ->all();
+
+        $obligatoriosOk = $obligatorios
+            ->filter(fn (Documento $d) => $this->estadoDocumento($d, $instancia) === 'valido')
+            ->count();
 
         return [
             'id' => $caso->id,
@@ -112,19 +127,22 @@ class RevisionEgresoPresenter
             ],
             'listo_para_aprobar' => $this->revision->pagoListoParaAprobar($caso),
             'jurisdiccion_determinable' => $instancia !== InstanciaRevision::Finanzas || $caso->cfinancieroId() !== null,
-            'documentos' => $documentos->map(fn (Documento $d) => $this->documento($d, $instancia))->all(),
+            'documentos' => $documentos,
+            'faltantes' => array_map(
+                fn (array $faltante) => [...$faltante, 'clasificacion' => 'faltante'],
+                $faltantes,
+            ),
+            'obligatorios_ok' => $obligatoriosOk,
+            'obligatorios_total' => $obligatorios->count() + count($faltantes),
         ];
     }
 
     /**
+     * @param  'obligatorio'|'opcional'  $clasificacion
      * @return array<string, mixed>
      */
-    private function documento(Documento $documento, ?InstanciaRevision $instancia): array
+    private function documento(Documento $documento, ?InstanciaRevision $instancia, string $clasificacion): array
     {
-        $estado = $instancia !== null
-            ? $this->validaciones->estadoVigente($documento, $instancia)
-            : $documento->estadoVigente();
-
         $ultima = $instancia !== null
             ? $documento->validaciones->filter(fn ($v) => $v->instancia === $instancia)->sortByDesc('id')->first()
             : $documento->validaciones->sortByDesc('id')->first();
@@ -134,9 +152,21 @@ class RevisionEgresoPresenter
             'titulo' => $documento->titulo,
             'tipo' => $documento->tipoDocumento?->nombre,
             'tipo_codigo' => $documento->tipoDocumento?->codigo,
-            'estado' => $estado,
+            'estado' => $this->estadoDocumento($documento, $instancia),
             'observacion' => $ultima?->observacion,
+            'clasificacion' => $clasificacion,
         ];
+    }
+
+    /**
+     * Estado vigente del documento en la instancia activa (o el estado global
+     * si el egreso no está en una instancia de revisión única).
+     */
+    private function estadoDocumento(Documento $documento, ?InstanciaRevision $instancia): string
+    {
+        return $instancia !== null
+            ? $this->validaciones->estadoVigente($documento, $instancia)
+            : $documento->estadoVigente();
     }
 
     private function puedeOperar(EgresoCgu $egreso, ?InstanciaRevision $instancia, User $user): bool

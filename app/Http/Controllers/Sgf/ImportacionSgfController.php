@@ -9,14 +9,24 @@ use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\SistemaExterno;
 use App\Models\TrabajoIntegracion;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
+use App\Services\Sgf\ImportacionesSgfPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ImportacionSgfController extends Controller
 {
+    /**
+     * Estados de un trabajo que "aún requieren atención" (todo lo que no es
+     * completado): el filtro "no completadas" replica la vista anterior.
+     *
+     * @var list<string>
+     */
+    private const ESTADOS_NO_COMPLETADAS = ['en_progreso', 'error', 'huerfano'];
+
     public function __construct(
         private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist,
+        private readonly ImportacionesSgfPresenter $importacionesPresenter,
     ) {}
 
     public function index(Request $request): Response
@@ -32,11 +42,24 @@ class ImportacionSgfController extends Controller
                 fn ($sub) => $sub->where('tipo', 'like', "%{$q}%")
                     ->orWhereHas('iniciadoPor', fn ($usuario) => $usuario->where('name', 'like', "%{$q}%"))
             ))
-            ->when($estado === null, fn ($query) => $query->where('estado', '!=', 'completado'))
-            ->when($estado !== null && $estado !== 'todos', fn ($query) => $query->where('estado', $estado))
+            // Por defecto (sin filtro explícito) el listado muestra solo las
+            // corridas completadas, que son las que normalmente se consultan.
+            ->when($estado === null, fn ($query) => $query->where('estado', 'completado'))
+            ->when($estado === 'no_completadas', fn ($query) => $query->whereIn('estado', self::ESTADOS_NO_COMPLETADAS))
+            ->when(
+                $estado !== null && $estado !== 'todos' && $estado !== 'no_completadas',
+                fn ($query) => $query->where('estado', $estado),
+            )
             ->latest('iniciado_en')
             ->paginate(20)
             ->withQueryString();
+
+        $contexto = $this->importacionesPresenter->contextoListado($importaciones->getCollection());
+
+        $importaciones->getCollection()->each(function (TrabajoIntegracion $trabajo) use ($contexto): void {
+            $trabajo->desgloseEstados = $contexto['desglosePorTrabajo'][$trabajo->id] ?? [];
+            $trabajo->eliminable = $contexto['eliminablePorTrabajo'][$trabajo->id] ?? false;
+        });
 
         return Inertia::render('sgf/importaciones/index', [
             'importaciones' => ImportacionSgfResource::collection($importaciones),

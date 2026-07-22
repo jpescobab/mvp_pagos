@@ -146,11 +146,11 @@ async function esperarYObtenerPrimero(contexto, candidatos, descripcion, timeout
         await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
-    // NOTA: asume que `contexto` es la Page (así se llama hoy en todos los
-    // call sites) — si en el futuro se pasa un Locator acotado, esto
-    // lanzaría al intentar hacer .screenshot()/.content() sobre él; ajustar
-    // pasando la Page por separado si hace falta.
-    const diagnostico = await capturarDiagnostico(contexto, descripcion.replace(/[^a-z0-9]+/gi, '_'));
+    // `contexto` puede ser la Page o un Locator acotado (ej. una fila): se
+    // deriva la Page real para el diagnóstico, igual que en
+    // primerSelectorExistente() (Locator expone .page(); Page no).
+    const pagina = typeof contexto.page === 'function' ? contexto.page() : contexto;
+    const diagnostico = await capturarDiagnostico(pagina, descripcion.replace(/[^a-z0-9]+/gi, '_'));
 
     throw new Error(
         `Ningún selector candidato para "${descripcion}" apareció visible dentro de ${timeoutMs}ms — hay que calibrar selectors.js contra el DOM real. ${diagnostico}`,
@@ -611,7 +611,16 @@ async function localizarFilasTablaDocumentos(page, timeoutMs = 8000) {
 async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
     await esperarSpinnerAusente(page);
 
-    const botonMenu = await primerSelectorExistente(filaLocator, MENU_ACCIONES_PROCESO.botonMenu, 'botón de menú de acciones del proceso');
+    // Polling (esperarYObtenerPrimero), NO primerSelectorExistente: el botón
+    // toggle de la fila lo monta Angular DataTables de forma asíncrona.
+    // esperarSpinnerAusente garantiza que el overlay de carga se fue, pero no
+    // que el DOM de la fila ya esté pintado, así que un chequeo puntual acá da
+    // falso negativo — el mismo timing que ya se maneja con reintento para la
+    // opción del menú y la pestaña más abajo. RECALIBRADO 2026-07-21: el
+    // conector falló con "ningún selector existe" aunque el
+    // `button[ngbdropdowntoggle]` SÍ estaba en el DOM capturado (6 en la
+    // página, 1 por fila) — timing, no selector incorrecto.
+    const botonMenu = await esperarYObtenerPrimero(filaLocator, MENU_ACCIONES_PROCESO.botonMenu, 'botón de menú de acciones del proceso');
     await botonMenu.click();
 
     // VERIFICADO (2026-07-08): el menú NO vive dentro de la fila (buscarlo

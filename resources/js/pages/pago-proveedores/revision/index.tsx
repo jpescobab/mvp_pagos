@@ -24,6 +24,13 @@ type Documento = {
     tipo_codigo: string | null;
     estado: string; // valido | rechazado | pendiente
     observacion: string | null;
+    clasificacion: 'obligatorio' | 'opcional';
+};
+
+type DocumentoFaltante = {
+    tipo_documento_id: number;
+    tipo_documento: string | null;
+    clasificacion: 'faltante';
 };
 
 type Totales = {
@@ -49,6 +56,9 @@ type Pago = {
     listo_para_aprobar: boolean;
     jurisdiccion_determinable: boolean;
     documentos: Documento[];
+    faltantes: DocumentoFaltante[];
+    obligatorios_ok: number;
+    obligatorios_total: number;
 };
 
 type Egreso = {
@@ -268,9 +278,68 @@ return;
     }
 
     /* --------- derivados --------- */
-    const docsOk = pago ? pago.documentos.filter((d) => d.estado === 'valido').length : 0;
-    const docsTotal = pago?.documentos.length ?? 0;
+    // El avance documental lo dicta el backend y cuenta SOLO los obligatorios
+    // del checklist (los opcionales no afectan la barra ni habilitan Aprobar).
+    const docsOk = pago?.obligatorios_ok ?? 0;
+    const docsTotal = pago?.obligatorios_total ?? 0;
     const pct = docsTotal ? Math.round((docsOk / docsTotal) * 100) : 0;
+    const documentosObligatorios = pago?.documentos.filter((d) => d.clasificacion === 'obligatorio') ?? [];
+    const documentosOpcionales = pago?.documentos.filter((d) => d.clasificacion === 'opcional') ?? [];
+    const faltantes = pago?.faltantes ?? [];
+
+    function renderDocCard(d: Documento) {
+        const meta = tipoMeta(d.tipo_codigo);
+        const est = ESTADO_DOC[d.estado] ?? ESTADO_DOC.pendiente;
+        const ok = d.estado === 'valido';
+        const bad = d.estado === 'rechazado';
+
+        return (
+            <button
+                key={d.id}
+                type="button"
+                className={`doc-card${d.id === doc?.id ? ' active' : ''}`}
+                onClick={() => {
+                    setDocId(d.id);
+                    setRejectingDoc(null);
+                }}
+            >
+                <div className="doc-ic" style={{ background: `${meta.color}22`, color: meta.color }}>
+                    <Icon path={meta.icon} />
+                </div>
+                <div className="doc-meta">
+                    <div className="dn">{d.titulo}</div>
+                    <div className="dt">{d.tipo ?? 'Documento'}</div>
+                    <div className="dbadge"><span className={`badge ${est.cls}`}><span className="d" />{est.label}</span></div>
+                </div>
+                <div
+                    className="doc-check"
+                    style={{
+                        background: ok ? 'var(--green)' : bad ? 'var(--red)' : 'var(--panel)',
+                        border: ok || bad ? '1px solid transparent' : '1px solid var(--border-strong)',
+                        color: ok || bad ? '#fff' : 'var(--fg-soft)',
+                    }}
+                >
+                    {ok && <Icon path={IC.check} />}
+                    {bad && <Icon path={IC.x} />}
+                </div>
+            </button>
+        );
+    }
+
+    function renderFaltante(f: DocumentoFaltante) {
+        return (
+            <div key={`faltante-${f.tipo_documento_id}`} className="doc-card faltante" aria-disabled>
+                <div className="doc-ic" style={{ background: 'var(--orange-soft)', color: 'var(--orange)' }}>
+                    <Icon path={IC.otro} />
+                </div>
+                <div className="doc-meta">
+                    <div className="dn">{f.tipo_documento ?? 'Documento requerido'}</div>
+                    <div className="dt">Sin documento vinculado</div>
+                    <div className="dbadge"><span className="badge orange"><span className="d" />Faltante</span></div>
+                </div>
+            </div>
+        );
+    }
     const finalizado = pago?.estado === 'lista_para_registro_cgu';
     const readyAprobar = (pago?.listo_para_aprobar ?? false) && puedeOperar && !finalizado;
 
@@ -379,45 +448,28 @@ return;
                         {pago && (
                             <div className="review-body">
                                 <div className="docs-col">
-                                    <div className="docs-col-label">Documentos del pago</div>
-                                    {pago.documentos.map((d) => {
-                                        const meta = tipoMeta(d.tipo_codigo);
-                                        const est = ESTADO_DOC[d.estado] ?? ESTADO_DOC.pendiente;
-                                        const ok = d.estado === 'valido';
-                                        const bad = d.estado === 'rechazado';
+                                    <div className="docs-col-label">
+                                        Obligatorios · {docsOk}/{docsTotal}
+                                    </div>
+                                    {documentosObligatorios.length === 0 && faltantes.length === 0 ? (
+                                        <p className="docs-col-empty">
+                                            El checklist del proceso no define documentos obligatorios.
+                                        </p>
+                                    ) : (
+                                        <>
+                                            {documentosObligatorios.map(renderDocCard)}
+                                            {faltantes.map(renderFaltante)}
+                                        </>
+                                    )}
 
-                                        return (
-                                            <button
-                                                key={d.id}
-                                                type="button"
-                                                className={`doc-card${d.id === doc?.id ? ' active' : ''}`}
-                                                onClick={() => {
-                                                    setDocId(d.id);
-                                                    setRejectingDoc(null);
-                                                }}
-                                            >
-                                                <div className="doc-ic" style={{ background: `${meta.color}22`, color: meta.color }}>
-                                                    <Icon path={meta.icon} />
-                                                </div>
-                                                <div className="doc-meta">
-                                                    <div className="dn">{d.titulo}</div>
-                                                    <div className="dt">{d.tipo ?? 'Documento'}</div>
-                                                    <div className="dbadge"><span className={`badge ${est.cls}`}><span className="d" />{est.label}</span></div>
-                                                </div>
-                                                <div
-                                                    className="doc-check"
-                                                    style={{
-                                                        background: ok ? 'var(--green)' : bad ? 'var(--red)' : 'var(--panel)',
-                                                        border: ok || bad ? '1px solid transparent' : '1px solid var(--border-strong)',
-                                                        color: ok || bad ? '#fff' : 'var(--fg-soft)',
-                                                    }}
-                                                >
-                                                    {ok && <Icon path={IC.check} />}
-                                                    {bad && <Icon path={IC.x} />}
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
+                                    {documentosOpcionales.length > 0 && (
+                                        <>
+                                            <div className="docs-col-label docs-col-label-sec">
+                                                Opcionales
+                                            </div>
+                                            {documentosOpcionales.map(renderDocCard)}
+                                        </>
+                                    )}
                                 </div>
 
                                 <div className="viewer-col">
@@ -642,6 +694,11 @@ html.dark .revpay{
 .revpay .review-body{flex:1;min-height:440px;display:grid;grid-template-columns:240px 1fr;grid-template-rows:minmax(0,1fr);border-top:1px solid var(--border);overflow:hidden;margin-top:6px;border-radius:12px;border:1px solid var(--border);}
 .revpay .docs-col{border-right:1px solid var(--border);background:var(--panel);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:0;height:100%;}
 .revpay .docs-col-label{font-size:11px;font-weight:700;color:var(--fg-soft);text-transform:uppercase;letter-spacing:0.06em;padding:2px 4px 6px;}
+.revpay .docs-col-label-sec{margin-top:8px;border-top:1px dashed var(--border);padding-top:10px;}
+.revpay .docs-col-empty{font-size:12px;color:var(--fg-soft);padding:2px 4px 6px;line-height:1.4;}
+.revpay .doc-card.faltante{cursor:default;border-style:dashed;background:var(--panel);}
+.revpay .doc-card.faltante:hover{border-color:var(--border);}
+.revpay .doc-card.faltante .doc-meta{padding-right:12px;}
 .revpay .doc-card{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel-2);cursor:pointer;transition:all .15s;position:relative;text-align:left;}
 .revpay .doc-card:hover{border-color:var(--border-strong);}
 .revpay .doc-card.active{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent);}

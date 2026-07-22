@@ -53,10 +53,17 @@ export type ChecklistItem = {
     tipo_requisito: string;
     estado_cumplimiento: string;
     documento_id: number | null;
+    nombre_archivo: string | null;
 };
 
 export type Checklist = {
     items: ChecklistItem[];
+};
+
+export type DocumentoRevinculable = {
+    documento_id: number;
+    tipo_documento: string | null;
+    nombre_archivo: string | null;
 };
 
 export type ValidacionDocumentoHistorial = {
@@ -90,6 +97,7 @@ export type Proceso = {
     transiciones_disponibles: TransicionWorkflow[];
     checklist?: Checklist | null;
     documentos?: DocumentoVinculado[];
+    documentos_revinculables?: DocumentoRevinculable[];
     tipo_proceso_pago_id: number | null;
     tipo_proceso_pago?: TipoProcesoPago | null;
 };

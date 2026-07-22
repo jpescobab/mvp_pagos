@@ -71,6 +71,7 @@ export default function CasoShow() {
     const documentosHuerfanos = (caso.proceso.documentos ?? []).filter(
         (doc) => !doc.coincide_checklist,
     );
+    const documentosRevinculables = caso.proceso.documentos_revinculables ?? [];
 
     const historial = [
         ...(caso.proceso.historial_transiciones ?? []),
@@ -137,8 +138,20 @@ export default function CasoShow() {
     const [documentoPreviewId, setDocumentoPreviewId] = useState<number | null>(
         null,
     );
+
+    // El visor sigue al documento vigente (valor derivado, no estado sincronizado):
+    // si el documento seleccionado deja de estar vinculado activamente (p. ej.
+    // tras desvincularlo), el visor deja de mostrarlo en vez de quedar con un
+    // PDF ya desvinculado. Al re-vincular y elegir "Ver", se muestra el vigente.
+    const documentoPreviewIdVigente =
+        documentoPreviewId !== null &&
+        (caso.proceso.documentos ?? []).some(
+            (doc) => doc.documento_id === documentoPreviewId,
+        )
+            ? documentoPreviewId
+            : null;
     const documentoPreviewItem = caso.proceso.checklist?.items.find(
-        (item) => item.documento_id === documentoPreviewId,
+        (item) => item.documento_id === documentoPreviewIdVigente,
     );
 
     function vincularHuerfano(
@@ -154,6 +167,40 @@ export default function CasoShow() {
 
         router.patch(
             documentos.tipoDocumento.store({
+                proceso: caso.proceso.id,
+                documento: Number(documentoId),
+            }).url,
+            { tipo_documento_id: tipoDocumentoId },
+            {
+                preserveScroll: true,
+                onSuccess: () =>
+                    setHuerfanoSeleccionado((actual) => ({
+                        ...actual,
+                        [tipoDocumentoId]: undefined,
+                    })),
+                onError: (errors) =>
+                    setErrorDocumento(
+                        (errors as Record<string, string>).tipo_documento_id ??
+                            null,
+                    ),
+                onFinish: () => setVinculandoHuerfano(false),
+            },
+        );
+    }
+
+    function reactivarDocumento(
+        tipoDocumentoId: number,
+        documentoId: string | undefined,
+    ) {
+        if (!documentoId) {
+            return;
+        }
+
+        setVinculandoHuerfano(true);
+        setErrorDocumento(null);
+
+        router.patch(
+            documentos.reactivar({
                 proceso: caso.proceso.id,
                 documento: Number(documentoId),
             }).url,
@@ -276,7 +323,7 @@ export default function CasoShow() {
                                 {caso.periodo ?? '—'}
                             </span>
                             {' · '}
-                            Número SGF:{' '}
+                            N° DTE:{' '}
                             <span className="font-mono text-foreground">
                                 {caso.numero ?? '—'}
                             </span>
@@ -605,6 +652,7 @@ export default function CasoShow() {
                             caso={caso}
                             errorDocumento={errorDocumento}
                             documentosHuerfanos={documentosHuerfanos}
+                            documentosRevinculables={documentosRevinculables}
                             puedeGestionarDocumentos={puedeGestionarDocumentos}
                             subiendoDocumento={subiendoDocumento}
                             subirDocumento={subirDocumento}
@@ -612,7 +660,8 @@ export default function CasoShow() {
                             setHuerfanoSeleccionado={setHuerfanoSeleccionado}
                             vinculandoHuerfano={vinculandoHuerfano}
                             vincularHuerfano={vincularHuerfano}
-                            documentoPreviewId={documentoPreviewId}
+                            reactivarDocumento={reactivarDocumento}
+                            documentoPreviewId={documentoPreviewIdVigente}
                             onVerDocumento={setDocumentoPreviewId}
                             desvincularDocumento={desvincularDocumento}
                         />
@@ -622,12 +671,13 @@ export default function CasoShow() {
                                 <h2 className="text-base font-medium">
                                     Vista previa
                                 </h2>
-                                {documentoPreviewId !== null && (
+                                {documentoPreviewIdVigente !== null && (
                                     <a
                                         href={
                                             documentos.ver({
                                                 proceso: caso.proceso.id,
-                                                documento: documentoPreviewId,
+                                                documento:
+                                                    documentoPreviewIdVigente,
                                             }).url
                                         }
                                         target="_blank"
@@ -639,13 +689,13 @@ export default function CasoShow() {
                                 )}
                             </div>
 
-                            {documentoPreviewId !== null ? (
+                            {documentoPreviewIdVigente !== null ? (
                                 <iframe
-                                    key={documentoPreviewId}
+                                    key={documentoPreviewIdVigente}
                                     src={
                                         documentos.ver({
                                             proceso: caso.proceso.id,
-                                            documento: documentoPreviewId,
+                                            documento: documentoPreviewIdVigente,
                                         }).url
                                     }
                                     title={

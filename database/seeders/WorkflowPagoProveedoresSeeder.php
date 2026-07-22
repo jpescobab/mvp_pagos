@@ -39,12 +39,17 @@ class WorkflowPagoProveedoresSeeder extends Seeder
         // para ser independientes del orden.
         Permission::firstOrCreate(['name' => 'documentos.validar']);
         Permission::firstOrCreate(['name' => 'documentos.gestionar']);
+        // Permiso core de integraciones: eliminar corridas de importación SGF
+        // sin trazabilidad. Lo crea también RolesAndPermissionsSeeder; se
+        // garantiza aquí con firstOrCreate para ser independiente del orden.
+        Permission::firstOrCreate(['name' => 'integraciones_sgf.eliminar_importacion']);
 
         $jefeFinanzas = Role::firstOrCreate(['name' => 'jefe_finanzas']);
         $jefeFinanzas->givePermissionTo([
             'pago_proveedores.revisar_finanzas',
             'pago_proveedores.gestionar_caso',
             'documentos.validar',
+            'integraciones_sgf.eliminar_importacion',
         ]);
 
         $administradorZonal = Role::firstOrCreate(['name' => 'administrador_zonal']);

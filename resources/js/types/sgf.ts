@@ -25,6 +25,12 @@ export type ResumenImportacionSgf = {
     casos_pendientes: number;
 };
 
+export type EtapaImportacionSgf = {
+    estado_codigo: string;
+    estado_nombre: string;
+    cantidad: number;
+};
+
 export type ImportacionSgf = {
     id: number;
     tipo: string;
@@ -35,6 +41,8 @@ export type ImportacionSgf = {
     total_elementos: number;
     estado: string;
     error: string | null;
+    desglose_estados: EtapaImportacionSgf[];
+    eliminable: boolean;
     snapshots?: SnapshotSgfResumen[];
     resumen?: ResumenImportacionSgf | null;
 };

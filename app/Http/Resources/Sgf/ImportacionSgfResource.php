@@ -53,6 +53,8 @@ class ImportacionSgfResource extends JsonResource
             'total_elementos' => $this->total_elementos,
             'estado' => $this->estado,
             'error' => $this->error,
+            'desglose_estados' => $this->desgloseEstados,
+            'eliminable' => $this->eliminable,
             'snapshots' => $this->when($snapshotsCargados, $snapshots),
             'resumen' => $this->when($snapshotsCargados, fn () => $this->resumen($snapshots)),
         ];
