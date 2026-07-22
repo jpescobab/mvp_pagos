@@ -5,6 +5,7 @@ namespace App\Services\PagoProveedores;
 use App\Enums\PagoProveedores\InstanciaRevision;
 use App\Models\CasoPagoProveedor;
 use App\Models\Documento;
+use App\Models\Proceso;
 use App\Models\User;
 use App\Models\ValidacionDocumento;
 use Illuminate\Support\Collection;
@@ -56,45 +57,121 @@ class ValidacionDocumentoInstanciaService
     }
 
     /**
-     * ¿Todos los documentos vinculados al proceso del caso están aprobados
-     * (`valido`) en la instancia indicada?
+     * ¿El pago está documentalmente listo para aprobarse en la instancia? El
+     * gating cuenta SOLO los documentos obligatorios según el checklist del
+     * proceso: no puede haber ningún obligatorio faltante y todos los
+     * obligatorios presentes deben estar aprobados (`valido`) en la instancia.
+     * Los documentos opcionales no bloquean.
      */
     public function todosAprobados(CasoPagoProveedor $caso, InstanciaRevision $instancia): bool
     {
-        $documentos = $this->documentosDelCaso($caso);
+        $clasificados = $this->documentosDelCaso($caso);
 
-        if ($documentos->isEmpty()) {
+        if ($clasificados['faltantes'] !== []) {
             return false;
         }
 
-        return $documentos->every(
+        $obligatorios = $clasificados['obligatorios'];
+
+        if ($obligatorios->isEmpty()) {
+            return false;
+        }
+
+        return $obligatorios->every(
             fn (Documento $documento) => $this->estadoVigente($documento, $instancia) === 'valido',
         );
     }
 
     /**
-     * Documentos activos vinculados al proceso del caso, con sus validaciones.
+     * Documentos activos vinculados al proceso del caso, clasificados contra el
+     * checklist documental del proceso: obligatorios (tipo exigido por un ítem
+     * obligatorio del checklist), opcionales (el resto de lo vinculado) y
+     * faltantes (tipos obligatorios del checklist sin documento vinculado).
      *
-     * @return Collection<int, Documento>
+     * @return array{
+     *     obligatorios: Collection<int, Documento>,
+     *     opcionales: Collection<int, Documento>,
+     *     faltantes: list<array{tipo_documento_id: int, tipo_documento: string|null}>
+     * }
      */
-    public function documentosDelCaso(CasoPagoProveedor $caso): Collection
+    public function documentosDelCaso(CasoPagoProveedor $caso): array
     {
         $proceso = $caso->proceso;
 
         if ($proceso === null) {
-            return collect();
+            return ['obligatorios' => collect(), 'opcionales' => collect(), 'faltantes' => []];
         }
 
         $documentoIds = $proceso->vinculosDocumento()
             ->where('activo', true)
             ->pluck('documento_id');
 
-        if ($documentoIds->isEmpty()) {
-            return collect();
-        }
-
-        return Documento::whereIn('id', $documentoIds)
+        /** @var Collection<int, Documento> $documentos */
+        $documentos = Documento::query()
+            ->whereIn('id', $documentoIds)
             ->with(['tipoDocumento', 'validaciones.validadoPor'])
             ->get();
+
+        [$tipoIdsObligatorios, $tiposObligatorios] = $this->obligatoriosDelProceso($proceso);
+
+        $obligatorios = $documentos
+            ->filter(fn (Documento $d) => in_array($d->tipo_documento_id, $tipoIdsObligatorios, true))
+            ->values();
+
+        $opcionales = $documentos
+            ->reject(fn (Documento $d) => in_array($d->tipo_documento_id, $tipoIdsObligatorios, true))
+            ->values();
+
+        $tiposPresentes = $documentos->pluck('tipo_documento_id')->all();
+
+        $faltantes = array_values(array_filter(
+            $tiposObligatorios,
+            fn (array $tipo) => ! in_array($tipo['tipo_documento_id'], $tiposPresentes, true),
+        ));
+
+        return [
+            'obligatorios' => $obligatorios,
+            'opcionales' => $opcionales,
+            'faltantes' => $faltantes,
+        ];
+    }
+
+    /**
+     * Tipos de documento obligatorios del proceso según su checklist. Devuelve
+     * la lista de `tipo_documento_id` obligatorios y la lista (única por tipo)
+     * con el nombre del tipo, para construir tanto la clasificación como las
+     * filas faltantes. Sin checklist generado, no hay obligatorios.
+     *
+     * @return array{0: list<int>, 1: list<array{tipo_documento_id: int, tipo_documento: string|null}>}
+     */
+    private function obligatoriosDelProceso(Proceso $proceso): array
+    {
+        $checklist = $proceso->checklist;
+
+        if ($checklist === null) {
+            return [[], []];
+        }
+
+        $items = $checklist->items()
+            ->where('tipo_requisito', 'obligatorio')
+            ->with('tipoDocumento')
+            ->get();
+
+        $tipos = [];
+
+        foreach ($items as $item) {
+            $tipoId = $item->tipo_documento_id;
+
+            if (isset($tipos[$tipoId])) {
+                continue;
+            }
+
+            $tipos[$tipoId] = [
+                'tipo_documento_id' => $tipoId,
+                'tipo_documento' => $item->tipoDocumento?->nombre,
+            ];
+        }
+
+        return [array_keys($tipos), array_values($tipos)];
     }
 }

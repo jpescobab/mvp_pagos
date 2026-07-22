@@ -3,6 +3,8 @@
 use App\Enums\PagoProveedores\InstanciaRevision;
 use App\Exceptions\TransicionWorkflowException;
 use App\Models\CasoPagoProveedor;
+use App\Models\ChecklistDocumentalProceso;
+use App\Models\ConjuntoRequisitosDocumentales;
 use App\Models\DefinicionWorkflow;
 use App\Models\Documento;
 use App\Models\EgresoCgu;
@@ -12,9 +14,11 @@ use App\Models\ModalidadAdquisicion;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
+use App\Models\RequisitoDocumental;
 use App\Models\SecurityAuditLog;
 use App\Models\TipoDocumento;
 use App\Models\User;
+use App\Services\PagoProveedores\RevisionEgresoPresenter;
 use App\Services\PagoProveedores\RevisionEgresoService;
 use App\Services\PagoProveedores\ValidacionDocumentoInstanciaService;
 use App\Services\Workflow\TransicionWorkflowService;
@@ -85,6 +89,11 @@ function crearEscenarioRevision(float $monto = 500000, string $sufijo = 'A'): ar
     $documento = Documento::create(['tipo_documento_id' => $factura->id, 'titulo' => "Factura {$sufijo}.pdf"]);
     $proceso->vinculosDocumento()->create(['documento_id' => $documento->id, 'activo' => true]);
 
+    // Checklist del proceso con FACTURA como único obligatorio (el requisito
+    // universal que ya exige el workflow). La Revisión de Pagos clasifica y
+    // gatea la aprobación contra este checklist.
+    $checklist = crearChecklistProceso($proceso, [['codigo' => 'FACTURA', 'tipo_requisito' => 'obligatorio']]);
+
     $egreso = EgresoCgu::create([
         'numero_egreso' => "EGR-{$sufijo}",
         'fecha' => '2026-07-05',
@@ -99,9 +108,64 @@ function crearEscenarioRevision(float $monto = 500000, string $sufijo = 'A'): ar
         'egreso' => $egreso->refresh(),
         'caso' => $caso->refresh(),
         'documento' => $documento,
+        'checklist' => $checklist,
         'cfinancieroId' => $cfinanciero->id,
         'jurisdiccionId' => $jurisdiccion->id,
     ];
+}
+
+/**
+ * Crea un ChecklistDocumentalProceso para el proceso con los ítems indicados.
+ * La clasificación de la revisión usa los vínculos vivos de documentos, no el
+ * documento_id del ítem, así que basta declarar tipo + tipo_requisito.
+ *
+ * @param  list<array{codigo: string, tipo_requisito: string}>  $items
+ */
+function crearChecklistProceso(Proceso $proceso, array $items): ChecklistDocumentalProceso
+{
+    $conjunto = ConjuntoRequisitosDocumentales::firstOrCreate(
+        ['codigo' => 'pago_proveedores'],
+        ['nombre' => 'Requisitos documentales de Pago de Proveedores', 'activo' => true],
+    );
+
+    $checklist = ChecklistDocumentalProceso::create([
+        'proceso_id' => $proceso->id,
+        'conjunto_requisitos_documentales_id' => $conjunto->id,
+        'generado_en' => now(),
+    ]);
+
+    foreach ($items as $item) {
+        agregarItemChecklist($checklist, $proceso, $item['codigo'], $item['tipo_requisito']);
+    }
+
+    return $checklist;
+}
+
+function agregarItemChecklist(
+    ChecklistDocumentalProceso $checklist,
+    Proceso $proceso,
+    string $codigoTipo,
+    string $tipoRequisito,
+): void {
+    $tipo = TipoDocumento::where('codigo', $codigoTipo)->firstOrFail();
+
+    $requisito = RequisitoDocumental::create([
+        'conjunto_requisitos_documentales_id' => $checklist->conjunto_requisitos_documentales_id,
+        'tipo_documento_id' => $tipo->id,
+        'modalidad_id' => null,
+        'tipo_proceso_pago_id' => null,
+        'definicion_workflow_id' => $proceso->definicion_workflow_id,
+        'tipo_requisito' => $tipoRequisito,
+        'activo' => true,
+    ]);
+
+    $checklist->items()->create([
+        'requisito_documental_id' => $requisito->id,
+        'tipo_documento_id' => $tipo->id,
+        'tipo_requisito' => $tipoRequisito,
+        'documento_id' => null,
+        'estado_cumplimiento' => 'pendiente',
+    ]);
 }
 
 function usuarioConRol(string $rol, ?int $cfinancieroId = null): User
@@ -347,4 +411,123 @@ test('la instancia Finanzas puede devolver (observar) el pago con comentario ví
 
     $response->assertSessionHasNoErrors();
     expect($e['caso']->proceso->refresh()->estadoActual->codigo)->toBe('observada');
+});
+
+test('un obligatorio del checklist presente y aprobado habilita la aprobación y se clasifica como obligatorio', function () {
+    $e = crearEscenarioRevision();
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $presenter = app(RevisionEgresoPresenter::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+
+    expect($revision->pagoListoParaAprobar($e['caso']->refresh()))->toBeTrue();
+
+    $pago = collect($presenter->detalle($e['egreso']->refresh(), $finanzas)['pagos'])
+        ->firstWhere('sgf_id', $e['caso']->sgf_id);
+    $factura = collect($pago['documentos'])->firstWhere('tipo', 'Factura');
+
+    expect($factura['clasificacion'])->toBe('obligatorio');
+    expect($pago['faltantes'])->toBeEmpty();
+    expect($pago['obligatorios_ok'])->toBe(1);
+    expect($pago['obligatorios_total'])->toBe(1);
+});
+
+test('un obligatorio del checklist sin documento vinculado aparece como faltante y bloquea la aprobación', function () {
+    $e = crearEscenarioRevision();
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $presenter = app(RevisionEgresoPresenter::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    // COMPROBANTE obligatorio en el checklist, sin documento vinculado -> faltante.
+    agregarItemChecklist($e['checklist'], $e['caso']->proceso, 'COMPROBANTE', 'obligatorio');
+
+    // El obligatorio presente (FACTURA) sí se aprueba y los totales se verifican;
+    // aun así el faltante bloquea.
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+
+    expect($revision->pagoListoParaAprobar($e['caso']->refresh()))->toBeFalse();
+
+    $pago = collect($presenter->detalle($e['egreso']->refresh(), $finanzas)['pagos'])
+        ->firstWhere('sgf_id', $e['caso']->sgf_id);
+
+    expect($pago['faltantes'])->toHaveCount(1);
+    expect($pago['obligatorios_ok'])->toBe(1);
+    expect($pago['obligatorios_total'])->toBe(2);
+});
+
+test('un documento opcional pendiente no bloquea la aprobación y se clasifica como opcional', function () {
+    $e = crearEscenarioRevision();
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $presenter = app(RevisionEgresoPresenter::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    // Documento de un tipo que NO es obligatorio en el checklist -> opcional.
+    $tipoOpcional = TipoDocumento::where('codigo', 'ACTA_RECEP')->firstOrFail();
+    $docOpcional = Documento::create(['tipo_documento_id' => $tipoOpcional->id, 'titulo' => 'acta.pdf']);
+    $e['caso']->proceso->vinculosDocumento()->create(['documento_id' => $docOpcional->id, 'activo' => true]);
+
+    // Se aprueba solo el obligatorio (FACTURA); el opcional queda pendiente.
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+
+    expect($revision->pagoListoParaAprobar($e['caso']->refresh()))->toBeTrue();
+
+    $pago = collect($presenter->detalle($e['egreso']->refresh(), $finanzas)['pagos'])
+        ->firstWhere('sgf_id', $e['caso']->sgf_id);
+    $opcional = collect($pago['documentos'])->firstWhere('titulo', 'acta.pdf');
+
+    expect($opcional['clasificacion'])->toBe('opcional');
+    expect($pago['obligatorios_total'])->toBe(1);
+    expect($pago['obligatorios_ok'])->toBe(1);
+});
+
+test('el gating por obligatorios es independiente en Finanzas y Zonal', function () {
+    $e = crearEscenarioRevision();
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+    $zonal = usuarioConRol('administrador_zonal', $e['cfinancieroId']);
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+    $revision->aprobarPago($e['caso']->refresh(), $finanzas);
+
+    $caso = $e['caso']->refresh();
+
+    // El obligatorio aprobado por Finanzas vuelve a estar pendiente para Zonal.
+    expect($revision->pagoListoParaAprobar($caso))->toBeFalse();
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Zonal, 'valido', null, $zonal);
+    $revision->verificarTotales($caso, InstanciaRevision::Zonal, $zonal);
+
+    expect($revision->pagoListoParaAprobar($caso->refresh()))->toBeTrue();
+});
+
+test('un proceso sin checklist deja los documentos como opcionales y no habilita la aprobación', function () {
+    $e = crearEscenarioRevision();
+    $revision = app(RevisionEgresoService::class);
+    $validaciones = app(ValidacionDocumentoInstanciaService::class);
+    $finanzas = usuarioConRol('jefe_finanzas');
+
+    // Elimina el checklist generado por el escenario.
+    $e['checklist']->items()->delete();
+    $e['checklist']->delete();
+
+    $caso = CasoPagoProveedor::findOrFail($e['caso']->id);
+    $clasificados = $validaciones->documentosDelCaso($caso);
+
+    expect($clasificados['obligatorios'])->toBeEmpty();
+    expect($clasificados['faltantes'])->toBeEmpty();
+    expect($clasificados['opcionales'])->toHaveCount(1);
+
+    $validaciones->validar($e['documento'], InstanciaRevision::Finanzas, 'valido', null, $finanzas);
+    $revision->verificarTotales($e['caso'], InstanciaRevision::Finanzas, $finanzas);
+
+    expect($revision->pagoListoParaAprobar($caso->refresh()))->toBeFalse();
 });

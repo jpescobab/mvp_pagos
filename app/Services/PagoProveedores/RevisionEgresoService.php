@@ -166,7 +166,9 @@ class RevisionEgresoService
 
     /**
      * ¿El pago está listo para aprobar en su instancia activa? Requiere todos
-     * los documentos aprobados en esa instancia y los totales verificados.
+     * los documentos OBLIGATORIOS del checklist aprobados en esa instancia (sin
+     * obligatorios faltantes) y los totales verificados. Los documentos
+     * opcionales no bloquean.
      */
     public function pagoListoParaAprobar(CasoPagoProveedor $caso): bool
     {
