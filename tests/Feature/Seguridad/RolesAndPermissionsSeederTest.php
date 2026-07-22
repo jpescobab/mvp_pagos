@@ -15,6 +15,7 @@ test('el seeder crea los roles y permisos esperados', function () {
         'documentos.validar',
         'indicadores.importar',
         'informes.ver',
+        'integraciones_sgf.eliminar_importacion',
         'reportabilidad.ver',
         'roles.administrar',
         'tablas_maestras.administrar',

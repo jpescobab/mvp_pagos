@@ -24,6 +24,7 @@ use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
 use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
+use App\Models\TrabajoIntegracion;
 use App\Models\User;
 use App\Policies\AsignacionPolicy;
 use App\Policies\AuditLogPolicy;
@@ -47,6 +48,7 @@ use App\Policies\ProveedorPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\TipoDocumentoPolicy;
 use App\Policies\TipoProcesoPagoPolicy;
+use App\Policies\TrabajoIntegracionPolicy;
 use App\Policies\UserPolicy;
 use App\Services\AuditLogger;
 use App\Services\Indicadores\IndicadorEconomicoSelector;
@@ -133,6 +135,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(LicitacionMercadoPublico::class, LicitacionMercadoPublicoPolicy::class);
         Gate::policy(TipoProcesoPago::class, TipoProcesoPagoPolicy::class);
         Gate::policy(TipoDocumento::class, TipoDocumentoPolicy::class);
+        Gate::policy(TrabajoIntegracion::class, TrabajoIntegracionPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

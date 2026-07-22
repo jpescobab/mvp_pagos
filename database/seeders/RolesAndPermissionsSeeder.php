@@ -33,6 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'reportabilidad.ver',
             'informes.ver',
             'indicadores.importar',
+            'integraciones_sgf.eliminar_importacion',
         ];
 
         foreach ($permissions as $permission) {
