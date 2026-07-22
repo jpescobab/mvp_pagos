@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import type {
     CasoPagoProveedor,
+    DocumentoRevinculable,
     DocumentoVinculado,
 } from '@/types/pago-proveedores';
 
@@ -17,6 +18,7 @@ type ChecklistDocumentalCardProps = {
     caso: CasoPagoProveedor;
     errorDocumento: string | null;
     documentosHuerfanos: DocumentoVinculado[];
+    documentosRevinculables: DocumentoRevinculable[];
     puedeGestionarDocumentos: boolean;
     subiendoDocumento: boolean;
     subirDocumento: (tipoDocumentoId: string, archivo: File) => void;
@@ -29,6 +31,10 @@ type ChecklistDocumentalCardProps = {
         tipoDocumentoId: number,
         documentoId: string | undefined,
     ) => void;
+    reactivarDocumento: (
+        tipoDocumentoId: number,
+        documentoId: string | undefined,
+    ) => void;
     documentoPreviewId: number | null;
     onVerDocumento: (documentoId: number) => void;
     desvincularDocumento: (vinculoId: number) => void;
@@ -38,6 +44,7 @@ export function ChecklistDocumentalCard({
     caso,
     errorDocumento,
     documentosHuerfanos,
+    documentosRevinculables,
     puedeGestionarDocumentos,
     subiendoDocumento,
     subirDocumento,
@@ -45,10 +52,17 @@ export function ChecklistDocumentalCard({
     setHuerfanoSeleccionado,
     vinculandoHuerfano,
     vincularHuerfano,
+    reactivarDocumento,
     documentoPreviewId,
     onVerDocumento,
     desvincularDocumento,
 }: ChecklistDocumentalCardProps) {
+    // Ids de documentos re-vinculables (desvinculados): al elegirlos hay que
+    // reactivar el vínculo en vez de reclasificar un huérfano activo.
+    const idsRevinculables = new Set(
+        documentosRevinculables.map((doc) => String(doc.documento_id)),
+    );
+
     return (
         <section className="space-y-3 rounded-xl border p-4">
             <h2 className="text-base font-medium">Checklist documental</h2>
@@ -66,26 +80,39 @@ export function ChecklistDocumentalCard({
                     {caso.proceso.checklist.items.map((item, i) => {
                         const esPendiente =
                             item.estado_cumplimiento === 'pendiente';
-                        const puedeVincularHuerfano =
+                        const puedeVincularExistente =
                             puedeGestionarDocumentos &&
                             esPendiente &&
                             item.tipo_documento_id !== null &&
-                            documentosHuerfanos.length > 0;
+                            documentosHuerfanos.length +
+                                documentosRevinculables.length >
+                                0;
 
                         return (
                             <li key={i} className="flex flex-col gap-2 py-2">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <span className="flex items-center gap-2">
+                                    <span className="flex min-w-0 items-center gap-2">
                                         {esPendiente ? (
                                             <Circle className="size-4 shrink-0 text-warning" />
                                         ) : (
                                             <CheckCircle2 className="size-4 shrink-0 text-primary" />
                                         )}
-                                        {item.tipo_documento ??
-                                            'Documento sin tipo'}{' '}
-                                        <span className="text-muted-foreground">
-                                            ({item.tipo_requisito})
+                                        <span className="shrink-0">
+                                            {item.tipo_documento ??
+                                                'Documento sin tipo'}{' '}
+                                            <span className="text-muted-foreground">
+                                                ({item.tipo_requisito})
+                                            </span>
                                         </span>
+                                        {item.documento_id !== null &&
+                                            item.nombre_archivo && (
+                                                <span
+                                                    className="truncate text-xs text-muted-foreground"
+                                                    title={item.nombre_archivo}
+                                                >
+                                                    · {item.nombre_archivo}
+                                                </span>
+                                            )}
                                     </span>
                                     <span className="flex items-center gap-2 text-muted-foreground">
                                         {item.documento_id !== null && (
@@ -165,7 +192,7 @@ export function ChecklistDocumentalCard({
                                             )}
                                     </span>
                                 </div>
-                                {puedeVincularHuerfano && (
+                                {puedeVincularExistente && (
                                     <div className="flex items-center gap-2 rounded-md bg-muted p-2">
                                         <span className="text-xs text-muted-foreground">
                                             o vincula uno ya importado:
@@ -209,6 +236,20 @@ export function ChecklistDocumentalCard({
                                                         </SelectItem>
                                                     ),
                                                 )}
+                                                {documentosRevinculables.map(
+                                                    (doc) => (
+                                                        <SelectItem
+                                                            key={`rev-${doc.documento_id}`}
+                                                            value={String(
+                                                                doc.documento_id,
+                                                            )}
+                                                        >
+                                                            {doc.nombre_archivo ??
+                                                                'Documento sin nombre'}{' '}
+                                                            (desvinculado)
+                                                        </SelectItem>
+                                                    ),
+                                                )}
                                             </SelectContent>
                                         </Select>
                                         <Button
@@ -221,14 +262,35 @@ export function ChecklistDocumentalCard({
                                                     item.tipo_documento_id as number
                                                 ]
                                             }
-                                            onClick={() =>
-                                                vincularHuerfano(
-                                                    item.tipo_documento_id as number,
+                                            onClick={() => {
+                                                const seleccionado =
                                                     huerfanoSeleccionado[
                                                         item.tipo_documento_id as number
-                                                    ],
-                                                )
-                                            }
+                                                    ];
+                                                const tipoId =
+                                                    item.tipo_documento_id as number;
+
+                                                // Un documento desvinculado se
+                                                // reactiva; un huérfano activo se
+                                                // reclasifica (comportamiento
+                                                // previo).
+                                                if (
+                                                    seleccionado !== undefined &&
+                                                    idsRevinculables.has(
+                                                        seleccionado,
+                                                    )
+                                                ) {
+                                                    reactivarDocumento(
+                                                        tipoId,
+                                                        seleccionado,
+                                                    );
+                                                } else {
+                                                    vincularHuerfano(
+                                                        tipoId,
+                                                        seleccionado,
+                                                    );
+                                                }
+                                            }}
                                         >
                                             <Link2 className="size-4" />
                                         </Button>

@@ -90,4 +90,22 @@ class DocumentoProcesoController extends Controller
 
         return back();
     }
+
+    public function reactivar(Proceso $proceso, Documento $documento, ReclasificarDocumentoRequest $request): RedirectResponse
+    {
+        Gate::authorize('gestionarDocumentos', $proceso);
+
+        $tieneVinculoInactivo = $proceso->vinculosDocumento()
+            ->where('documento_id', $documento->id)
+            ->where('activo', false)
+            ->exists();
+
+        abort_unless($tieneVinculoInactivo, 404);
+
+        $tipoDocumento = TipoDocumento::findOrFail($request->integer('tipo_documento_id'));
+
+        $this->gestorDocumento->reactivarYReclasificar($proceso, $documento, $tipoDocumento);
+
+        return back();
+    }
 }

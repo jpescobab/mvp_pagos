@@ -70,6 +70,26 @@ class GestorDocumentoProceso
         $documento->update(['tipo_documento_id' => $tipoDocumento->id]);
     }
 
+    /**
+     * Reactiva el vínculo inactivo de un documento previamente desvinculado del
+     * proceso y lo reclasifica al tipo elegido — permite re-vincular el MISMO
+     * documento sin volver a subirlo. `desvincular()` deja el vínculo en
+     * `activo=false` (soft-unlink); acá se lo revierte a `activo=true`.
+     */
+    public function reactivarYReclasificar(Proceso $proceso, Documento $documento, TipoDocumento $tipoDocumento): void
+    {
+        DB::transaction(function () use ($proceso, $documento, $tipoDocumento): void {
+            $proceso->vinculosDocumento()
+                ->where('documento_id', $documento->id)
+                ->where('activo', false)
+                ->latest('id')
+                ->first()
+                ?->update(['activo' => true]);
+
+            $documento->update(['tipo_documento_id' => $tipoDocumento->id]);
+        });
+    }
+
     public function descargarRutaArchivo(Documento $documento): string
     {
         return Storage::disk('local')->path(

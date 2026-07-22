@@ -162,6 +162,51 @@ test('un documento vinculado que no coincide con ningún ítem del checklist se 
     });
 });
 
+test('el checklist expone el nombre del archivo por ítem, los documentos re-vinculables y el N° DTE (caso.numero)', function () {
+    $this->withoutVite();
+    sembrarRequisitosDocumentalesPagoProveedores();
+
+    $caso = app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot(
+        crearSnapshotSgfParaApi(['sgf_id' => 'caso-nombre-archivo', 'numero' => '293819']),
+    );
+
+    // Documento FACTURA vinculado (activo) con nombre de archivo real → el ítem
+    // obligatorio "Factura" del checklist queda cargado con ese documento.
+    $factura = TipoDocumento::where('codigo', 'FACTURA')->firstOrFail();
+    $docFactura = Documento::create(['tipo_documento_id' => $factura->id, 'titulo' => 'FAE-293819.pdf']);
+    $docFactura->versiones()->create(['numero_version' => 1, 'ruta_archivo' => 'documentos/fae.pdf', 'nombre_archivo' => 'FAE-293819.pdf']);
+    $caso->proceso->vinculosDocumento()->create(['documento_id' => $docFactura->id, 'activo' => true]);
+
+    // Documento desvinculado (activo=false) → re-vinculable.
+    $tipoOtro = TipoDocumento::firstOrCreate(['codigo' => 'OTRO'], ['nombre' => 'Otro', 'activo' => true]);
+    $docDesvinculado = Documento::create(['tipo_documento_id' => $tipoOtro->id, 'titulo' => 'viejo.pdf']);
+    $docDesvinculado->versiones()->create(['numero_version' => 1, 'ruta_archivo' => 'documentos/viejo.pdf', 'nombre_archivo' => 'viejo.pdf']);
+    $caso->proceso->vinculosDocumento()->create(['documento_id' => $docDesvinculado->id, 'activo' => false]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->get(route('pago-proveedores.casos.show', $caso));
+
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $props = $page->toArray()['props'];
+        $items = $props['caso']['proceso']['checklist']['items'];
+
+        $itemFactura = collect($items)->firstWhere('tipo_documento', 'Factura');
+        expect($itemFactura['nombre_archivo'])->toBe('FAE-293819.pdf');
+
+        // Un ítem obligatorio sin documento (p. ej. Comprobante) no trae nombre.
+        $itemPendiente = collect($items)->first(fn ($i) => $i['documento_id'] === null);
+        expect($itemPendiente['nombre_archivo'])->toBeNull();
+
+        $revinculables = collect($props['caso']['proceso']['documentos_revinculables']);
+        expect($revinculables->pluck('nombre_archivo'))->toContain('viejo.pdf');
+
+        // El N° DTE de la cabecera se sirve como caso.numero.
+        expect($props['caso']['numero'])->toBe('293819');
+    });
+});
+
 test('abrir el detalle de un caso de pago dos veces no duplica los items del checklist', function () {
     $this->withoutVite();
     sembrarRequisitosDocumentalesPagoProveedores();

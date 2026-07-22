@@ -90,3 +90,65 @@ test('reclasificar un documento sin vínculo activo con el proceso indicado es r
     $response->assertNotFound();
     expect($documento->refresh()->tipo_documento_id)->not->toBe($tipoDestino->id);
 });
+
+test('reactivar un documento desvinculado lo reactiva y lo reclasifica al tipo elegido', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $proceso = crearProcesoDePruebaParaReclasificar();
+    $documento = vincularDocumentoDePrueba($proceso);
+    // Soft-unlink: el vínculo queda activo=false.
+    $proceso->vinculosDocumento()->where('documento_id', $documento->id)->update(['activo' => false]);
+    $tipoDestino = TipoDocumento::firstOrCreate(['codigo' => 'FACTURA'], ['nombre' => 'Factura', 'activo' => true]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('documentos.gestionar');
+
+    $response = $this->actingAs($usuario)->patch(
+        route('procesos.documentos.reactivar', [$proceso, $documento]),
+        ['tipo_documento_id' => $tipoDestino->id],
+    );
+
+    $response->assertSessionHasNoErrors();
+    expect(
+        $proceso->vinculosDocumento()->where('documento_id', $documento->id)->where('activo', true)->exists()
+    )->toBeTrue();
+    expect($documento->refresh()->tipo_documento_id)->toBe($tipoDestino->id);
+});
+
+test('un usuario sin documentos.gestionar no puede reactivar un documento desvinculado', function () {
+    $proceso = crearProcesoDePruebaParaReclasificar();
+    $documento = vincularDocumentoDePrueba($proceso);
+    $proceso->vinculosDocumento()->where('documento_id', $documento->id)->update(['activo' => false]);
+    $tipoDestino = TipoDocumento::firstOrCreate(['codigo' => 'FACTURA'], ['nombre' => 'Factura', 'activo' => true]);
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($usuario)->patch(
+        route('procesos.documentos.reactivar', [$proceso, $documento]),
+        ['tipo_documento_id' => $tipoDestino->id],
+    );
+
+    $response->assertForbidden();
+    expect(
+        $proceso->vinculosDocumento()->where('documento_id', $documento->id)->where('activo', false)->exists()
+    )->toBeTrue();
+});
+
+test('reactivar un documento que no tiene vínculo inactivo en el proceso es rechazado', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $proceso = crearProcesoDePruebaParaReclasificar();
+    // El documento queda con vínculo ACTIVO (no hay vínculo inactivo que reactivar).
+    $documento = vincularDocumentoDePrueba($proceso);
+    $tipoDestino = TipoDocumento::firstOrCreate(['codigo' => 'FACTURA'], ['nombre' => 'Factura', 'activo' => true]);
+
+    $usuario = User::factory()->create();
+    $usuario->givePermissionTo('documentos.gestionar');
+
+    $response = $this->actingAs($usuario)->patch(
+        route('procesos.documentos.reactivar', [$proceso, $documento]),
+        ['tipo_documento_id' => $tipoDestino->id],
+    );
+
+    $response->assertNotFound();
+});

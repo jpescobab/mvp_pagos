@@ -16,6 +16,16 @@ class ProcesoResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Nombre de archivo vigente por documento (desde las versiones ya
+        // cargadas), para resolverlo por ítem del checklist sin N+1.
+        $nombresPorDocumento = $this->relationLoaded('vinculosDocumento')
+            ? $this->vinculosDocumento
+                ->mapWithKeys(fn (VinculoDocumento $vinculo) => [
+                    $vinculo->documento_id => $vinculo->documento->versiones->last()?->nombre_archivo,
+                ])
+                ->all()
+            : [];
+
         return [
             'id' => $this->id,
             'estado_actual' => new EstadoWorkflowResource($this->estadoActual),
@@ -40,13 +50,38 @@ class ProcesoResource extends JsonResource
                     'tipo_requisito' => $item->tipo_requisito,
                     'estado_cumplimiento' => $item->estado_cumplimiento,
                     'documento_id' => $item->documento_id,
-                ])->values(),
+                    'nombre_archivo' => $item->documento_id !== null
+                        ? ($nombresPorDocumento[$item->documento_id] ?? null)
+                        : null,
+                ])->values()->all(),
             ]),
             'documentos' => $this->whenLoaded(
                 'vinculosDocumento',
                 fn () => $this->mapDocumentosVinculados(),
             ),
+            'documentos_revinculables' => $this->whenLoaded(
+                'vinculosDocumento',
+                fn () => $this->mapDocumentosRevinculables(),
+            ),
         ];
+    }
+
+    /**
+     * Documentos con vínculo INACTIVO (desvinculados) del proceso: se ofrecen
+     * para re-vincularlos (reactivar el vínculo) sin re-subir el archivo.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function mapDocumentosRevinculables(): array
+    {
+        return array_values($this->vinculosDocumento
+            ->where('activo', false)
+            ->map(fn (VinculoDocumento $vinculo) => [
+                'documento_id' => $vinculo->documento->id,
+                'tipo_documento' => $vinculo->documento->tipoDocumento?->nombre,
+                'nombre_archivo' => $vinculo->documento->versiones->last()?->nombre_archivo,
+            ])
+            ->all());
     }
 
     /**
