@@ -57,12 +57,17 @@ test('la búsqueda filtra por nombre, email y rut', function () {
     $this->withoutVite();
     $this->seed(RolesAndPermissionsSeeder::class);
 
-    $actor = User::factory()->create();
+    // Nombres/emails explícitos (sin la subcadena "ana", case-insensitive en
+    // sqlite) para los usuarios que NO deben coincidir con la búsqueda "Ana":
+    // con valores aleatorios de faker, un email/nombre generado podía contener
+    // "ana" (Susana, Adriana, …) y hacer que la búsqueda devolviera 2 en vez de
+    // 1 de forma intermitente.
+    $actor = User::factory()->create(['name' => 'Actor Prueba', 'email' => 'actor-prueba@example.com']);
     $actor->givePermissionTo('usuarios.ver');
 
-    $porNombre = User::factory()->create(['name' => 'Ana Pérez']);
+    $porNombre = User::factory()->create(['name' => 'Ana Pérez', 'email' => 'ana.perez@example.com']);
     $porEmail = User::factory()->create(['name' => 'Zzz', 'email' => 'buscado@example.com']);
-    $porRut = User::factory()->create(['name' => 'Yyy']);
+    $porRut = User::factory()->create(['name' => 'Yyy', 'email' => 'por-rut@example.com']);
     crearFuncionario($porRut, ['rut' => '22.222.222-2']);
     User::factory()->create(['name' => 'No coincide', 'email' => 'nada@example.com']);
 
