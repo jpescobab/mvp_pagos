@@ -10,7 +10,9 @@ import { LicitacionEstadoBadge } from '@/components/mercado-publico/licitacion-e
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
-import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
+import licitacionesMp, {
+    pdf as pdfLicitacionMp,
+} from '@/routes/adquisiciones/licitaciones_mp';
 import type {
     DiferenciaCampoLicitacionMercadoPublico,
     LicitacionMercadoPublico,
@@ -372,7 +374,11 @@ export default function BuscarLicitacionMercadoPublico({
                                             urlDetalle={urlDetalleLicitacionMercadoPublico(
                                                 licitacionLocal.codigo,
                                             )}
-                                            urlPdf={null}
+                                            urlPdf={pdfLicitacionMp.url({
+                                                query: {
+                                                    codigo: licitacionLocal.codigo,
+                                                },
+                                            })}
                                         />
                                     </>
                                 ),
@@ -485,7 +491,12 @@ export default function BuscarLicitacionMercadoPublico({
                                             vistaPrevia.payload_normalizado
                                                 .codigo,
                                         )}
-                                        urlPdf={null}
+                                        urlPdf={pdfLicitacionMp.url({
+                                            query: {
+                                                codigo: vistaPrevia
+                                                    .payload_normalizado.codigo,
+                                            },
+                                        })}
                                     />
                                     <Button
                                         disabled={procesando}

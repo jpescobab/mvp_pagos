@@ -31,6 +31,7 @@ Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->gr
         Route::get('/', [LicitacionMercadoPublicoController::class, 'index'])->name('index');
         Route::post('buscar', [LicitacionMercadoPublicoController::class, 'buscar'])->name('buscar');
         Route::post('guardar', [LicitacionMercadoPublicoController::class, 'guardar'])->name('guardar');
+        Route::get('pdf', [LicitacionMercadoPublicoController::class, 'pdf'])->name('pdf');
         Route::get('{licitacion}', [LicitacionMercadoPublicoController::class, 'show'])->name('show');
         Route::post('{licitacion}/verificar', [LicitacionMercadoPublicoController::class, 'verificar'])->name('verificar');
         Route::post('{licitacion}/actualizar', [LicitacionMercadoPublicoController::class, 'actualizar'])->name('actualizar');
