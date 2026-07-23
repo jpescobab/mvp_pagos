@@ -110,4 +110,39 @@ class Proceso extends Model
     {
         return $this->hasOne(ChecklistDocumentalProceso::class);
     }
+
+    /**
+     * Descripción legible y URL de destino del proceso, derivadas de su sujeto
+     * polimórfico. Único lugar donde vive el mapeo tipo de sujeto → ruta de
+     * detalle: cuando aparezca un tercer tipo de sujeto con workflow, se le
+     * enseña acá su descripción y su ruta. Un sujeto sin detalle navegable
+     * devuelve `url = null`.
+     *
+     * @return array{descripcion: string, url: string|null}
+     */
+    public function descriptorNotificacion(): array
+    {
+        $sujeto = $this->sujeto;
+
+        if ($sujeto instanceof CasoPagoProveedor) {
+            $identificador = $sujeto->numero ?? $sujeto->sgf_id ?? "#{$sujeto->id}";
+
+            return [
+                'descripcion' => "Caso de pago {$identificador}",
+                'url' => route('pago-proveedores.casos.show', $sujeto),
+            ];
+        }
+
+        if ($sujeto instanceof ProcesoAdquisicion) {
+            return [
+                'descripcion' => "Proceso de adquisición {$sujeto->codigo}",
+                'url' => route('adquisiciones.procesos.show', $sujeto),
+            ];
+        }
+
+        return [
+            'descripcion' => "Proceso #{$this->id}",
+            'url' => null,
+        ];
+    }
 }

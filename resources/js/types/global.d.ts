@@ -17,6 +17,7 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             appearance: Appearance;
             indicadoresTopbar: Indicador[];
+            notificaciones_no_leidas: number;
             [key: string]: unknown;
         };
         flashDataType: {
