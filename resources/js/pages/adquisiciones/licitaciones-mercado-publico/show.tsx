@@ -16,7 +16,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
+import licitacionesMp, {
+    pdf as pdfLicitacionMp,
+} from '@/routes/adquisiciones/licitaciones_mp';
 import type { LicitacionMercadoPublico } from '@/types/adquisiciones';
 
 const URL_BASE_DETALLE_LICITACION_MERCADO_PUBLICO =
@@ -245,7 +247,9 @@ export default function LicitacionMercadoPublicoShow({
                                     urlDetalle={urlDetalleLicitacionMercadoPublico(
                                         licitacion.codigo,
                                     )}
-                                    urlPdf={null}
+                                    urlPdf={pdfLicitacionMp.url({
+                                        query: { codigo: licitacion.codigo },
+                                    })}
                                 />
                             </>
                         ),

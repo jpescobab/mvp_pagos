@@ -87,10 +87,9 @@ export function FichaConsultaMercadoPublico({
  * consultar Mercado Público); "Mercado Público" abre en una pestaña nueva el
  * detalle oficial en mercadopublico.cl (`urlDetalle`, provisto por el
  * llamador porque cada dominio expone su propia URL pública); "Ver PDF"
- * descarga el PDF directamente a través de un endpoint propio (`urlPdf`) que
- * resuelve el enlace real de descarga — cuando el llamador no tiene ese
- * endpoint disponible (`urlPdf` es `null`), la acción queda deshabilitada con
- * la indicación "Disponible próximamente".
+ * descarga el PDF a través de un endpoint propio (`urlPdf`), que cada dominio
+ * resuelve a su manera —la Orden de Compra redirige al enlace público, la
+ * Licitación entrega el archivo— sin que este componente tenga que saberlo.
  */
 export function AccionesEncabezadoFichaMercadoPublico({
     payloadCrudo,
@@ -99,7 +98,7 @@ export function AccionesEncabezadoFichaMercadoPublico({
 }: {
     payloadCrudo: unknown;
     urlDetalle: string;
-    urlPdf: string | null;
+    urlPdf: string;
 }) {
     const [jsonAbierto, setJsonAbierto] = useState(false);
     const tieneJson = payloadCrudo !== null && payloadCrudo !== undefined;
@@ -125,24 +124,12 @@ export function AccionesEncabezadoFichaMercadoPublico({
                 </DialogContent>
             </Dialog>
 
-            {urlPdf ? (
-                <Button variant="outline" size="sm" asChild>
-                    <a href={urlPdf} target="_blank" rel="noopener noreferrer">
-                        <FileText className="size-4" />
-                        Ver PDF
-                    </a>
-                </Button>
-            ) : (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled
-                    title="Disponible próximamente"
-                >
+            <Button variant="outline" size="sm" asChild>
+                <a href={urlPdf} target="_blank" rel="noopener noreferrer">
                     <FileText className="size-4" />
                     Ver PDF
-                </Button>
-            )}
+                </a>
+            </Button>
 
             <Button variant="outline" size="sm" asChild>
                 <a href={urlDetalle} target="_blank" rel="noopener noreferrer">
