@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Proveedor extends Model
 {
     use SoftDeletes;
+
+    /** Registro identificado que todavía no está habilitado para operar. */
+    public const ESTADO_BORRADOR = 'borrador';
+
+    public const ESTADO_ACTIVO = 'activo';
+
+    /** Estuvo habilitado y se dio de baja. */
+    public const ESTADO_INACTIVO = 'inactivo';
+
+    /** @var list<string> */
+    public const ESTADOS = [self::ESTADO_BORRADOR, self::ESTADO_ACTIVO, self::ESTADO_INACTIVO];
 
     protected $table = 'proveedores';
 
@@ -20,7 +32,7 @@ class Proveedor extends Model
         'direccion',
         'contacto',
         'imagen',
-        'activo',
+        'estado',
         'giro',
         'tipo_contribuyente',
         'rubros',
@@ -41,9 +53,21 @@ class Proveedor extends Model
     protected function casts(): array
     {
         return [
-            'activo' => 'boolean',
             'rubros' => 'array',
         ];
+    }
+
+    /**
+     * Proveedores disponibles para operar. El filtro vive acá y no como un
+     * `where` repetido en cada controlador: que no existiera como concepto es
+     * la razón por la que los selectores nacieron sin filtrar.
+     *
+     * @param  Builder<$this>  $query
+     * @return Builder<$this>
+     */
+    public function scopeActivos(Builder $query): Builder
+    {
+        return $query->where('estado', self::ESTADO_ACTIVO);
     }
 
     /**

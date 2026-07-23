@@ -1,10 +1,23 @@
-# Spec: registrar-proveedor
+## ADDED Requirements
 
-## Purpose
+### Requirement: El estado del proveedor gobierna su disponibilidad para operar
+Un `proveedor` SHALL tener exactamente uno de tres estados: `borrador` (registro identificado que todavía no está habilitado para operar), `activo` (habilitado) o `inactivo` (dado de baja). El sistema SHALL ofrecer únicamente proveedores en estado `activo` allí donde se elige un proveedor **para operar** —al crear un proceso de adquisición y al asociar un cliente medidor—. El catálogo de proveedores (listado, búsqueda y detalle) SHALL mostrar los proveedores en cualquiera de los tres estados, porque es la pantalla desde la que se administra el catálogo y desde la que hay que completar un borrador. Un proveedor creado por una vía distinta del formulario de alta —por ejemplo, resuelto automáticamente desde una importación externa— SHALL quedar en estado `activo`.
 
-Permitir el alta de proveedores institucionales con los datos que Finanzas necesita para pagarles (identificación tributaria, clasificación por rubros, contacto comercial, domicilio y datos bancarios de la cuenta de destino), mediante un formulario por pasos con panel de resumen y completitud.
+#### Scenario: Selector operativo ofrece solo proveedores activos
+- **WHEN** un usuario abre el formulario de creación de un proceso de adquisición o el de asociación de un cliente medidor
+- **THEN** la lista de proveedores ofrecida incluye únicamente los que están en estado `activo`
+- **AND** no incluye los que están en estado `borrador` ni en estado `inactivo`
 
-## Requirements
+#### Scenario: El catálogo muestra los tres estados
+- **WHEN** un usuario con permiso `core_institucional.administrar` abre el listado de proveedores
+- **THEN** se muestran los proveedores en estado `borrador`, `activo` e `inactivo`
+- **AND** cada uno indica su estado de forma distinguible
+
+#### Scenario: Proveedor creado desde una importación externa
+- **WHEN** el sistema resuelve o crea un proveedor a partir de datos recibidos de un sistema externo
+- **THEN** ese proveedor queda en estado `activo`
+
+## MODIFIED Requirements
 
 ### Requirement: Registrar un proveedor institucional nuevo
 El sistema SHALL permitir a un usuario con el permiso `core_institucional.administrar` registrar un nuevo `proveedor` con RUT y nombre obligatorios, y de forma opcional: giro, tipo de contribuyente, rubros, contacto comercial (nombre, cargo, teléfono), domicilio (dirección, región, comuna), datos bancarios (banco, tipo de cuenta, número de cuenta, condición de pago, moneda, correo para pagos, documento de respaldo) y notas internas. El alta SHALL ofrecer dos acciones —registrar el proveedor como `activo` o guardarlo como `borrador`— que SHALL exigir los mismos campos obligatorios y aplicar la misma validación, diferenciándose únicamente en el estado con el que nace el registro. El sistema SHALL rechazar el alta si el RUT ya existe en el catálogo, cualquiera sea el estado del registro existente.
@@ -34,7 +47,6 @@ El sistema SHALL permitir a un usuario con el permiso `core_institucional.admini
 - **WHEN** un usuario autenticado sin el permiso `core_institucional.administrar` intenta acceder al formulario de alta o enviar el envío
 - **THEN** el sistema responde con un error de autorización y no crea el proveedor
 
-
 ### Requirement: Formulario de alta por pasos con resumen de completitud
 El sistema SHALL presentar el alta y edición de proveedor como un formulario dividido en los pasos Identificación, Clasificación, Contacto, Domicilio y Datos bancarios, mostrados como un stepper con separadores tipo flecha entre cada paso y navegables libremente, junto a un panel de resumen que muestra una vista previa de los datos ingresados y el porcentaje de completitud del registro según cuántos de esos pasos tienen sus campos mínimos completos. El sistema SHALL mostrar las acciones de guardado de forma permanente junto a los controles de navegación entre pasos, habilitadas únicamente cuando los campos obligatorios (RUT y razón social) están completos, sin exigir que los campos opcionales (nullable) de los demás pasos estén completos. El sistema SHALL NOT enviar los datos al backend paso por paso; el envío ocurre una sola vez al confirmar. Ninguna acción del formulario SHALL mostrarse deshabilitada con la indicación "Disponible próximamente".
 
@@ -57,36 +69,6 @@ El sistema SHALL presentar el alta y edición de proveedor como un formulario di
 #### Scenario: Acciones de guardado habilitadas con datos obligatorios completos
 - **WHEN** un usuario completa el RUT y la razón social, aunque los demás pasos (clasificación, contacto, domicilio, datos bancarios) queden sin completar
 - **THEN** las acciones de guardado se habilitan, visibles desde cualquier paso del formulario
-
-
-### Requirement: Clasificación de proveedor por rubros
-El sistema SHALL permitir seleccionar cero o más rubros institucionales predefinidos para un proveedor, y SHALL NOT limitar la selección a un único rubro.
-
-#### Scenario: Selección de múltiples rubros
-- **WHEN** un usuario marca más de un rubro en el paso de Clasificación y confirma el alta
-- **THEN** el proveedor queda registrado con todos los rubros seleccionados
-
-### Requirement: Datos bancarios y documento de respaldo del proveedor
-El sistema SHALL permitir registrar el banco, tipo de cuenta, número de cuenta, condición de pago, moneda y correo para pagos de un proveedor, junto a un documento de respaldo bancario opcional (PDF o imagen, hasta 8 MB), almacenado en almacenamiento privado y nunca expuesto por una URL pública directa.
-
-#### Scenario: Documento de respaldo válido
-- **WHEN** un usuario adjunta un PDF o imagen de hasta 8 MB como documento de respaldo bancario
-- **THEN** el sistema guarda el archivo y asocia su ruta al proveedor
-
-#### Scenario: Documento de respaldo inválido
-- **WHEN** un usuario adjunta un archivo que no es PDF ni imagen, o que supera 8 MB
-- **THEN** el sistema rechaza el envío con un error de validación en el campo del documento
-
-### Requirement: Ver el detalle de un proveedor registrado
-El sistema SHALL permitir a un usuario con el permiso `core_institucional.administrar` ver el detalle completo de un `proveedor` registrado, incluyendo identificación tributaria, clasificación, contacto comercial, domicilio, datos bancarios y notas internas. El sistema SHALL indicar si el proveedor tiene un documento de respaldo bancario adjunto, sin exponer un enlace de descarga directa.
-
-#### Scenario: Ver el detalle completo
-- **WHEN** un usuario con permiso `core_institucional.administrar` abre el detalle de un proveedor registrado
-- **THEN** la vista muestra todos sus campos, incluyendo los que quedaron en `null` por no haberse completado en el alta
-
-#### Scenario: Sin permiso para ver el detalle
-- **WHEN** un usuario autenticado sin el permiso `core_institucional.administrar` intenta abrir el detalle de un proveedor
-- **THEN** el sistema responde con un error de autorización
 
 ### Requirement: Editar un proveedor existente
 El sistema SHALL permitir a un usuario con el permiso `core_institucional.administrar` editar cualquier campo de un proveedor ya registrado, incluido su estado, mediante el mismo formulario por pasos usado en el alta, precargado con los datos actuales. La edición SHALL permitir mover el proveedor a cualquiera de los tres estados, en particular promover un `borrador` a `activo` para habilitarlo. Cambiar el estado SHALL ser una edición del dato maestro y SHALL NOT constituir una transición de workflow. El sistema SHALL rechazar la edición si el nuevo RUT coincide con el de otro proveedor distinto del que se está editando. Si se reemplaza el documento de respaldo bancario, el sistema SHALL descartar el archivo anterior.
@@ -115,36 +97,3 @@ El sistema SHALL permitir a un usuario con el permiso `core_institucional.admini
 #### Scenario: Sin permiso para editar
 - **WHEN** un usuario autenticado sin el permiso `core_institucional.administrar` intenta acceder al formulario de edición o enviarlo
 - **THEN** el sistema responde con un error de autorización y no modifica el proveedor
-
-
-### Requirement: Eliminar un proveedor sin relaciones activas
-El sistema SHALL permitir a un usuario con el permiso `core_institucional.administrar` eliminar (soft delete) un proveedor que no tenga clientes medidores, casos de pago, facturas ni procesos de adquisición asociados. El sistema SHALL rechazar la eliminación de un proveedor que sí tenga alguna de esas relaciones, indicando cuál lo impide.
-
-#### Scenario: Eliminación exitosa sin relaciones
-- **WHEN** un usuario con permiso `core_institucional.administrar` elimina un proveedor que no tiene clientes medidores, casos de pago, facturas ni procesos de adquisición asociados
-- **THEN** el proveedor queda eliminado (soft delete) y deja de aparecer en el catálogo
-
-#### Scenario: Eliminación rechazada por relaciones activas
-- **WHEN** un usuario intenta eliminar un proveedor que tiene al menos un cliente medidor, caso de pago, factura o proceso de adquisición asociado
-- **THEN** el sistema rechaza la eliminación e indica qué relación la impide, sin eliminar el proveedor
-
-#### Scenario: Sin permiso para eliminar
-- **WHEN** un usuario autenticado sin el permiso `core_institucional.administrar` intenta eliminar un proveedor
-- **THEN** el sistema responde con un error de autorización y no elimina el proveedor
-
-### Requirement: El estado del proveedor gobierna su disponibilidad para operar
-Un `proveedor` SHALL tener exactamente uno de tres estados: `borrador` (registro identificado que todavía no está habilitado para operar), `activo` (habilitado) o `inactivo` (dado de baja). El sistema SHALL ofrecer únicamente proveedores en estado `activo` allí donde se elige un proveedor **para operar** —al crear un proceso de adquisición y al asociar un cliente medidor—. El catálogo de proveedores (listado, búsqueda y detalle) SHALL mostrar los proveedores en cualquiera de los tres estados, porque es la pantalla desde la que se administra el catálogo y desde la que hay que completar un borrador. Un proveedor creado por una vía distinta del formulario de alta —por ejemplo, resuelto automáticamente desde una importación externa— SHALL quedar en estado `activo`.
-
-#### Scenario: Selector operativo ofrece solo proveedores activos
-- **WHEN** un usuario abre el formulario de creación de un proceso de adquisición o el de asociación de un cliente medidor
-- **THEN** la lista de proveedores ofrecida incluye únicamente los que están en estado `activo`
-- **AND** no incluye los que están en estado `borrador` ni en estado `inactivo`
-
-#### Scenario: El catálogo muestra los tres estados
-- **WHEN** un usuario con permiso `core_institucional.administrar` abre el listado de proveedores
-- **THEN** se muestran los proveedores en estado `borrador`, `activo` e `inactivo`
-- **AND** cada uno indica su estado de forma distinguible
-
-#### Scenario: Proveedor creado desde una importación externa
-- **WHEN** el sistema resuelve o crea un proveedor a partir de datos recibidos de un sistema externo
-- **THEN** ese proveedor queda en estado `activo`
