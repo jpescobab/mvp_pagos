@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { CheckIcon, ChevronRight } from 'lucide-react';
 import { Fragment, useState } from 'react';
+import { ProveedorStatusBadge } from '@/components/maestros/proveedor-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,16 +16,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
-import type { CatalogosProveedor, Proveedor } from '@/types/maestros';
+import type {
+    CatalogosProveedor,
+    EstadoProveedor,
+    Proveedor,
+} from '@/types/maestros';
 
 const SIN_SELECCION = '__sin_seleccion__';
 const OTRO_BANCO = '__otro_banco__';
@@ -150,7 +149,9 @@ export function ProveedorFormulario({
     const [notasInternas, setNotasInternas] = useState(
         valoresIniciales?.notas_internas ?? '',
     );
-    const [activo, setActivo] = useState(valoresIniciales?.activo ?? true);
+    const [estado, setEstado] = useState<EstadoProveedor>(
+        valoresIniciales?.estado ?? 'activo',
+    );
 
     function alternarRubro(valor: string, marcado: boolean) {
         setRubros((actuales) =>
@@ -178,7 +179,12 @@ export function ProveedorFormulario({
     const totalCompletos = Object.values(pasosCompletos).filter(Boolean).length;
     const completitud = Math.round((totalCompletos / PASOS.length) * 100);
 
-    function enviar() {
+    /**
+     * En el alta, "Registrar" y "Guardar como borrador" son el MISMO envío con
+     * los mismos campos obligatorios: lo único que cambia es el estado con el
+     * que nace el registro. En edición el estado sale del control de estado.
+     */
+    function enviar(estadoDeLaAccion: EstadoProveedor = estado) {
         setProcesando(true);
         setErrors({});
 
@@ -208,7 +214,7 @@ export function ProveedorFormulario({
                 correo_pago: correoPago || null,
                 documento_respaldo: documentoRespaldo,
                 notas_internas: notasInternas || null,
-                activo,
+                estado: estadoDeLaAccion,
             },
             {
                 forceFormData: true,
@@ -703,24 +709,42 @@ export function ProveedorFormulario({
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between rounded-md border p-3">
-                                <div>
-                                    <Label htmlFor="activo">
-                                        {modo === 'crear'
-                                            ? 'Activar proveedor al guardar'
-                                            : 'Proveedor activo'}
-                                    </Label>
+                            {modo === 'editar' && (
+                                <div className="grid gap-2 rounded-md border p-3">
+                                    <Label htmlFor="estado">Estado</Label>
                                     <p className="text-xs text-muted-foreground">
-                                        Quedará disponible para asociar a
-                                        órdenes de compra de inmediato.
+                                        Solo los proveedores activos se ofrecen
+                                        al crear un proceso de adquisición o al
+                                        asociar un cliente medidor.
                                     </p>
+                                    <Select
+                                        value={estado}
+                                        onValueChange={(valor) =>
+                                            setEstado(valor as EstadoProveedor)
+                                        }
+                                    >
+                                        <SelectTrigger id="estado">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="borrador">
+                                                Borrador — todavía no habilitado
+                                            </SelectItem>
+                                            <SelectItem value="activo">
+                                                Activo — disponible para operar
+                                            </SelectItem>
+                                            <SelectItem value="inactivo">
+                                                Inactivo — dado de baja
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.estado && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.estado}
+                                        </p>
+                                    )}
                                 </div>
-                                <Switch
-                                    id="activo"
-                                    checked={activo}
-                                    onCheckedChange={setActivo}
-                                />
-                            </div>
+                            )}
 
                             <div className="grid gap-2">
                                 <Label htmlFor="notas_internas">
@@ -748,18 +772,17 @@ export function ProveedorFormulario({
                                 Cancelar
                             </Button>
                             {modo === 'crear' && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <span>
-                                            <Button variant="outline" disabled>
-                                                Borrador
-                                            </Button>
-                                        </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        Disponible próximamente
-                                    </TooltipContent>
-                                </Tooltip>
+                                <Button
+                                    variant="outline"
+                                    disabled={
+                                        procesando ||
+                                        !pasosCompletos.identificacion
+                                    }
+                                    onClick={() => enviar('borrador')}
+                                    title="Registra el proveedor sin habilitarlo para operar todavía"
+                                >
+                                    Guardar como borrador
+                                </Button>
                             )}
                         </div>
 
@@ -796,7 +819,9 @@ export function ProveedorFormulario({
                                 disabled={
                                     procesando || !pasosCompletos.identificacion
                                 }
-                                onClick={enviar}
+                                onClick={() =>
+                                    enviar(modo === 'crear' ? 'activo' : estado)
+                                }
                             >
                                 {modo === 'crear'
                                     ? '✓ Registrar proveedor'
@@ -848,16 +873,7 @@ export function ProveedorFormulario({
                         <div className="flex items-center justify-between">
                             <dt className="text-muted-foreground">Estado</dt>
                             <dd>
-                                <Badge
-                                    variant="outline"
-                                    className={
-                                        activo
-                                            ? 'border-transparent bg-success-soft text-success'
-                                            : 'border-transparent bg-danger-soft text-destructive'
-                                    }
-                                >
-                                    {activo ? 'Activo' : 'Inactivo'}
-                                </Badge>
+                                <ProveedorStatusBadge estado={estado} />
                             </dd>
                         </div>
                     </dl>

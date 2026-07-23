@@ -57,7 +57,7 @@ class UpdateProveedorRequest extends FormRequest
             'correo_pago' => ['nullable', 'email', 'max:255'],
             'documento_respaldo' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
             'notas_internas' => ['nullable', 'string', 'max:2000'],
-            'activo' => ['boolean'],
+            'estado' => ['sometimes', Rule::in(Proveedor::ESTADOS)],
         ];
     }
 }

@@ -60,7 +60,7 @@ test('un usuario con core_institucional.administrar puede registrar un proveedor
     expect($proveedor)->not->toBeNull();
     expect($proveedor->rutproveedor)->toBe('76234567-8');
     expect($proveedor->nombre)->toBe('Comercial Andes Sur Ltda.');
-    expect($proveedor->activo)->toBeTrue();
+    expect($proveedor->estado)->toBe(Proveedor::ESTADO_ACTIVO);
     expect($proveedor->giro)->toBeNull();
 });
 
@@ -92,7 +92,7 @@ test('un usuario con core_institucional.administrar puede registrar un proveedor
         'correo_pago' => 'pagos@techpatagonia.cl',
         'documento_respaldo' => UploadedFile::fake()->create('certificado.pdf', 200, 'application/pdf'),
         'notas_internas' => 'Proveedor recomendado por licitación anterior.',
-        'activo' => true,
+        'estado' => 'activo',
     ]);
 
     $response->assertRedirect(route('maestros.proveedores.index'));
@@ -157,4 +157,60 @@ test('un usuario sin core_institucional.administrar no puede acceder al formular
     $response = $this->actingAs($actor)->get(route('maestros.proveedores.create'));
 
     $response->assertForbidden();
+});
+
+test('guardar como borrador crea el proveedor en estado borrador', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $response = $this->actingAs($actor)->post(route('maestros.proveedores.store'), [
+        'rutproveedor' => '78.111.222-3',
+        'nombre' => 'Servicios Aysén SpA',
+        'estado' => 'borrador',
+    ]);
+
+    $response->assertRedirect(route('maestros.proveedores.index'));
+
+    $proveedor = Proveedor::where('rutproveedor', '78111222-3')->first();
+    expect($proveedor)->not->toBeNull();
+    expect($proveedor->estado)->toBe(Proveedor::ESTADO_BORRADOR);
+});
+
+test('guardar como borrador exige los mismos campos obligatorios que el alta normal', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $sinRut = $this->actingAs($actor)->post(route('maestros.proveedores.store'), [
+        'nombre' => 'Sin RUT SpA',
+        'estado' => 'borrador',
+    ]);
+    $sinRut->assertSessionHasErrors('rutproveedor');
+
+    $sinNombre = $this->actingAs($actor)->post(route('maestros.proveedores.store'), [
+        'rutproveedor' => '78.999.888-7',
+        'estado' => 'borrador',
+    ]);
+    $sinNombre->assertSessionHasErrors('nombre');
+
+    expect(Proveedor::count())->toBe(0);
+});
+
+test('el alta rechaza un estado fuera del dominio', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $response = $this->actingAs($actor)->post(route('maestros.proveedores.store'), [
+        'rutproveedor' => '78.555.444-3',
+        'nombre' => 'Estado Inventado SpA',
+        'estado' => 'archivado',
+    ]);
+
+    $response->assertSessionHasErrors('estado');
+    expect(Proveedor::count())->toBe(0);
 });

@@ -21,7 +21,7 @@ class ProveedorResource extends JsonResource
             'correo' => $this->correo,
             'direccion' => $this->direccion,
             'contacto' => $this->contacto,
-            'activo' => $this->activo,
+            'estado' => $this->estado,
             'giro' => $this->giro,
             'tipo_contribuyente' => $this->tipo_contribuyente,
             'rubros' => $this->rubros,

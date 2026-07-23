@@ -117,7 +117,7 @@ class ClienteMedidorController extends Controller
                 'codigo' => $ccosto->codigo,
                 'nombre' => $ccosto->nombre,
             ]),
-            'proveedores' => Proveedor::all()->map(fn (Proveedor $proveedor) => [
+            'proveedores' => Proveedor::activos()->get()->map(fn (Proveedor $proveedor) => [
                 'id' => $proveedor->id,
                 'nombre' => $proveedor->nombre,
                 'rutproveedor' => $proveedor->rutproveedor,

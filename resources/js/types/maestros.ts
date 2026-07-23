@@ -1,3 +1,10 @@
+/**
+ * `borrador`: identificado pero todavía no habilitado para operar.
+ * `inactivo`: estuvo habilitado y se dio de baja.
+ * Solo los `activo` se ofrecen donde se elige un proveedor para operar.
+ */
+export type EstadoProveedor = 'borrador' | 'activo' | 'inactivo';
+
 export type Proveedor = {
     id: number;
     rutproveedor: string;
@@ -5,7 +12,7 @@ export type Proveedor = {
     correo: string | null;
     direccion: string | null;
     contacto: string | null;
-    activo: boolean;
+    estado: EstadoProveedor;
     giro: string | null;
     tipo_contribuyente: string | null;
     rubros: string[] | null;
