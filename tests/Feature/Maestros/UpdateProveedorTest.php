@@ -18,7 +18,7 @@ test('un usuario con core_institucional.administrar puede editar un proveedor', 
         'rutproveedor' => '76.234.567-8',
         'nombre' => 'Comercial Andes Sur Limitada',
         'giro' => 'Distribución de insumos',
-        'activo' => false,
+        'estado' => 'inactivo',
     ]);
 
     $response->assertRedirect(route('maestros.proveedores.show', $proveedor));
@@ -26,7 +26,7 @@ test('un usuario con core_institucional.administrar puede editar un proveedor', 
     $proveedor->refresh();
     expect($proveedor->nombre)->toBe('Comercial Andes Sur Limitada');
     expect($proveedor->giro)->toBe('Distribución de insumos');
-    expect($proveedor->activo)->toBeFalse();
+    expect($proveedor->estado)->toBe(Proveedor::ESTADO_INACTIVO);
 });
 
 test('editar un proveedor con el rut de otro proveedor falla la validación', function () {
@@ -105,4 +105,46 @@ test('un usuario sin core_institucional.administrar no puede editar un proveedor
     ]);
     $responsePatch->assertForbidden();
     expect($proveedor->refresh()->nombre)->toBe('Comercial Andes Sur Ltda.');
+});
+
+test('editar un proveedor permite promover un borrador a activo', function () {
+    $proveedor = Proveedor::create([
+        'rutproveedor' => '79.111.000-1',
+        'nombre' => 'Borrador a Promover SpA',
+        'estado' => Proveedor::ESTADO_BORRADOR,
+    ]);
+
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $this->actingAs($actor)->patch(route('maestros.proveedores.update', $proveedor), [
+        'rutproveedor' => '79.111.000-1',
+        'nombre' => 'Borrador a Promover SpA',
+        'estado' => 'activo',
+    ])->assertRedirect(route('maestros.proveedores.show', $proveedor));
+
+    expect($proveedor->refresh()->estado)->toBe(Proveedor::ESTADO_ACTIVO);
+});
+
+test('editar un proveedor rechaza un estado fuera del dominio', function () {
+    $proveedor = Proveedor::create([
+        'rutproveedor' => '79.222.000-2',
+        'nombre' => 'Estado Invalido SpA',
+        'estado' => Proveedor::ESTADO_ACTIVO,
+    ]);
+
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('core_institucional.administrar');
+
+    $this->actingAs($actor)->patch(route('maestros.proveedores.update', $proveedor), [
+        'rutproveedor' => '79.222.000-2',
+        'nombre' => 'Estado Invalido SpA',
+        'estado' => 'suspendido',
+    ])->assertSessionHasErrors('estado');
+
+    expect($proveedor->refresh()->estado)->toBe(Proveedor::ESTADO_ACTIVO);
 });

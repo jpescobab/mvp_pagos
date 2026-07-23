@@ -142,7 +142,7 @@ export default function ProveedoresIndex() {
                                     </td>
                                     <td className="px-2.5 py-1">
                                         <ProveedorStatusBadge
-                                            activo={proveedor.activo}
+                                            estado={proveedor.estado}
                                         />
                                     </td>
                                     <td className="px-2.5 py-1 text-right">

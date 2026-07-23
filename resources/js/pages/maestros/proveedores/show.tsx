@@ -70,7 +70,7 @@ export default function ProveedorShow() {
                                 {proveedor.rutproveedor}
                             </p>
                         </div>
-                        <ProveedorStatusBadge activo={proveedor.activo} />
+                        <ProveedorStatusBadge estado={proveedor.estado} />
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" asChild>

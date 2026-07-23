@@ -8,12 +8,14 @@ use App\Http\Requests\Adquisiciones\GuardarLicitacionMercadoPublicoRequest;
 use App\Http\Resources\Adquisiciones\LicitacionMercadoPublicoResource;
 use App\Models\LicitacionMercadoPublico;
 use App\Models\ProcesoAdquisicion;
+use App\Services\Adquisiciones\DescargaPdfLicitacionMercadoPublicoService;
 use App\Services\Adquisiciones\LicitacionMercadoPublicoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LicitacionMercadoPublicoController extends Controller
 {
@@ -45,6 +47,30 @@ class LicitacionMercadoPublicoController extends Controller
         Gate::authorize('viewAny', LicitacionMercadoPublico::class);
 
         return $this->renderizarBusqueda($request->string('codigo')->trim()->toString());
+    }
+
+    /**
+     * Entrega el PDF en el cuerpo, no como redirect: a diferencia de la Orden
+     * de Compra, la ficha de Licitación no publica ninguna URL de PDF a la que
+     * redirigir (ver DescargaPdfLicitacionMercadoPublicoService).
+     */
+    public function pdf(
+        BuscarLicitacionMercadoPublicoRequest $request,
+        DescargaPdfLicitacionMercadoPublicoService $descargaPdf,
+    ): StreamedResponse|RedirectResponse {
+        Gate::authorize('viewAny', LicitacionMercadoPublico::class);
+
+        $pdf = $descargaPdf->obtener($request->string('codigo')->trim()->toString());
+
+        if ($pdf === null) {
+            return back()->withErrors(['pdf' => 'No fue posible obtener el PDF de esta licitación desde Mercado Público.']);
+        }
+
+        return response()->streamDownload(
+            fn () => print ($pdf['contenido']),
+            $pdf['nombre_archivo'],
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 
     public function verificar(LicitacionMercadoPublico $licitacion): Response
