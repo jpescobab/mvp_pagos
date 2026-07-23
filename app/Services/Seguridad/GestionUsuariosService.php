@@ -2,13 +2,17 @@
 
 namespace App\Services\Seguridad;
 
+use App\Models\AuditLog;
 use App\Models\Funcionario;
+use App\Models\SecurityAuditLog;
 use App\Models\User;
 use App\Services\AuditLogger;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class GestionUsuariosService
@@ -194,6 +198,55 @@ class GestionUsuariosService
         );
 
         return $passwordTemporal;
+    }
+
+    /**
+     * Actividad reciente del usuario, separada por naturaleza: acciones de
+     * negocio (`audit_logs`) y eventos de seguridad (`security_audit_logs`).
+     * Solo lectura: no escribe en ninguna de las dos tablas.
+     *
+     * @return array{negocio: Collection<int, AuditLog>, seguridad: Collection<int, SecurityAuditLog>}
+     */
+    public function actividadReciente(User $usuario, int $limite = 10): array
+    {
+        return [
+            'negocio' => AuditLog::query()
+                ->where('user_id', $usuario->getKey())
+                ->orderByDesc('id')
+                ->limit($limite)
+                ->get(),
+            'seguridad' => SecurityAuditLog::query()
+                ->where('user_id', $usuario->getKey())
+                ->orderByDesc('id')
+                ->limit($limite)
+                ->get(),
+        ];
+    }
+
+    /**
+     * Permisos efectivos del usuario, leídos sin la caché de
+     * PermisosCompartidosResolver (que es del usuario autenticado, no de este).
+     *
+     * `superadmin` recibe acceso total vía `Gate::before`, no por asignación
+     * explícita: se reporta como tal en vez de enumerar todos los permisos.
+     *
+     * @return array{acceso_total: bool, permisos: list<string>}
+     */
+    public function permisosEfectivos(User $usuario): array
+    {
+        if ($usuario->hasRole('superadmin')) {
+            return ['acceso_total' => true, 'permisos' => []];
+        }
+
+        $permisos = array_values(
+            $usuario->getAllPermissions()
+                ->map(static fn (Permission $permiso): string => $permiso->name)
+                ->all(),
+        );
+
+        sort($permisos);
+
+        return ['acceso_total' => false, 'permisos' => $permisos];
     }
 
     private function esUltimoAdministradorActivo(User $usuario): bool

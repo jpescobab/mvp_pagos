@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Seguridad;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Seguridad\CrearUsuarioRequest;
 use App\Http\Requests\Seguridad\EditarUsuarioRequest;
+use App\Http\Resources\Seguridad\AuditLogResource;
+use App\Http\Resources\Seguridad\SecurityAuditLogResource;
 use App\Http\Resources\Seguridad\UserResource;
 use App\Models\Ccosto;
 use App\Models\Cfinanciero;
@@ -105,6 +107,30 @@ class UserController extends Controller
         ]);
 
         return to_route('usuarios.index');
+    }
+
+    public function show(Request $request, User $usuario): Response
+    {
+        Gate::authorize('view', $usuario);
+
+        $usuario->load(['roles', 'funcionario.cfinanciero.jurisdiccion', 'funcionario.ccosto']);
+
+        $actividad = $this->gestionUsuarios->actividadReciente($usuario);
+
+        return Inertia::render('seguridad/usuarios/show', [
+            'usuario' => new UserResource($usuario),
+            'permisos_efectivos' => $this->gestionUsuarios->permisosEfectivos($usuario),
+            'actividad' => [
+                'negocio' => AuditLogResource::collection($actividad['negocio']),
+                'seguridad' => SecurityAuditLogResource::collection($actividad['seguridad']),
+            ],
+            'permissions' => [
+                'can_edit_user' => (bool) $request->user()?->can('usuarios.editar'),
+                'can_activate_user' => (bool) $request->user()?->can('usuarios.activar'),
+                'can_deactivate_user' => (bool) $request->user()?->can('usuarios.desactivar'),
+                'can_reset_password' => (bool) $request->user()?->can('usuarios.resetear_password'),
+            ],
+        ]);
     }
 
     public function edit(Request $request, User $usuario): Response

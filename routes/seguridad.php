@@ -11,6 +11,9 @@ Route::middleware(['auth'])->prefix('usuarios')->name('usuarios.')->group(functi
     Route::get('/', [UserController::class, 'index'])->name('index');
     Route::get('create', [UserController::class, 'create'])->name('create');
     Route::post('/', [UserController::class, 'store'])->name('store');
+    // Debe ir DESPUÉS de 'create': si se declara antes, /usuarios/create se
+    // resuelve contra {usuario} y el binding implícito devuelve 404.
+    Route::get('{usuario}', [UserController::class, 'show'])->name('show');
     Route::get('{usuario}/editar', [UserController::class, 'edit'])->name('edit');
     Route::patch('{usuario}', [UserController::class, 'update'])->name('update');
     Route::patch('{usuario}/activar', [UserController::class, 'activar'])->name('activar');

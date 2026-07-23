@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Listado administrativo de usuarios institucionales: búsqueda, paginación, orden y acciones de cuenta (activar, desactivar, resetear contraseña) protegidas por permiso granular, sobre `users`/`funcionarios`. El CRUD completo (crear/editar/detalle), la asignación de roles y el CRUD de roles/permisos pertenecen a cambios futuros.
+Listado administrativo de usuarios institucionales: búsqueda, paginación, orden y acciones de cuenta (activar, desactivar, resetear contraseña) protegidas por permiso granular, sobre `users`/`funcionarios`. La creación, la edición y el detalle del usuario viven en sus propias capabilities (`crear-usuario-institucional`, `editar-usuario-institucional`, `ver-detalle-usuario-institucional`), a las que este listado navega desde el menú de acciones.
 
 ## Requirements
 
@@ -93,10 +93,13 @@ El sistema SHALL permitir generar una contraseña temporal segura para un usuari
 - **WHEN** un usuario sin el permiso `usuarios.resetear_password` intenta resetear la contraseña de otro usuario
 - **THEN** el sistema bloquea la operación
 
-### Requirement: Acciones diferidas visibles pero deshabilitadas
-El sistema SHALL mostrar las acciones "Ver detalle", "Editar usuario" y "Asignar roles" en el menú de acciones por usuario cuando el usuario autenticado tenga el permiso correspondiente (`usuarios.ver`, `usuarios.editar`, `usuarios.asignar_roles`), pero SHALL mantenerlas deshabilitadas con una indicación de "Disponible próximamente", ya que su implementación completa (rutas, páginas) pertenece a tareas separadas.
+### Requirement: Navegar al detalle de un usuario desde el listado
+El sistema SHALL ofrecer, en el menú de acciones por usuario del listado, la opción "Ver detalle" cuando el usuario autenticado tenga el permiso `usuarios.ver`, y esa opción SHALL navegar a la página de detalle de ese usuario. La opción SHALL NOT mostrarse a quien no tenga ese permiso.
 
-#### Scenario: Acción diferida visible pero inactiva
-- **WHEN** un usuario con el permiso `usuarios.editar` abre el menú de acciones de un usuario
-- **THEN** la opción "Editar usuario" aparece deshabilitada con la indicación "Disponible próximamente"
-- **AND** no navega a ninguna ruta al intentar seleccionarla
+#### Scenario: Navegar al detalle desde el menú de acciones
+- **WHEN** un usuario con el permiso `usuarios.ver` selecciona "Ver detalle" en el menú de acciones de un usuario del listado
+- **THEN** la aplicación navega a la página de detalle de ese usuario
+
+#### Scenario: Sin permiso para ver el detalle
+- **WHEN** un usuario sin el permiso `usuarios.ver` abre el menú de acciones de un usuario
+- **THEN** la opción "Ver detalle" no aparece en el menú

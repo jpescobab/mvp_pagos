@@ -26,6 +26,32 @@ export type UsuarioListado = {
     centro_costo: { id: number; nombre: string } | null;
 };
 
+export type SecurityAuditLogEntry = {
+    id: number;
+    event: string;
+    description: string | null;
+    ip_address: string | null;
+    user_agent: string | null;
+    created_at: string;
+};
+
+export type PermisosEfectivos = {
+    acceso_total: boolean;
+    permisos: string[];
+};
+
+export type ActividadUsuario = {
+    negocio: AuditLogEntry[];
+    seguridad: SecurityAuditLogEntry[];
+};
+
+export type PermisosDetalleUsuario = {
+    can_edit_user: boolean;
+    can_activate_user: boolean;
+    can_deactivate_user: boolean;
+    can_reset_password: boolean;
+};
+
 export type FiltrosUsuarios = {
     search: string | null;
     per_page: number;
