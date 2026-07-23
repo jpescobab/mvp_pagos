@@ -37,7 +37,12 @@ class EgresoCguController extends Controller
     {
         Gate::authorize('view', $egresoCgu);
 
-        $egresoCgu->load('items.caso');
+        $egresoCgu->load([
+            'items.caso.proveedor',
+            'items.caso.proceso.estadoActual',
+            'registradoPor',
+            'cfinanciero',
+        ]);
 
         return Inertia::render('pago-proveedores/egresos-cgu/show', [
             'egreso' => new EgresoCguResource($egresoCgu),

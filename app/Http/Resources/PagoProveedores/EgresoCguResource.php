@@ -20,8 +20,33 @@ class EgresoCguResource extends JsonResource
             'fecha' => $this->fecha,
             'monto_total' => $this->monto_total,
             'observaciones' => $this->observaciones,
+            'periodo' => $this->periodo,
+            'generado_automaticamente' => $this->generado_automaticamente,
+            'cantidad_casos' => $this->items->count(),
+            'cfinanciero' => $this->whenLoaded(
+                'cfinanciero',
+                fn () => $this->cfinanciero === null ? null : ['nombre' => $this->cfinanciero->nombre],
+            ),
+            'registrado_por' => $this->whenLoaded('registradoPor', fn () => $this->registradoPor?->name),
             'items' => $this->items->map(fn ($item) => [
-                'caso' => ['sgf_id' => $item->caso->sgf_id],
+                'caso' => [
+                    'id' => $item->caso->id,
+                    'sgf_id' => $item->caso->sgf_id,
+                ],
+                'numero' => $item->caso->numero,
+                'periodo' => $item->caso->periodo,
+                'fecha_sii' => $item->caso->fecha_sii,
+                'folio_egreso' => $item->caso->folio_egreso,
+                'observacion' => $item->caso->observacion,
+                'proveedor' => $item->caso->relationLoaded('proveedor')
+                    ? [
+                        'nombre' => $item->caso->proveedor?->nombre,
+                        'rutproveedor' => $item->caso->proveedor?->rutproveedor,
+                    ]
+                    : null,
+                'estado_actual' => $item->caso->relationLoaded('proceso') && $item->caso->proceso?->estadoActual !== null
+                    ? new EstadoWorkflowResource($item->caso->proceso->estadoActual)
+                    : null,
                 'monto' => $item->monto,
             ])->values(),
         ];

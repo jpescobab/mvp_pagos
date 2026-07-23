@@ -198,7 +198,14 @@ export type CasoSeleccionable = {
 };
 
 export type EgresoCguItem = {
-    caso: { sgf_id: string };
+    caso: { id: number; sgf_id: string };
+    numero: string | null;
+    periodo: string | null;
+    fecha_sii: string | null;
+    folio_egreso: string | null;
+    observacion: string | null;
+    proveedor: { nombre: string | null; rutproveedor: string | null } | null;
+    estado_actual: EstadoWorkflow | null;
     monto: string;
 };
 
@@ -208,6 +215,11 @@ export type EgresoCgu = {
     fecha: string;
     monto_total: string;
     observaciones: string | null;
+    periodo: string | null;
+    generado_automaticamente: boolean;
+    cantidad_casos: number;
+    cfinanciero?: { nombre: string | null } | null;
+    registrado_por?: string | null;
     items: EgresoCguItem[];
 };
 
