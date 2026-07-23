@@ -16,11 +16,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import usuarios from '@/routes/usuarios';
 import type { PermisosUsuarios, UsuarioListado } from '@/types/seguridad';
 
@@ -59,11 +54,6 @@ export function UserActionsMenu({
         }
     }
 
-    const diferidas: Array<{
-        label: string;
-        permitido: boolean;
-    }> = [{ label: 'Ver detalle', permitido: permissions.can_view_user }];
-
     return (
         <>
             <DropdownMenu>
@@ -74,6 +64,15 @@ export function UserActionsMenu({
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    {permissions.can_view_user && (
+                        <DropdownMenuItem
+                            onSelect={() =>
+                                router.get(usuarios.show(usuario.id).url)
+                            }
+                        >
+                            Ver detalle
+                        </DropdownMenuItem>
+                    )}
                     {permissions.can_edit_user && (
                         <DropdownMenuItem
                             onSelect={() =>
@@ -105,22 +104,6 @@ export function UserActionsMenu({
                             Resetear contraseña
                         </DropdownMenuItem>
                     )}
-                    {diferidas
-                        .filter((accion) => accion.permitido)
-                        .map((accion) => (
-                            <Tooltip key={accion.label}>
-                                <TooltipTrigger asChild>
-                                    <div>
-                                        <DropdownMenuItem disabled>
-                                            {accion.label}
-                                        </DropdownMenuItem>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    Disponible próximamente
-                                </TooltipContent>
-                            </Tooltip>
-                        ))}
                 </DropdownMenuContent>
             </DropdownMenu>
 
