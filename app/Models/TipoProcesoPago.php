@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TipoProcesoPago extends Model
 {
+    use RegistraAuditoria;
+
     protected $table = 'tipos_proceso_pago';
 
     protected $fillable = ['codigo', 'nombre', 'activo', 'requiere_traspaso_cgu'];

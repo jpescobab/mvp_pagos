@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TipoDocumento extends Model
 {
+    use RegistraAuditoria;
+
     protected $table = 'tipos_documento';
 
     protected $fillable = ['codigo', 'nombre', 'descripcion', 'es_obligatorio', 'activo'];
