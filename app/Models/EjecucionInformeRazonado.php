@@ -120,4 +120,9 @@ class EjecucionInformeRazonado extends Model
     {
         return $this->hasMany(ExportacionInformeRazonado::class);
     }
+
+    public function estaEnElaboracion(): bool
+    {
+        return $this->proceso?->estadoActual?->codigo === 'en_elaboracion';
+    }
 }

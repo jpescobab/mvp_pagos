@@ -135,6 +135,18 @@ class InformeRazonadoService
         ]);
     }
 
+    public function editarNarrativa(NarrativaInformeRazonado $narrativa, string $contenido): NarrativaInformeRazonado
+    {
+        $narrativa->update(['contenido' => $contenido]);
+
+        return $narrativa->refresh();
+    }
+
+    public function eliminarNarrativa(NarrativaInformeRazonado $narrativa): void
+    {
+        $narrativa->delete();
+    }
+
     public function revisarNarrativa(NarrativaInformeRazonado $narrativa, ?User $usuario = null): NarrativaInformeRazonado
     {
         $usuario ??= Auth::user();

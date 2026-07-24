@@ -13,7 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Monto } from '@/components/ui/monto';
 import { formatFecha, formatFechaHora } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
-import type { EjecucionInformeRazonado } from '@/types/informes-razonados';
+import narrativas from '@/routes/informes-razonados/narrativas';
+import type {
+    EjecucionInformeRazonado,
+    NarrativaInformeRazonado,
+} from '@/types/informes-razonados';
 import type { TransicionWorkflow } from '@/types/pago-proveedores';
 
 type PageProps = {
@@ -21,13 +25,87 @@ type PageProps = {
 };
 
 export default function EjecucionInformeRazonadoShow() {
-    const { ejecucion } = usePage<PageProps>().props;
+    const { ejecucion, auth } = usePage<PageProps>().props;
+
+    const puedeElaborar = auth.permissions.includes('informes.elaborar');
+    const puedeRevisar = auth.permissions.includes('informes.aprobar');
+    const editable = ejecucion.editable ?? false;
 
     const [transicionConComentario, setTransicionConComentario] =
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
     const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
+
+    const [nuevaNarrativa, setNuevaNarrativa] = useState('');
+    const [narrativaEnEdicion, setNarrativaEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [contenidoEdicion, setContenidoEdicion] = useState('');
+    const [procesandoNarrativa, setProcesandoNarrativa] = useState(false);
+
+    function agregarNarrativa() {
+        if (nuevaNarrativa.trim() === '') {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.post(
+            ejecuciones.narrativas.store(ejecucion.id).url,
+            { contenido: nuevaNarrativa },
+            {
+                preserveScroll: true,
+                onSuccess: () => setNuevaNarrativa(''),
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
+
+    function iniciarEdicion(narrativa: NarrativaInformeRazonado) {
+        setNarrativaEnEdicion(narrativa.id);
+        setContenidoEdicion(narrativa.contenido);
+    }
+
+    function guardarEdicion(id: number) {
+        if (contenidoEdicion.trim() === '') {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.patch(
+            narrativas.update(id).url,
+            { contenido: contenidoEdicion },
+            {
+                preserveScroll: true,
+                onSuccess: () => setNarrativaEnEdicion(null),
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
+
+    function eliminarNarrativa(id: number) {
+        if (!window.confirm('¿Eliminar esta narrativa?')) {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.delete(narrativas.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoNarrativa(false),
+        });
+    }
+
+    function marcarRevisada(id: number) {
+        setProcesandoNarrativa(true);
+        router.post(
+            narrativas.revisar(id).url,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -157,7 +235,7 @@ export default function EjecucionInformeRazonadoShow() {
                         )}
                     </section>
 
-                    <section className="space-y-2 rounded-xl border p-4">
+                    <section className="space-y-3 rounded-xl border p-4">
                         <h2 className="text-base font-medium">Narrativas</h2>
                         {(ejecucion.narrativas ?? []).length === 0 ? (
                             <p className="text-sm text-muted-foreground">
@@ -166,11 +244,166 @@ export default function EjecucionInformeRazonadoShow() {
                         ) : (
                             <ul className="divide-y text-sm">
                                 {ejecucion.narrativas?.map((narrativa) => (
-                                    <li key={narrativa.id} className="py-2">
-                                        {narrativa.contenido}
+                                    <li
+                                        key={narrativa.id}
+                                        className="space-y-2 py-3"
+                                    >
+                                        {narrativaEnEdicion === narrativa.id ? (
+                                            <div className="space-y-2">
+                                                <textarea
+                                                    className="min-h-24 w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={contenidoEdicion}
+                                                    onChange={(e) =>
+                                                        setContenidoEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        disabled={
+                                                            procesandoNarrativa ||
+                                                            contenidoEdicion.trim() ===
+                                                                ''
+                                                        }
+                                                        onClick={() =>
+                                                            guardarEdicion(
+                                                                narrativa.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Guardar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoNarrativa
+                                                        }
+                                                        onClick={() =>
+                                                            setNarrativaEnEdicion(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <p className="whitespace-pre-wrap">
+                                                    {narrativa.contenido}
+                                                </p>
+                                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                    {narrativa.generado_por_ia && (
+                                                        <span className="rounded bg-muted px-1.5 py-0.5">
+                                                            IA
+                                                        </span>
+                                                    )}
+                                                    {narrativa.revisado_en ? (
+                                                        <span>
+                                                            Revisada
+                                                            {narrativa.revisado_por
+                                                                ? ` por ${narrativa.revisado_por}`
+                                                                : ''}{' '}
+                                                            ·{' '}
+                                                            {formatFechaHora(
+                                                                narrativa.revisado_en,
+                                                            )}
+                                                        </span>
+                                                    ) : (
+                                                        <span>Sin revisar</span>
+                                                    )}
+                                                </div>
+                                                {(editable && puedeElaborar) ||
+                                                puedeRevisar ? (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {editable &&
+                                                            puedeElaborar && (
+                                                                <>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        disabled={
+                                                                            procesandoNarrativa
+                                                                        }
+                                                                        onClick={() =>
+                                                                            iniciarEdicion(
+                                                                                narrativa,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Editar
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        disabled={
+                                                                            procesandoNarrativa
+                                                                        }
+                                                                        onClick={() =>
+                                                                            eliminarNarrativa(
+                                                                                narrativa.id,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Eliminar
+                                                                    </Button>
+                                                                </>
+                                                            )}
+                                                        {puedeRevisar &&
+                                                            !narrativa.revisado_en && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    disabled={
+                                                                        procesandoNarrativa
+                                                                    }
+                                                                    onClick={() =>
+                                                                        marcarRevisada(
+                                                                            narrativa.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Marcar
+                                                                    revisada
+                                                                </Button>
+                                                            )}
+                                                    </div>
+                                                ) : null}
+                                            </>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
+                        )}
+
+                        {editable && puedeElaborar && (
+                            <div className="space-y-2 border-t pt-3">
+                                <Label htmlFor="nueva-narrativa">
+                                    Agregar narrativa
+                                </Label>
+                                <textarea
+                                    id="nueva-narrativa"
+                                    className="min-h-24 w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaNarrativa}
+                                    onChange={(e) =>
+                                        setNuevaNarrativa(e.target.value)
+                                    }
+                                />
+                                <Button
+                                    size="sm"
+                                    disabled={
+                                        procesandoNarrativa ||
+                                        nuevaNarrativa.trim() === ''
+                                    }
+                                    onClick={agregarNarrativa}
+                                >
+                                    Agregar
+                                </Button>
+                            </div>
                         )}
                     </section>
 

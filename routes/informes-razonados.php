@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\InformesRazonados\DefinicionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\EjecucionInformeRazonadoController;
+use App\Http\Controllers\InformesRazonados\NarrativaInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\TransicionEjecucionInformeRazonadoController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +19,9 @@ Route::middleware(['auth'])->prefix('informes-razonados')->name('informes-razona
     Route::post('ejecuciones', [EjecucionInformeRazonadoController::class, 'store'])->name('ejecuciones.store');
     Route::get('ejecuciones/{ejecucion}', [EjecucionInformeRazonadoController::class, 'show'])->name('ejecuciones.show');
     Route::post('ejecuciones/{ejecucion}/transiciones', [TransicionEjecucionInformeRazonadoController::class, 'store'])->name('ejecuciones.transiciones.store');
+
+    Route::post('ejecuciones/{ejecucion}/narrativas', [NarrativaInformeRazonadoController::class, 'store'])->name('ejecuciones.narrativas.store');
+    Route::patch('narrativas/{narrativa}', [NarrativaInformeRazonadoController::class, 'update'])->name('narrativas.update');
+    Route::delete('narrativas/{narrativa}', [NarrativaInformeRazonadoController::class, 'destroy'])->name('narrativas.destroy');
+    Route::post('narrativas/{narrativa}/revisar', [NarrativaInformeRazonadoController::class, 'revisar'])->name('narrativas.revisar');
 });
