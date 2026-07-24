@@ -13,6 +13,7 @@ class WorkflowInformesRazonadosSeeder extends Seeder
     {
         $permisos = [
             'reportabilidad.publicar_corte',
+            'informes.administrar',
             'informes.aprobar',
             'informes.publicar',
         ];
