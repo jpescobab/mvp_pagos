@@ -8,8 +8,11 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\WorkflowInformesRazonadosSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('un usuario autenticado puede crear una definición de informe razonado', function () {
+test('un usuario con informes.administrar puede crear una definición de informe razonado', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('informes.administrar');
 
     $response = $this->actingAs($usuario)->post(route('informes-razonados.definiciones.store'), [
         'codigo' => 'EJECUCION-PRESUPUESTARIA',

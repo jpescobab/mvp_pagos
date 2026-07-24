@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\InformesRazonados;
 
+use App\Models\DefinicionInformeRazonado;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class CrearDefinicionInformeRazonadoRequest extends FormRequest
+class ActualizarDefinicionInformeRazonadoRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,8 +18,11 @@ class CrearDefinicionInformeRazonadoRequest extends FormRequest
      */
     public function rules(): array
     {
+        /** @var DefinicionInformeRazonado $definicion */
+        $definicion = $this->route('definicion');
+
         return [
-            'codigo' => ['required', 'string', 'max:255', 'unique:definiciones_informe_razonado,codigo'],
+            'codigo' => ['required', 'string', 'max:255', Rule::unique('definiciones_informe_razonado', 'codigo')->ignore($definicion->id)],
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
             'activo' => ['boolean'],

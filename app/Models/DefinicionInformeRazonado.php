@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DefinicionInformeRazonado extends Model
 {
+    use RegistraAuditoria;
+
     protected $table = 'definiciones_informe_razonado';
 
     protected $fillable = [

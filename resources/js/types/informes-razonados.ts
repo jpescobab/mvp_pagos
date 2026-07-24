@@ -1,12 +1,23 @@
 import type { Proceso } from '@/types/pago-proveedores';
 
+export type DefinicionEjecucionResumen = {
+    id: number;
+    generado_en: string;
+    corte_fecha: string | null;
+    periodo_codigo: string | null;
+    estado: string | null;
+};
+
 export type DefinicionInformeRazonado = {
     id: number;
     codigo: string;
     nombre: string;
     descripcion: string | null;
     activo: boolean;
-    ejecuciones_count: number;
+    /** Presente en el listado (`withCount`). */
+    ejecuciones_count?: number;
+    /** Presente en el detalle. */
+    ejecuciones?: DefinicionEjecucionResumen[];
 };
 
 export type SeccionInformeRazonado = {

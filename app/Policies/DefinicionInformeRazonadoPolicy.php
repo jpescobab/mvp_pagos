@@ -16,4 +16,19 @@ class DefinicionInformeRazonadoPolicy
     {
         return $user->can('informes.ver');
     }
+
+    public function create(User $user): bool
+    {
+        return $user->can('informes.administrar');
+    }
+
+    public function update(User $user, DefinicionInformeRazonado $definicionInformeRazonado): bool
+    {
+        return $user->can('informes.administrar');
+    }
+
+    public function delete(User $user, DefinicionInformeRazonado $definicionInformeRazonado): bool
+    {
+        return $user->can('informes.administrar');
+    }
 }
