@@ -14,6 +14,8 @@ import {
     Landmark,
     Layers,
     LayoutGrid,
+    Map,
+    Network,
     Plug,
     PlugZap,
     Receipt,
@@ -49,7 +51,9 @@ import { index as sistemasExternos } from '@/routes/integraciones/sistemas-exter
 import { index as ccostos } from '@/routes/maestros/ccostos';
 import { index as cfinancieros } from '@/routes/maestros/cfinancieros';
 import { index as clientesMedidores } from '@/routes/maestros/clientes-medidores';
+import { index as instituciones } from '@/routes/maestros/instituciones';
 import { index as items } from '@/routes/maestros/items';
+import { index as jurisdicciones } from '@/routes/maestros/jurisdicciones';
 import { index as proveedores } from '@/routes/maestros/proveedores';
 import { index as tiposDocumento } from '@/routes/maestros/tipos-documento';
 import { index as tiposProcesoPago } from '@/routes/maestros/tipos-proceso-pago';
@@ -190,6 +194,18 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
 ];
 
 const estructuraInstitucionalNavItems: NavItemConPermiso[] = [
+    {
+        title: 'Instituciones',
+        href: instituciones(),
+        icon: Network,
+        permiso: 'core_institucional.administrar',
+    },
+    {
+        title: 'Jurisdicciones',
+        href: jurisdicciones(),
+        icon: Map,
+        permiso: 'core_institucional.administrar',
+    },
     {
         title: 'Centros Financieros',
         href: cfinancieros(),

@@ -53,6 +53,44 @@ export type ClienteMedidor = {
     activo: boolean;
 };
 
+export type Institucion = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    activo: boolean;
+    /** Presente en el listado (`withCount`). */
+    jurisdicciones_count?: number;
+    /** Presente en el detalle. */
+    jurisdicciones?: {
+        id: number;
+        codigo: string;
+        nombre: string;
+        activo: boolean;
+    }[];
+};
+
+export type Jurisdiccion = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    descripcion: string | null;
+    activo: boolean;
+    institucion: { id: number; codigo: string; nombre: string };
+    /** Presente en el detalle. */
+    cfinancieros?: {
+        id: number;
+        codigo: string;
+        nombre: string;
+        activo: boolean;
+    }[];
+};
+
+export type InstitucionSeleccionable = {
+    id: number;
+    codigo: string;
+    nombre: string;
+};
+
 export type Cfinanciero = {
     id: number;
     codigo: string;
