@@ -28,3 +28,13 @@ export type DefinicionWorkflow = {
     estados?: EstadoWorkflowResumen[];
     transiciones?: TransicionWorkflowResumen[];
 };
+
+export type NotificacionWorkflow = {
+    id: string;
+    descripcion: string | null;
+    estado_nuevo: string | null;
+    estado_anterior: string | null;
+    url: string | null;
+    leida: boolean;
+    created_at: string | null;
+};

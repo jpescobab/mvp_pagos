@@ -49,6 +49,10 @@ class HandleInertiaRequests extends Middleware
             'indicadoresTopbar' => $request->user()
                 ? app(IndicadorEconomicoSelector::class)->ultimosPorTipo(['UF', 'UTM', 'USD', 'IPC'])
                 : [],
+            // Solo el conteo para el badge de la campana; la lista se pide al
+            // endpoint al abrir el panel. Sin caché: debe reflejar de inmediato
+            // el marcado como leídas y las transiciones nuevas.
+            'notificaciones_no_leidas' => $request->user()?->unreadNotifications()->count() ?? 0,
         ];
     }
 }
