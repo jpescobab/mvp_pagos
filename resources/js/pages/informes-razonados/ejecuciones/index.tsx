@@ -27,7 +27,10 @@ export default function EjecucionesInformeRazonadoIndex() {
         ejecuciones: lista,
         definiciones,
         cortesPublicados,
+        auth,
     } = usePage<PageProps>().props;
+
+    const puedeElaborar = auth.permissions.includes('informes.elaborar');
 
     const [definicionId, setDefinicionId] = useState('');
     const [corteId, setCorteId] = useState('');
@@ -69,67 +72,72 @@ export default function EjecucionesInformeRazonadoIndex() {
                     Ejecuciones de Informes Razonados
                 </h1>
 
-                <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">Iniciar ejecución</h2>
-
-                    {error && (
-                        <p className="text-sm text-destructive">{error}</p>
-                    )}
-
-                    {cortesPublicados.length === 0 && (
-                        <p className="text-sm text-muted-foreground">
-                            No hay cortes de reportabilidad publicados todavía.
-                        </p>
-                    )}
-
-                    <div className="flex flex-wrap items-end gap-2">
-                        <Select
-                            value={definicionId}
-                            onValueChange={setDefinicionId}
-                        >
-                            <SelectTrigger className="w-64">
-                                <SelectValue placeholder="Definición de informe" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {definiciones.map((definicion) => (
-                                    <SelectItem
-                                        key={definicion.id}
-                                        value={String(definicion.id)}
-                                    >
-                                        {definicion.nombre}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <Select value={corteId} onValueChange={setCorteId}>
-                            <SelectTrigger className="w-64">
-                                <SelectValue placeholder="Corte publicado" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {cortesPublicados.map((corte) => (
-                                    <SelectItem
-                                        key={corte.id}
-                                        value={String(corte.id)}
-                                    >
-                                        {formatFecha(corte.fecha_corte)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <Button
-                            disabled={
-                                procesando ||
-                                definicionId === '' ||
-                                corteId === ''
-                            }
-                            onClick={iniciarEjecucion}
-                        >
+                {puedeElaborar && (
+                    <section className="space-y-3 rounded-xl border p-4">
+                        <h2 className="text-base font-medium">
                             Iniciar ejecución
-                        </Button>
-                    </div>
-                </section>
+                        </h2>
+
+                        {error && (
+                            <p className="text-sm text-destructive">{error}</p>
+                        )}
+
+                        {cortesPublicados.length === 0 && (
+                            <p className="text-sm text-muted-foreground">
+                                No hay cortes de reportabilidad publicados
+                                todavía.
+                            </p>
+                        )}
+
+                        <div className="flex flex-wrap items-end gap-2">
+                            <Select
+                                value={definicionId}
+                                onValueChange={setDefinicionId}
+                            >
+                                <SelectTrigger className="w-64">
+                                    <SelectValue placeholder="Definición de informe" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {definiciones.map((definicion) => (
+                                        <SelectItem
+                                            key={definicion.id}
+                                            value={String(definicion.id)}
+                                        >
+                                            {definicion.nombre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={corteId} onValueChange={setCorteId}>
+                                <SelectTrigger className="w-64">
+                                    <SelectValue placeholder="Corte publicado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {cortesPublicados.map((corte) => (
+                                        <SelectItem
+                                            key={corte.id}
+                                            value={String(corte.id)}
+                                        >
+                                            {formatFecha(corte.fecha_corte)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                disabled={
+                                    procesando ||
+                                    definicionId === '' ||
+                                    corteId === ''
+                                }
+                                onClick={iniciarEjecucion}
+                            >
+                                Iniciar ejecución
+                            </Button>
+                        </div>
+                    </section>
+                )}
 
                 <div className="overflow-hidden rounded-xl border">
                     <table className="w-full text-sm">

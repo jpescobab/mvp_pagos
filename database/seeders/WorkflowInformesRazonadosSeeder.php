@@ -14,6 +14,7 @@ class WorkflowInformesRazonadosSeeder extends Seeder
         $permisos = [
             'reportabilidad.publicar_corte',
             'informes.administrar',
+            'informes.elaborar',
             'informes.aprobar',
             'informes.publicar',
         ];
@@ -47,9 +48,9 @@ class WorkflowInformesRazonadosSeeder extends Seeder
         }
 
         $transiciones = [
-            ['codigo' => 'enviar_a_revision', 'nombre' => 'Enviar a revisión', 'de' => 'en_elaboracion', 'a' => 'en_revision'],
+            ['codigo' => 'enviar_a_revision', 'nombre' => 'Enviar a revisión', 'de' => 'en_elaboracion', 'a' => 'en_revision', 'permiso_requerido' => 'informes.elaborar'],
             ['codigo' => 'aprobar', 'nombre' => 'Aprobar', 'de' => 'en_revision', 'a' => 'aprobado', 'permiso_requerido' => 'informes.aprobar'],
-            ['codigo' => 'rechazar', 'nombre' => 'Rechazar', 'de' => 'en_revision', 'a' => 'rechazado', 'requiere_comentario' => true],
+            ['codigo' => 'rechazar', 'nombre' => 'Rechazar', 'de' => 'en_revision', 'a' => 'rechazado', 'requiere_comentario' => true, 'permiso_requerido' => 'informes.aprobar'],
             ['codigo' => 'publicar', 'nombre' => 'Publicar', 'de' => 'aprobado', 'a' => 'publicado', 'permiso_requerido' => 'informes.publicar'],
         ];
 

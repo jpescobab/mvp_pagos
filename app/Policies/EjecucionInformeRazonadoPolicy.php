@@ -16,4 +16,9 @@ class EjecucionInformeRazonadoPolicy
     {
         return $user->can('informes.ver');
     }
+
+    public function create(User $user): bool
+    {
+        return $user->can('informes.elaborar');
+    }
 }
