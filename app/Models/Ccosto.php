@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ccosto extends Model
 {
+    use RegistraAuditoria;
+
     protected $table = 'ccostos';
 
     protected $fillable = ['cfinanciero_id', 'codigo', 'nombre', 'cod_edificio', 'activo'];

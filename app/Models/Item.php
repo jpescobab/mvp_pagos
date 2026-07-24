@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Item extends Model
 {
+    use RegistraAuditoria;
     use SoftDeletes;
 
     protected $table = 'items';
