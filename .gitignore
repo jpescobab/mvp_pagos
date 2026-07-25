@@ -28,6 +28,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/.agents
 /openspec.bak
 /openspec_capj_app_pagos_optimizado_v9.zip
 
