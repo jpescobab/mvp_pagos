@@ -12,7 +12,9 @@ Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->gr
     Route::get('procesos', [ProcesoAdquisicionController::class, 'index'])->name('procesos.index');
     Route::get('procesos/crear', [ProcesoAdquisicionController::class, 'create'])->name('procesos.create');
     Route::post('procesos', [ProcesoAdquisicionController::class, 'store'])->name('procesos.store');
+    Route::get('procesos/{proceso}/editar', [ProcesoAdquisicionController::class, 'edit'])->name('procesos.edit');
     Route::get('procesos/{proceso}', [ProcesoAdquisicionController::class, 'show'])->name('procesos.show');
+    Route::match(['put', 'patch'], 'procesos/{proceso}', [ProcesoAdquisicionController::class, 'update'])->name('procesos.update');
     Route::post('procesos/{proceso}/transiciones', [TransicionProcesoAdquisicionController::class, 'store'])->name('procesos.transiciones.store');
 
     Route::prefix('ordenes-compra-mercado-publico')->name('ordenes_compra_mp.')->group(function () {

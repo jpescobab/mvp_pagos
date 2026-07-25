@@ -21,4 +21,9 @@ class ProcesoAdquisicionPolicy
     {
         return $user->can('adquisiciones.crear_proceso');
     }
+
+    public function update(User $user, ProcesoAdquisicion $proceso): bool
+    {
+        return $user->can('adquisiciones.editar_proceso');
+    }
 }
