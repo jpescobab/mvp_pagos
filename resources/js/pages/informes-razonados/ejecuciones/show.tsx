@@ -13,10 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Monto } from '@/components/ui/monto';
 import { formatFecha, formatFechaHora } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
+import excepciones from '@/routes/informes-razonados/excepciones';
 import narrativas from '@/routes/informes-razonados/narrativas';
 import secciones from '@/routes/informes-razonados/secciones';
 import type {
     EjecucionInformeRazonado,
+    ExcepcionInformeRazonado,
     NarrativaInformeRazonado,
     SeccionInformeRazonado,
 } from '@/types/informes-razonados';
@@ -24,6 +26,14 @@ import type { TransicionWorkflow } from '@/types/pago-proveedores';
 
 type PageProps = {
     ejecucion: EjecucionInformeRazonado;
+};
+
+const SEVERIDADES = ['info', 'advertencia', 'critico'] as const;
+
+const CLASES_SEVERIDAD: Record<string, string> = {
+    info: 'bg-muted text-muted-foreground',
+    advertencia: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+    critico: 'bg-destructive/15 text-destructive',
 };
 
 export default function EjecucionInformeRazonadoShow() {
@@ -152,6 +162,86 @@ export default function EjecucionInformeRazonadoShow() {
         router.delete(secciones.destroy(id).url, {
             preserveScroll: true,
             onFinish: () => setProcesandoSeccion(false),
+        });
+    }
+
+    const [nuevaExcepcionCodigo, setNuevaExcepcionCodigo] = useState('');
+    const [nuevaExcepcionDescripcion, setNuevaExcepcionDescripcion] =
+        useState('');
+    const [nuevaExcepcionSeveridad, setNuevaExcepcionSeveridad] =
+        useState('info');
+    const [excepcionEnEdicion, setExcepcionEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [descripcionExcepcionEdicion, setDescripcionExcepcionEdicion] =
+        useState('');
+    const [severidadExcepcionEdicion, setSeveridadExcepcionEdicion] =
+        useState('info');
+    const [procesandoExcepcion, setProcesandoExcepcion] = useState(false);
+
+    function agregarExcepcion() {
+        if (
+            nuevaExcepcionCodigo.trim() === '' ||
+            nuevaExcepcionDescripcion.trim() === ''
+        ) {
+            return;
+        }
+
+        setProcesandoExcepcion(true);
+        router.post(
+            ejecuciones.excepciones.store(ejecucion.id).url,
+            {
+                codigo: nuevaExcepcionCodigo,
+                descripcion: nuevaExcepcionDescripcion,
+                severidad: nuevaExcepcionSeveridad,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNuevaExcepcionCodigo('');
+                    setNuevaExcepcionDescripcion('');
+                    setNuevaExcepcionSeveridad('info');
+                },
+                onFinish: () => setProcesandoExcepcion(false),
+            },
+        );
+    }
+
+    function iniciarEdicionExcepcion(excepcion: ExcepcionInformeRazonado) {
+        setExcepcionEnEdicion(excepcion.id);
+        setDescripcionExcepcionEdicion(excepcion.descripcion);
+        setSeveridadExcepcionEdicion(excepcion.severidad);
+    }
+
+    function guardarEdicionExcepcion(id: number) {
+        if (descripcionExcepcionEdicion.trim() === '') {
+            return;
+        }
+
+        setProcesandoExcepcion(true);
+        router.patch(
+            excepciones.update(id).url,
+            {
+                descripcion: descripcionExcepcionEdicion,
+                severidad: severidadExcepcionEdicion,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => setExcepcionEnEdicion(null),
+                onFinish: () => setProcesandoExcepcion(false),
+            },
+        );
+    }
+
+    function eliminarExcepcion(id: number) {
+        if (!window.confirm('¿Eliminar esta excepción?')) {
+            return;
+        }
+
+        setProcesandoExcepcion(true);
+        router.delete(excepciones.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoExcepcion(false),
         });
     }
 
@@ -687,7 +777,7 @@ export default function EjecucionInformeRazonadoShow() {
                         )}
                     </section>
 
-                    <section className="space-y-2 rounded-xl border p-4">
+                    <section className="space-y-3 rounded-xl border p-4">
                         <h2 className="text-base font-medium">Excepciones</h2>
                         {(ejecucion.excepciones ?? []).length === 0 ? (
                             <p className="text-sm text-muted-foreground">
@@ -696,14 +786,189 @@ export default function EjecucionInformeRazonadoShow() {
                         ) : (
                             <ul className="divide-y text-sm">
                                 {ejecucion.excepciones?.map((excepcion) => (
-                                    <li key={excepcion.id} className="py-2">
-                                        <span className="font-mono">
-                                            {excepcion.severidad}
-                                        </span>{' '}
-                                        — {excepcion.descripcion}
+                                    <li
+                                        key={excepcion.id}
+                                        className="space-y-2 py-2"
+                                    >
+                                        {excepcionEnEdicion === excepcion.id ? (
+                                            <div className="space-y-2">
+                                                <textarea
+                                                    aria-label="Descripción"
+                                                    className="min-h-16 w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={
+                                                        descripcionExcepcionEdicion
+                                                    }
+                                                    onChange={(e) =>
+                                                        setDescripcionExcepcionEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <select
+                                                    aria-label="Severidad"
+                                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={
+                                                        severidadExcepcionEdicion
+                                                    }
+                                                    onChange={(e) =>
+                                                        setSeveridadExcepcionEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
+                                                    {SEVERIDADES.map(
+                                                        (severidad) => (
+                                                            <option
+                                                                key={severidad}
+                                                                value={severidad}
+                                                            >
+                                                                {severidad}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        disabled={
+                                                            procesandoExcepcion ||
+                                                            descripcionExcepcionEdicion.trim() ===
+                                                                ''
+                                                        }
+                                                        onClick={() =>
+                                                            guardarEdicionExcepcion(
+                                                                excepcion.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Guardar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoExcepcion
+                                                        }
+                                                        onClick={() =>
+                                                            setExcepcionEnEdicion(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-start gap-2">
+                                                    <span
+                                                        className={`rounded px-1.5 py-0.5 text-xs ${
+                                                            CLASES_SEVERIDAD[
+                                                                excepcion
+                                                                    .severidad
+                                                            ] ??
+                                                            CLASES_SEVERIDAD.info
+                                                        }`}
+                                                    >
+                                                        {excepcion.severidad}
+                                                    </span>
+                                                    <span className="flex-1">
+                                                        {excepcion.descripcion}
+                                                    </span>
+                                                </div>
+                                                {editable && puedeElaborar && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoExcepcion
+                                                            }
+                                                            onClick={() =>
+                                                                iniciarEdicionExcepcion(
+                                                                    excepcion,
+                                                                )
+                                                            }
+                                                        >
+                                                            Editar
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoExcepcion
+                                                            }
+                                                            onClick={() =>
+                                                                eliminarExcepcion(
+                                                                    excepcion.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Eliminar
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
+                        )}
+
+                        {editable && puedeElaborar && (
+                            <div className="space-y-2 border-t pt-3">
+                                <Label htmlFor="nueva-excepcion-codigo">
+                                    Agregar excepción
+                                </Label>
+                                <input
+                                    id="nueva-excepcion-codigo"
+                                    placeholder="Código"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaExcepcionCodigo}
+                                    onChange={(e) =>
+                                        setNuevaExcepcionCodigo(e.target.value)
+                                    }
+                                />
+                                <textarea
+                                    aria-label="Descripción"
+                                    placeholder="Descripción"
+                                    className="min-h-16 w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaExcepcionDescripcion}
+                                    onChange={(e) =>
+                                        setNuevaExcepcionDescripcion(
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                                <select
+                                    aria-label="Severidad"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaExcepcionSeveridad}
+                                    onChange={(e) =>
+                                        setNuevaExcepcionSeveridad(
+                                            e.target.value,
+                                        )
+                                    }
+                                >
+                                    {SEVERIDADES.map((severidad) => (
+                                        <option key={severidad} value={severidad}>
+                                            {severidad}
+                                        </option>
+                                    ))}
+                                </select>
+                                <Button
+                                    size="sm"
+                                    disabled={
+                                        procesandoExcepcion ||
+                                        nuevaExcepcionCodigo.trim() === '' ||
+                                        nuevaExcepcionDescripcion.trim() === ''
+                                    }
+                                    onClick={agregarExcepcion}
+                                >
+                                    Agregar
+                                </Button>
+                            </div>
                         )}
                     </section>
 
