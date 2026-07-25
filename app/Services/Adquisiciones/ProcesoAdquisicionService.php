@@ -42,4 +42,38 @@ class ProcesoAdquisicionService
             return $proceso->refresh();
         });
     }
+
+    /**
+     * Actualiza un proceso de adquisición que está en borrador y sincroniza los
+     * campos que gobiernan el checklist (modalidad_id, monto) en su Proceso.
+     *
+     * @param  array<string, mixed>  $datos  Debe incluir codigo, modalidad_id, ccosto_id, objeto y opcionalmente proveedor_id/monto
+     */
+    public function actualizar(ProcesoAdquisicion $proceso, array $datos): ProcesoAdquisicion
+    {
+        $estadoActual = $proceso->proceso->estadoActual->codigo;
+
+        if ($estadoActual !== 'borrador') {
+            throw ProcesoAdquisicionException::noEditableEnEstado($estadoActual);
+        }
+
+        $modalidad = ModalidadAdquisicion::where('id', $datos['modalidad_id'])
+            ->where('activo', true)
+            ->first();
+
+        if ($modalidad === null) {
+            throw ProcesoAdquisicionException::modalidadInvalida();
+        }
+
+        return DB::transaction(function () use ($proceso, $datos) {
+            $proceso->update($datos);
+
+            $proceso->proceso->update([
+                'modalidad_id' => $proceso->modalidad_id,
+                'monto' => $proceso->monto,
+            ]);
+
+            return $proceso->refresh();
+        });
+    }
 }

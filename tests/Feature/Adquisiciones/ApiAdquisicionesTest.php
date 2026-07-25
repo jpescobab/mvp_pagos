@@ -193,10 +193,12 @@ test('el seeder de workflow otorga los permisos de proceso a admin y a administr
     $admin = Role::where('name', 'admin')->firstOrFail();
     expect($admin->hasPermissionTo('adquisiciones.consultar_proceso'))->toBeTrue();
     expect($admin->hasPermissionTo('adquisiciones.crear_proceso'))->toBeTrue();
+    expect($admin->hasPermissionTo('adquisiciones.editar_proceso'))->toBeTrue();
 
     $administrativo = Role::where('name', 'administrativo_adquisiciones')->firstOrFail();
     expect($administrativo->hasPermissionTo('adquisiciones.consultar_proceso'))->toBeTrue();
     expect($administrativo->hasPermissionTo('adquisiciones.crear_proceso'))->toBeTrue();
+    expect($administrativo->hasPermissionTo('adquisiciones.editar_proceso'))->toBeTrue();
 });
 
 test('ejecutar una transición válida con el permiso requerido cambia el estado del Proceso', function () {

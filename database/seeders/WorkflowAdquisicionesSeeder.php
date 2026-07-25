@@ -14,6 +14,7 @@ class WorkflowAdquisicionesSeeder extends Seeder
         $permisos = [
             'adquisiciones.consultar_proceso',
             'adquisiciones.crear_proceso',
+            'adquisiciones.editar_proceso',
             'adquisiciones.publicar',
             'adquisiciones.adjudicar',
             'adquisiciones.anular',
@@ -33,6 +34,7 @@ class WorkflowAdquisicionesSeeder extends Seeder
         $administrativoAdquisiciones->givePermissionTo([
             'adquisiciones.consultar_proceso',
             'adquisiciones.crear_proceso',
+            'adquisiciones.editar_proceso',
         ]);
 
         $definicion = DefinicionWorkflow::firstOrCreate(

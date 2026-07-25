@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Adquisiciones;
 
 use App\Exceptions\ProcesoAdquisicionException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Adquisiciones\ActualizarProcesoAdquisicionRequest;
 use App\Http\Requests\Adquisiciones\CrearProcesoAdquisicionRequest;
 use App\Http\Resources\Adquisiciones\ProcesoAdquisicionResource;
 use App\Models\Ccosto;
@@ -16,6 +17,7 @@ use App\Services\Adquisiciones\ProcesoAdquisicionService;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,29 +78,10 @@ class ProcesoAdquisicionController extends Controller
     {
         Gate::authorize('create', ProcesoAdquisicion::class);
 
-        $modalidades = ModalidadAdquisicion::where('activo', true)->get()
-            ->map(fn (ModalidadAdquisicion $modalidad) => [
-                'id' => $modalidad->id,
-                'codigo' => $modalidad->codigo,
-                'nombre' => $modalidad->nombre,
-            ]);
-
-        $ccostos = Ccosto::all()->map(fn (Ccosto $ccosto) => [
-            'id' => $ccosto->id,
-            'codigo' => $ccosto->codigo,
-            'nombre' => $ccosto->nombre,
-        ]);
-
-        $proveedores = Proveedor::activos()->get()->map(fn (Proveedor $proveedor) => [
-            'id' => $proveedor->id,
-            'nombre' => $proveedor->nombre,
-            'rutproveedor' => $proveedor->rutproveedor,
-        ]);
-
         return Inertia::render('adquisiciones/procesos/crear', [
-            'modalidades' => $modalidades,
-            'ccostos' => $ccostos,
-            'proveedores' => $proveedores,
+            'modalidades' => $this->modalidadesActivas(),
+            'ccostos' => $this->ccostosDisponibles(),
+            'proveedores' => $this->proveedoresActivos(),
         ]);
     }
 
@@ -113,5 +96,75 @@ class ProcesoAdquisicionController extends Controller
         }
 
         return to_route('adquisiciones.procesos.show', $proceso);
+    }
+
+    public function edit(ProcesoAdquisicion $proceso): Response
+    {
+        Gate::authorize('update', $proceso);
+
+        return Inertia::render('adquisiciones/procesos/editar', [
+            'proceso' => [
+                'id' => $proceso->id,
+                'codigo' => $proceso->codigo,
+                'modalidad_id' => $proceso->modalidad_id,
+                'ccosto_id' => $proceso->ccosto_id,
+                'proveedor_id' => $proceso->proveedor_id,
+                'monto' => $proceso->monto,
+                'objeto' => $proceso->objeto,
+            ],
+            'modalidades' => $this->modalidadesActivas(),
+            'ccostos' => $this->ccostosDisponibles(),
+            'proveedores' => $this->proveedoresActivos(),
+        ]);
+    }
+
+    public function update(ActualizarProcesoAdquisicionRequest $request, ProcesoAdquisicion $proceso, ProcesoAdquisicionService $servicio): RedirectResponse
+    {
+        Gate::authorize('update', $proceso);
+
+        try {
+            $servicio->actualizar($proceso, $request->validated());
+        } catch (ProcesoAdquisicionException $e) {
+            return back()->withErrors(['modalidad_id' => $e->getMessage()]);
+        }
+
+        return to_route('adquisiciones.procesos.show', $proceso);
+    }
+
+    /**
+     * @return Collection<int, array{id: int, codigo: string, nombre: string}>
+     */
+    private function modalidadesActivas(): Collection
+    {
+        return ModalidadAdquisicion::where('activo', true)->get()
+            ->map(fn (ModalidadAdquisicion $modalidad) => [
+                'id' => $modalidad->id,
+                'codigo' => $modalidad->codigo,
+                'nombre' => $modalidad->nombre,
+            ]);
+    }
+
+    /**
+     * @return Collection<int, array{id: int, codigo: string, nombre: string}>
+     */
+    private function ccostosDisponibles(): Collection
+    {
+        return Ccosto::all()->map(fn (Ccosto $ccosto) => [
+            'id' => $ccosto->id,
+            'codigo' => $ccosto->codigo,
+            'nombre' => $ccosto->nombre,
+        ]);
+    }
+
+    /**
+     * @return Collection<int, array{id: int, nombre: string, rutproveedor: string}>
+     */
+    private function proveedoresActivos(): Collection
+    {
+        return Proveedor::activos()->get()->map(fn (Proveedor $proveedor) => [
+            'id' => $proveedor->id,
+            'nombre' => $proveedor->nombre,
+            'rutproveedor' => $proveedor->rutproveedor,
+        ]);
     }
 }

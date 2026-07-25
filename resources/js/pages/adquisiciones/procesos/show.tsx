@@ -34,7 +34,11 @@ type PageProps = {
 };
 
 export default function ProcesoShow() {
-    const { proceso, tiposDocumento } = usePage<PageProps>().props;
+    const { proceso, tiposDocumento, auth } = usePage<PageProps>().props;
+
+    const puedeEditar =
+        proceso.proceso.estado_actual.codigo === 'borrador' &&
+        auth.permissions.includes('adquisiciones.editar_proceso');
     const [transicionConComentario, setTransicionConComentario] =
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
@@ -212,6 +216,17 @@ export default function ProcesoShow() {
                             <span className="text-sm text-muted-foreground">
                                 {proceso.proveedor.nombre}
                             </span>
+                        )}
+                        {puedeEditar && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    router.get(procesos.edit(proceso.id).url)
+                                }
+                            >
+                                Editar
+                            </Button>
                         )}
                         <EstadoBadge estado={proceso.proceso.estado_actual} />
                     </div>

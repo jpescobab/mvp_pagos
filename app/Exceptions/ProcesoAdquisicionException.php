@@ -10,4 +10,9 @@ class ProcesoAdquisicionException extends RuntimeException
     {
         return new self('La modalidad indicada no existe o no está activa.');
     }
+
+    public static function noEditableEnEstado(string $estado): self
+    {
+        return new self("Un proceso de adquisición solo puede editarse en estado borrador (estado actual: {$estado}).");
+    }
 }
