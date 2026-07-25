@@ -46,7 +46,9 @@ export type NarrativaInformeRazonado = {
     id: number;
     contenido: string;
     generado_por_ia: boolean;
+    seccion_informe_razonado_id: number | null;
     revisado_en: string | null;
+    revisado_por: string | null;
 };
 
 export type ExcepcionInformeRazonado = {
@@ -82,6 +84,7 @@ export type EjecucionInformeRazonado = {
     corte: { id: number; estado: string; periodo_codigo: string | null };
     generado_por: string | null;
     generado_en: string;
+    editable?: boolean;
     proceso?: Proceso;
     secciones?: SeccionInformeRazonado[];
     metricas?: MetricaInformeRazonado[];

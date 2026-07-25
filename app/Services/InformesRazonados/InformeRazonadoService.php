@@ -65,6 +65,21 @@ class InformeRazonadoService
         ]);
     }
 
+    public function editarSeccion(SeccionInformeRazonado $seccion, string $titulo, int $orden): SeccionInformeRazonado
+    {
+        $seccion->update([
+            'titulo' => $titulo,
+            'orden' => $orden,
+        ]);
+
+        return $seccion->refresh();
+    }
+
+    public function eliminarSeccion(SeccionInformeRazonado $seccion): void
+    {
+        $seccion->delete();
+    }
+
     public function agregarMetrica(
         EjecucionInformeRazonado $ejecucion,
         string $codigo,
@@ -133,6 +148,18 @@ class InformeRazonadoService
             'contenido' => $contenido,
             'generado_por_ia' => $generadoPorIa,
         ]);
+    }
+
+    public function editarNarrativa(NarrativaInformeRazonado $narrativa, string $contenido): NarrativaInformeRazonado
+    {
+        $narrativa->update(['contenido' => $contenido]);
+
+        return $narrativa->refresh();
+    }
+
+    public function eliminarNarrativa(NarrativaInformeRazonado $narrativa): void
+    {
+        $narrativa->delete();
     }
 
     public function revisarNarrativa(NarrativaInformeRazonado $narrativa, ?User $usuario = null): NarrativaInformeRazonado

@@ -13,7 +13,13 @@ import { Label } from '@/components/ui/label';
 import { Monto } from '@/components/ui/monto';
 import { formatFecha, formatFechaHora } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
-import type { EjecucionInformeRazonado } from '@/types/informes-razonados';
+import narrativas from '@/routes/informes-razonados/narrativas';
+import secciones from '@/routes/informes-razonados/secciones';
+import type {
+    EjecucionInformeRazonado,
+    NarrativaInformeRazonado,
+    SeccionInformeRazonado,
+} from '@/types/informes-razonados';
 import type { TransicionWorkflow } from '@/types/pago-proveedores';
 
 type PageProps = {
@@ -21,13 +27,179 @@ type PageProps = {
 };
 
 export default function EjecucionInformeRazonadoShow() {
-    const { ejecucion } = usePage<PageProps>().props;
+    const { ejecucion, auth } = usePage<PageProps>().props;
+
+    const puedeElaborar = auth.permissions.includes('informes.elaborar');
+    const puedeRevisar = auth.permissions.includes('informes.aprobar');
+    const editable = ejecucion.editable ?? false;
 
     const [transicionConComentario, setTransicionConComentario] =
         useState<TransicionWorkflow | null>(null);
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
     const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
+
+    const [nuevaNarrativa, setNuevaNarrativa] = useState('');
+    const [nuevaNarrativaSeccion, setNuevaNarrativaSeccion] = useState('');
+    const [narrativaEnEdicion, setNarrativaEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [contenidoEdicion, setContenidoEdicion] = useState('');
+    const [procesandoNarrativa, setProcesandoNarrativa] = useState(false);
+
+    const [nuevaSeccionCodigo, setNuevaSeccionCodigo] = useState('');
+    const [nuevaSeccionTitulo, setNuevaSeccionTitulo] = useState('');
+    const [nuevaSeccionOrden, setNuevaSeccionOrden] = useState('0');
+    const [seccionEnEdicion, setSeccionEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [tituloSeccionEdicion, setTituloSeccionEdicion] = useState('');
+    const [ordenSeccionEdicion, setOrdenSeccionEdicion] = useState('0');
+    const [procesandoSeccion, setProcesandoSeccion] = useState(false);
+
+    const seccionesOrdenadas = [...(ejecucion.secciones ?? [])].sort(
+        (a, b) => a.orden - b.orden,
+    );
+
+    function agregarNarrativa() {
+        if (nuevaNarrativa.trim() === '') {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.post(
+            ejecuciones.narrativas.store(ejecucion.id).url,
+            {
+                contenido: nuevaNarrativa,
+                seccion_informe_razonado_id: nuevaNarrativaSeccion || null,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNuevaNarrativa('');
+                    setNuevaNarrativaSeccion('');
+                },
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
+
+    function agregarSeccion() {
+        if (
+            nuevaSeccionCodigo.trim() === '' ||
+            nuevaSeccionTitulo.trim() === ''
+        ) {
+            return;
+        }
+
+        setProcesandoSeccion(true);
+        router.post(
+            ejecuciones.secciones.store(ejecucion.id).url,
+            {
+                codigo: nuevaSeccionCodigo,
+                titulo: nuevaSeccionTitulo,
+                orden: Number(nuevaSeccionOrden) || 0,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNuevaSeccionCodigo('');
+                    setNuevaSeccionTitulo('');
+                    setNuevaSeccionOrden('0');
+                },
+                onFinish: () => setProcesandoSeccion(false),
+            },
+        );
+    }
+
+    function iniciarEdicionSeccion(seccion: SeccionInformeRazonado) {
+        setSeccionEnEdicion(seccion.id);
+        setTituloSeccionEdicion(seccion.titulo);
+        setOrdenSeccionEdicion(String(seccion.orden));
+    }
+
+    function guardarEdicionSeccion(id: number) {
+        if (tituloSeccionEdicion.trim() === '') {
+            return;
+        }
+
+        setProcesandoSeccion(true);
+        router.patch(
+            secciones.update(id).url,
+            {
+                titulo: tituloSeccionEdicion,
+                orden: Number(ordenSeccionEdicion) || 0,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => setSeccionEnEdicion(null),
+                onFinish: () => setProcesandoSeccion(false),
+            },
+        );
+    }
+
+    function eliminarSeccion(id: number) {
+        if (
+            !window.confirm(
+                'Eliminar esta sección también eliminará las narrativas, ' +
+                    'métricas y gráficos asignados a ella. ¿Continuar?',
+            )
+        ) {
+            return;
+        }
+
+        setProcesandoSeccion(true);
+        router.delete(secciones.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoSeccion(false),
+        });
+    }
+
+    function iniciarEdicion(narrativa: NarrativaInformeRazonado) {
+        setNarrativaEnEdicion(narrativa.id);
+        setContenidoEdicion(narrativa.contenido);
+    }
+
+    function guardarEdicion(id: number) {
+        if (contenidoEdicion.trim() === '') {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.patch(
+            narrativas.update(id).url,
+            { contenido: contenidoEdicion },
+            {
+                preserveScroll: true,
+                onSuccess: () => setNarrativaEnEdicion(null),
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
+
+    function eliminarNarrativa(id: number) {
+        if (!window.confirm('¿Eliminar esta narrativa?')) {
+            return;
+        }
+
+        setProcesandoNarrativa(true);
+        router.delete(narrativas.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoNarrativa(false),
+        });
+    }
+
+    function marcarRevisada(id: number) {
+        setProcesandoNarrativa(true);
+        router.post(
+            narrativas.revisar(id).url,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setProcesandoNarrativa(false),
+            },
+        );
+    }
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -54,6 +226,124 @@ export default function EjecucionInformeRazonadoShow() {
     const historial = [
         ...(ejecucion.proceso?.historial_transiciones ?? []),
     ].reverse();
+
+    const todasLasNarrativas = ejecucion.narrativas ?? [];
+    const gruposNarrativas = [
+        ...seccionesOrdenadas.map((seccion) => ({
+            key: `seccion-${seccion.id}`,
+            titulo: seccion.titulo,
+            items: todasLasNarrativas.filter(
+                (n) => n.seccion_informe_razonado_id === seccion.id,
+            ),
+        })),
+        {
+            key: 'sin-seccion',
+            titulo: 'Sin sección',
+            items: todasLasNarrativas.filter(
+                (n) => n.seccion_informe_razonado_id == null,
+            ),
+        },
+    ].filter((grupo) => grupo.items.length > 0);
+
+    function renderNarrativa(narrativa: NarrativaInformeRazonado) {
+        return (
+            <li key={narrativa.id} className="space-y-2 py-3">
+                {narrativaEnEdicion === narrativa.id ? (
+                    <div className="space-y-2">
+                        <textarea
+                            className="min-h-24 w-full rounded-md border bg-background p-2 text-sm"
+                            value={contenidoEdicion}
+                            onChange={(e) => setContenidoEdicion(e.target.value)}
+                        />
+                        <div className="flex gap-2">
+                            <Button
+                                size="sm"
+                                disabled={
+                                    procesandoNarrativa ||
+                                    contenidoEdicion.trim() === ''
+                                }
+                                onClick={() => guardarEdicion(narrativa.id)}
+                            >
+                                Guardar
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={procesandoNarrativa}
+                                onClick={() => setNarrativaEnEdicion(null)}
+                            >
+                                Cancelar
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <p className="whitespace-pre-wrap">
+                            {narrativa.contenido}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            {narrativa.generado_por_ia && (
+                                <span className="rounded bg-muted px-1.5 py-0.5">
+                                    IA
+                                </span>
+                            )}
+                            {narrativa.revisado_en ? (
+                                <span>
+                                    Revisada
+                                    {narrativa.revisado_por
+                                        ? ` por ${narrativa.revisado_por}`
+                                        : ''}{' '}
+                                    · {formatFechaHora(narrativa.revisado_en)}
+                                </span>
+                            ) : (
+                                <span>Sin revisar</span>
+                            )}
+                        </div>
+                        {(editable && puedeElaborar) || puedeRevisar ? (
+                            <div className="flex flex-wrap gap-2">
+                                {editable && puedeElaborar && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            disabled={procesandoNarrativa}
+                                            onClick={() =>
+                                                iniciarEdicion(narrativa)
+                                            }
+                                        >
+                                            Editar
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            disabled={procesandoNarrativa}
+                                            onClick={() =>
+                                                eliminarNarrativa(narrativa.id)
+                                            }
+                                        >
+                                            Eliminar
+                                        </Button>
+                                    </>
+                                )}
+                                {puedeRevisar && !narrativa.revisado_en && (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={procesandoNarrativa}
+                                        onClick={() =>
+                                            marcarRevisada(narrativa.id)
+                                        }
+                                    >
+                                        Marcar revisada
+                                    </Button>
+                                )}
+                            </div>
+                        ) : null}
+                    </>
+                )}
+            </li>
+        );
+    }
 
     return (
         <>
@@ -112,6 +402,174 @@ export default function EjecucionInformeRazonadoShow() {
                     )}
                 </section>
 
+                {editable && puedeElaborar && (
+                    <section className="space-y-3 rounded-xl border p-4">
+                        <h2 className="text-base font-medium">Secciones</h2>
+
+                        {seccionesOrdenadas.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Sin secciones todavía.
+                            </p>
+                        ) : (
+                            <ul className="divide-y text-sm">
+                                {seccionesOrdenadas.map((seccion) => (
+                                    <li
+                                        key={seccion.id}
+                                        className="space-y-2 py-2"
+                                    >
+                                        {seccionEnEdicion === seccion.id ? (
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <input
+                                                    aria-label="Título"
+                                                    className="flex-1 rounded-md border bg-background p-2 text-sm"
+                                                    value={tituloSeccionEdicion}
+                                                    onChange={(e) =>
+                                                        setTituloSeccionEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <input
+                                                    aria-label="Orden"
+                                                    type="number"
+                                                    className="w-20 rounded-md border bg-background p-2 text-sm"
+                                                    value={ordenSeccionEdicion}
+                                                    onChange={(e) =>
+                                                        setOrdenSeccionEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <Button
+                                                    size="sm"
+                                                    disabled={
+                                                        procesandoSeccion ||
+                                                        tituloSeccionEdicion.trim() ===
+                                                            ''
+                                                    }
+                                                    onClick={() =>
+                                                        guardarEdicionSeccion(
+                                                            seccion.id,
+                                                        )
+                                                    }
+                                                >
+                                                    Guardar
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={procesandoSeccion}
+                                                    onClick={() =>
+                                                        setSeccionEnEdicion(null)
+                                                    }
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <span>
+                                                    <span className="text-muted-foreground">
+                                                        #{seccion.orden}
+                                                    </span>{' '}
+                                                    {seccion.titulo}{' '}
+                                                    <span className="font-mono text-xs text-muted-foreground">
+                                                        {seccion.codigo}
+                                                    </span>
+                                                </span>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoSeccion
+                                                        }
+                                                        onClick={() =>
+                                                            iniciarEdicionSeccion(
+                                                                seccion,
+                                                            )
+                                                        }
+                                                    >
+                                                        Editar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoSeccion
+                                                        }
+                                                        onClick={() =>
+                                                            eliminarSeccion(
+                                                                seccion.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Eliminar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+
+                        <div className="flex flex-wrap items-end gap-2 border-t pt-3">
+                            <div className="grid gap-1">
+                                <Label htmlFor="nueva-seccion-codigo">
+                                    Código
+                                </Label>
+                                <input
+                                    id="nueva-seccion-codigo"
+                                    className="w-32 rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaSeccionCodigo}
+                                    onChange={(e) =>
+                                        setNuevaSeccionCodigo(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="grid flex-1 gap-1">
+                                <Label htmlFor="nueva-seccion-titulo">
+                                    Título
+                                </Label>
+                                <input
+                                    id="nueva-seccion-titulo"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaSeccionTitulo}
+                                    onChange={(e) =>
+                                        setNuevaSeccionTitulo(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="grid gap-1">
+                                <Label htmlFor="nueva-seccion-orden">
+                                    Orden
+                                </Label>
+                                <input
+                                    id="nueva-seccion-orden"
+                                    type="number"
+                                    className="w-20 rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaSeccionOrden}
+                                    onChange={(e) =>
+                                        setNuevaSeccionOrden(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <Button
+                                size="sm"
+                                disabled={
+                                    procesandoSeccion ||
+                                    nuevaSeccionCodigo.trim() === '' ||
+                                    nuevaSeccionTitulo.trim() === ''
+                                }
+                                onClick={agregarSeccion}
+                            >
+                                Agregar sección
+                            </Button>
+                        </div>
+                    </section>
+                )}
+
                 <div className="grid gap-4 md:grid-cols-2">
                     <section className="space-y-2 rounded-xl border p-4">
                         <h2 className="text-base font-medium">Métricas</h2>
@@ -157,20 +615,75 @@ export default function EjecucionInformeRazonadoShow() {
                         )}
                     </section>
 
-                    <section className="space-y-2 rounded-xl border p-4">
+                    <section className="space-y-3 rounded-xl border p-4">
                         <h2 className="text-base font-medium">Narrativas</h2>
-                        {(ejecucion.narrativas ?? []).length === 0 ? (
+                        {todasLasNarrativas.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 Sin narrativas todavía.
                             </p>
                         ) : (
-                            <ul className="divide-y text-sm">
-                                {ejecucion.narrativas?.map((narrativa) => (
-                                    <li key={narrativa.id} className="py-2">
-                                        {narrativa.contenido}
-                                    </li>
+                            <div className="space-y-4">
+                                {gruposNarrativas.map((grupo) => (
+                                    <div key={grupo.key} className="space-y-1">
+                                        {seccionesOrdenadas.length > 0 && (
+                                            <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                                {grupo.titulo}
+                                            </h3>
+                                        )}
+                                        <ul className="divide-y text-sm">
+                                            {grupo.items.map(renderNarrativa)}
+                                        </ul>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
+                        )}
+
+                        {editable && puedeElaborar && (
+                            <div className="space-y-2 border-t pt-3">
+                                <Label htmlFor="nueva-narrativa">
+                                    Agregar narrativa
+                                </Label>
+                                <textarea
+                                    id="nueva-narrativa"
+                                    className="min-h-24 w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaNarrativa}
+                                    onChange={(e) =>
+                                        setNuevaNarrativa(e.target.value)
+                                    }
+                                />
+                                {seccionesOrdenadas.length > 0 && (
+                                    <select
+                                        aria-label="Sección"
+                                        className="w-full rounded-md border bg-background p-2 text-sm"
+                                        value={nuevaNarrativaSeccion}
+                                        onChange={(e) =>
+                                            setNuevaNarrativaSeccion(
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        <option value="">Sin sección</option>
+                                        {seccionesOrdenadas.map((seccion) => (
+                                            <option
+                                                key={seccion.id}
+                                                value={String(seccion.id)}
+                                            >
+                                                {seccion.titulo}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+                                <Button
+                                    size="sm"
+                                    disabled={
+                                        procesandoNarrativa ||
+                                        nuevaNarrativa.trim() === ''
+                                    }
+                                    onClick={agregarNarrativa}
+                                >
+                                    Agregar
+                                </Button>
+                            </div>
                         )}
                     </section>
 

@@ -68,7 +68,7 @@ class EjecucionInformeRazonadoController extends Controller
             'secciones',
             'metricas',
             'graficos',
-            'narrativas',
+            'narrativas.revisadoPor',
             'excepciones',
             'snapshots',
             'aprobaciones.aprobadoPor',

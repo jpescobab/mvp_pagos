@@ -37,6 +37,7 @@ class EjecucionInformeRazonadoResource extends JsonResource
             ]),
             'generado_por' => $this->generadoPor?->name,
             'generado_en' => $this->generado_en,
+            'editable' => $this->whenLoaded('proceso', fn () => $this->estaEnElaboracion()),
             'proceso' => $this->whenLoaded('proceso', fn () => new ProcesoResource($this->proceso)),
             'secciones' => $this->whenLoaded('secciones', fn () => $this->mapSecciones()),
             'metricas' => $this->whenLoaded('metricas', fn () => $this->mapMetricas()),
@@ -105,7 +106,9 @@ class EjecucionInformeRazonadoResource extends JsonResource
                 'id' => $narrativa->id,
                 'contenido' => $narrativa->contenido,
                 'generado_por_ia' => $narrativa->generado_por_ia,
+                'seccion_informe_razonado_id' => $narrativa->seccion_informe_razonado_id,
                 'revisado_en' => $narrativa->revisado_en,
+                'revisado_por' => $narrativa->revisadoPor?->name,
             ])
             ->all());
     }
