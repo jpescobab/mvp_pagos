@@ -3,6 +3,7 @@
 use App\Http\Controllers\InformesRazonados\DefinicionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\EjecucionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\NarrativaInformeRazonadoController;
+use App\Http\Controllers\InformesRazonados\SeccionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\TransicionEjecucionInformeRazonadoController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,8 @@ Route::middleware(['auth'])->prefix('informes-razonados')->name('informes-razona
     Route::patch('narrativas/{narrativa}', [NarrativaInformeRazonadoController::class, 'update'])->name('narrativas.update');
     Route::delete('narrativas/{narrativa}', [NarrativaInformeRazonadoController::class, 'destroy'])->name('narrativas.destroy');
     Route::post('narrativas/{narrativa}/revisar', [NarrativaInformeRazonadoController::class, 'revisar'])->name('narrativas.revisar');
+
+    Route::post('ejecuciones/{ejecucion}/secciones', [SeccionInformeRazonadoController::class, 'store'])->name('ejecuciones.secciones.store');
+    Route::patch('secciones/{seccion}', [SeccionInformeRazonadoController::class, 'update'])->name('secciones.update');
+    Route::delete('secciones/{seccion}', [SeccionInformeRazonadoController::class, 'destroy'])->name('secciones.destroy');
 });

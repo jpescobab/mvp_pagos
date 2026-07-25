@@ -65,6 +65,21 @@ class InformeRazonadoService
         ]);
     }
 
+    public function editarSeccion(SeccionInformeRazonado $seccion, string $titulo, int $orden): SeccionInformeRazonado
+    {
+        $seccion->update([
+            'titulo' => $titulo,
+            'orden' => $orden,
+        ]);
+
+        return $seccion->refresh();
+    }
+
+    public function eliminarSeccion(SeccionInformeRazonado $seccion): void
+    {
+        $seccion->delete();
+    }
+
     public function agregarMetrica(
         EjecucionInformeRazonado $ejecucion,
         string $codigo,
