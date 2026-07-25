@@ -9,16 +9,16 @@ class ProcesoAdquisicionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('adquisiciones.consultar_proceso');
     }
 
     public function view(User $user, ProcesoAdquisicion $proceso): bool
     {
-        return true;
+        return $user->can('adquisiciones.consultar_proceso');
     }
 
     public function create(User $user): bool
     {
-        return true;
+        return $user->can('adquisiciones.crear_proceso');
     }
 }

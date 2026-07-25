@@ -3,6 +3,7 @@
 use App\Models\Proveedor;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\WorkflowAdquisicionesSeeder;
 
 /**
  * El estado del proveedor solo gobierna los selectores donde se elige un
@@ -35,6 +36,9 @@ beforeEach(function () {
 });
 
 test('el formulario de creación de proceso de adquisición ofrece solo proveedores activos', function () {
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+    $this->actor->givePermissionTo('adquisiciones.crear_proceso');
+
     $response = $this->actingAs($this->actor)->get(route('adquisiciones.procesos.create'));
 
     $response->assertOk();

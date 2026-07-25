@@ -242,6 +242,7 @@ test('el detalle de un proceso de adquisición muestra los casos de pago vincula
     $caso->update(['proceso_adquisicion_id' => $proceso->id]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 
@@ -261,6 +262,7 @@ test('el detalle de un proceso de adquisición sin casos vinculados muestra la l
     $proceso = crearProcesoAdquisicionDePrueba();
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 

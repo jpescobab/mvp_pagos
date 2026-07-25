@@ -65,6 +65,7 @@ test('abrir el detalle de un proceso con modalidad licitación pública genera u
     ]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 
@@ -91,6 +92,7 @@ test('abrir el detalle de un proceso con modalidad trato directo no exige bases 
     ]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 
@@ -117,6 +119,7 @@ test('abrir el detalle dos veces no duplica los items del checklist', function (
     ]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
     $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
@@ -145,6 +148,7 @@ test('un documento de contrato ya vinculado se refleja en el checklist con docum
     $proceso->proceso->vinculosDocumento()->create(['documento_id' => $documento->id, 'activo' => true]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 

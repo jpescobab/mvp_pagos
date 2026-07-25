@@ -43,6 +43,7 @@ test('el detalle de un proceso incluye el historial completo de validaciones de 
     $documento->validaciones()->create(['estado' => 'valido', 'validado_por' => $validador->id, 'validado_en' => now()]);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 
@@ -77,6 +78,7 @@ test('la observacion de un rechazo pasado sigue presente en el historial despues
     $documento->validaciones()->create(['estado' => 'valido']);
 
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('adquisiciones.consultar_proceso');
 
     $response = $this->actingAs($usuario)->get(route('adquisiciones.procesos.show', $proceso));
 
