@@ -6,6 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class IniciarEjecucionInformeRazonadoRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        return (bool) $this->user()?->can('informes.elaborar');
+    }
+
     /**
      * @return array<string, array<int, string>>
      */

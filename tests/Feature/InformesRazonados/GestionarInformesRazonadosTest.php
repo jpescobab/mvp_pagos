@@ -29,6 +29,7 @@ test('iniciar una ejecución sobre un corte publicado crea el registro con su Pr
     $corte = corteReportabilidadDePrueba(['estado' => 'publicado']);
     $definicion = definicionInformeRazonadoDePrueba();
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('informes.elaborar');
 
     $response = $this->actingAs($usuario)->post(route('informes-razonados.ejecuciones.store'), [
         'definicion_informe_razonado_id' => $definicion->id,
@@ -43,9 +44,12 @@ test('iniciar una ejecución sobre un corte publicado crea el registro con su Pr
 });
 
 test('iniciar una ejecución sobre un corte en borrador la rechaza', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+
     $corte = corteReportabilidadDePrueba(['estado' => 'borrador']);
     $definicion = definicionInformeRazonadoDePrueba();
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('informes.elaborar');
 
     $response = $this->actingAs($usuario)->post(route('informes-razonados.ejecuciones.store'), [
         'definicion_informe_razonado_id' => $definicion->id,
@@ -93,6 +97,7 @@ test('aprobar sin el permiso informes.aprobar bloquea la transición', function 
     $corte = corteReportabilidadDePrueba(['estado' => 'publicado']);
     $definicion = definicionInformeRazonadoDePrueba();
     $usuario = User::factory()->create();
+    $usuario->givePermissionTo('informes.elaborar');
 
     $ejecucion = app(InformeRazonadoService::class)
         ->iniciarEjecucion($definicion, $corte, $usuario);

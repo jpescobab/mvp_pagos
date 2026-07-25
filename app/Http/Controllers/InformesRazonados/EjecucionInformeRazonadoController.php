@@ -39,6 +39,8 @@ class EjecucionInformeRazonadoController extends Controller
 
     public function store(IniciarEjecucionInformeRazonadoRequest $request): RedirectResponse
     {
+        Gate::authorize('create', EjecucionInformeRazonado::class);
+
         $definicion = DefinicionInformeRazonado::findOrFail($request->integer('definicion_informe_razonado_id'));
         $corte = CorteReportabilidad::findOrFail($request->integer('corte_reportabilidad_id'));
 
