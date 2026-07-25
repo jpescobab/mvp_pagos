@@ -126,6 +126,8 @@ vendor/bin/pest tests/Feature/Settings/   # un directorio/archivo puntual
 composer ci:check         # lint:check JS + format:check + types:check + test
 ```
 
+**Qué gatea realmente GitHub Actions (≠ `composer ci:check`)**: hay dos workflows en `.github/workflows/`. `lint.yml` (job `quality`) corre Pint + `npm run format` (prettier) + `npm run lint` (eslint). `tests.yml` (job `ci`, matriz PHP 8.4/8.5) corre `npm run build` → `composer types:check` (PHPStan) → `php artisan test`. **Ningún workflow corre `tsc`**: los errores de tipos TS solo los atrapa `npm run types:check` en local — por eso `composer ci:check`, que sí lo incluye, es *más* estricto que el CI remoto; córrelo antes de subir cambios de frontend. El código generado por Wayfinder (`resources/js/{routes,actions,wayfinder}`) está **gitignoreado** (build artifact): lo regenera el plugin `wayfinder()` de Vite en `npm run build`/dev, o `php artisan wayfinder:generate --with-form` a mano — no se commitea, CI lo regenera solo. Al agregar rutas hay que regenerarlo localmente para que `tsc` vea los helpers nuevos. Nota: `eslint .` puede reportar cientos de errores en paquetes de skills untracked bajo `.agents/` (gitignoreado, ausente en el checkout de CI) — al verificar apunta eslint a los archivos que tocaste, no a todo el árbol.
+
 ### Build de producción
 ```bash
 npm run build
