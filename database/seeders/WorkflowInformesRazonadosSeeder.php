@@ -62,7 +62,7 @@ class WorkflowInformesRazonadosSeeder extends Seeder
                     'estado_origen_id' => $estadosCreados[$transicion['de']]->id,
                     'estado_destino_id' => $estadosCreados[$transicion['a']]->id,
                     'requiere_comentario' => $transicion['requiere_comentario'] ?? false,
-                    'permiso_requerido' => $transicion['permiso_requerido'] ?? null,
+                    'permiso_requerido' => $transicion['permiso_requerido'],
                     'documentos_requeridos' => null,
                 ],
             );
