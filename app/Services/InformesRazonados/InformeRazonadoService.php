@@ -137,6 +137,21 @@ class InformeRazonadoService
         ]);
     }
 
+    public function editarExcepcion(ExcepcionInformeRazonado $excepcion, string $descripcion, string $severidad): ExcepcionInformeRazonado
+    {
+        $excepcion->update([
+            'descripcion' => $descripcion,
+            'severidad' => $severidad,
+        ]);
+
+        return $excepcion->refresh();
+    }
+
+    public function eliminarExcepcion(ExcepcionInformeRazonado $excepcion): void
+    {
+        $excepcion->delete();
+    }
+
     public function agregarNarrativa(
         EjecucionInformeRazonado $ejecucion,
         string $contenido,
