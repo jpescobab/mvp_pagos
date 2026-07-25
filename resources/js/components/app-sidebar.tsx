@@ -174,6 +174,7 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
         title: 'Procesos',
         href: procesosAdquisicion(),
         icon: ShoppingCart,
+        permiso: 'adquisiciones.consultar_proceso',
     },
     {
         title: 'Órdenes de Compra (Mercado Público)',
