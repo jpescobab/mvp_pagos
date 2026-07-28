@@ -1,3 +1,10 @@
+export type CorteReportabilidadItem = {
+    id: number;
+    etiqueta: string;
+    entidad_tipo: string | null;
+    entidad_id: number | null;
+};
+
 export type CorteReportabilidad = {
     id: number;
     fecha_corte: string;
@@ -5,6 +12,7 @@ export type CorteReportabilidad = {
     publicado_por: string | null;
     publicado_en: string | null;
     periodo?: { id: number; codigo: string };
+    items?: CorteReportabilidadItem[];
     items_count: number;
     snapshots_count: number;
     ejecuciones_informe_razonado_count: number;

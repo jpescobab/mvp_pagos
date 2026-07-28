@@ -9,7 +9,17 @@ type PageProps = {
 };
 
 export default function CorteReportabilidadShow() {
-    const { corte } = usePage<PageProps>().props;
+    const { corte, auth } = usePage<PageProps>().props;
+
+    const esBorrador = corte.estado === 'borrador';
+    const puedeGenerar = auth.permissions.includes(
+        'reportabilidad.generar_corte',
+    );
+    const items = corte.items ?? [];
+
+    function generar() {
+        router.post(cortes.generar(corte.id).url, {}, { preserveScroll: true });
+    }
 
     function publicar() {
         router.post(
@@ -44,9 +54,7 @@ export default function CorteReportabilidadShow() {
                         <dt className="text-muted-foreground">
                             Fecha de corte
                         </dt>
-                        <dd>
-                            {formatFecha(corte.fecha_corte)}
-                        </dd>
+                        <dd>{formatFecha(corte.fecha_corte)}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">Items</dt>
@@ -76,7 +84,49 @@ export default function CorteReportabilidadShow() {
                     )}
                 </dl>
 
-                {corte.estado === 'borrador' && (
+                <section className="space-y-2 rounded-xl border p-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-base font-medium">
+                            Contenido del corte
+                        </h2>
+                        {esBorrador && puedeGenerar && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={generar}
+                            >
+                                {items.length > 0
+                                    ? 'Regenerar contenido'
+                                    : 'Generar contenido'}
+                            </Button>
+                        )}
+                    </div>
+                    {items.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin contenido todavía. Genera el corte para incluir
+                            las entidades reportables del período.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {items.map((item) => (
+                                <li
+                                    key={item.id}
+                                    className="flex items-center justify-between py-2"
+                                >
+                                    <span>{item.etiqueta}</span>
+                                    <span className="text-muted-foreground">
+                                        {item.entidad_tipo ?? '—'}
+                                        {item.entidad_id
+                                            ? ` #${item.entidad_id}`
+                                            : ''}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                {esBorrador && (
                     <Button onClick={publicar}>Publicar corte</Button>
                 )}
             </div>
