@@ -28,6 +28,44 @@ class WorkflowInformesRazonadosSeeder extends Seeder
         $admin = Role::where('name', 'admin')->first();
         $admin?->givePermissionTo($permisos);
 
+        // Roles operativos dedicados que materializan la separación de deberes
+        // del flujo (elaborar ≠ aprobar/publicar ≠ preparar cortes). Bundlean
+        // permisos ya existentes; `informes.administrar` queda fuera (config de
+        // plantillas, propia de `admin`). Se usa syncPermissions para que el
+        // conjunto sea exacto e idempotente; no se tocan `admin`/`superadmin`.
+        $rolesDedicados = [
+            'gestor_reportabilidad' => [
+                'reportabilidad.ver',
+                'reportabilidad.generar_corte',
+                'reportabilidad.publicar_corte',
+                'informes.ver',
+            ],
+            'elaborador_informes' => [
+                'informes.ver',
+                'informes.elaborar',
+                'informes.exportar',
+            ],
+            'revisor_informes' => [
+                'informes.ver',
+                'informes.aprobar',
+                'informes.publicar',
+                'informes.exportar',
+            ],
+        ];
+
+        // `informes.ver` y `reportabilidad.ver` los crea RolesAndPermissionsSeeder;
+        // se aseguran aquí con firstOrCreate para que este seeder sea
+        // auto-suficiente aunque se ejecute aislado (varios tests lo siembran solo).
+        foreach ($rolesDedicados as $permisosRol) {
+            foreach ($permisosRol as $permiso) {
+                Permission::firstOrCreate(['name' => $permiso]);
+            }
+        }
+
+        foreach ($rolesDedicados as $nombreRol => $permisosRol) {
+            Role::firstOrCreate(['name' => $nombreRol])->syncPermissions($permisosRol);
+        }
+
         $definicion = DefinicionWorkflow::firstOrCreate(
             ['codigo' => 'informes_razonados'],
             ['nombre' => 'Informes Razonados', 'activo' => true],
