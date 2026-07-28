@@ -193,7 +193,7 @@ test('editarGrafico actualiza los campos y eliminarGrafico lo borra', function (
     expect($ejecucion->graficos()->count())->toBe(0);
 });
 
-test('ExportadorInformeRazonadoService genera un archivo HTML y rechaza formatos no soportados', function () {
+test('ExportadorInformeRazonadoService genera archivos HTML y PDF y rechaza formatos no soportados', function () {
     $this->seed(WorkflowInformesRazonadosSeeder::class);
 
     Storage::fake('local');
@@ -213,6 +213,12 @@ test('ExportadorInformeRazonadoService genera un archivo HTML y rechaza formatos
     expect($ruta)->toEndWith('.html');
     expect(Storage::disk('local')->get($ruta))->toContain('Monto total');
 
-    expect(fn () => $exportador->exportar($ejecucion, 'pdf'))
+    $rutaPdf = $exportador->exportar($ejecucion, 'pdf');
+
+    Storage::disk('local')->assertExists($rutaPdf);
+    expect($rutaPdf)->toEndWith('.pdf');
+    expect(Storage::disk('local')->get($rutaPdf))->toStartWith('%PDF-');
+
+    expect(fn () => $exportador->exportar($ejecucion, 'docx'))
         ->toThrow(InvalidArgumentException::class);
 });

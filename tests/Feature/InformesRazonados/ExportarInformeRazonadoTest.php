@@ -35,6 +35,57 @@ test('exportar en HTML con informes.exportar genera el archivo y registra la exp
     expect($ejecucion->proceso->refresh()->estadoActual->codigo)->toBe($estadoInicial);
 });
 
+test('exportar en PDF con informes.exportar genera el archivo y registra la exportación', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+    Storage::fake('local');
+
+    $exportador = User::factory()->create();
+    $exportador->givePermissionTo('informes.exportar');
+
+    $ejecucion = ejecucionEnElaboracionDePrueba($exportador);
+    app(InformeRazonadoService::class)->agregarMetrica($ejecucion, 'MET-1', 'Monto total', 100.0, 'CLP');
+    $estadoInicial = $ejecucion->proceso->estadoActual->codigo;
+
+    $response = $this->actingAs($exportador)->post(
+        route('informes-razonados.ejecuciones.exportaciones.store', $ejecucion),
+        ['formato' => 'pdf']
+    );
+
+    $response->assertRedirect();
+    expect($ejecucion->exportaciones()->count())->toBe(1);
+
+    $exportacion = $ejecucion->exportaciones()->first();
+    expect($exportacion->formato)->toBe('pdf');
+    expect($exportacion->generado_por)->toBe($exportador->id);
+    Storage::disk('local')->assertExists($exportacion->ruta_archivo);
+    expect(Storage::disk('local')->get($exportacion->ruta_archivo))->toStartWith('%PDF-');
+    expect($ejecucion->proceso->refresh()->estadoActual->codigo)->toBe($estadoInicial);
+});
+
+test('descargar una exportación PDF responde con Content-Type application/pdf', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+    Storage::fake('local');
+
+    $exportador = User::factory()->create();
+    $exportador->givePermissionTo('informes.exportar');
+
+    $ejecucion = ejecucionEnElaboracionDePrueba($exportador);
+
+    $this->actingAs($exportador)->post(
+        route('informes-razonados.ejecuciones.exportaciones.store', $ejecucion),
+        ['formato' => 'pdf']
+    )->assertRedirect();
+
+    $exportacion = $ejecucion->exportaciones()->first();
+
+    $response = $this->actingAs($exportador)->get(
+        route('informes-razonados.exportaciones.descargar', $exportacion)
+    );
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/pdf');
+});
+
 test('exportar en un formato no soportado responde con error de validación y no registra nada', function () {
     $this->seed(WorkflowInformesRazonadosSeeder::class);
     Storage::fake('local');
@@ -46,7 +97,7 @@ test('exportar en un formato no soportado responde con error de validación y no
 
     $response = $this->actingAs($exportador)->post(
         route('informes-razonados.ejecuciones.exportaciones.store', $ejecucion),
-        ['formato' => 'pdf']
+        ['formato' => 'docx']
     );
 
     $response->assertSessionHasErrors('formato');
