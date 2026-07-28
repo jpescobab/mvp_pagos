@@ -37,6 +37,13 @@ const SEVERIDADES = ['info', 'advertencia', 'critico'] as const;
 
 const TIPOS_GRAFICO = ['barra', 'linea', 'torta', 'area'] as const;
 
+const FORMATOS_EXPORTACION = [
+    { value: 'html', label: 'HTML' },
+    { value: 'pdf', label: 'PDF' },
+    { value: 'docx', label: 'Word' },
+    { value: 'xlsx', label: 'Excel' },
+] as const;
+
 const CLASES_SEVERIDAD: Record<string, string> = {
     info: 'bg-muted text-muted-foreground',
     advertencia: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
@@ -469,11 +476,11 @@ export default function EjecucionInformeRazonadoShow() {
     const puedeExportar = auth.permissions.includes('informes.exportar');
     const [procesandoExportacion, setProcesandoExportacion] = useState(false);
 
-    function exportar() {
+    function exportar(formato: string) {
         setProcesandoExportacion(true);
         router.post(
             ejecuciones.exportaciones.store(ejecucion.id).url,
-            { formato: 'html' },
+            { formato },
             {
                 preserveScroll: true,
                 onFinish: () => setProcesandoExportacion(false),
@@ -1640,13 +1647,24 @@ export default function EjecucionInformeRazonadoShow() {
                                 Exportaciones
                             </h2>
                             {puedeExportar && (
-                                <Button
-                                    size="sm"
-                                    disabled={procesandoExportacion}
-                                    onClick={exportar}
-                                >
-                                    Exportar HTML
-                                </Button>
+                                <div className="flex flex-wrap items-center gap-1">
+                                    <span className="mr-1 text-xs text-muted-foreground">
+                                        Exportar como
+                                    </span>
+                                    {FORMATOS_EXPORTACION.map((formato) => (
+                                        <Button
+                                            key={formato.value}
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={procesandoExportacion}
+                                            onClick={() =>
+                                                exportar(formato.value)
+                                            }
+                                        >
+                                            {formato.label}
+                                        </Button>
+                                    ))}
+                                </div>
                             )}
                         </div>
                         {(ejecucion.exportaciones ?? []).length === 0 ? (
