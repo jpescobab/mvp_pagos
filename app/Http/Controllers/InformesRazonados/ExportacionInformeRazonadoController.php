@@ -38,6 +38,15 @@ class ExportacionInformeRazonadoController extends Controller
 
         abort_unless(Storage::disk('local')->exists($exportacion->ruta_archivo), 404);
 
-        return Storage::disk('local')->download($exportacion->ruta_archivo);
+        $contentType = match ($exportacion->formato) {
+            'pdf' => 'application/pdf',
+            default => 'text/html',
+        };
+
+        return Storage::disk('local')->download(
+            $exportacion->ruta_archivo,
+            basename($exportacion->ruta_archivo),
+            ['Content-Type' => $contentType],
+        );
     }
 }
