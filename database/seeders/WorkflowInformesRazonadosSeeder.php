@@ -17,6 +17,7 @@ class WorkflowInformesRazonadosSeeder extends Seeder
             'informes.elaborar',
             'informes.aprobar',
             'informes.publicar',
+            'informes.exportar',
         ];
 
         foreach ($permisos as $permiso) {

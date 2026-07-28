@@ -3,6 +3,9 @@
 use App\Http\Controllers\InformesRazonados\DefinicionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\EjecucionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\ExcepcionInformeRazonadoController;
+use App\Http\Controllers\InformesRazonados\ExportacionInformeRazonadoController;
+use App\Http\Controllers\InformesRazonados\GraficoInformeRazonadoController;
+use App\Http\Controllers\InformesRazonados\MetricaInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\NarrativaInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\SeccionInformeRazonadoController;
 use App\Http\Controllers\InformesRazonados\TransicionEjecucionInformeRazonadoController;
@@ -34,4 +37,15 @@ Route::middleware(['auth'])->prefix('informes-razonados')->name('informes-razona
     Route::post('ejecuciones/{ejecucion}/excepciones', [ExcepcionInformeRazonadoController::class, 'store'])->name('ejecuciones.excepciones.store');
     Route::patch('excepciones/{excepcion}', [ExcepcionInformeRazonadoController::class, 'update'])->name('excepciones.update');
     Route::delete('excepciones/{excepcion}', [ExcepcionInformeRazonadoController::class, 'destroy'])->name('excepciones.destroy');
+
+    Route::post('ejecuciones/{ejecucion}/metricas', [MetricaInformeRazonadoController::class, 'store'])->name('ejecuciones.metricas.store');
+    Route::patch('metricas/{metrica}', [MetricaInformeRazonadoController::class, 'update'])->name('metricas.update');
+    Route::delete('metricas/{metrica}', [MetricaInformeRazonadoController::class, 'destroy'])->name('metricas.destroy');
+
+    Route::post('ejecuciones/{ejecucion}/graficos', [GraficoInformeRazonadoController::class, 'store'])->name('ejecuciones.graficos.store');
+    Route::patch('graficos/{grafico}', [GraficoInformeRazonadoController::class, 'update'])->name('graficos.update');
+    Route::delete('graficos/{grafico}', [GraficoInformeRazonadoController::class, 'destroy'])->name('graficos.destroy');
+
+    Route::post('ejecuciones/{ejecucion}/exportaciones', [ExportacionInformeRazonadoController::class, 'store'])->name('ejecuciones.exportaciones.store');
+    Route::get('exportaciones/{exportacion}/descargar', [ExportacionInformeRazonadoController::class, 'descargar'])->name('exportaciones.descargar');
 });

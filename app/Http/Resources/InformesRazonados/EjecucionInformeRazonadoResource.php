@@ -77,6 +77,8 @@ class EjecucionInformeRazonadoResource extends JsonResource
                 'etiqueta' => $metrica->etiqueta,
                 'valor' => $metrica->valor,
                 'unidad' => $metrica->unidad,
+                'orden' => $metrica->orden,
+                'seccion_informe_razonado_id' => $metrica->seccion_informe_razonado_id,
             ])
             ->all());
     }
@@ -92,6 +94,9 @@ class EjecucionInformeRazonadoResource extends JsonResource
                 'codigo' => $grafico->codigo,
                 'titulo' => $grafico->titulo,
                 'tipo' => $grafico->tipo,
+                'datos' => $grafico->datos,
+                'orden' => $grafico->orden,
+                'seccion_informe_razonado_id' => $grafico->seccion_informe_razonado_id,
             ])
             ->all());
     }
@@ -167,7 +172,9 @@ class EjecucionInformeRazonadoResource extends JsonResource
             ->map(fn (ExportacionInformeRazonado $exportacion) => [
                 'id' => $exportacion->id,
                 'formato' => $exportacion->formato,
+                'generado_por' => $exportacion->generadoPor?->name,
                 'generado_en' => $exportacion->generado_en,
+                'url_descarga' => route('informes-razonados.exportaciones.descargar', $exportacion),
             ])
             ->all());
     }
