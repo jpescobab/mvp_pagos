@@ -193,7 +193,7 @@ test('editarGrafico actualiza los campos y eliminarGrafico lo borra', function (
     expect($ejecucion->graficos()->count())->toBe(0);
 });
 
-test('ExportadorInformeRazonadoService genera archivos HTML y PDF y rechaza formatos no soportados', function () {
+test('ExportadorInformeRazonadoService genera archivos HTML, PDF, Word y Excel y rechaza formatos no soportados', function () {
     $this->seed(WorkflowInformesRazonadosSeeder::class);
 
     Storage::fake('local');
@@ -219,6 +219,18 @@ test('ExportadorInformeRazonadoService genera archivos HTML y PDF y rechaza form
     expect($rutaPdf)->toEndWith('.pdf');
     expect(Storage::disk('local')->get($rutaPdf))->toStartWith('%PDF-');
 
-    expect(fn () => $exportador->exportar($ejecucion, 'docx'))
+    $rutaDocx = $exportador->exportar($ejecucion, 'docx');
+
+    Storage::disk('local')->assertExists($rutaDocx);
+    expect($rutaDocx)->toEndWith('.docx');
+    expect(Storage::disk('local')->get($rutaDocx))->toStartWith('PK');
+
+    $rutaXlsx = $exportador->exportar($ejecucion, 'xlsx');
+
+    Storage::disk('local')->assertExists($rutaXlsx);
+    expect($rutaXlsx)->toEndWith('.xlsx');
+    expect(Storage::disk('local')->get($rutaXlsx))->toStartWith('PK');
+
+    expect(fn () => $exportador->exportar($ejecucion, 'txt'))
         ->toThrow(InvalidArgumentException::class);
 });
