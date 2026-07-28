@@ -99,6 +99,30 @@ class InformeRazonadoService
         ]);
     }
 
+    public function editarMetrica(
+        MetricaInformeRazonado $metrica,
+        string $etiqueta,
+        ?float $valor,
+        ?string $unidad,
+        int $orden,
+        ?SeccionInformeRazonado $seccion = null,
+    ): MetricaInformeRazonado {
+        $metrica->update([
+            'seccion_informe_razonado_id' => $seccion?->id,
+            'etiqueta' => $etiqueta,
+            'valor' => $valor,
+            'unidad' => $unidad,
+            'orden' => $orden,
+        ]);
+
+        return $metrica->refresh();
+    }
+
+    public function eliminarMetrica(MetricaInformeRazonado $metrica): void
+    {
+        $metrica->delete();
+    }
+
     /**
      * @param  array<string, mixed>  $datos
      */
@@ -119,6 +143,33 @@ class InformeRazonadoService
             'datos' => $datos,
             'orden' => $orden,
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $datos
+     */
+    public function editarGrafico(
+        GraficoInformeRazonado $grafico,
+        string $titulo,
+        string $tipo,
+        array $datos,
+        int $orden,
+        ?SeccionInformeRazonado $seccion = null,
+    ): GraficoInformeRazonado {
+        $grafico->update([
+            'seccion_informe_razonado_id' => $seccion?->id,
+            'titulo' => $titulo,
+            'tipo' => $tipo,
+            'datos' => $datos,
+            'orden' => $orden,
+        ]);
+
+        return $grafico->refresh();
+    }
+
+    public function eliminarGrafico(GraficoInformeRazonado $grafico): void
+    {
+        $grafico->delete();
     }
 
     public function agregarExcepcion(

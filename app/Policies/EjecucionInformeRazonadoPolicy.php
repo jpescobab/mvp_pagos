@@ -21,4 +21,9 @@ class EjecucionInformeRazonadoPolicy
     {
         return $user->can('informes.elaborar');
     }
+
+    public function exportar(User $user, EjecucionInformeRazonado $ejecucionInformeRazonado): bool
+    {
+        return $user->can('informes.exportar');
+    }
 }

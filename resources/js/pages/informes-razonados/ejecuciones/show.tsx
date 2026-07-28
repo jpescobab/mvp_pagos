@@ -1,3 +1,4 @@
+import type { FormDataConvertible } from '@inertiajs/core';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -14,11 +15,15 @@ import { Monto } from '@/components/ui/monto';
 import { formatFecha, formatFechaHora } from '@/lib/format';
 import ejecuciones from '@/routes/informes-razonados/ejecuciones';
 import excepciones from '@/routes/informes-razonados/excepciones';
+import graficos from '@/routes/informes-razonados/graficos';
+import metricas from '@/routes/informes-razonados/metricas';
 import narrativas from '@/routes/informes-razonados/narrativas';
 import secciones from '@/routes/informes-razonados/secciones';
 import type {
     EjecucionInformeRazonado,
     ExcepcionInformeRazonado,
+    GraficoInformeRazonado,
+    MetricaInformeRazonado,
     NarrativaInformeRazonado,
     SeccionInformeRazonado,
 } from '@/types/informes-razonados';
@@ -29,6 +34,8 @@ type PageProps = {
 };
 
 const SEVERIDADES = ['info', 'advertencia', 'critico'] as const;
+
+const TIPOS_GRAFICO = ['barra', 'linea', 'torta', 'area'] as const;
 
 const CLASES_SEVERIDAD: Record<string, string> = {
     info: 'bg-muted text-muted-foreground',
@@ -245,6 +252,235 @@ export default function EjecucionInformeRazonadoShow() {
         });
     }
 
+    const [nuevaMetricaCodigo, setNuevaMetricaCodigo] = useState('');
+    const [nuevaMetricaEtiqueta, setNuevaMetricaEtiqueta] = useState('');
+    const [nuevaMetricaValor, setNuevaMetricaValor] = useState('');
+    const [nuevaMetricaUnidad, setNuevaMetricaUnidad] = useState('');
+    const [metricaEnEdicion, setMetricaEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [etiquetaMetricaEdicion, setEtiquetaMetricaEdicion] = useState('');
+    const [valorMetricaEdicion, setValorMetricaEdicion] = useState('');
+    const [unidadMetricaEdicion, setUnidadMetricaEdicion] = useState('');
+    const [procesandoMetrica, setProcesandoMetrica] = useState(false);
+
+    function agregarMetrica() {
+        if (
+            nuevaMetricaCodigo.trim() === '' ||
+            nuevaMetricaEtiqueta.trim() === ''
+        ) {
+            return;
+        }
+
+        setProcesandoMetrica(true);
+        router.post(
+            ejecuciones.metricas.store(ejecucion.id).url,
+            {
+                codigo: nuevaMetricaCodigo,
+                etiqueta: nuevaMetricaEtiqueta,
+                valor:
+                    nuevaMetricaValor === '' ? null : Number(nuevaMetricaValor),
+                unidad: nuevaMetricaUnidad || null,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNuevaMetricaCodigo('');
+                    setNuevaMetricaEtiqueta('');
+                    setNuevaMetricaValor('');
+                    setNuevaMetricaUnidad('');
+                },
+                onFinish: () => setProcesandoMetrica(false),
+            },
+        );
+    }
+
+    function iniciarEdicionMetrica(metrica: MetricaInformeRazonado) {
+        setMetricaEnEdicion(metrica.id);
+        setEtiquetaMetricaEdicion(metrica.etiqueta);
+        setValorMetricaEdicion(metrica.valor ?? '');
+        setUnidadMetricaEdicion(metrica.unidad ?? '');
+    }
+
+    function guardarEdicionMetrica(metrica: MetricaInformeRazonado) {
+        if (etiquetaMetricaEdicion.trim() === '') {
+            return;
+        }
+
+        setProcesandoMetrica(true);
+        router.patch(
+            metricas.update(metrica.id).url,
+            {
+                etiqueta: etiquetaMetricaEdicion,
+                valor:
+                    valorMetricaEdicion === ''
+                        ? null
+                        : Number(valorMetricaEdicion),
+                unidad: unidadMetricaEdicion || null,
+                orden: metrica.orden,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => setMetricaEnEdicion(null),
+                onFinish: () => setProcesandoMetrica(false),
+            },
+        );
+    }
+
+    function eliminarMetrica(id: number) {
+        if (!window.confirm('¿Eliminar esta métrica?')) {
+            return;
+        }
+
+        setProcesandoMetrica(true);
+        router.delete(metricas.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoMetrica(false),
+        });
+    }
+
+    const [nuevoGraficoCodigo, setNuevoGraficoCodigo] = useState('');
+    const [nuevoGraficoTitulo, setNuevoGraficoTitulo] = useState('');
+    const [nuevoGraficoTipo, setNuevoGraficoTipo] = useState<string>(
+        TIPOS_GRAFICO[0],
+    );
+    const [nuevoGraficoDatos, setNuevoGraficoDatos] = useState('{}');
+    const [graficoEnEdicion, setGraficoEnEdicion] = useState<number | null>(
+        null,
+    );
+    const [tituloGraficoEdicion, setTituloGraficoEdicion] = useState('');
+    const [tipoGraficoEdicion, setTipoGraficoEdicion] = useState<string>(
+        TIPOS_GRAFICO[0],
+    );
+    const [datosGraficoEdicion, setDatosGraficoEdicion] = useState('{}');
+    const [procesandoGrafico, setProcesandoGrafico] = useState(false);
+    const [errorGrafico, setErrorGrafico] = useState<string | null>(null);
+
+    function parsearDatos(
+        texto: string,
+    ): Record<string, FormDataConvertible> | null {
+        try {
+            const parsed = JSON.parse(texto);
+
+            if (
+                typeof parsed !== 'object' ||
+                parsed === null ||
+                Array.isArray(parsed)
+            ) {
+                return null;
+            }
+
+            return parsed as Record<string, FormDataConvertible>;
+        } catch {
+            return null;
+        }
+    }
+
+    function agregarGrafico() {
+        if (
+            nuevoGraficoCodigo.trim() === '' ||
+            nuevoGraficoTitulo.trim() === ''
+        ) {
+            return;
+        }
+
+        const datos = parsearDatos(nuevoGraficoDatos);
+
+        if (datos === null) {
+            setErrorGrafico('Los datos deben ser un objeto JSON válido.');
+
+            return;
+        }
+
+        setErrorGrafico(null);
+        setProcesandoGrafico(true);
+        router.post(
+            ejecuciones.graficos.store(ejecucion.id).url,
+            {
+                codigo: nuevoGraficoCodigo,
+                titulo: nuevoGraficoTitulo,
+                tipo: nuevoGraficoTipo,
+                datos,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNuevoGraficoCodigo('');
+                    setNuevoGraficoTitulo('');
+                    setNuevoGraficoTipo(TIPOS_GRAFICO[0]);
+                    setNuevoGraficoDatos('{}');
+                },
+                onFinish: () => setProcesandoGrafico(false),
+            },
+        );
+    }
+
+    function iniciarEdicionGrafico(grafico: GraficoInformeRazonado) {
+        setGraficoEnEdicion(grafico.id);
+        setTituloGraficoEdicion(grafico.titulo);
+        setTipoGraficoEdicion(grafico.tipo);
+        setDatosGraficoEdicion(JSON.stringify(grafico.datos ?? {}, null, 2));
+        setErrorGrafico(null);
+    }
+
+    function guardarEdicionGrafico(grafico: GraficoInformeRazonado) {
+        if (tituloGraficoEdicion.trim() === '') {
+            return;
+        }
+
+        const datos = parsearDatos(datosGraficoEdicion);
+
+        if (datos === null) {
+            setErrorGrafico('Los datos deben ser un objeto JSON válido.');
+
+            return;
+        }
+
+        setErrorGrafico(null);
+        setProcesandoGrafico(true);
+        router.patch(
+            graficos.update(grafico.id).url,
+            {
+                titulo: tituloGraficoEdicion,
+                tipo: tipoGraficoEdicion,
+                datos,
+                orden: grafico.orden,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => setGraficoEnEdicion(null),
+                onFinish: () => setProcesandoGrafico(false),
+            },
+        );
+    }
+
+    function eliminarGrafico(id: number) {
+        if (!window.confirm('¿Eliminar este gráfico?')) {
+            return;
+        }
+
+        setProcesandoGrafico(true);
+        router.delete(graficos.destroy(id).url, {
+            preserveScroll: true,
+            onFinish: () => setProcesandoGrafico(false),
+        });
+    }
+
+    const puedeExportar = auth.permissions.includes('informes.exportar');
+    const [procesandoExportacion, setProcesandoExportacion] = useState(false);
+
+    function exportar() {
+        setProcesandoExportacion(true);
+        router.post(
+            ejecuciones.exportaciones.store(ejecucion.id).url,
+            { formato: 'html' },
+            {
+                preserveScroll: true,
+                onFinish: () => setProcesandoExportacion(false),
+            },
+        );
+    }
+
     function iniciarEdicion(narrativa: NarrativaInformeRazonado) {
         setNarrativaEnEdicion(narrativa.id);
         setContenidoEdicion(narrativa.contenido);
@@ -343,7 +579,9 @@ export default function EjecucionInformeRazonadoShow() {
                         <textarea
                             className="min-h-24 w-full rounded-md border bg-background p-2 text-sm"
                             value={contenidoEdicion}
-                            onChange={(e) => setContenidoEdicion(e.target.value)}
+                            onChange={(e) =>
+                                setContenidoEdicion(e.target.value)
+                            }
                         />
                         <div className="flex gap-2">
                             <Button
@@ -550,7 +788,9 @@ export default function EjecucionInformeRazonadoShow() {
                                                     variant="outline"
                                                     disabled={procesandoSeccion}
                                                     onClick={() =>
-                                                        setSeccionEnEdicion(null)
+                                                        setSeccionEnEdicion(
+                                                            null,
+                                                        )
                                                     }
                                                 >
                                                     Cancelar
@@ -672,19 +912,194 @@ export default function EjecucionInformeRazonadoShow() {
                                 {ejecucion.metricas?.map((metrica) => (
                                     <li
                                         key={metrica.id}
-                                        className="flex items-center justify-between py-2"
+                                        className="space-y-2 py-2"
                                     >
-                                        <span>{metrica.etiqueta}</span>
-                                        <span className="text-muted-foreground">
-                                            <Monto
-                                                valor={metrica.valor}
-                                                variante="numero"
-                                            />{' '}
-                                            {metrica.unidad}
-                                        </span>
+                                        {metricaEnEdicion === metrica.id ? (
+                                            <div className="space-y-2">
+                                                <input
+                                                    aria-label="Etiqueta"
+                                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={
+                                                        etiquetaMetricaEdicion
+                                                    }
+                                                    onChange={(e) =>
+                                                        setEtiquetaMetricaEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        aria-label="Valor"
+                                                        type="number"
+                                                        className="w-full rounded-md border bg-background p-2 text-sm"
+                                                        value={
+                                                            valorMetricaEdicion
+                                                        }
+                                                        onChange={(e) =>
+                                                            setValorMetricaEdicion(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <input
+                                                        aria-label="Unidad"
+                                                        className="w-full rounded-md border bg-background p-2 text-sm"
+                                                        value={
+                                                            unidadMetricaEdicion
+                                                        }
+                                                        onChange={(e) =>
+                                                            setUnidadMetricaEdicion(
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        disabled={
+                                                            procesandoMetrica ||
+                                                            etiquetaMetricaEdicion.trim() ===
+                                                                ''
+                                                        }
+                                                        onClick={() =>
+                                                            guardarEdicionMetrica(
+                                                                metrica,
+                                                            )
+                                                        }
+                                                    >
+                                                        Guardar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoMetrica
+                                                        }
+                                                        onClick={() =>
+                                                            setMetricaEnEdicion(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center justify-between">
+                                                    <span>
+                                                        {metrica.etiqueta}
+                                                    </span>
+                                                    <span className="text-muted-foreground">
+                                                        <Monto
+                                                            valor={
+                                                                metrica.valor
+                                                            }
+                                                            variante="numero"
+                                                        />{' '}
+                                                        {metrica.unidad}
+                                                    </span>
+                                                </div>
+                                                {editable && puedeElaborar && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoMetrica
+                                                            }
+                                                            onClick={() =>
+                                                                iniciarEdicionMetrica(
+                                                                    metrica,
+                                                                )
+                                                            }
+                                                        >
+                                                            Editar
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoMetrica
+                                                            }
+                                                            onClick={() =>
+                                                                eliminarMetrica(
+                                                                    metrica.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Eliminar
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
+                        )}
+
+                        {editable && puedeElaborar && (
+                            <div className="space-y-2 border-t pt-3">
+                                <Label htmlFor="nueva-metrica-codigo">
+                                    Agregar métrica
+                                </Label>
+                                <input
+                                    id="nueva-metrica-codigo"
+                                    placeholder="Código"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaMetricaCodigo}
+                                    onChange={(e) =>
+                                        setNuevaMetricaCodigo(e.target.value)
+                                    }
+                                />
+                                <input
+                                    aria-label="Etiqueta"
+                                    placeholder="Etiqueta"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevaMetricaEtiqueta}
+                                    onChange={(e) =>
+                                        setNuevaMetricaEtiqueta(e.target.value)
+                                    }
+                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        aria-label="Valor"
+                                        type="number"
+                                        placeholder="Valor"
+                                        className="w-full rounded-md border bg-background p-2 text-sm"
+                                        value={nuevaMetricaValor}
+                                        onChange={(e) =>
+                                            setNuevaMetricaValor(e.target.value)
+                                        }
+                                    />
+                                    <input
+                                        aria-label="Unidad"
+                                        placeholder="Unidad"
+                                        className="w-full rounded-md border bg-background p-2 text-sm"
+                                        value={nuevaMetricaUnidad}
+                                        onChange={(e) =>
+                                            setNuevaMetricaUnidad(
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <Button
+                                    size="sm"
+                                    disabled={
+                                        procesandoMetrica ||
+                                        nuevaMetricaCodigo.trim() === '' ||
+                                        nuevaMetricaEtiqueta.trim() === ''
+                                    }
+                                    onClick={agregarMetrica}
+                                >
+                                    Agregar métrica
+                                </Button>
+                            </div>
                         )}
                     </section>
 
@@ -697,11 +1112,197 @@ export default function EjecucionInformeRazonadoShow() {
                         ) : (
                             <ul className="divide-y text-sm">
                                 {ejecucion.graficos?.map((grafico) => (
-                                    <li key={grafico.id} className="py-2">
-                                        {grafico.titulo} ({grafico.tipo})
+                                    <li
+                                        key={grafico.id}
+                                        className="space-y-2 py-2"
+                                    >
+                                        {graficoEnEdicion === grafico.id ? (
+                                            <div className="space-y-2">
+                                                <input
+                                                    aria-label="Título"
+                                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={tituloGraficoEdicion}
+                                                    onChange={(e) =>
+                                                        setTituloGraficoEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <select
+                                                    aria-label="Tipo"
+                                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                                    value={tipoGraficoEdicion}
+                                                    onChange={(e) =>
+                                                        setTipoGraficoEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
+                                                    {TIPOS_GRAFICO.map(
+                                                        (tipo) => (
+                                                            <option
+                                                                key={tipo}
+                                                                value={tipo}
+                                                            >
+                                                                {tipo}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                                <textarea
+                                                    aria-label="Datos (JSON)"
+                                                    className="min-h-20 w-full rounded-md border bg-background p-2 font-mono text-xs"
+                                                    value={datosGraficoEdicion}
+                                                    onChange={(e) =>
+                                                        setDatosGraficoEdicion(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        disabled={
+                                                            procesandoGrafico ||
+                                                            tituloGraficoEdicion.trim() ===
+                                                                ''
+                                                        }
+                                                        onClick={() =>
+                                                            guardarEdicionGrafico(
+                                                                grafico,
+                                                            )
+                                                        }
+                                                    >
+                                                        Guardar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={
+                                                            procesandoGrafico
+                                                        }
+                                                        onClick={() =>
+                                                            setGraficoEnEdicion(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center justify-between">
+                                                    <span>
+                                                        {grafico.titulo}
+                                                    </span>
+                                                    <span className="text-muted-foreground">
+                                                        {grafico.tipo}
+                                                    </span>
+                                                </div>
+                                                {editable && puedeElaborar && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoGrafico
+                                                            }
+                                                            onClick={() =>
+                                                                iniciarEdicionGrafico(
+                                                                    grafico,
+                                                                )
+                                                            }
+                                                        >
+                                                            Editar
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            disabled={
+                                                                procesandoGrafico
+                                                            }
+                                                            onClick={() =>
+                                                                eliminarGrafico(
+                                                                    grafico.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Eliminar
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
+                        )}
+
+                        {editable && puedeElaborar && (
+                            <div className="space-y-2 border-t pt-3">
+                                <Label htmlFor="nuevo-grafico-codigo">
+                                    Agregar gráfico
+                                </Label>
+                                <input
+                                    id="nuevo-grafico-codigo"
+                                    placeholder="Código"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevoGraficoCodigo}
+                                    onChange={(e) =>
+                                        setNuevoGraficoCodigo(e.target.value)
+                                    }
+                                />
+                                <input
+                                    aria-label="Título"
+                                    placeholder="Título"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevoGraficoTitulo}
+                                    onChange={(e) =>
+                                        setNuevoGraficoTitulo(e.target.value)
+                                    }
+                                />
+                                <select
+                                    aria-label="Tipo"
+                                    className="w-full rounded-md border bg-background p-2 text-sm"
+                                    value={nuevoGraficoTipo}
+                                    onChange={(e) =>
+                                        setNuevoGraficoTipo(e.target.value)
+                                    }
+                                >
+                                    {TIPOS_GRAFICO.map((tipo) => (
+                                        <option key={tipo} value={tipo}>
+                                            {tipo}
+                                        </option>
+                                    ))}
+                                </select>
+                                <textarea
+                                    aria-label="Datos (JSON)"
+                                    placeholder='{"series": [1, 2, 3]}'
+                                    className="min-h-20 w-full rounded-md border bg-background p-2 font-mono text-xs"
+                                    value={nuevoGraficoDatos}
+                                    onChange={(e) =>
+                                        setNuevoGraficoDatos(e.target.value)
+                                    }
+                                />
+                                {errorGrafico && (
+                                    <p className="text-sm text-destructive">
+                                        {errorGrafico}
+                                    </p>
+                                )}
+                                <Button
+                                    size="sm"
+                                    disabled={
+                                        procesandoGrafico ||
+                                        nuevoGraficoCodigo.trim() === '' ||
+                                        nuevoGraficoTitulo.trim() === ''
+                                    }
+                                    onClick={agregarGrafico}
+                                >
+                                    Agregar gráfico
+                                </Button>
+                            </div>
                         )}
                     </section>
 
@@ -820,7 +1421,9 @@ export default function EjecucionInformeRazonadoShow() {
                                                         (severidad) => (
                                                             <option
                                                                 key={severidad}
-                                                                value={severidad}
+                                                                value={
+                                                                    severidad
+                                                                }
                                                             >
                                                                 {severidad}
                                                             </option>
@@ -952,7 +1555,10 @@ export default function EjecucionInformeRazonadoShow() {
                                     }
                                 >
                                     {SEVERIDADES.map((severidad) => (
-                                        <option key={severidad} value={severidad}>
+                                        <option
+                                            key={severidad}
+                                            value={severidad}
+                                        >
                                             {severidad}
                                         </option>
                                     ))}
@@ -1011,7 +1617,9 @@ export default function EjecucionInformeRazonadoShow() {
                                                 {aprobacion.decision}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {formatFechaHora(aprobacion.decidido_en)}
+                                                {formatFechaHora(
+                                                    aprobacion.decidido_en,
+                                                )}
                                             </span>
                                         </div>
                                         <p className="text-muted-foreground">
@@ -1020,6 +1628,58 @@ export default function EjecucionInformeRazonadoShow() {
                                             {aprobacion.comentario &&
                                                 ` — ${aprobacion.comentario}`}
                                         </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+
+                    <section className="space-y-2 rounded-xl border p-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-base font-medium">
+                                Exportaciones
+                            </h2>
+                            {puedeExportar && (
+                                <Button
+                                    size="sm"
+                                    disabled={procesandoExportacion}
+                                    onClick={exportar}
+                                >
+                                    Exportar HTML
+                                </Button>
+                            )}
+                        </div>
+                        {(ejecucion.exportaciones ?? []).length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Sin exportaciones todavía.
+                            </p>
+                        ) : (
+                            <ul className="divide-y text-sm">
+                                {ejecucion.exportaciones?.map((exportacion) => (
+                                    <li
+                                        key={exportacion.id}
+                                        className="flex items-center justify-between py-2"
+                                    >
+                                        <span>
+                                            <span className="uppercase">
+                                                {exportacion.formato}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {' '}
+                                                —{' '}
+                                                {formatFechaHora(
+                                                    exportacion.generado_en,
+                                                )}
+                                                {exportacion.generado_por &&
+                                                    ` · ${exportacion.generado_por}`}
+                                            </span>
+                                        </span>
+                                        <a
+                                            href={exportacion.url_descarga}
+                                            className="text-primary underline"
+                                        >
+                                            Descargar
+                                        </a>
                                     </li>
                                 ))}
                             </ul>

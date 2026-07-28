@@ -33,6 +33,8 @@ export type MetricaInformeRazonado = {
     etiqueta: string;
     valor: string | null;
     unidad: string | null;
+    orden: number;
+    seccion_informe_razonado_id: number | null;
 };
 
 export type GraficoInformeRazonado = {
@@ -40,6 +42,9 @@ export type GraficoInformeRazonado = {
     codigo: string;
     titulo: string;
     tipo: string;
+    datos: Record<string, unknown>;
+    orden: number;
+    seccion_informe_razonado_id: number | null;
 };
 
 export type NarrativaInformeRazonado = {
@@ -75,7 +80,9 @@ export type AprobacionInformeRazonado = {
 export type ExportacionInformeRazonado = {
     id: number;
     formato: string;
+    generado_por: string | null;
     generado_en: string;
+    url_descarga: string;
 };
 
 export type EjecucionInformeRazonado = {

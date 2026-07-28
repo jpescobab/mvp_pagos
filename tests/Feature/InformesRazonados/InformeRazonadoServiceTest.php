@@ -7,9 +7,11 @@ use App\Models\DefinicionInformeRazonado;
 use App\Models\EjecucionInformeRazonado;
 use App\Models\PeriodoReportabilidad;
 use App\Models\User;
+use App\Services\InformesRazonados\ExportadorInformeRazonadoService;
 use App\Services\InformesRazonados\InformeRazonadoService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\WorkflowInformesRazonadosSeeder;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @param  array<string, mixed>  $overrides
@@ -147,4 +149,70 @@ test('exportar crea una ExportacionInformeRazonado con formato, ruta y responsab
     expect($exportacion->formato)->toBe('pdf');
     expect($exportacion->ruta_archivo)->toBe('storage/informes/informe.pdf');
     expect($exportacion->generado_por)->toBe($usuario->id);
+});
+
+test('editarMetrica actualiza los campos y eliminarMetrica la borra', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+
+    $servicio = app(InformeRazonadoService::class);
+    $ejecucion = $servicio->iniciarEjecucion(
+        definicionInformeRazonadoDePrueba(),
+        corteReportabilidadDePrueba(['estado' => 'publicado']),
+    );
+
+    $metrica = $servicio->agregarMetrica($ejecucion, 'MET-1', 'Monto total', 100.0, 'CLP');
+
+    $editada = $servicio->editarMetrica($metrica, 'Monto neto', 250.5, 'UF', 3);
+    expect($editada->etiqueta)->toBe('Monto neto');
+    expect((float) $editada->valor)->toBe(250.5);
+    expect($editada->unidad)->toBe('UF');
+    expect($editada->orden)->toBe(3);
+
+    $servicio->eliminarMetrica($editada);
+    expect($ejecucion->metricas()->count())->toBe(0);
+});
+
+test('editarGrafico actualiza los campos y eliminarGrafico lo borra', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+
+    $servicio = app(InformeRazonadoService::class);
+    $ejecucion = $servicio->iniciarEjecucion(
+        definicionInformeRazonadoDePrueba(),
+        corteReportabilidadDePrueba(['estado' => 'publicado']),
+    );
+
+    $grafico = $servicio->agregarGrafico($ejecucion, 'GRA-1', 'Evolución', 'barra', ['series' => [1, 2]]);
+
+    $editado = $servicio->editarGrafico($grafico, 'Evolución mensual', 'linea', ['series' => [3, 4, 5]], 2);
+    expect($editado->titulo)->toBe('Evolución mensual');
+    expect($editado->tipo)->toBe('linea');
+    expect($editado->datos)->toBe(['series' => [3, 4, 5]]);
+    expect($editado->orden)->toBe(2);
+
+    $servicio->eliminarGrafico($editado);
+    expect($ejecucion->graficos()->count())->toBe(0);
+});
+
+test('ExportadorInformeRazonadoService genera un archivo HTML y rechaza formatos no soportados', function () {
+    $this->seed(WorkflowInformesRazonadosSeeder::class);
+
+    Storage::fake('local');
+
+    $servicio = app(InformeRazonadoService::class);
+    $ejecucion = $servicio->iniciarEjecucion(
+        definicionInformeRazonadoDePrueba(),
+        corteReportabilidadDePrueba(['estado' => 'publicado']),
+    );
+    $servicio->agregarMetrica($ejecucion, 'MET-1', 'Monto total', 100.0, 'CLP');
+
+    $exportador = app(ExportadorInformeRazonadoService::class);
+
+    $ruta = $exportador->exportar($ejecucion, 'html');
+
+    Storage::disk('local')->assertExists($ruta);
+    expect($ruta)->toEndWith('.html');
+    expect(Storage::disk('local')->get($ruta))->toContain('Monto total');
+
+    expect(fn () => $exportador->exportar($ejecucion, 'pdf'))
+        ->toThrow(InvalidArgumentException::class);
 });
