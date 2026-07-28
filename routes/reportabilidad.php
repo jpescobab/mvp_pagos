@@ -10,5 +10,6 @@ Route::middleware(['auth'])->prefix('reportabilidad')->name('reportabilidad.')->
     Route::post('periodos/{periodo}/cortes', [CorteReportabilidadController::class, 'store'])->name('periodos.cortes.store');
 
     Route::get('cortes/{corte}', [CorteReportabilidadController::class, 'show'])->name('cortes.show');
+    Route::post('cortes/{corte}/generar', [CorteReportabilidadController::class, 'generar'])->name('cortes.generar');
     Route::post('cortes/{corte}/publicar', [CorteReportabilidadController::class, 'publicar'])->name('cortes.publicar');
 });
