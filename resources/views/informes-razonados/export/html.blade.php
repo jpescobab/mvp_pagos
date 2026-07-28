@@ -1,3 +1,4 @@
+@inject('graficoRenderer', \App\Services\InformesRazonados\GraficoSvgRenderer::class)
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +16,8 @@
         .vacio { color: #888; font-style: italic; }
         .severidad-critico { color: #b00020; font-weight: bold; }
         .severidad-advertencia { color: #b06a00; }
-        pre { background: #f7f7f7; padding: 6px; overflow-x: auto; font-size: 12px; }
+        .grafico { margin: 0.5rem 0; }
+        .grafico svg { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
@@ -58,8 +60,32 @@
 
     <h2>Gráficos</h2>
     @forelse ($ejecucion->graficos as $grafico)
+        @php($datosGrafico = is_array($grafico->datos) ? $grafico->datos : [])
         <h3>{{ $grafico->titulo }} <small>({{ $grafico->tipo }})</small></h3>
-        <pre>{{ json_encode($grafico->datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+        <div class="grafico">{!! $graficoRenderer->render($grafico->tipo, $datosGrafico, (string) $grafico->titulo) !!}</div>
+        {{-- Tabla de datos: acompaña al gráfico y conserva los valores en formatos que no renderizan SVG inline (Word). --}}
+        @if (! empty($datosGrafico['categorias']) && ! empty($datosGrafico['series']))
+            <table>
+                <thead>
+                    <tr>
+                        <th>Serie</th>
+                        @foreach ($datosGrafico['categorias'] as $categoria)
+                            <th>{{ $categoria }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($datosGrafico['series'] as $serie)
+                        <tr>
+                            <td>{{ $serie['nombre'] ?? '—' }}</td>
+                            @foreach (($serie['valores'] ?? []) as $valor)
+                                <td>{{ $valor }}</td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     @empty
         <p class="vacio">Sin gráficos.</p>
     @endforelse

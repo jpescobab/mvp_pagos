@@ -1,6 +1,7 @@
 import type { FormDataConvertible } from '@inertiajs/core';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { GraficoSvg } from '@/components/informes-razonados/grafico-svg';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -36,6 +37,15 @@ type PageProps = {
 const SEVERIDADES = ['info', 'advertencia', 'critico'] as const;
 
 const TIPOS_GRAFICO = ['barra', 'linea', 'torta', 'area'] as const;
+
+const DATOS_GRAFICO_EJEMPLO = JSON.stringify(
+    {
+        categorias: ['Ene', 'Feb', 'Mar'],
+        series: [{ nombre: 'Total', valores: [10, 20, 15] }],
+    },
+    null,
+    2,
+);
 
 const FORMATOS_EXPORTACION = [
     { value: 'html', label: 'HTML' },
@@ -351,7 +361,9 @@ export default function EjecucionInformeRazonadoShow() {
     const [nuevoGraficoTipo, setNuevoGraficoTipo] = useState<string>(
         TIPOS_GRAFICO[0],
     );
-    const [nuevoGraficoDatos, setNuevoGraficoDatos] = useState('{}');
+    const [nuevoGraficoDatos, setNuevoGraficoDatos] = useState(
+        DATOS_GRAFICO_EJEMPLO,
+    );
     const [graficoEnEdicion, setGraficoEnEdicion] = useState<number | null>(
         null,
     );
@@ -415,7 +427,7 @@ export default function EjecucionInformeRazonadoShow() {
                     setNuevoGraficoCodigo('');
                     setNuevoGraficoTitulo('');
                     setNuevoGraficoTipo(TIPOS_GRAFICO[0]);
-                    setNuevoGraficoDatos('{}');
+                    setNuevoGraficoDatos(DATOS_GRAFICO_EJEMPLO);
                 },
                 onFinish: () => setProcesandoGrafico(false),
             },
@@ -1208,6 +1220,10 @@ export default function EjecucionInformeRazonadoShow() {
                                                         {grafico.tipo}
                                                     </span>
                                                 </div>
+                                                <GraficoSvg
+                                                    tipo={grafico.tipo}
+                                                    datos={grafico.datos}
+                                                />
                                                 {editable && puedeElaborar && (
                                                     <div className="flex flex-wrap gap-2">
                                                         <Button
@@ -1286,13 +1302,23 @@ export default function EjecucionInformeRazonadoShow() {
                                 </select>
                                 <textarea
                                     aria-label="Datos (JSON)"
-                                    placeholder='{"series": [1, 2, 3]}'
+                                    placeholder={DATOS_GRAFICO_EJEMPLO}
                                     className="min-h-20 w-full rounded-md border bg-background p-2 font-mono text-xs"
                                     value={nuevoGraficoDatos}
                                     onChange={(e) =>
                                         setNuevoGraficoDatos(e.target.value)
                                     }
                                 />
+                                <p className="text-xs text-muted-foreground">
+                                    Forma esperada:{' '}
+                                    <code>
+                                        {
+                                            '{ categorias: [...], series: [{ nombre, valores: [...] }] }'
+                                        }
+                                    </code>
+                                    . Cada serie debe tener tantos valores como
+                                    categorías; torta admite una sola serie.
+                                </p>
                                 {errorGrafico && (
                                     <p className="text-sm text-destructive">
                                         {errorGrafico}

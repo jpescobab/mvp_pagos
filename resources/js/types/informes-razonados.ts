@@ -37,12 +37,25 @@ export type MetricaInformeRazonado = {
     seccion_informe_razonado_id: number | null;
 };
 
+export type SerieGrafico = {
+    nombre: string;
+    valores: number[];
+};
+
+/** Forma canónica de `datos` de un gráfico. */
+export type DatosGraficoCanonico = {
+    categorias: string[];
+    series: SerieGrafico[];
+};
+
 export type GraficoInformeRazonado = {
     id: number;
     codigo: string;
     titulo: string;
     tipo: string;
-    datos: Record<string, unknown>;
+    // Los gráficos nuevos usan la forma canónica; se tolera la forma legada
+    // (Record libre) de datos guardados antes de la validación estricta.
+    datos: DatosGraficoCanonico | Record<string, unknown>;
     orden: number;
     seccion_informe_razonado_id: number | null;
 };
