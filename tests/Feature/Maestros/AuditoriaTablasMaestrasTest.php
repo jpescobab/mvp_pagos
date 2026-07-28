@@ -134,6 +134,79 @@ test('un update que no cambia nada no genera auditoría', function () {
     expect(AuditLog::where('action', 'editar_cfinanciero')->count())->toBe($ediciones);
 });
 
+test('crear, editar y eliminar una institución deja auditoría con el usuario y el diff', function () {
+    $actor = User::factory()->create();
+    $this->actingAs($actor);
+
+    $institucion = Institucion::create(['codigo' => 'CAPJ-NUEVA', 'nombre' => 'Nombre Original']);
+
+    $creacion = AuditLog::where('action', 'crear_institucion')->latest('id')->first();
+    expect($creacion)->not->toBeNull();
+    expect($creacion->user_id)->toBe($actor->id);
+    expect($creacion->auditable_id)->toBe($institucion->id);
+    expect($creacion->after['codigo'])->toBe('CAPJ-NUEVA');
+
+    $institucion->update(['nombre' => 'Nombre Corregido']);
+
+    $edicion = AuditLog::where('action', 'editar_institucion')->latest('id')->first();
+    expect($edicion->before)->toBe(['nombre' => 'Nombre Original']);
+    expect($edicion->after)->toBe(['nombre' => 'Nombre Corregido']);
+
+    $institucion->delete();
+
+    $eliminacion = AuditLog::where('action', 'eliminar_institucion')->latest('id')->first();
+    expect($eliminacion)->not->toBeNull();
+    expect($eliminacion->before['codigo'])->toBe('CAPJ-NUEVA');
+});
+
+test('crear, editar y eliminar una jurisdicción deja auditoría con el usuario y el diff', function () {
+    $institucion = Institucion::create(['codigo' => 'CAPJ-JUR', 'nombre' => 'CAPJ']);
+
+    $actor = User::factory()->create();
+    $this->actingAs($actor);
+
+    $jurisdiccion = Jurisdiccion::create([
+        'institucion_id' => $institucion->id,
+        'codigo' => '77',
+        'nombre' => 'Nombre Original',
+    ]);
+
+    $creacion = AuditLog::where('action', 'crear_jurisdiccion')->latest('id')->first();
+    expect($creacion)->not->toBeNull();
+    expect($creacion->user_id)->toBe($actor->id);
+    expect($creacion->auditable_id)->toBe($jurisdiccion->id);
+    expect($creacion->after['codigo'])->toBe('77');
+
+    $jurisdiccion->update(['nombre' => 'Nombre Corregido']);
+
+    $edicion = AuditLog::where('action', 'editar_jurisdiccion')->latest('id')->first();
+    expect($edicion->before)->toBe(['nombre' => 'Nombre Original']);
+    expect($edicion->after)->toBe(['nombre' => 'Nombre Corregido']);
+
+    $jurisdiccion->delete();
+
+    $eliminacion = AuditLog::where('action', 'eliminar_jurisdiccion')->latest('id')->first();
+    expect($eliminacion)->not->toBeNull();
+    expect($eliminacion->before['codigo'])->toBe('77');
+});
+
+test('sembrar instituciones y jurisdicciones sin usuario autenticado no genera auditoría', function () {
+    $antes = AuditLog::count();
+
+    // Sin actingAs: contexto de seeder/consola.
+    $institucion = Institucion::create(['codigo' => 'CAPJ-SEED', 'nombre' => 'Sembrada']);
+    $jurisdiccion = Jurisdiccion::create([
+        'institucion_id' => $institucion->id,
+        'codigo' => '88',
+        'nombre' => 'Sembrada',
+    ]);
+    $jurisdiccion->update(['nombre' => 'Sembrada y editada']);
+    $jurisdiccion->delete();
+    $institucion->delete();
+
+    expect(AuditLog::count())->toBe($antes);
+});
+
 test('el flujo real por controlador audita la creación', function () {
     $jurisdiccion = jurisdiccionParaAuditoria();
     $this->seed(RolesAndPermissionsSeeder::class);
