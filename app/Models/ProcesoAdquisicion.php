@@ -74,4 +74,12 @@ class ProcesoAdquisicion extends Model
     {
         return $this->hasMany(OrdenCompraMercadoPublico::class);
     }
+
+    /**
+     * @return HasMany<LicitacionMercadoPublico, $this>
+     */
+    public function licitacionesMercadoPublico(): HasMany
+    {
+        return $this->hasMany(LicitacionMercadoPublico::class);
+    }
 }

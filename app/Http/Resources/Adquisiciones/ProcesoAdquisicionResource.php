@@ -40,6 +40,40 @@ class ProcesoAdquisicionResource extends JsonResource
                     'sgf_id' => $caso->sgf_id,
                 ])->values(),
             ),
+            'ordenes_compra_mercado_publico' => $this->whenLoaded(
+                'ordenesCompraMercadoPublico',
+                fn () => $this->ordenesCompraMercadoPublico->map(fn ($orden) => [
+                    'id' => $orden->id,
+                    'codigo' => $orden->codigo,
+                    'estado_mercado_publico' => $orden->estado_mercado_publico,
+                    'organismo' => $this->nombreOrganismo($orden->organismo_comprador),
+                    'monto' => $orden->monto_total,
+                ])->values(),
+            ),
+            'licitaciones_mercado_publico' => $this->whenLoaded(
+                'licitacionesMercadoPublico',
+                fn () => $this->licitacionesMercadoPublico->map(fn ($licitacion) => [
+                    'id' => $licitacion->id,
+                    'codigo' => $licitacion->codigo,
+                    'nombre' => $licitacion->nombre,
+                    'estado_mercado_publico' => $licitacion->estado_mercado_publico,
+                    'organismo' => $this->nombreOrganismo($licitacion->organismo_comprador),
+                    'monto' => $licitacion->monto_estimado,
+                ])->values(),
+            ),
         ];
+    }
+
+    /**
+     * Extrae de forma defensiva el nombre del organismo comprador del payload
+     * (array JSON de Mercado Público), sin asumir su estructura completa.
+     *
+     * @param  array<string, mixed>|null  $organismo
+     */
+    private function nombreOrganismo(?array $organismo): ?string
+    {
+        $nombre = $organismo['nombre'] ?? null;
+
+        return is_string($nombre) ? $nombre : null;
     }
 }

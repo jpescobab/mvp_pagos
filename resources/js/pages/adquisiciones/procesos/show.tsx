@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { formatFechaHora } from '@/lib/format';
+import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
+import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
 import procesos from '@/routes/adquisiciones/procesos';
 import documentos from '@/routes/procesos/documentos';
 import type { ProcesoAdquisicion } from '@/types/adquisiciones';
@@ -298,6 +300,101 @@ export default function ProcesoShow() {
                                     {caso.sgf_id}
                                 </li>
                             ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Órdenes de compra (Mercado Público)
+                    </h2>
+
+                    {proceso.ordenes_compra_mercado_publico.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin órdenes de compra vinculadas todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {proceso.ordenes_compra_mercado_publico.map(
+                                (orden) => (
+                                    <li
+                                        key={orden.id}
+                                        className="flex items-center justify-between gap-2 py-2"
+                                    >
+                                        <span className="min-w-0">
+                                            <span className="font-mono">
+                                                {orden.codigo}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {' · '}
+                                                {orden.organismo ?? '—'}
+                                                {' · '}
+                                                {orden.estado_mercado_publico ??
+                                                    '—'}
+                                            </span>
+                                        </span>
+                                        <span className="flex shrink-0 items-center gap-3">
+                                            <Monto valor={orden.monto} />
+                                            <Link
+                                                href={ordenesCompraMp.show.url(
+                                                    orden.id,
+                                                )}
+                                                className="text-primary underline"
+                                            >
+                                                Ver
+                                            </Link>
+                                        </span>
+                                    </li>
+                                ),
+                            )}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Licitaciones (Mercado Público)
+                    </h2>
+
+                    {proceso.licitaciones_mercado_publico.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Sin licitaciones vinculadas todavía.
+                        </p>
+                    ) : (
+                        <ul className="divide-y text-sm">
+                            {proceso.licitaciones_mercado_publico.map(
+                                (licitacion) => (
+                                    <li
+                                        key={licitacion.id}
+                                        className="flex items-center justify-between gap-2 py-2"
+                                    >
+                                        <span className="min-w-0">
+                                            <span className="font-mono">
+                                                {licitacion.codigo}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {licitacion.nombre
+                                                    ? ` · ${licitacion.nombre}`
+                                                    : ''}
+                                                {' · '}
+                                                {licitacion.estado_mercado_publico ??
+                                                    '—'}
+                                            </span>
+                                        </span>
+                                        <span className="flex shrink-0 items-center gap-3">
+                                            <Monto valor={licitacion.monto} />
+                                            <Link
+                                                href={licitacionesMp.show.url(
+                                                    licitacion.id,
+                                                )}
+                                                className="text-primary underline"
+                                            >
+                                                Ver
+                                            </Link>
+                                        </span>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                 </section>

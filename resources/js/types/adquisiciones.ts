@@ -5,6 +5,23 @@ export type CasoPagoProveedorVinculado = {
     sgf_id: string;
 };
 
+export type OrdenCompraVinculada = {
+    id: number;
+    codigo: string;
+    estado_mercado_publico: string | null;
+    organismo: string | null;
+    monto: string | null;
+};
+
+export type LicitacionVinculada = {
+    id: number;
+    codigo: string;
+    nombre: string | null;
+    estado_mercado_publico: string | null;
+    organismo: string | null;
+    monto: string | null;
+};
+
 export type ProcesoAdquisicion = {
     id: number;
     codigo: string;
@@ -15,6 +32,8 @@ export type ProcesoAdquisicion = {
     objeto: string;
     proceso: Proceso;
     casos_pago_proveedor: CasoPagoProveedorVinculado[];
+    ordenes_compra_mercado_publico: OrdenCompraVinculada[];
+    licitaciones_mercado_publico: LicitacionVinculada[];
 };
 
 export type ModalidadSeleccionable = {

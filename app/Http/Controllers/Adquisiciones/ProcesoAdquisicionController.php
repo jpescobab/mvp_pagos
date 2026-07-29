@@ -53,6 +53,8 @@ class ProcesoAdquisicionController extends Controller
             'proceso.historialTransiciones.estadoDestino',
             'proceso.historialTransiciones.user',
             'casosPagoProveedor',
+            'ordenesCompraMercadoPublico',
+            'licitacionesMercadoPublico',
         ]);
 
         $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'adquisiciones')->first();
