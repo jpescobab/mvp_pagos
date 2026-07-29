@@ -289,10 +289,11 @@ export default function UsuariosEditar({
                             {catalogs.roles.map((rol) => (
                                 <div
                                     key={rol.id}
-                                    className="flex items-center gap-2"
+                                    className="flex items-start gap-2"
                                 >
                                     <Checkbox
                                         id={`rol-${rol.id}`}
+                                        className="mt-0.5"
                                         checked={rolesSeleccionados.includes(
                                             rol.id,
                                         )}
@@ -303,12 +304,19 @@ export default function UsuariosEditar({
                                             )
                                         }
                                     />
-                                    <Label
-                                        htmlFor={`rol-${rol.id}`}
-                                        className="font-normal"
-                                    >
-                                        {rol.etiqueta ?? rol.name}
-                                    </Label>
+                                    <div className="grid gap-0.5">
+                                        <Label
+                                            htmlFor={`rol-${rol.id}`}
+                                            className="font-normal"
+                                        >
+                                            {rol.etiqueta ?? rol.name}
+                                        </Label>
+                                        {rol.descripcion && (
+                                            <p className="text-xs text-muted-foreground">
+                                                {rol.descripcion}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

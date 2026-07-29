@@ -233,7 +233,7 @@ class UserController extends Controller
     private function catalogos(): array
     {
         return [
-            'roles' => Role::orderBy('name')->get(['id', 'name', 'etiqueta']),
+            'roles' => Role::orderBy('name')->get(['id', 'name', 'etiqueta', 'descripcion']),
             'centros_financieros' => Cfinanciero::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'centros_costos' => Ccosto::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
         ];

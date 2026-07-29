@@ -69,6 +69,7 @@ export type CatalogoOpcion = {
     nombre?: string;
     name?: string;
     etiqueta?: string | null;
+    descripcion?: string | null;
 };
 
 export type CatalogosUsuarios = {
