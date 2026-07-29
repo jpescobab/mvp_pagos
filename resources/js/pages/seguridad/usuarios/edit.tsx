@@ -307,7 +307,7 @@ export default function UsuariosEditar({
                                         htmlFor={`rol-${rol.id}`}
                                         className="font-normal"
                                     >
-                                        {rol.name}
+                                        {rol.etiqueta ?? rol.name}
                                     </Label>
                                 </div>
                             ))}

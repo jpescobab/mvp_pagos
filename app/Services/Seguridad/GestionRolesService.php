@@ -23,7 +23,7 @@ class GestionRolesService
     }
 
     /**
-     * @param  array{name: string, permissions: array<int, int>}  $datos
+     * @param  array{name: string, etiqueta?: string|null, descripcion?: string|null, permissions: array<int, int>}  $datos
      */
     public function crear(array $datos): Role
     {
@@ -32,13 +32,22 @@ class GestionRolesService
             // usuarios asignados (se asignan después vía asignarRoles), no
             // hay ninguna caché de permisos por usuario que invalidar.
             $rol = Role::query()->create(['name' => $datos['name']]);
+            $rol->forceFill([
+                'etiqueta' => $datos['etiqueta'] ?? null,
+                'descripcion' => $datos['descripcion'] ?? null,
+            ])->save();
             $rol->syncPermissions($datos['permissions']);
 
             $this->auditLogger->log(
                 'crear_rol',
                 $rol,
                 [],
-                ['name' => $rol->name, 'permissions' => $datos['permissions']],
+                [
+                    'name' => $rol->name,
+                    'etiqueta' => $rol->etiqueta,
+                    'descripcion' => $rol->descripcion,
+                    'permissions' => $datos['permissions'],
+                ],
             );
 
             return $rol;
@@ -46,17 +55,23 @@ class GestionRolesService
     }
 
     /**
-     * @param  array{name: string, permissions: array<int, int>}  $datos
+     * @param  array{name: string, etiqueta?: string|null, descripcion?: string|null, permissions: array<int, int>}  $datos
      */
     public function editar(Role $rol, array $datos): void
     {
         DB::transaction(function () use ($rol, $datos): void {
             $before = [
                 'name' => $rol->name,
+                'etiqueta' => $rol->etiqueta,
+                'descripcion' => $rol->descripcion,
                 'permissions' => $rol->permissions()->pluck('id')->all(),
             ];
 
-            $rol->forceFill(['name' => $datos['name']])->save();
+            $rol->forceFill([
+                'name' => $datos['name'],
+                'etiqueta' => $datos['etiqueta'] ?? null,
+                'descripcion' => $datos['descripcion'] ?? null,
+            ])->save();
             $rol->syncPermissions($datos['permissions']);
 
             $this->permisosCompartidos->invalidarParaRol($rol);
@@ -65,7 +80,12 @@ class GestionRolesService
                 'editar_rol',
                 $rol,
                 $before,
-                ['name' => $datos['name'], 'permissions' => $datos['permissions']],
+                [
+                    'name' => $datos['name'],
+                    'etiqueta' => $datos['etiqueta'] ?? null,
+                    'descripcion' => $datos['descripcion'] ?? null,
+                    'permissions' => $datos['permissions'],
+                ],
             );
         });
     }

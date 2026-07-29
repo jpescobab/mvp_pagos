@@ -31,6 +31,10 @@ class WorkflowAdquisicionesSeeder extends Seeder
         // procesos de adquisición. Las transiciones sensibles (publicar,
         // adjudicar, anular) siguen reservadas a admin.
         $administrativoAdquisiciones = Role::firstOrCreate(['name' => 'administrativo_adquisiciones']);
+        $administrativoAdquisiciones->forceFill([
+            'etiqueta' => 'Administrativo de adquisiciones',
+            'descripcion' => 'Consulta, crea y edita procesos de adquisición.',
+        ])->save();
         $administrativoAdquisiciones->givePermissionTo([
             'adquisiciones.consultar_proceso',
             'adquisiciones.crear_proceso',

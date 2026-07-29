@@ -27,7 +27,10 @@ class UserResource extends JsonResource
             'active' => $this->active,
             'last_login_at' => $this->last_login_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
-            'roles' => $this->roles->pluck('name')->values(),
+            'roles' => $this->roles->map(fn ($rol): array => [
+                'name' => $rol->name,
+                'etiqueta' => $rol->etiqueta,
+            ])->values(),
             'jurisdiccion' => $cfinanciero?->jurisdiccion === null ? null : [
                 'id' => $cfinanciero->jurisdiccion->id,
                 'nombre' => $cfinanciero->jurisdiccion->nombre,

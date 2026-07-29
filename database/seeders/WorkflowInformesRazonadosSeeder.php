@@ -35,35 +35,52 @@ class WorkflowInformesRazonadosSeeder extends Seeder
         // conjunto sea exacto e idempotente; no se tocan `admin`/`superadmin`.
         $rolesDedicados = [
             'gestor_reportabilidad' => [
-                'reportabilidad.ver',
-                'reportabilidad.generar_corte',
-                'reportabilidad.publicar_corte',
-                'informes.ver',
+                'etiqueta' => 'Gestor de reportabilidad',
+                'descripcion' => 'Prepara y publica los cortes de reportabilidad.',
+                'permisos' => [
+                    'reportabilidad.ver',
+                    'reportabilidad.generar_corte',
+                    'reportabilidad.publicar_corte',
+                    'informes.ver',
+                ],
             ],
             'elaborador_informes' => [
-                'informes.ver',
-                'informes.elaborar',
-                'informes.exportar',
+                'etiqueta' => 'Elaborador de informes',
+                'descripcion' => 'Elabora el contenido de los informes razonados.',
+                'permisos' => [
+                    'informes.ver',
+                    'informes.elaborar',
+                    'informes.exportar',
+                ],
             ],
             'revisor_informes' => [
-                'informes.ver',
-                'informes.aprobar',
-                'informes.publicar',
-                'informes.exportar',
+                'etiqueta' => 'Revisor de informes',
+                'descripcion' => 'Aprueba y publica los informes razonados.',
+                'permisos' => [
+                    'informes.ver',
+                    'informes.aprobar',
+                    'informes.publicar',
+                    'informes.exportar',
+                ],
             ],
         ];
 
         // `informes.ver` y `reportabilidad.ver` los crea RolesAndPermissionsSeeder;
         // se aseguran aquí con firstOrCreate para que este seeder sea
         // auto-suficiente aunque se ejecute aislado (varios tests lo siembran solo).
-        foreach ($rolesDedicados as $permisosRol) {
-            foreach ($permisosRol as $permiso) {
+        foreach ($rolesDedicados as $config) {
+            foreach ($config['permisos'] as $permiso) {
                 Permission::firstOrCreate(['name' => $permiso]);
             }
         }
 
-        foreach ($rolesDedicados as $nombreRol => $permisosRol) {
-            Role::firstOrCreate(['name' => $nombreRol])->syncPermissions($permisosRol);
+        foreach ($rolesDedicados as $nombreRol => $config) {
+            $rol = Role::firstOrCreate(['name' => $nombreRol]);
+            $rol->forceFill([
+                'etiqueta' => $config['etiqueta'],
+                'descripcion' => $config['descripcion'],
+            ])->save();
+            $rol->syncPermissions($config['permisos']);
         }
 
         $definicion = DefinicionWorkflow::firstOrCreate(

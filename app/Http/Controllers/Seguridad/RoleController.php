@@ -52,6 +52,8 @@ class RoleController extends Controller
             'roles' => $roles->map(fn (Role $rol): array => [
                 'id' => $rol->id,
                 'name' => $rol->name,
+                'etiqueta' => $rol->etiqueta,
+                'descripcion' => $rol->descripcion,
                 'users_count' => $rol->users_count,
                 'permissions_count' => $rol->permissions_count,
                 'is_core' => GestionRolesService::esRolCore($rol),
@@ -77,6 +79,8 @@ class RoleController extends Controller
 
         $this->gestionRoles->crear([
             'name' => $datos['name'],
+            'etiqueta' => $datos['etiqueta'] ?? null,
+            'descripcion' => $datos['descripcion'] ?? null,
             'permissions' => $datos['permissions'] ?? [],
         ]);
 
@@ -91,6 +95,8 @@ class RoleController extends Controller
             'role' => [
                 'id' => $role->id,
                 'name' => $role->name,
+                'etiqueta' => $role->etiqueta,
+                'descripcion' => $role->descripcion,
                 'permission_ids' => $role->permissions()->pluck('id')->all(),
             ],
             'permissionGroups' => $this->gruposDePermisos(),
@@ -103,6 +109,8 @@ class RoleController extends Controller
 
         $this->gestionRoles->editar($role, [
             'name' => $datos['name'],
+            'etiqueta' => $datos['etiqueta'] ?? null,
+            'descripcion' => $datos['descripcion'] ?? null,
             'permissions' => $datos['permissions'] ?? [],
         ]);
 

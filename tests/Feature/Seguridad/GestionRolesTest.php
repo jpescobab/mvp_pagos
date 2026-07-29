@@ -54,6 +54,65 @@ test('un usuario con roles.administrar puede crear un rol con permisos', functio
     expect(AuditLog::where('action', 'crear_rol')->where('auditable_id', $rol->id)->exists())->toBeTrue();
 });
 
+test('crear un rol persiste su etiqueta y descripción', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('roles.administrar');
+
+    $response = $this->actingAs($actor)->post(route('roles.store'), [
+        'name' => 'auditor_externo',
+        'etiqueta' => 'Auditor externo',
+        'descripcion' => 'Consulta el historial de auditoría del sistema.',
+        'permissions' => [],
+    ]);
+
+    $response->assertRedirect(route('roles.index'));
+
+    $rol = Role::where('name', 'auditor_externo')->firstOrFail();
+    expect($rol->etiqueta)->toBe('Auditor externo');
+    expect($rol->descripcion)->toBe('Consulta el historial de auditoría del sistema.');
+});
+
+test('editar un rol actualiza su etiqueta y descripción', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('roles.administrar');
+
+    $rol = Role::firstOrCreate(['name' => 'auditor']);
+
+    $response = $this->actingAs($actor)->patch(route('roles.update', $rol), [
+        'name' => 'auditor',
+        'etiqueta' => 'Auditor interno',
+        'descripcion' => 'Revisa la auditoría de negocio.',
+        'permissions' => [],
+    ]);
+
+    $response->assertRedirect(route('roles.index'));
+
+    $rol->refresh();
+    expect($rol->etiqueta)->toBe('Auditor interno');
+    expect($rol->descripcion)->toBe('Revisa la auditoría de negocio.');
+});
+
+test('el índice de roles expone etiqueta y descripción', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('roles.administrar');
+
+    Role::firstOrCreate(['name' => 'auditor'])->forceFill([
+        'etiqueta' => 'Auditor interno',
+        'descripcion' => 'Revisa la auditoría.',
+    ])->save();
+
+    $this->actingAs($actor)->get(route('roles.index'))->assertInertia(fn (Assert $page) => $page
+        ->component('seguridad/roles/index')
+        ->where('roles', fn ($roles) => collect($roles)->firstWhere('name', 'auditor')['etiqueta'] === 'Auditor interno'
+            && collect($roles)->firstWhere('name', 'auditor')['descripcion'] === 'Revisa la auditoría.'));
+});
+
 test('un usuario sin roles.administrar no puede crear un rol', function () {
     $actor = User::factory()->create();
 

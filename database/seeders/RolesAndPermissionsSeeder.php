@@ -43,9 +43,17 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::where('name', 'usuarios.administrar')->delete();
 
         $superadmin = Role::firstOrCreate(['name' => 'superadmin']);
+        $superadmin->forceFill([
+            'etiqueta' => 'Superadministrador',
+            'descripcion' => 'Acceso total al sistema, sin restricciones.',
+        ])->save();
         $superadmin->syncPermissions($permissions);
 
         $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->forceFill([
+            'etiqueta' => 'Administrador',
+            'descripcion' => 'Administra usuarios, roles, maestros y todos los módulos.',
+        ])->save();
         $admin->syncPermissions([
             'usuarios.ver',
             'usuarios.crear',

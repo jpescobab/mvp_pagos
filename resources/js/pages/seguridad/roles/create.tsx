@@ -13,6 +13,8 @@ type PageProps = {
 
 export default function RolesCrear({ permissionGroups }: PageProps) {
     const [name, setName] = useState('');
+    const [etiqueta, setEtiqueta] = useState('');
+    const [descripcion, setDescripcion] = useState('');
     const [permisosSeleccionados, setPermisosSeleccionados] = useState<
         number[]
     >([]);
@@ -33,7 +35,12 @@ export default function RolesCrear({ permissionGroups }: PageProps) {
 
         router.post(
             roles.store().url,
-            { name, permissions: permisosSeleccionados },
+            {
+                name,
+                etiqueta: etiqueta || null,
+                descripcion: descripcion || null,
+                permissions: permisosSeleccionados,
+            },
             {
                 onError: (errores) =>
                     setErrors(errores as Record<string, string>),
@@ -54,16 +61,56 @@ export default function RolesCrear({ permissionGroups }: PageProps) {
                 <div className="grid max-w-xl gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">
-                            Nombre<span className="text-destructive">*</span>
+                            Nombre técnico
+                            <span className="text-destructive">*</span>
                         </Label>
                         <Input
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            placeholder="elaborador_informes"
+                            className="font-mono"
                         />
+                        <p className="text-xs text-muted-foreground">
+                            Clave interna en snake_case; no cambia una vez en
+                            uso.
+                        </p>
                         {errors.name && (
                             <p className="text-sm text-destructive">
                                 {errors.name}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="etiqueta">Etiqueta</Label>
+                        <Input
+                            id="etiqueta"
+                            value={etiqueta}
+                            onChange={(e) => setEtiqueta(e.target.value)}
+                            placeholder="Elaborador de informes"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            Nombre legible que se muestra en la aplicación.
+                        </p>
+                        {errors.etiqueta && (
+                            <p className="text-sm text-destructive">
+                                {errors.etiqueta}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="descripcion">Descripción</Label>
+                        <Input
+                            id="descripcion"
+                            value={descripcion}
+                            onChange={(e) => setDescripcion(e.target.value)}
+                            placeholder="Elabora el contenido de los informes razonados."
+                        />
+                        {errors.descripcion && (
+                            <p className="text-sm text-destructive">
+                                {errors.descripcion}
                             </p>
                         )}
                     </div>

@@ -45,6 +45,10 @@ class WorkflowPagoProveedoresSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'integraciones_sgf.eliminar_importacion']);
 
         $jefeFinanzas = Role::firstOrCreate(['name' => 'jefe_finanzas']);
+        $jefeFinanzas->forceFill([
+            'etiqueta' => 'Jefe de finanzas',
+            'descripcion' => 'Revisa y aprueba en finanzas los casos de pago a proveedores.',
+        ])->save();
         $jefeFinanzas->givePermissionTo([
             'pago_proveedores.revisar_finanzas',
             'pago_proveedores.gestionar_caso',
@@ -53,6 +57,10 @@ class WorkflowPagoProveedoresSeeder extends Seeder
         ]);
 
         $administradorZonal = Role::firstOrCreate(['name' => 'administrador_zonal']);
+        $administradorZonal->forceFill([
+            'etiqueta' => 'Administrador zonal',
+            'descripcion' => 'Revisa en la instancia zonal los casos de pago a proveedores.',
+        ])->save();
         $administradorZonal->givePermissionTo(['pago_proveedores.revisar_zonal', 'documentos.validar']);
 
         // Rol operativo del tramo posterior a la revisión en dos instancias
@@ -64,6 +72,10 @@ class WorkflowPagoProveedoresSeeder extends Seeder
         // sube sus documentos) no es quien lo aprueba, lo anula o valida sus
         // propios documentos.
         $administrativoFinanzas = Role::firstOrCreate(['name' => 'administrativo_finanzas']);
+        $administrativoFinanzas->forceFill([
+            'etiqueta' => 'Administrativo de finanzas',
+            'descripcion' => 'Prepara y registra el pago a proveedores tras la revisión.',
+        ])->save();
         $administrativoFinanzas->givePermissionTo([
             'pago_proveedores.registrar_egreso',
             'pago_proveedores.registrar_cgu',

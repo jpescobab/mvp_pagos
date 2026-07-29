@@ -10,6 +10,11 @@ export type AuditLogEntry = {
     created_at: string;
 };
 
+export type RolAsignado = {
+    name: string;
+    etiqueta: string | null;
+};
+
 export type UsuarioListado = {
     id: number;
     name: string;
@@ -20,7 +25,7 @@ export type UsuarioListado = {
     active: boolean;
     last_login_at: string | null;
     created_at: string | null;
-    roles: string[];
+    roles: RolAsignado[];
     jurisdiccion: { id: number; nombre: string } | null;
     centro_financiero: { id: number; nombre: string } | null;
     centro_costo: { id: number; nombre: string } | null;
@@ -63,6 +68,7 @@ export type CatalogoOpcion = {
     id: number;
     nombre?: string;
     name?: string;
+    etiqueta?: string | null;
 };
 
 export type CatalogosUsuarios = {
@@ -84,6 +90,8 @@ export type PermisosUsuarios = {
 export type RolListado = {
     id: number;
     name: string;
+    etiqueta: string | null;
+    descripcion: string | null;
     users_count: number;
     permissions_count: number;
     is_core: boolean;
@@ -106,5 +114,7 @@ export type GrupoPermisos = {
 export type RolEditable = {
     id: number;
     name: string;
+    etiqueta: string | null;
+    descripcion: string | null;
     permission_ids: number[];
 };

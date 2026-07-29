@@ -126,14 +126,17 @@ export default function UsuarioShow() {
                                     </Link>
                                 </Button>
                             )}
-                            {!usuario.active && permissions.can_activate_user && (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setConfirmacion('activar')}
-                                >
-                                    Activar
-                                </Button>
-                            )}
+                            {!usuario.active &&
+                                permissions.can_activate_user && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() =>
+                                            setConfirmacion('activar')
+                                        }
+                                    >
+                                        Activar
+                                    </Button>
+                                )}
                             {usuario.active &&
                                 permissions.can_deactivate_user && (
                                     <Button
@@ -206,8 +209,8 @@ export default function UsuarioShow() {
                         <>
                             <div className="flex flex-wrap gap-1">
                                 {usuario.roles.map((rol) => (
-                                    <Badge key={rol} variant="secondary">
-                                        {rol}
+                                    <Badge key={rol.name} variant="secondary">
+                                        {rol.etiqueta ?? rol.name}
                                     </Badge>
                                 ))}
                             </div>
@@ -215,7 +218,9 @@ export default function UsuarioShow() {
                             {permisosEfectivos.acceso_total ? (
                                 <p className="rounded-lg border border-warning/40 bg-warning-soft px-3 py-2 text-sm">
                                     Acceso total al sistema. El rol{' '}
-                                    <span className="font-mono">superadmin</span>{' '}
+                                    <span className="font-mono">
+                                        superadmin
+                                    </span>{' '}
                                     pasa cualquier autorización sin depender de
                                     permisos asignados.
                                 </p>

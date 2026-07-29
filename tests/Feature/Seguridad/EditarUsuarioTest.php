@@ -44,6 +44,25 @@ test('un usuario con usuarios.editar puede ver el formulario de edición precarg
         ->where('usuario.cargo', 'Analista'));
 });
 
+test('el catálogo de roles del formulario de edición incluye la etiqueta', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('usuarios.editar');
+
+    Role::where('name', 'admin')->firstOrFail()->forceFill([
+        'etiqueta' => 'Administrador',
+    ])->save();
+
+    $usuario = User::factory()->create();
+
+    $response = $this->actingAs($actor)->get(route('usuarios.edit', $usuario));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('seguridad/usuarios/edit')
+        ->where('catalogs.roles', fn ($roles) => collect($roles)->firstWhere('name', 'admin')['etiqueta'] === 'Administrador'));
+});
+
 test('el formulario de edición funciona para usuarios sin funcionario', function () {
     $this->seed(RolesAndPermissionsSeeder::class);
 

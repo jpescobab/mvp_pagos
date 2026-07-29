@@ -149,15 +149,25 @@ export default function RolesIndex() {
                                             key={rol.id}
                                             className="hover:bg-muted/30"
                                         >
-                                            <td className="px-4 py-2 font-medium">
-                                                {rol.name}
-                                                {rol.is_core && (
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className="ml-2"
-                                                    >
-                                                        Core
-                                                    </Badge>
+                                            <td className="px-4 py-2">
+                                                <div className="flex items-center gap-2 font-medium">
+                                                    <span>
+                                                        {rol.etiqueta ??
+                                                            rol.name}
+                                                    </span>
+                                                    {rol.is_core && (
+                                                        <Badge variant="secondary">
+                                                            Core
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <div className="font-mono text-xs text-muted-foreground">
+                                                    {rol.name}
+                                                </div>
+                                                {rol.descripcion && (
+                                                    <div className="max-w-md truncate text-xs text-muted-foreground">
+                                                        {rol.descripcion}
+                                                    </div>
                                                 )}
                                             </td>
                                             <td className="px-4 py-2 text-muted-foreground">
@@ -233,7 +243,7 @@ export default function RolesIndex() {
                         <DialogTitle>Eliminar rol</DialogTitle>
                         <DialogDescription>
                             {rolAEliminar &&
-                                `¿Confirmas eliminar el rol "${rolAEliminar.name}"? Esta acción no se puede deshacer.`}
+                                `¿Confirmas eliminar el rol "${rolAEliminar.etiqueta ?? rolAEliminar.name}"? Esta acción no se puede deshacer.`}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

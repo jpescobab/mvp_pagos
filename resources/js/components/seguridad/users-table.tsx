@@ -122,11 +122,11 @@ export function UsersTable({ users, permissions }: UsersTableProps) {
                                         {usuario.roles.length === 0 && '—'}
                                         {usuario.roles.map((rol) => (
                                             <Badge
-                                                key={rol}
+                                                key={rol.name}
                                                 variant="secondary"
                                                 className="text-[10px]"
                                             >
-                                                {rol}
+                                                {rol.etiqueta ?? rol.name}
                                             </Badge>
                                         ))}
                                     </div>
@@ -167,8 +167,8 @@ export function UsersTable({ users, permissions }: UsersTableProps) {
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                             <UserStatusBadge active={usuario.active} />
                             {usuario.roles.map((rol) => (
-                                <Badge key={rol} variant="secondary">
-                                    {rol}
+                                <Badge key={rol.name} variant="secondary">
+                                    {rol.etiqueta ?? rol.name}
                                 </Badge>
                             ))}
                         </div>
