@@ -3,10 +3,10 @@
 use App\Models\TipoDocumento;
 use Database\Seeders\TiposDocumentoSeeder;
 
-test('el seeder crea los 13 tipos documentales reales', function () {
+test('el seeder crea los 14 tipos documentales reales', function () {
     $this->seed(TiposDocumentoSeeder::class);
 
-    expect(TipoDocumento::count())->toBe(13);
+    expect(TipoDocumento::count())->toBe(14);
     expect(TipoDocumento::pluck('codigo')->sort()->values()->all())->toBe([
         'ACTA_RECEP',
         'BASES_LICITACION',
@@ -19,6 +19,7 @@ test('el seeder crea los 13 tipos documentales reales', function () {
         'NOTA_DEBITO',
         'ORDEN_COMPRA',
         'OTRO',
+        'PRESUPUESTO_CGU',
         'RESOLUCION',
         'RESOLUCION_ADJUDICACION',
     ]);

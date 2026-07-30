@@ -14,6 +14,7 @@ import {
     Landmark,
     Layers,
     LayoutGrid,
+    PiggyBank,
     Plug,
     PlugZap,
     Receipt,
@@ -57,6 +58,8 @@ import { index as casos } from '@/routes/pago-proveedores/casos';
 import { index as egresosCgu } from '@/routes/pago-proveedores/egresos-cgu';
 import { index as requisitosDocumentales } from '@/routes/pago-proveedores/requisitos-documentales';
 import { index as revisionPagos } from '@/routes/pago-proveedores/revision';
+import { index as importacionesPresupuesto } from '@/routes/presupuesto/importaciones';
+import { index as lineasPresupuesto } from '@/routes/presupuesto/lineas';
 import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
 import { index as roles } from '@/routes/roles';
 import { index as importacionesSgf } from '@/routes/sgf/importaciones';
@@ -205,6 +208,21 @@ const estructuraInstitucionalNavItems: NavItemConPermiso[] = [
     },
 ];
 
+const presupuestoNavItems: NavItemConPermiso[] = [
+    {
+        title: 'Líneas de Presupuesto',
+        href: lineasPresupuesto(),
+        icon: PiggyBank,
+        permiso: 'presupuesto.consultar',
+    },
+    {
+        title: 'Importaciones',
+        href: importacionesPresupuesto(),
+        icon: History,
+        permiso: 'presupuesto.consultar',
+    },
+];
+
 const reportabilidadNavItems: NavItemConPermiso[] = [
     {
         title: 'Períodos de Reportabilidad',
@@ -259,6 +277,10 @@ export function AppSidebar() {
         adquisicionesNavItems,
         auth.permissions,
     );
+    const presupuestoItems = filtrarPorPermiso(
+        presupuestoNavItems,
+        auth.permissions,
+    );
 
     const puedeRevisar =
         auth.permissions.includes('pago_proveedores.revisar_finanzas') ||
@@ -302,6 +324,9 @@ export function AppSidebar() {
                     items={pagoProveedoresItems}
                 />
                 <NavGroup label="Adquisiciones" items={adquisicionesItems} />
+                {presupuestoItems.length > 0 && (
+                    <NavGroup label="Presupuesto" items={presupuestoItems} />
+                )}
                 {reportabilidadItems.length > 0 && (
                     <NavGroup
                         label="Reportabilidad"

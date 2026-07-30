@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class ItemsSeeder extends Seeder
 {
     /**
-     * Seed the real budget classifier items (subtitulo 22).
+     * Seed the real budget classifier items (subtitulo 22, 29 y 31).
      */
     public function run(): void
     {
@@ -25,6 +25,9 @@ class ItemsSeeder extends Seeder
             ['codigo' => '2210', 'nombre' => 'Servicios Financieros y de Seguros', 'descripcion' => 'Servicios Financieros y de Seguros'],
             ['codigo' => '2211', 'nombre' => 'Servicios Técnicos y Profesionales', 'descripcion' => 'Servicios Técnicos y Profesionales'],
             ['codigo' => '2212', 'nombre' => 'Otros Gastos en Bienes y Servicios de Consumo', 'descripcion' => 'Otros Gastos en Bienes y Servicios de Consumo'],
+            ['codigo' => '2904', 'nombre' => 'Mobiliario y Otros', 'descripcion' => 'Son los gastos por concepto de adquisición de mobiliario para oficinas y viviendas, muebles de instalaciones militares, policiales, educacionales, sanitarias y hospitalarias, de Aduana, puertos y aeropuertos, y otros similares.'],
+            ['codigo' => '2905', 'nombre' => 'Máquinas y Equipos de Oficina', 'descripcion' => 'Son los gastos por concepto de adquisición de máquinas calculadoras, contables, de cálculo electrónico, relojes de control, equipos de aire acondicionado, reguladores de temperatura, y otras máquinas y equipos necesarios para el funcionamiento de oficinas.'],
+            ['codigo' => '31', 'nombre' => 'Iniciativas de Inversión', 'descripcion' => 'Corresponde a gastos de inversión real directa, tales como estudios básicos, proyectos y programas de inversión, que efectúan los organismos del Sector Público.'],
         ];
 
         foreach ($items as $item) {

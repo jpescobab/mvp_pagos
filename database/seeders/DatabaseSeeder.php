@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(TiposDocumentoSeeder::class);
         $this->call(WorkflowPagoProveedoresSeeder::class);
+        $this->call(PresupuestoSeeder::class);
         $this->call(TiposProcesoPagoSeeder::class);
         $this->call(RequisitosDocumentalesPagoProveedoresSeeder::class);
         $this->call(IntegracionesSeeder::class);

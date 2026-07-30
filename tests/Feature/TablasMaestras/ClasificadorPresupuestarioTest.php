@@ -14,10 +14,10 @@ beforeEach(function () {
     $this->seed(CatalogosSeeder::class);
 });
 
-test('siembra los 12 items, 57 asignaciones y 156 catalogos reales', function () {
-    expect(Item::count())->toBe(12);
-    expect(Asignacion::count())->toBe(57);
-    expect(Catalogo::count())->toBe(156);
+test('siembra los 15 items, 60 asignaciones y 159 catalogos reales', function () {
+    expect(Item::count())->toBe(15);
+    expect(Asignacion::count())->toBe(60);
+    expect(Catalogo::count())->toBe(159);
 });
 
 test('una asignación resuelve su item_id por código', function () {

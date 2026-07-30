@@ -24,6 +24,8 @@ use App\Models\MetricaInformeRazonado;
 use App\Models\NarrativaInformeRazonado;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\PeriodoReportabilidad;
+use App\Models\Presupuesto\ImportacionPresupuesto;
+use App\Models\Presupuesto\Presupuesto;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
@@ -53,6 +55,8 @@ use App\Policies\MetricaInformeRazonadoPolicy;
 use App\Policies\NarrativaInformeRazonadoPolicy;
 use App\Policies\OrdenCompraMercadoPublicoPolicy;
 use App\Policies\PeriodoReportabilidadPolicy;
+use App\Policies\Presupuesto\ImportacionPresupuestoPolicy;
+use App\Policies\Presupuesto\PresupuestoPolicy;
 use App\Policies\ProcesoAdquisicionPolicy;
 use App\Policies\ProcesoPolicy;
 use App\Policies\ProveedorPolicy;
@@ -154,6 +158,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(TipoProcesoPago::class, TipoProcesoPagoPolicy::class);
         Gate::policy(TipoDocumento::class, TipoDocumentoPolicy::class);
         Gate::policy(TrabajoIntegracion::class, TrabajoIntegracionPolicy::class);
+        Gate::policy(ImportacionPresupuesto::class, ImportacionPresupuestoPolicy::class);
+        Gate::policy(Presupuesto::class, PresupuestoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

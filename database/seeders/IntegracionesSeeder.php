@@ -37,7 +37,7 @@ class IntegracionesSeeder extends Seeder
 
         $sistemas = [
             ['codigo' => 'SGF', 'nombre' => 'SGF', 'tipo_integracion' => 'playwright', 'activo' => true],
-            ['codigo' => 'CGU', 'nombre' => 'CGU', 'tipo_integracion' => 'manual', 'activo' => false],
+            ['codigo' => 'CGU', 'nombre' => 'CGU', 'tipo_integracion' => 'manual', 'activo' => true],
             ['codigo' => 'BANCOESTADO', 'nombre' => 'BancoEstado', 'tipo_integracion' => 'manual', 'activo' => false],
             ['codigo' => 'SII', 'nombre' => 'SII', 'tipo_integracion' => 'manual', 'activo' => false],
             ['codigo' => 'CMF', 'nombre' => 'CMF', 'tipo_integracion' => 'manual', 'activo' => false],

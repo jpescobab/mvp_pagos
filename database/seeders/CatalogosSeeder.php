@@ -171,6 +171,9 @@ class CatalogosSeeder extends Seeder
             ['codigo' => '2212004000', 'item' => '2212', 'nombre' => 'Intereses, Multas y Recargos', 'descripcion' => 'Intereses, Multas y Recargos', 'activo' => true],
             ['codigo' => '2212005000', 'item' => '2212', 'nombre' => 'Derechos y Tasas', 'descripcion' => 'Derechos y Tasas', 'activo' => true],
             ['codigo' => '2212999000', 'item' => '2212', 'nombre' => 'Otros', 'descripcion' => 'Otros', 'activo' => true],
+            ['codigo' => '2904000000', 'item' => '2904', 'nombre' => 'Mobiliario', 'descripcion' => 'Son los gastos por concepto de adquisición de mobiliario para oficinas y viviendas, muebles de instalaciones militares, policiales, educacionales, sanitarias y hospitalarias, de Aduana, puertos y aeropuertos, y otros similares.', 'activo' => true],
+            ['codigo' => '2905001000', 'item' => '2905', 'nombre' => 'Máquinas y Equipos de Oficina', 'descripcion' => 'Son los gastos por concepto de adquisición de máquinas calculadoras, contables, de cálculo electrónico, relojes de control y otras máquinas y equipos necesarios para el funcionamiento de oficinas.', 'activo' => true],
+            ['codigo' => '3102004000', 'item' => '31', 'nombre' => 'Obras Civiles', 'descripcion' => 'Corresponde a los proyectos de inversión que consideran la ejecución de obras civiles, tales como construcción, ampliación, reposición o habilitación de edificaciones e infraestructura.', 'activo' => true],
         ];
 
         foreach ($catalogos as $catalogo) {

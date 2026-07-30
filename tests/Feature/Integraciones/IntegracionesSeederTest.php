@@ -11,7 +11,7 @@ test('IntegracionesSeeder crea el catálogo de sistemas_externos y los permisos 
 
     expect(SistemaExterno::count())->toBe(6);
     expect(SistemaExterno::where('codigo', 'SGF')->first()?->activo)->toBeTrue();
-    expect(SistemaExterno::where('codigo', 'CGU')->first()?->activo)->toBeFalse();
+    expect(SistemaExterno::where('codigo', 'CGU')->first()?->activo)->toBeTrue();
     expect(SistemaExterno::where('codigo', 'BANCOESTADO')->first()?->activo)->toBeFalse();
     expect(SistemaExterno::where('codigo', 'SII')->first()?->activo)->toBeFalse();
     expect(SistemaExterno::where('codigo', 'CMF')->first()?->activo)->toBeFalse();
