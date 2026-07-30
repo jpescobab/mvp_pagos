@@ -1,7 +1,8 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Input } from '@/components/ui/input';
-import { formatMonto, formatNumero } from '@/lib/format';
+import { formatMonto } from '@/lib/format';
 import lineas from '@/routes/presupuesto/lineas';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { Presupuesto } from '@/types/presupuesto';
@@ -9,10 +10,15 @@ import type { Presupuesto } from '@/types/presupuesto';
 type PageProps = {
     presupuestos: Paginated<Presupuesto>;
     anio: number | null;
+    total_asignado: number;
 };
 
 export default function LineasPresupuestoIndex() {
-    const { presupuestos: pagina, anio } = usePage<PageProps>().props;
+    const {
+        presupuestos: pagina,
+        anio,
+        total_asignado: totalAsignado,
+    } = usePage<PageProps>().props;
     const [anioFiltro, setAnioFiltro] = useState(anio ? String(anio) : '');
 
     useEffect(() => {
@@ -68,7 +74,7 @@ export default function LineasPresupuestoIndex() {
                                 <th className="w-[10%] px-2.5 py-1 font-medium">
                                     Año
                                 </th>
-                                <th className="w-[20%] px-2.5 py-1 font-medium">
+                                <th className="w-[20%] px-2.5 py-1 text-right font-medium">
                                     Monto asignado
                                 </th>
                             </tr>
@@ -116,7 +122,7 @@ export default function LineasPresupuestoIndex() {
                                     <td className="px-2.5 py-1">
                                         {presupuesto.anio}
                                     </td>
-                                    <td className="px-2.5 py-1">
+                                    <td className="px-2.5 py-1 text-right tabular-nums">
                                         {formatMonto(
                                             presupuesto.monto_asignado,
                                         )}
@@ -124,16 +130,23 @@ export default function LineasPresupuestoIndex() {
                                 </tr>
                             ))}
                         </tbody>
+                        <tfoot className="border-t bg-muted/30">
+                            <tr>
+                                <td
+                                    colSpan={4}
+                                    className="px-2.5 py-1.5 font-medium"
+                                >
+                                    Total general
+                                </td>
+                                <td className="px-2.5 py-1.5 text-right font-mono font-medium tabular-nums">
+                                    {formatMonto(totalAsignado)}
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

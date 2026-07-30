@@ -1,8 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
-import { formatNumero } from '@/lib/format';
 import procesos from '@/routes/adquisiciones/procesos';
 import type { ProcesoAdquisicion } from '@/types/adquisiciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -99,35 +99,7 @@ export default function ProcesosIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

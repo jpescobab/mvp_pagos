@@ -1,5 +1,6 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -8,7 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { formatFecha, formatNumero } from '@/lib/format';
+import { formatFecha } from '@/lib/format';
 import { formatearValorIndicador } from '@/lib/indicadores';
 import indicadoresEconomicos from '@/routes/indicadores-economicos';
 import type { IndicadorEconomico } from '@/types/indicadores';
@@ -132,35 +133,7 @@ export default function IndicadoresEconomicosIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

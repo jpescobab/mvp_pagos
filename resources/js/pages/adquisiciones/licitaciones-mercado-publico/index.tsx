@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { LicitacionEstadoBadge } from '@/components/mercado-publico/licitacion-estado-badge';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
 import { useInitials } from '@/hooks/use-initials';
-import { formatNumero } from '@/lib/format';
 import licitacionesMp from '@/routes/adquisiciones/licitaciones_mp';
 import type { LicitacionMercadoPublico } from '@/types/adquisiciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -215,35 +215,7 @@ export default function LicitacionesMercadoPublicoIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

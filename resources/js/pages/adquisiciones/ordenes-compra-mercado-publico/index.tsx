@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { OrdenCompraEstadoBadge } from '@/components/mercado-publico/orden-compra-estado-badge';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Monto } from '@/components/ui/monto';
 import { useInitials } from '@/hooks/use-initials';
-import { formatFecha, formatNumero } from '@/lib/format';
+import { formatFecha } from '@/lib/format';
 import ordenesCompraMp from '@/routes/adquisiciones/ordenes_compra_mp';
 import type { OrdenCompraMercadoPublico } from '@/types/adquisiciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -140,7 +141,9 @@ export default function OrdenesCompraMercadoPublicoIndex() {
                                                 </div>
                                                 <div className="truncate font-mono text-[10px] text-muted-foreground">
                                                     {orden.fecha_emision
-                                                        ? formatFecha(orden.fecha_emision)
+                                                        ? formatFecha(
+                                                              orden.fecha_emision,
+                                                          )
                                                         : '—'}
                                                 </div>
                                             </div>
@@ -216,35 +219,7 @@ export default function OrdenesCompraMercadoPublicoIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

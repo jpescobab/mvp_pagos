@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { ImportacionEstadoBadge } from '@/components/sgf/importacion-estado-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,6 @@ import {
 } from '@/components/ui/select';
 import { useInitials } from '@/hooks/use-initials';
 import { formatFechaHora } from '@/lib/format';
-import { formatNumero } from '@/lib/format';
 import casos from '@/routes/sgf/casos';
 import importaciones from '@/routes/sgf/importaciones';
 import type { Paginated } from '@/types/pago-proveedores';
@@ -364,7 +364,9 @@ export default function ImportacionesSgfIndex() {
                                                             !importacion.eliminable
                                                         }
                                                         onSelect={() =>
-                                                            eliminar(importacion)
+                                                            eliminar(
+                                                                importacion,
+                                                            )
                                                         }
                                                         className="text-destructive focus:text-destructive"
                                                         title={
@@ -386,35 +388,7 @@ export default function ImportacionesSgfIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

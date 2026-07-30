@@ -1,7 +1,8 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Fragment, useState } from 'react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Button } from '@/components/ui/button';
-import { formatFechaHora, formatNumero } from '@/lib/format';
+import { formatFechaHora } from '@/lib/format';
 import auditoria from '@/routes/auditoria';
 import type { Paginated } from '@/types/pago-proveedores';
 import type { AuditLogEntry } from '@/types/seguridad';
@@ -69,7 +70,9 @@ export default function AuditoriaIndex() {
                                 <Fragment key={registro.id}>
                                     <tr>
                                         <td className="px-4 py-2 font-mono text-xs">
-                                            {formatFechaHora(registro.created_at)}
+                                            {formatFechaHora(
+                                                registro.created_at,
+                                            )}
                                         </td>
                                         <td className="px-4 py-2">
                                             {registro.user ?? 'Sistema'}
@@ -125,35 +128,7 @@ export default function AuditoriaIndex() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        Mostrando {formatNumero(pagina.meta.from ?? 0)}–
-                        {formatNumero(pagina.meta.to ?? 0)} de{' '}
-                        {formatNumero(pagina.meta.total)}
-                    </span>
-                    <div className="flex gap-2">
-                        <Link
-                            href={pagina.links.prev ?? '#'}
-                            className={
-                                pagina.links.prev
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Anterior
-                        </Link>
-                        <Link
-                            href={pagina.links.next ?? '#'}
-                            className={
-                                pagina.links.next
-                                    ? 'underline'
-                                    : 'pointer-events-none opacity-50'
-                            }
-                        >
-                            Siguiente
-                        </Link>
-                    </div>
-                </div>
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );

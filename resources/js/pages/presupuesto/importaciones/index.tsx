@@ -1,5 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { PaginacionFooter } from '@/components/paginacion-footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -216,6 +217,8 @@ export default function ImportacionesPresupuestoIndex() {
                         </tbody>
                     </table>
                 </div>
+
+                <PaginacionFooter meta={pagina.meta} links={pagina.links} />
             </div>
         </>
     );
