@@ -13,12 +13,13 @@ use Database\Seeders\JurisdiccionesSeeder;
 use Database\Seeders\PresupuestoSeeder;
 use Database\Seeders\TiposDocumentoSeeder;
 use Illuminate\Http\UploadedFile;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
- * @param  list<list<mixed>>  $filas
+ * @param  list<list<mixed>>  $filas  el monto (última columna) siempre numérico,
+ *                                    igual que el Excel real de CGU (celda "n",
+ *                                    formato `#,##0`, no texto con puntos).
  */
 function crearArchivoExcelPresupuestoDePrueba(array $filas): UploadedFile
 {
@@ -34,11 +35,8 @@ function crearArchivoExcelPresupuestoDePrueba(array $filas): UploadedFile
     $hoja->fromArray($encabezados, null, 'A1');
     $hoja->fromArray($filas, null, 'A2');
 
-    // La columna "Ppto.Vigente" (W) viene de CGU con puntos de miles como
-    // texto (ej. "124.085"); forzar el tipo string evita que PhpSpreadsheet
-    // la infiera como número decimal y pierda el formato real.
     foreach ($filas as $indice => $fila) {
-        $hoja->setCellValueExplicit('W'.(2 + $indice), (string) end($fila), DataType::TYPE_STRING);
+        $hoja->getStyle('W'.(2 + $indice))->getNumberFormat()->setFormatCode('#,##0');
     }
 
     $ruta = tempnam(sys_get_temp_dir(), 'presupuesto_cgu_').'.xlsx';
@@ -71,7 +69,7 @@ test('una importación válida crea líneas de presupuesto y snapshot', function
     $usuario = usuarioConPermisoImportar();
 
     $archivo = crearArchivoExcelPresupuestoDePrueba([
-        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '124.085'],
+        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 124085],
     ]);
 
     $response = $this->actingAs($usuario)->post(route('presupuesto.importaciones.store'), [
@@ -127,7 +125,7 @@ test('una fila con cuenta inexistente se omite y queda contada', function () {
     $usuario = usuarioConPermisoImportar();
 
     $archivo = crearArchivoExcelPresupuestoDePrueba([
-        ['5', '9999999999', 'Cuenta inexistente', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '1.000'],
+        ['5', '9999999999', 'Cuenta inexistente', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1000],
     ]);
 
     $this->actingAs($usuario)->post(route('presupuesto.importaciones.store'), [
@@ -146,7 +144,7 @@ test('reimportar una versión posterior del mismo año actualiza el monto asigna
     $usuario = usuarioConPermisoImportar();
 
     $primerArchivo = crearArchivoExcelPresupuestoDePrueba([
-        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '100.000'],
+        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100000],
     ]);
 
     $this->actingAs($usuario)->post(route('presupuesto.importaciones.store'), [
@@ -155,7 +153,7 @@ test('reimportar una versión posterior del mismo año actualiza el monto asigna
     ]);
 
     $segundoArchivo = crearArchivoExcelPresupuestoDePrueba([
-        ['6', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '150.000'],
+        ['6', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150000],
     ]);
 
     $this->actingAs($usuario)->post(route('presupuesto.importaciones.store'), [
@@ -176,8 +174,8 @@ test('un mismo plan de tarea bajo cuentas presupuestarias distintas no se duplic
     $usuario = usuarioConPermisoImportar();
 
     $archivo = crearArchivoExcelPresupuestoDePrueba([
-        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '100.000'],
-        ['5', '2203003000', 'Para Calefacción', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '200.000'],
+        ['5', '2203002000', 'Para Maquinarias', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100000],
+        ['5', '2203003000', 'Para Calefacción', '22', '1400', 'PE', 'GV', '01', '01', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200000],
     ]);
 
     $this->actingAs($usuario)->post(route('presupuesto.importaciones.store'), [

@@ -19,12 +19,18 @@ class PresupuestoController extends Controller
         $anio = $request->integer('anio') ?: null;
         $cfinancieroId = $request->integer('cfinanciero_id') ?: null;
 
-        $presupuestos = Presupuesto::query()
-            ->with(['cfinanciero', 'catalogo', 'planTarea'])
+        $filtros = fn ($query) => $query
             ->when($anio, fn ($query) => $query->where('anio', $anio))
-            ->when($cfinancieroId, fn ($query) => $query->where('cfinanciero_id', $cfinancieroId))
-            ->orderByDesc('anio')
-            ->orderBy('cfinanciero_id')
+            ->when($cfinancieroId, fn ($query) => $query->where('cfinanciero_id', $cfinancieroId));
+
+        $totalAsignado = (float) $filtros(Presupuesto::query())->sum('monto_asignado');
+
+        $presupuestos = $filtros(Presupuesto::query())
+            ->with(['cfinanciero', 'catalogo', 'planTarea'])
+            ->join('catalogos', 'catalogos.id', '=', 'presupuestos.catalogo_id')
+            ->select('presupuestos.*')
+            ->orderBy('catalogos.codigo')
+            ->orderByDesc('presupuestos.anio')
             ->paginate(20)
             ->withQueryString();
 
@@ -32,6 +38,7 @@ class PresupuestoController extends Controller
             'presupuestos' => PresupuestoResource::collection($presupuestos),
             'anio' => $anio,
             'cfinanciero_id' => $cfinancieroId,
+            'total_asignado' => $totalAsignado,
         ]);
     }
 }
