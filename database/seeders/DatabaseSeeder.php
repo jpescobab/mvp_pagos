@@ -38,6 +38,12 @@ class DatabaseSeeder extends Seeder
         $this->call(ModalidadesAdquisicionSeeder::class);
         $this->call(WorkflowAdquisicionesSeeder::class);
         $this->call(RequisitosDocumentalesAdquisicionesSeeder::class);
+        $this->call(WorkflowPresupuestoCdpSeeder::class);
+
+        // Snapshot de desarrollo (UF/USD/UTM/UTA/IPC ene-ago 2026) para no
+        // golpear la API de la CMF en cada fresh — ver docblock del seeder.
+        // Quitar cuando ya no haga falta reproducir este período localmente.
+        $this->call(IndicadoresEconomicosDesarrolloSeeder::class);
 
         $this->call(FuncionariosCapjSeeder::class);
 

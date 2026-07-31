@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Presupuesto\CertificadoDisponibilidadPresupuestaria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -137,6 +138,13 @@ class Proceso extends Model
             return [
                 'descripcion' => "Proceso de adquisición {$sujeto->codigo}",
                 'url' => route('adquisiciones.procesos.show', $sujeto),
+            ];
+        }
+
+        if ($sujeto instanceof CertificadoDisponibilidadPresupuestaria) {
+            return [
+                'descripcion' => "CDP {$sujeto->folio}",
+                'url' => route('presupuesto.cdps.show', $sujeto),
             ];
         }
 
