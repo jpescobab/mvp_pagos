@@ -25,27 +25,44 @@ export type LicitacionVinculada = {
 export type ProcesoAdquisicion = {
     id: number;
     codigo: string;
+    fecha_inicio: string | null;
+    nombre: string | null;
+    id_requerimiento: string | null;
     modalidad: { codigo: string | null; nombre: string | null };
     ccosto: { codigo: string | null; nombre: string | null };
+    funcionario_requirente: {
+        id: number | null;
+        nombre: string | null;
+        cargo: string | null;
+    };
     proveedor: { nombre: string | null; rutproveedor: string | null };
-    monto: string | null;
-    objeto: string;
+    caracteristicas: string | null;
+    motivo_contratacion: string | null;
+    en_plan_compras: boolean | null;
+    id_pac: string | null;
+    codigo_bip: string | null;
+    moneda_compra: string | null;
+    monto_estimado_solicitado: string | null;
+    fecha_paridad: string | null;
+    paridad: string | null;
+    monto_estimado: string | null;
     proceso: Proceso;
     casos_pago_proveedor: CasoPagoProveedorVinculado[];
     ordenes_compra_mercado_publico: OrdenCompraVinculada[];
     licitaciones_mercado_publico: LicitacionVinculada[];
 };
 
-export type ModalidadSeleccionable = {
+export type CcostoSeleccionable = {
     id: number;
     codigo: string;
     nombre: string;
 };
 
-export type CcostoSeleccionable = {
+export type FuncionarioSeleccionable = {
     id: number;
-    codigo: string;
     nombre: string;
+    cargo: string | null;
+    ccosto_id: number | null;
 };
 
 export type ProveedorSeleccionable = {

@@ -25,7 +25,7 @@ class BuscarProcesoAdquisicionController extends Controller
                 $query->where(function ($query) use ($termino) {
                     $query->where('codigo', 'like', "%{$termino}%")
                         ->orWhere('objeto', 'like', "%{$termino}%")
-                        ->orWhere('monto', 'like', "%{$termino}%")
+                        ->orWhere('monto_estimado', 'like', "%{$termino}%")
                         ->orWhereHas('proveedor', function ($query) use ($termino) {
                             $query->where('nombre', 'like', "%{$termino}%");
                         });

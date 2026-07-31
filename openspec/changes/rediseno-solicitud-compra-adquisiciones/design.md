@@ -23,7 +23,7 @@ Quedaban tres puntos técnicos abiertos que este documento resuelve con evidenci
 ### Formato del correlativo `codigo`: seguir el patrón ya usado por el CDP
 `CrearBorradorCertificadoDisponibilidadService` (`app/Services/Presupuesto/CrearBorradorCertificadoDisponibilidadService.php:45-69`) ya resolvió este mismo problema para `certificados_disponibilidad_presupuestaria.folio`, con una lección documentada: un `SELECT MAX()+1` no serializa de forma segura contra inserciones concurrentes bajo `READ COMMITTED` en PostgreSQL (produjo folios duplicados en pruebas reales). Su solución: insertar con un valor temporal único (`'TEMP-'.Str::uuid()`), y una vez conocido el `id` autoincremental (único y atómico de forma nativa), fijar el código definitivo con un `update()` dentro de la misma transacción.
 
-Se reutiliza exactamente ese patrón para `procesos_adquisicion.codigo`, con formato `sprintf('SC %05d-%d', $proceso->id, $anio)` (ej. `SC 00042-2026`) — mismo estilo que `CDP %03d-%d`, con un dígito extra de padding porque se espera mayor volumen de solicitudes de compra que de CDPs. `$anio` se toma de `fecha_inicio`. Vive en `ProcesoAdquisicionService::crear()`, dentro de la transacción existente.
+Se reutiliza exactamente ese patrón para `procesos_adquisicion.codigo`, con formato `sprintf('SPC-%03d-%d', $proceso->id, $anio)` (ej. `SPC-001-2026`, pedido explícitamente por el usuario) — mismo estilo que `CDP %03d-%d`. `$anio` se toma de `fecha_inicio`. Vive en `ProcesoAdquisicionService::crear()`, dentro de la transacción existente.
 
 **Alternativas consideradas:** un contador separado (tabla de secuencias) — descartado por agregar una tabla y un punto de fallo nuevo cuando el `id` autoincremental ya resuelve la atomicidad de forma nativa, tal como probó el CDP.
 
@@ -66,3 +66,11 @@ Rollback: la migración es aditiva y no destruye datos (ningún `DROP COLUMN` so
 
 - Si más adelante se requiere que la aprobación quede restringida a la jefatura real de la unidad requirente específica (no solo el permiso genérico `adquisiciones.publicar`), habrá que modelar "jefatura por `ccosto`" — no está resuelto en este cambio, ver "Alcance del permiso de aprobación" arriba.
 - Contenido exacto/diseño visual de la plantilla PDF (más allá de qué datos incluye) queda a criterio de implementación durante `/opsx:apply`, siguiendo el estilo ya usado por los PDF de `ExportadorInformeRazonadoService`.
+
+### Decisión añadida durante la verificación manual: moneda y paridad del monto estimado
+
+El usuario, probando el formulario ya implementado, pidió que el monto estimado siguiera exactamente la misma lógica de moneda/paridad que ya existe para el CDP (`presupuesto-certificado-disponibilidad`): elegir moneda (CLP/UF/USD); en CLP no hay paridad; en UF/USD se pide fecha de paridad y se resuelve contra `indicadores_economicos` (mismo `IndicadorEconomicoSelector::paraFecha()`); el monto final en CLP es paridad × monto solicitado.
+
+Se replicó **exactamente** el patrón de `CrearBorradorCertificadoDisponibilidadService::resolverParidadYMonto()`: mismos nombres de columna (`moneda_compra`, `fecha_paridad`, `paridad`), mismo mecanismo de rechazo (`sinIndicadorParaFecha`), mismo endpoint de previsualización en vivo (`ParidadCdpController` → `ParidadAdquisicionController`, idéntico salvo el permiso gateado), mismo componente de UI (`cdp-form.tsx` → `campo-moneda-monto.tsx`, extraído como componente compartido entre `crear.tsx`/`editar.tsx`). Única diferencia de nombre: `total_moneda_compra` (CDP) se llamó `monto_estimado_solicitado` aquí, más claro en este contexto ya que `monto_estimado` (el resultado en CLP) ya existía con ese nombre desde antes en `procesos_adquisicion`.
+
+No se tocó ningún archivo del dominio Presupuesto/CDP — el endpoint de previsualización se duplicó en vez de reutilizarse porque el gate de autorización difiere (`adquisiciones.crear_proceso` vs el permiso de CDP), evitando acoplar los dos dominios.

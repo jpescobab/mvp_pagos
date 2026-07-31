@@ -43,6 +43,7 @@ class RequisitosDocumentalesAdquisicionesSeeder extends Seeder
                 ['codigo' => 'RESOLUCION_ADJUDICACION', 'tipo_requisito' => 'obligatorio'],
                 ['codigo' => 'CONTRATO', 'tipo_requisito' => 'obligatorio'],
                 ['codigo' => 'ACTA_RECEP', 'tipo_requisito' => 'obligatorio'],
+                ['codigo' => 'INFORME_JUSTIFICACION_TRATO_DIRECTO', 'tipo_requisito' => 'obligatorio'],
             ],
             'CONVENIO_MARCO' => [
                 ['codigo' => 'CONTRATO', 'tipo_requisito' => 'obligatorio'],

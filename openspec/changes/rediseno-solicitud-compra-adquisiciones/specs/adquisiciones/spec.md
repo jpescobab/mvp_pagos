@@ -118,3 +118,19 @@ El sistema SHALL permitir exportar un `proceso_adquisicion` como un documento PD
 #### Scenario: Exportar no altera el proceso
 - **WHEN** se exporta el PDF de un `proceso_adquisicion`
 - **THEN** su estado y sus datos permanecen sin cambios
+
+### Requirement: El monto estimado se calcula desde una moneda de compra y su paridad
+El sistema SHALL registrar la moneda de compra (CLP, UF o USD) y el monto solicitado en esa moneda para cada `proceso_adquisicion`. Cuando la moneda es CLP, el `monto_estimado` SHALL ser igual al monto solicitado, sin paridad. Cuando la moneda es UF o USD, el sistema SHALL exigir una fecha de paridad y resolver la paridad vigente para esa fecha contra el indicador económico real correspondiente (mismo mecanismo que ya usa el Certificado de Disponibilidad Presupuestaria); el `monto_estimado` SHALL ser el resultado de multiplicar el monto solicitado por esa paridad. Si no existe un valor de paridad registrado para la fecha indicada, el sistema SHALL rechazar la creación o actualización.
+
+#### Scenario: Monto en CLP no tiene paridad
+- **WHEN** se crea un `proceso_adquisicion` con moneda de compra CLP y un monto solicitado
+- **THEN** el `monto_estimado` es igual al monto solicitado, sin paridad asociada
+
+#### Scenario: Monto en UF o USD se convierte usando la paridad de la fecha indicada
+- **WHEN** se crea un `proceso_adquisicion` con moneda de compra UF o USD, un monto solicitado y una fecha de paridad con valor registrado
+- **THEN** el sistema resuelve la paridad vigente para esa fecha
+- **AND** el `monto_estimado` resulta de multiplicar el monto solicitado por esa paridad
+
+#### Scenario: Rechazar cuando no hay paridad registrada para la fecha
+- **WHEN** se crea un `proceso_adquisicion` con moneda de compra UF o USD y una fecha de paridad sin valor registrado
+- **THEN** el sistema rechaza la creación con un error de validación

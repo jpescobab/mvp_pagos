@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Funcionario;
 use App\Models\Institucion;
 use App\Models\LicitacionMercadoPublico;
-use App\Models\ModalidadAdquisicion;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\ProcesoAdquisicion;
 use App\Models\User;
@@ -18,12 +18,23 @@ function crearProcesoParaCompras(): ProcesoAdquisicion
     $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => '14-CMP', 'nombre' => 'Zonal']);
     $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => 'CF-CMP', 'nombre' => 'Centro Financiero']);
     $ccosto = $cfinanciero->ccostos()->create(['codigo' => 'CC-CMP', 'nombre' => 'Centro de Costo']);
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccosto->id,
+        'activo' => true,
+    ]);
 
     return app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-CMP-'.fake()->unique()->numerify('#####'),
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Proceso para mostrar compras de Mercado Público',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Proceso para mostrar compras de Mercado Público',
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Proceso para mostrar compras de Mercado Público',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 

@@ -5,10 +5,10 @@ use App\Models\Ccosto;
 use App\Models\CorteReportabilidad;
 use App\Models\DefinicionInformeRazonado;
 use App\Models\EgresoCgu;
+use App\Models\Funcionario;
 use App\Models\IndicadorEconomico;
 use App\Models\IndicadorEconomicoImportacion;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\PeriodoReportabilidad;
 use App\Models\Proveedor;
 use App\Models\SistemaExterno;
@@ -73,13 +73,26 @@ function crearCasoPagoProveedorDePruebaParaDashboard(string $sgfId, string $prov
     return app(CasoPagoProveedorImporter::class)->importarDesdeSnapshot($snapshot);
 }
 
-function crearProcesoAdquisicionDePruebaParaDashboard(string $codigo): void
+function crearProcesoAdquisicionDePruebaParaDashboard(string $nombre): void
 {
+    $ccostoId = crearCcostoDePruebaParaDashboard()->id;
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccostoId,
+        'activo' => true,
+    ]);
+
     app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => $codigo,
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => crearCcostoDePruebaParaDashboard()->id,
-        'objeto' => 'Compra de equipos de climatización',
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => $nombre,
+        'ccosto_id' => $ccostoId,
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Compra de equipos de climatización',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 

@@ -60,3 +60,14 @@ El sistema SHALL exponer una ruta autenticada que entregue el PDF de un `proceso
 #### Scenario: Rechazar la descarga sin permiso
 - **WHEN** un usuario autenticado sin el permiso `adquisiciones.consultar_proceso` solicita el PDF de un proceso de adquisición
 - **THEN** el sistema rechaza la petición con una respuesta HTTP 403
+
+### Requirement: Previsualizar la paridad de una moneda vía HTTP
+El sistema SHALL exponer una ruta autenticada que, dada una moneda (UF o USD) y una fecha, devuelva el valor de paridad vigente para esa fecha sin persistir nada, gobernada por el mismo permiso de creación (`adquisiciones.crear_proceso`). Es solo para previsualización en el formulario: el valor realmente comprometido se vuelve a resolver en el servidor al guardar.
+
+#### Scenario: Consultar la paridad con un valor registrado
+- **WHEN** un usuario con el permiso `adquisiciones.crear_proceso` consulta la paridad de UF o USD para una fecha con valor registrado
+- **THEN** el sistema responde con ese valor
+
+#### Scenario: Consultar la paridad sin un valor registrado
+- **WHEN** un usuario consulta la paridad de UF o USD para una fecha sin valor registrado
+- **THEN** el sistema responde que no hay valor registrado para esa fecha, sin error 500

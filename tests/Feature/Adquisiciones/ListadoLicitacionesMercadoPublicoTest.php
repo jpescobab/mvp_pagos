@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Funcionario;
 use App\Models\Institucion;
 use App\Models\LicitacionMercadoPublico;
-use App\Models\ModalidadAdquisicion;
 use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
@@ -17,12 +17,23 @@ function crearProcesoAdquisicionParaListadoLic(): ProcesoAdquisicion
     $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => '14-LIST-LIC', 'nombre' => 'Zonal']);
     $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => 'CF-LIST-LIC', 'nombre' => 'Centro Financiero']);
     $ccosto = $cfinanciero->ccostos()->create(['codigo' => 'CC-LIST-LIC', 'nombre' => 'Centro de Costo']);
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccosto->id,
+        'activo' => true,
+    ]);
 
     return app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-2026-LIC-001',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Adquisici처n de prueba para listado de Licitaci처n',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Adquisici처n de prueba para listado de Licitaci처n',
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Adquisici처n de prueba para listado de Licitaci처n',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 
@@ -67,7 +78,7 @@ test('el listado muestra las Licitaciones guardadas con su proceso de adquisici�
     $response->assertInertia(fn (Assert $page) => $page
         ->component('adquisiciones/licitaciones-mercado-publico/index')
         ->where('licitaciones.data.0.codigo', 'LIC-LISTADO-1')
-        ->where('licitaciones.data.0.proceso_adquisicion.codigo', 'ADQ-2026-LIC-001')
+        ->where('licitaciones.data.0.proceso_adquisicion.codigo', $proceso->codigo)
     );
 });
 

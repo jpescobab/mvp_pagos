@@ -19,7 +19,7 @@ class ProcesoAdquisicionResumenResource extends JsonResource
             'codigo' => $this->codigo,
             'objeto' => $this->objeto,
             'proveedor' => $this->proveedor?->nombre,
-            'monto' => $this->monto,
+            'monto' => $this->monto_estimado,
         ];
     }
 }

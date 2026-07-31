@@ -2,8 +2,8 @@
 
 use App\Models\Ccosto;
 use App\Models\Documento;
+use App\Models\Funcionario;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\TipoDocumento;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
@@ -22,17 +22,38 @@ function crearCcostoDePruebaParaHistorial(): Ccosto
     return $cfinanciero->ccostos()->create(['codigo' => "CC-HV-{$sufijo}", 'nombre' => 'Centro de Costo 1']);
 }
 
+/**
+ * @return array<string, mixed>
+ */
+function datosProcesoParaHistorial(string $nombre): array
+{
+    $ccostoId = crearCcostoDePruebaParaHistorial()->id;
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccostoId,
+        'activo' => true,
+    ]);
+
+    return [
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => $nombre,
+        'ccosto_id' => $ccostoId,
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => $nombre,
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
+    ];
+}
+
 test('el detalle de un proceso incluye el historial completo de validaciones de un documento', function () {
     $this->withoutVite();
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
-    $proceso = app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-HIST-001',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => crearCcostoDePruebaParaHistorial()->id,
-        'objeto' => 'Compra de prueba',
-    ]);
+    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaHistorial('Compra de prueba'));
 
     $tipoDocumento = TipoDocumento::create(['codigo' => 'TIPO_HIST', 'nombre' => 'Tipo de prueba']);
     $documento = Documento::create(['tipo_documento_id' => $tipoDocumento->id, 'titulo' => 'doc.pdf']);
@@ -63,12 +84,7 @@ test('la observacion de un rechazo pasado sigue presente en el historial despues
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
-    $proceso = app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-HIST-002',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => crearCcostoDePruebaParaHistorial()->id,
-        'objeto' => 'Compra de prueba 2',
-    ]);
+    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaHistorial('Compra de prueba 2'));
 
     $tipoDocumento = TipoDocumento::create(['codigo' => 'TIPO_HIST2', 'nombre' => 'Tipo de prueba 2']);
     $documento = Documento::create(['tipo_documento_id' => $tipoDocumento->id, 'titulo' => 'doc.pdf']);

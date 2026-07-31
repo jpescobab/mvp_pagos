@@ -18,6 +18,9 @@ class ProcesoAdquisicionResource extends JsonResource
         return [
             'id' => $this->id,
             'codigo' => $this->codigo,
+            'fecha_inicio' => $this->fecha_inicio,
+            'nombre' => $this->nombre,
+            'id_requerimiento' => $this->id_requerimiento,
             'modalidad' => [
                 'codigo' => $this->modalidad?->codigo,
                 'nombre' => $this->modalidad?->nombre,
@@ -26,12 +29,25 @@ class ProcesoAdquisicionResource extends JsonResource
                 'codigo' => $this->ccosto?->codigo,
                 'nombre' => $this->ccosto?->nombre,
             ],
+            'funcionario_requirente' => [
+                'id' => $this->funcionarioRequirente?->id,
+                'nombre' => $this->funcionarioRequirente?->nombre,
+                'cargo' => $this->funcionarioRequirente?->cargo,
+            ],
             'proveedor' => [
                 'nombre' => $this->proveedor?->nombre,
                 'rutproveedor' => $this->proveedor?->rutproveedor,
             ],
-            'monto' => $this->monto,
-            'objeto' => $this->objeto,
+            'caracteristicas' => $this->caracteristicas,
+            'motivo_contratacion' => $this->motivo_contratacion,
+            'en_plan_compras' => $this->en_plan_compras,
+            'id_pac' => $this->id_pac,
+            'codigo_bip' => $this->codigo_bip,
+            'moneda_compra' => $this->moneda_compra,
+            'monto_estimado_solicitado' => $this->monto_estimado_solicitado,
+            'fecha_paridad' => $this->fecha_paridad,
+            'paridad' => $this->paridad,
+            'monto_estimado' => $this->monto_estimado,
             'proceso' => new ProcesoResource($this->proceso),
             'casos_pago_proveedor' => $this->whenLoaded(
                 'casosPagoProveedor',

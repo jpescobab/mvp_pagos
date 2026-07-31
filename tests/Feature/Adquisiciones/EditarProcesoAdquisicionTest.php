@@ -3,6 +3,7 @@
 use App\Exceptions\ProcesoAdquisicionException;
 use App\Models\Ccosto;
 use App\Models\ConjuntoRequisitosDocumentales;
+use App\Models\Funcionario;
 use App\Models\Institucion;
 use App\Models\ModalidadAdquisicion;
 use App\Models\TipoDocumento;
@@ -26,16 +27,39 @@ function crearCcostoParaEdicion(): Ccosto
     return $cfinanciero->ccostos()->create(['codigo' => "CC-ED-{$sufijo}", 'nombre' => 'Centro de Costo']);
 }
 
+function crearFuncionarioParaEdicion(int $ccostoId): Funcionario
+{
+    return Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccostoId,
+        'activo' => true,
+    ]);
+}
+
 /**
  * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
  */
 function datosProcesoParaEdicion(array $overrides = []): array
 {
+    $ccostoId = $overrides['ccosto_id'] ?? crearCcostoParaEdicion()->id;
+
     return array_merge([
-        'codigo' => 'ADQ-ED-'.fake()->unique()->numerify('#####'),
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => $overrides['ccosto_id'] ?? crearCcostoParaEdicion()->id,
-        'objeto' => 'Objeto de prueba',
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Compra de prueba',
+        'id_requerimiento' => null,
+        'ccosto_id' => $ccostoId,
+        'funcionario_requirente_id' => crearFuncionarioParaEdicion($ccostoId)->id,
+        'caracteristicas' => 'Características originales',
+        'motivo_contratacion' => 'Motivo original',
+        'en_plan_compras' => false,
+        'id_pac' => null,
+        'codigo_bip' => null,
+        'convenio_marco' => true,
+        'moneda_compra' => 'CLP',
+        'monto_estimado_solicitado' => 100000,
+        'fecha_paridad' => null,
     ], $overrides);
 }
 
@@ -54,25 +78,22 @@ test('actualizar en borrador actualiza los campos y sincroniza el Proceso asocia
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
     $servicio = app(ProcesoAdquisicionService::class);
-    $proceso = $servicio->crear(datosProcesoParaEdicion(['monto' => 1000]));
-    $tratoDirecto = ModalidadAdquisicion::where('codigo', 'TRATO_DIRECTO')->value('id');
+    $proceso = $servicio->crear(datosProcesoParaEdicion(['convenio_marco' => true, 'monto_estimado_solicitado' => 1000]));
 
-    $servicio->actualizar($proceso, [
-        'codigo' => $proceso->codigo,
-        'modalidad_id' => $tratoDirecto,
-        'ccosto_id' => $proceso->ccosto_id,
-        'monto' => 2500,
-        'objeto' => 'Objeto corregido',
-    ]);
+    $servicio->actualizar($proceso, array_merge(
+        datosProcesoParaEdicion(['ccosto_id' => $proceso->ccosto_id, 'funcionario_requirente_id' => $proceso->funcionario_requirente_id]),
+        ['caracteristicas' => 'Características corregidas', 'convenio_marco' => false, 'monto_estimado_solicitado' => 2500],
+    ));
 
     $proceso->refresh();
-    expect($proceso->objeto)->toBe('Objeto corregido');
-    expect((int) $proceso->modalidad_id)->toBe((int) $tratoDirecto);
-    expect((int) $proceso->proceso->modalidad_id)->toBe((int) $tratoDirecto);
+    expect($proceso->caracteristicas)->toBe('Características corregidas');
+    expect($proceso->objeto)->toBe('Características corregidas');
+    expect($proceso->modalidad->codigo)->toBe('TRATO_DIRECTO');
+    expect($proceso->proceso->modalidad_id)->toBe($proceso->modalidad_id);
     expect((float) $proceso->proceso->monto)->toBe(2500.0);
 });
 
-test('cambiar la modalidad y re-resolver el checklist refleja la nueva modalidad', function () {
+test('cambiar Convenio Marco a No y re-resolver el checklist exige el informe de justificación', function () {
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
     $this->seed(TiposDocumentoSeeder::class);
@@ -81,27 +102,20 @@ test('cambiar la modalidad y re-resolver el checklist refleja la nueva modalidad
     $servicio = app(ProcesoAdquisicionService::class);
     $resolutor = app(ResolutorChecklistDocumentalProceso::class);
     $conjunto = ConjuntoRequisitosDocumentales::where('codigo', 'adquisiciones')->firstOrFail();
-    $basesId = TipoDocumento::where('codigo', 'BASES_LICITACION')->value('id');
+    $informeId = TipoDocumento::where('codigo', 'INFORME_JUSTIFICACION_TRATO_DIRECTO')->value('id');
 
-    $proceso = $servicio->crear([
-        'codigo' => 'ADQ-ED-CHK',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => crearCcostoParaEdicion()->id,
-        'objeto' => 'Compra',
-    ]);
+    $proceso = $servicio->crear(datosProcesoParaEdicion(['convenio_marco' => true]));
 
-    $checklistPublica = $resolutor->resolve($proceso->proceso, $conjunto);
-    expect($checklistPublica->items->pluck('tipo_documento_id'))->toContain($basesId);
+    $checklistConvenio = $resolutor->resolve($proceso->proceso, $conjunto);
+    expect($checklistConvenio->items->pluck('tipo_documento_id'))->not->toContain($informeId);
 
-    $servicio->actualizar($proceso, [
-        'codigo' => 'ADQ-ED-CHK',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'TRATO_DIRECTO')->value('id'),
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Compra',
-    ]);
+    $servicio->actualizar($proceso, array_merge(
+        datosProcesoParaEdicion(['ccosto_id' => $proceso->ccosto_id, 'funcionario_requirente_id' => $proceso->funcionario_requirente_id]),
+        ['convenio_marco' => false],
+    ));
 
-    $checklistTrato = $resolutor->resolve($proceso->proceso->refresh(), $conjunto);
-    expect($checklistTrato->items->pluck('tipo_documento_id'))->not->toContain($basesId);
+    $checklistTratoDirecto = $resolutor->resolve($proceso->proceso->refresh(), $conjunto);
+    expect($checklistTratoDirecto->items->pluck('tipo_documento_id'))->toContain($informeId);
 });
 
 test('actualizar un proceso fuera de borrador lanza excepción y no modifica datos', function () {
@@ -109,37 +123,34 @@ test('actualizar un proceso fuera de borrador lanza excepción y no modifica dat
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
     $servicio = app(ProcesoAdquisicionService::class);
-    $proceso = $servicio->crear(datosProcesoParaEdicion(['objeto' => 'Original']));
+    $proceso = $servicio->crear(datosProcesoParaEdicion(['caracteristicas' => 'Original']));
     $proceso->proceso->update([
         'estado_actual_id' => $proceso->proceso->definicionWorkflow->estados()->where('codigo', 'en_revision')->value('id'),
     ]);
 
-    expect(fn () => $servicio->actualizar($proceso, [
-        'codigo' => $proceso->codigo,
-        'modalidad_id' => $proceso->modalidad_id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Cambiado',
-    ]))->toThrow(ProcesoAdquisicionException::class);
+    expect(fn () => $servicio->actualizar($proceso, array_merge(
+        datosProcesoParaEdicion(['ccosto_id' => $proceso->ccosto_id, 'funcionario_requirente_id' => $proceso->funcionario_requirente_id]),
+        ['caracteristicas' => 'Cambiado'],
+    )))->toThrow(ProcesoAdquisicionException::class);
 
-    expect($proceso->refresh()->objeto)->toBe('Original');
+    expect($proceso->refresh()->caracteristicas)->toBe('Original');
 });
 
-test('actualizar con una modalidad inexistente o inactiva es rechazado', function () {
+test('actualizar sin las modalidades base activas es rechazado', function () {
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
     $servicio = app(ProcesoAdquisicionService::class);
-    $proceso = $servicio->crear(datosProcesoParaEdicion(['objeto' => 'Original']));
-    $modalidadInactiva = ModalidadAdquisicion::create(['codigo' => 'INAC-ED', 'nombre' => 'Inactiva', 'activo' => false]);
+    $proceso = $servicio->crear(datosProcesoParaEdicion(['caracteristicas' => 'Original']));
 
-    expect(fn () => $servicio->actualizar($proceso, [
-        'codigo' => $proceso->codigo,
-        'modalidad_id' => $modalidadInactiva->id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Cambiado',
-    ]))->toThrow(ProcesoAdquisicionException::class);
+    ModalidadAdquisicion::where('codigo', 'TRATO_DIRECTO')->update(['activo' => false]);
 
-    expect($proceso->refresh()->objeto)->toBe('Original');
+    expect(fn () => $servicio->actualizar($proceso, array_merge(
+        datosProcesoParaEdicion(['ccosto_id' => $proceso->ccosto_id, 'funcionario_requirente_id' => $proceso->funcionario_requirente_id]),
+        ['caracteristicas' => 'Cambiado', 'convenio_marco' => false],
+    )))->toThrow(ProcesoAdquisicionException::class);
+
+    expect($proceso->refresh()->caracteristicas)->toBe('Original');
 });
 
 // --- HTTP ---
@@ -156,15 +167,14 @@ test('edit y update responden 403 sin el permiso adquisiciones.editar_proceso', 
         ->assertForbidden();
 
     $this->actingAs($usuarioSinPermiso)
-        ->put(route('adquisiciones.procesos.update', $proceso), [
-            'codigo' => $proceso->codigo,
-            'modalidad_id' => $proceso->modalidad_id,
+        ->put(route('adquisiciones.procesos.update', $proceso), datosProcesoParaEdicion([
             'ccosto_id' => $proceso->ccosto_id,
-            'objeto' => 'Intento sin permiso',
-        ])
+            'funcionario_requirente_id' => $proceso->funcionario_requirente_id,
+            'caracteristicas' => 'Intento sin permiso',
+        ]))
         ->assertForbidden();
 
-    expect($proceso->refresh()->objeto)->toBe('Objeto de prueba');
+    expect($proceso->refresh()->caracteristicas)->toBe('Características originales');
 });
 
 test('con permiso, edit entrega el proceso y update en borrador actualiza y redirige al detalle', function () {
@@ -172,7 +182,7 @@ test('con permiso, edit entrega el proceso y update en borrador actualiza y redi
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
-    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaEdicion(['objeto' => 'Original']));
+    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaEdicion(['caracteristicas' => 'Original']));
     $usuario = usuarioEditorAdquisiciones();
 
     $this->actingAs($usuario)
@@ -181,72 +191,42 @@ test('con permiso, edit entrega el proceso y update en borrador actualiza y redi
         ->assertInertia(fn (Assert $page) => $page
             ->component('adquisiciones/procesos/editar', shouldExist: false)
             ->where('proceso.codigo', $proceso->codigo)
-            ->where('proceso.objeto', 'Original')
+            ->where('proceso.caracteristicas', 'Original')
+            ->where('proceso.convenio_marco', true)
         );
 
-    $response = $this->actingAs($usuario)->put(route('adquisiciones.procesos.update', $proceso), [
-        'codigo' => $proceso->codigo,
-        'modalidad_id' => $proceso->modalidad_id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Corregido',
-    ]);
+    $response = $this->actingAs($usuario)->put(
+        route('adquisiciones.procesos.update', $proceso),
+        datosProcesoParaEdicion([
+            'ccosto_id' => $proceso->ccosto_id,
+            'funcionario_requirente_id' => $proceso->funcionario_requirente_id,
+            'caracteristicas' => 'Corregido',
+        ]),
+    );
 
     $response->assertSessionHasNoErrors();
     $response->assertRedirect(route('adquisiciones.procesos.show', $proceso));
-    expect($proceso->refresh()->objeto)->toBe('Corregido');
+    expect($proceso->refresh()->caracteristicas)->toBe('Corregido');
 });
 
 test('update de un proceso fuera de borrador refleja el error y no lo modifica', function () {
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
 
-    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaEdicion(['objeto' => 'Original']));
+    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaEdicion(['caracteristicas' => 'Original']));
     $proceso->proceso->update([
         'estado_actual_id' => $proceso->proceso->definicionWorkflow->estados()->where('codigo', 'en_revision')->value('id'),
     ]);
 
-    $response = $this->actingAs(usuarioEditorAdquisiciones())->put(route('adquisiciones.procesos.update', $proceso), [
-        'codigo' => $proceso->codigo,
-        'modalidad_id' => $proceso->modalidad_id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Cambiado',
-    ]);
+    $response = $this->actingAs(usuarioEditorAdquisiciones())->put(
+        route('adquisiciones.procesos.update', $proceso),
+        datosProcesoParaEdicion([
+            'ccosto_id' => $proceso->ccosto_id,
+            'funcionario_requirente_id' => $proceso->funcionario_requirente_id,
+            'caracteristicas' => 'Cambiado',
+        ]),
+    );
 
     $response->assertSessionHasErrors('modalidad_id');
-    expect($proceso->refresh()->objeto)->toBe('Original');
-});
-
-test('update acepta guardar sin cambiar el código (unique ignora el propio registro)', function () {
-    $this->seed(ModalidadesAdquisicionSeeder::class);
-    $this->seed(WorkflowAdquisicionesSeeder::class);
-
-    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoParaEdicion(['codigo' => 'ADQ-ED-MISMO', 'objeto' => 'Original']));
-
-    $response = $this->actingAs(usuarioEditorAdquisiciones())->put(route('adquisiciones.procesos.update', $proceso), [
-        'codigo' => 'ADQ-ED-MISMO',
-        'modalidad_id' => $proceso->modalidad_id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Corregido',
-    ]);
-
-    $response->assertSessionHasNoErrors();
-    expect($proceso->refresh()->objeto)->toBe('Corregido');
-});
-
-test('update rechaza un código ya usado por otro proceso', function () {
-    $this->seed(ModalidadesAdquisicionSeeder::class);
-    $this->seed(WorkflowAdquisicionesSeeder::class);
-
-    $servicio = app(ProcesoAdquisicionService::class);
-    $servicio->crear(datosProcesoParaEdicion(['codigo' => 'ADQ-ED-OCUPADO']));
-    $proceso = $servicio->crear(datosProcesoParaEdicion(['codigo' => 'ADQ-ED-PROPIO']));
-
-    $response = $this->actingAs(usuarioEditorAdquisiciones())->put(route('adquisiciones.procesos.update', $proceso), [
-        'codigo' => 'ADQ-ED-OCUPADO',
-        'modalidad_id' => $proceso->modalidad_id,
-        'ccosto_id' => $proceso->ccosto_id,
-        'objeto' => 'Cambiado',
-    ]);
-
-    $response->assertSessionHasErrors('codigo');
+    expect($proceso->refresh()->caracteristicas)->toBe('Original');
 });

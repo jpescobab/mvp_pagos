@@ -1,7 +1,7 @@
 <?php
 
+use App\Models\Funcionario;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\ProcesoAdquisicion;
 use App\Models\User;
@@ -16,12 +16,23 @@ function crearProcesoAdquisicionParaVinculoOc(): ProcesoAdquisicion
     $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => '14-VINC', 'nombre' => 'Zonal']);
     $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => 'CF-VINC', 'nombre' => 'Centro Financiero']);
     $ccosto = $cfinanciero->ccostos()->create(['codigo' => 'CC-VINC', 'nombre' => 'Centro de Costo']);
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccosto->id,
+        'activo' => true,
+    ]);
 
     return app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-VINC-'.fake()->unique()->numerify('#####'),
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Adquisición de prueba para vínculo de OC',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Adquisición de prueba para vínculo de OC',
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Adquisición de prueba para vínculo de OC',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 

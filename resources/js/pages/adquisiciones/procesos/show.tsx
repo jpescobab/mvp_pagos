@@ -205,7 +205,7 @@ export default function ProcesoShow() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h1 className="text-xl font-semibold tracking-tight">
-                            {proceso.modalidad.nombre ?? proceso.codigo}
+                            {proceso.nombre ?? proceso.codigo}
                         </h1>
                         <p className="font-mono text-sm text-muted-foreground">
                             código: {proceso.codigo}
@@ -219,6 +219,11 @@ export default function ProcesoShow() {
                                 {proceso.proveedor.nombre}
                             </span>
                         )}
+                        <Button variant="outline" size="sm" asChild>
+                            <a href={procesos.pdf(proceso.id).url}>
+                                Descargar PDF
+                            </a>
+                        </Button>
                         {puedeEditar && (
                             <Button
                                 variant="outline"
@@ -234,15 +239,100 @@ export default function ProcesoShow() {
                     </div>
                 </div>
 
-                <div className="text-sm">
-                    <span className="text-muted-foreground">Monto: </span>
-                    <Monto valor={proceso.monto} />
-                </div>
-
-                <div className="text-sm">
-                    <span className="text-muted-foreground">Objeto: </span>
-                    {proceso.objeto}
-                </div>
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Antecedentes generales
+                    </h2>
+                    <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Fecha inicio compra
+                            </dt>
+                            <dd>{proceso.fecha_inicio ?? '—'}</dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                ID requerimiento
+                            </dt>
+                            <dd>{proceso.id_requerimiento ?? '—'}</dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Unidad requirente
+                            </dt>
+                            <dd>{proceso.ccosto.nombre ?? '—'}</dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Nombre requirente
+                            </dt>
+                            <dd>
+                                {proceso.funcionario_requirente.nombre ?? '—'}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">Modalidad</dt>
+                            <dd>{proceso.modalidad.nombre ?? '—'}</dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Monto solicitado
+                            </dt>
+                            <dd>
+                                {proceso.moneda_compra ?? 'CLP'}{' '}
+                                {proceso.monto_estimado_solicitado ?? '—'}
+                                {proceso.moneda_compra !== 'CLP' &&
+                                    proceso.paridad && (
+                                        <span className="text-muted-foreground">
+                                            {' '}
+                                            (paridad {proceso.paridad} al{' '}
+                                            {proceso.fecha_paridad})
+                                        </span>
+                                    )}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Monto estimado (CLP)
+                            </dt>
+                            <dd>
+                                <Monto valor={proceso.monto_estimado} />
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-muted-foreground">
+                                ¿En Plan Anual de Compras?
+                            </dt>
+                            <dd>{proceso.en_plan_compras ? 'Sí' : 'No'}</dd>
+                        </div>
+                        {proceso.en_plan_compras && proceso.id_pac && (
+                            <div>
+                                <dt className="text-muted-foreground">
+                                    ID del PAC
+                                </dt>
+                                <dd>{proceso.id_pac}</dd>
+                            </div>
+                        )}
+                        <div>
+                            <dt className="text-muted-foreground">
+                                Código BIP (SUBT. 31)
+                            </dt>
+                            <dd>{proceso.codigo_bip ?? '—'}</dd>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <dt className="text-muted-foreground">
+                                Características del bien y/o servicio
+                            </dt>
+                            <dd>{proceso.caracteristicas ?? '—'}</dd>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <dt className="text-muted-foreground">
+                                Motivo de contratación
+                            </dt>
+                            <dd>{proceso.motivo_contratacion ?? '—'}</dd>
+                        </div>
+                    </dl>
+                </section>
 
                 <section className="space-y-3 rounded-xl border p-4">
                     <h2 className="text-base font-medium">
@@ -276,7 +366,9 @@ export default function ProcesoShow() {
                                                 : ejecutar(transicion)
                                         }
                                     >
-                                        {transicion.nombre}
+                                        {transicion.codigo === 'publicar'
+                                            ? 'Aprobar solicitud'
+                                            : transicion.nombre}
                                     </Button>
                                 ),
                             )}

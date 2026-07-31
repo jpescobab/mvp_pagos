@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Adquisiciones\LicitacionMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\OrdenCompraMercadoPublicoController;
+use App\Http\Controllers\Adquisiciones\ParidadAdquisicionController;
 use App\Http\Controllers\Adquisiciones\ProcesoAdquisicionController;
 use App\Http\Controllers\Adquisiciones\TransicionProcesoAdquisicionController;
 use App\Http\Controllers\Adquisiciones\VinculoProcesoAdquisicionLicitacionMercadoPublicoController;
@@ -11,9 +12,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->group(function () {
     Route::get('procesos', [ProcesoAdquisicionController::class, 'index'])->name('procesos.index');
     Route::get('procesos/crear', [ProcesoAdquisicionController::class, 'create'])->name('procesos.create');
+    Route::get('procesos/paridad', [ParidadAdquisicionController::class, 'show'])->name('procesos.paridad');
     Route::post('procesos', [ProcesoAdquisicionController::class, 'store'])->name('procesos.store');
     Route::get('procesos/{proceso}/editar', [ProcesoAdquisicionController::class, 'edit'])->name('procesos.edit');
     Route::get('procesos/{proceso}', [ProcesoAdquisicionController::class, 'show'])->name('procesos.show');
+    Route::get('procesos/{proceso}/pdf', [ProcesoAdquisicionController::class, 'pdf'])->name('procesos.pdf');
     Route::match(['put', 'patch'], 'procesos/{proceso}', [ProcesoAdquisicionController::class, 'update'])->name('procesos.update');
     Route::post('procesos/{proceso}/transiciones', [TransicionProcesoAdquisicionController::class, 'store'])->name('procesos.transiciones.store');
 

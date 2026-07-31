@@ -4,9 +4,9 @@ use App\Models\AuditLog;
 use App\Models\CasoPagoProveedor;
 use App\Models\Ccosto;
 use App\Models\EgresoCgu;
+use App\Models\Funcionario;
 use App\Models\HistorialTransicionWorkflow;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\SecurityAuditLog;
@@ -31,13 +31,26 @@ function crearCcostoDePruebaParaVinculo(): Ccosto
     return $cfinanciero->ccostos()->create(['codigo' => "CC-V-{$sufijo}", 'nombre' => 'Centro de Costo 1']);
 }
 
-function crearProcesoAdquisicionDePrueba(string $codigo = 'ADQ-V-001'): ProcesoAdquisicion
+function crearProcesoAdquisicionDePrueba(string $nombre = 'Compra de equipos de climatización'): ProcesoAdquisicion
 {
+    $ccostoId = crearCcostoDePruebaParaVinculo()->id;
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccostoId,
+        'activo' => true,
+    ]);
+
     return app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => $codigo,
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => crearCcostoDePruebaParaVinculo()->id,
-        'objeto' => 'Compra de equipos de climatización',
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => $nombre,
+        'ccosto_id' => $ccostoId,
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => $nombre,
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 
@@ -217,7 +230,7 @@ test('la búsqueda asistida devuelve coincidencias por código, objeto, proveedo
     $caso = crearCasoPagoProveedorDePrueba();
 
     foreach (range(1, 12) as $i) {
-        crearProcesoAdquisicionDePrueba(sprintf('ADQ-BUSQ-%03d', $i));
+        crearProcesoAdquisicionDePrueba(sprintf('Compra ADQ-BUSQ %03d', $i));
     }
 
     $usuario = User::factory()->create();

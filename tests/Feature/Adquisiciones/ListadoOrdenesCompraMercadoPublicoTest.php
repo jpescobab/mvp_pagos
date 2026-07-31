@@ -1,7 +1,7 @@
 <?php
 
+use App\Models\Funcionario;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
@@ -18,12 +18,23 @@ function crearProcesoAdquisicionParaListadoOc(): ProcesoAdquisicion
     $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => '14-LIST', 'nombre' => 'Zonal']);
     $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => 'CF-LIST', 'nombre' => 'Centro Financiero']);
     $ccosto = $cfinanciero->ccostos()->create(['codigo' => 'CC-LIST', 'nombre' => 'Centro de Costo']);
+    $funcionario = Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccosto->id,
+        'activo' => true,
+    ]);
 
     return app(ProcesoAdquisicionService::class)->crear([
-        'codigo' => 'ADQ-2026-001',
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Adquisición de prueba para listado de OC',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Adquisición de prueba para listado de OC',
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Adquisición de prueba para listado de OC',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 100000,
     ]);
 }
 
@@ -71,7 +82,7 @@ test('el listado muestra las OC guardadas con su proveedor y proceso de adquisic
         ->component('adquisiciones/ordenes-compra-mercado-publico/index')
         ->where('ordenes.data.0.codigo', 'OC-LISTADO-1')
         ->where('ordenes.data.0.proveedor.id', $proveedor->id)
-        ->where('ordenes.data.0.proceso_adquisicion.codigo', 'ADQ-2026-001')
+        ->where('ordenes.data.0.proceso_adquisicion.codigo', $proceso->codigo)
     );
     expect($orden->proveedor_id)->toBe($proveedor->id);
 });

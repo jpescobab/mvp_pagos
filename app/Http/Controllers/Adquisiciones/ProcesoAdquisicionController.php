@@ -9,14 +9,16 @@ use App\Http\Requests\Adquisiciones\CrearProcesoAdquisicionRequest;
 use App\Http\Resources\Adquisiciones\ProcesoAdquisicionResource;
 use App\Models\Ccosto;
 use App\Models\ConjuntoRequisitosDocumentales;
-use App\Models\ModalidadAdquisicion;
+use App\Models\Funcionario;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
 use App\Models\TipoDocumento;
+use App\Services\Adquisiciones\ExportadorSolicitudCompraPdfService;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -76,13 +78,23 @@ class ProcesoAdquisicionController extends Controller
         ]);
     }
 
+    public function pdf(ProcesoAdquisicion $proceso, ExportadorSolicitudCompraPdfService $exportador): HttpResponse
+    {
+        Gate::authorize('view', $proceso);
+
+        return response($exportador->generar($proceso), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$proceso->codigo.'.pdf"',
+        ]);
+    }
+
     public function create(): Response
     {
         Gate::authorize('create', ProcesoAdquisicion::class);
 
         return Inertia::render('adquisiciones/procesos/crear', [
-            'modalidades' => $this->modalidadesActivas(),
             'ccostos' => $this->ccostosDisponibles(),
+            'funcionarios' => $this->funcionariosActivos(),
             'proveedores' => $this->proveedoresActivos(),
         ]);
     }
@@ -94,7 +106,7 @@ class ProcesoAdquisicionController extends Controller
         try {
             $proceso = $servicio->crear($request->validated());
         } catch (ProcesoAdquisicionException $e) {
-            return back()->withErrors(['modalidad_id' => $e->getMessage()]);
+            return back()->withErrors([$e->campo() => $e->getMessage()]);
         }
 
         return to_route('adquisiciones.procesos.show', $proceso);
@@ -108,14 +120,26 @@ class ProcesoAdquisicionController extends Controller
             'proceso' => [
                 'id' => $proceso->id,
                 'codigo' => $proceso->codigo,
-                'modalidad_id' => $proceso->modalidad_id,
+                'fecha_inicio' => $proceso->fecha_inicio,
+                'nombre' => $proceso->nombre,
+                'id_requerimiento' => $proceso->id_requerimiento,
                 'ccosto_id' => $proceso->ccosto_id,
+                'funcionario_requirente_id' => $proceso->funcionario_requirente_id,
                 'proveedor_id' => $proceso->proveedor_id,
-                'monto' => $proceso->monto,
-                'objeto' => $proceso->objeto,
+                'caracteristicas' => $proceso->caracteristicas,
+                'motivo_contratacion' => $proceso->motivo_contratacion,
+                'en_plan_compras' => $proceso->en_plan_compras,
+                'id_pac' => $proceso->id_pac,
+                'codigo_bip' => $proceso->codigo_bip,
+                'convenio_marco' => $proceso->modalidad?->codigo === 'CONVENIO_MARCO',
+                'moneda_compra' => $proceso->moneda_compra,
+                'monto_estimado_solicitado' => $proceso->monto_estimado_solicitado,
+                'fecha_paridad' => $proceso->fecha_paridad,
+                'paridad' => $proceso->paridad,
+                'monto_estimado' => $proceso->monto_estimado,
             ],
-            'modalidades' => $this->modalidadesActivas(),
             'ccostos' => $this->ccostosDisponibles(),
+            'funcionarios' => $this->funcionariosActivos(),
             'proveedores' => $this->proveedoresActivos(),
         ]);
     }
@@ -127,22 +151,23 @@ class ProcesoAdquisicionController extends Controller
         try {
             $servicio->actualizar($proceso, $request->validated());
         } catch (ProcesoAdquisicionException $e) {
-            return back()->withErrors(['modalidad_id' => $e->getMessage()]);
+            return back()->withErrors([$e->campo() => $e->getMessage()]);
         }
 
         return to_route('adquisiciones.procesos.show', $proceso);
     }
 
     /**
-     * @return Collection<int, array{id: int, codigo: string, nombre: string}>
+     * @return Collection<int, array{id: int, nombre: string, cargo: ?string, ccosto_id: int<0, max>|null}>
      */
-    private function modalidadesActivas(): Collection
+    private function funcionariosActivos(): Collection
     {
-        return ModalidadAdquisicion::where('activo', true)->get()
-            ->map(fn (ModalidadAdquisicion $modalidad) => [
-                'id' => $modalidad->id,
-                'codigo' => $modalidad->codigo,
-                'nombre' => $modalidad->nombre,
+        return Funcionario::where('activo', true)->get()
+            ->map(fn (Funcionario $funcionario) => [
+                'id' => $funcionario->id,
+                'nombre' => $funcionario->nombre,
+                'cargo' => $funcionario->cargo,
+                'ccosto_id' => $funcionario->ccosto_id,
             ]);
     }
 

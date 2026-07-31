@@ -23,7 +23,9 @@ class TiposDocumentoSeeder extends Seeder
             ['codigo' => 'BASES_LICITACION',      'nombre' => 'Bases de Licitación',          'descripcion' => 'Bases administrativas y técnicas del proceso de adquisición', 'es_obligatorio' => false],
             ['codigo' => 'RESOLUCION_ADJUDICACION', 'nombre' => 'Resolución de Adjudicación', 'descripcion' => 'Resolución que adjudica el proceso de adquisición',           'es_obligatorio' => false],
             ['codigo' => 'GARANTIA',     'nombre' => 'Garantía',                   'descripcion' => 'Garantía de seriedad de oferta o fiel cumplimiento',          'es_obligatorio' => false],
+            ['codigo' => 'INFORME_JUSTIFICACION_TRATO_DIRECTO', 'nombre' => 'Informe de Justificación de Trato Directo', 'descripcion' => 'Informe que justifica no usar el Convenio Marco disponible', 'es_obligatorio' => false],
             ['codigo' => 'PRESUPUESTO_CGU', 'nombre' => 'Presupuesto CGU',         'descripcion' => 'Excel de presupuesto asignado exportado desde CGU',          'es_obligatorio' => false],
+            ['codigo' => 'CDP',           'nombre' => 'Certificado de Disponibilidad Presupuestaria', 'descripcion' => 'PDF del CDP generado al firmar',            'es_obligatorio' => false],
         ];
 
         foreach ($tipos as $tipo) {

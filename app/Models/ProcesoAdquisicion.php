@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Presupuesto\CertificadoDisponibilidadPresupuestaria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,17 +14,35 @@ class ProcesoAdquisicion extends Model
 
     protected $fillable = [
         'codigo',
+        'fecha_inicio',
+        'nombre',
+        'id_requerimiento',
         'modalidad_id',
         'ccosto_id',
+        'funcionario_requirente_id',
         'proveedor_id',
-        'monto',
+        'caracteristicas',
+        'motivo_contratacion',
+        'en_plan_compras',
+        'id_pac',
+        'codigo_bip',
+        'monto_estimado',
+        'moneda_compra',
+        'monto_estimado_solicitado',
+        'fecha_paridad',
+        'paridad',
         'objeto',
     ];
 
     protected function casts(): array
     {
         return [
-            'monto' => 'decimal:2',
+            'fecha_inicio' => 'date:Y-m-d',
+            'en_plan_compras' => 'boolean',
+            'monto_estimado' => 'decimal:2',
+            'monto_estimado_solicitado' => 'decimal:4',
+            'fecha_paridad' => 'date:Y-m-d',
+            'paridad' => 'decimal:4',
         ];
     }
 
@@ -49,6 +68,14 @@ class ProcesoAdquisicion extends Model
     public function proveedor(): BelongsTo
     {
         return $this->belongsTo(Proveedor::class);
+    }
+
+    /**
+     * @return BelongsTo<Funcionario, $this>
+     */
+    public function funcionarioRequirente(): BelongsTo
+    {
+        return $this->belongsTo(Funcionario::class, 'funcionario_requirente_id');
     }
 
     /**
@@ -81,5 +108,13 @@ class ProcesoAdquisicion extends Model
     public function licitacionesMercadoPublico(): HasMany
     {
         return $this->hasMany(LicitacionMercadoPublico::class);
+    }
+
+    /**
+     * @return HasMany<CertificadoDisponibilidadPresupuestaria, $this>
+     */
+    public function cdps(): HasMany
+    {
+        return $this->hasMany(CertificadoDisponibilidadPresupuestaria::class);
     }
 }

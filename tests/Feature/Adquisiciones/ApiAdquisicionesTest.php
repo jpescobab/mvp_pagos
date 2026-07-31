@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\Ccosto;
+use App\Models\Funcionario;
+use App\Models\IndicadorEconomico;
+use App\Models\IndicadorEconomicoImportacion;
 use App\Models\Institucion;
-use App\Models\ModalidadAdquisicion;
 use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use App\Services\Adquisiciones\ProcesoAdquisicionService;
@@ -14,11 +16,23 @@ use Spatie\Permission\Models\Role;
 
 function crearCcostoDePruebaParaApi(): Ccosto
 {
-    $institucion = Institucion::create(['codigo' => 'CAPJ', 'nombre' => 'CAPJ']);
-    $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => '14', 'nombre' => 'Zonal Coyhaique']);
-    $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => 'CF-001', 'nombre' => 'Centro Financiero 1']);
+    $sufijo = fake()->unique()->numerify('####');
 
-    return $cfinanciero->ccostos()->create(['codigo' => 'CC-001', 'nombre' => 'Centro de Costo 1']);
+    $institucion = Institucion::create(['codigo' => "CAPJ-{$sufijo}", 'nombre' => 'CAPJ']);
+    $jurisdiccion = $institucion->jurisdicciones()->create(['codigo' => "14-{$sufijo}", 'nombre' => 'Zonal Coyhaique']);
+    $cfinanciero = $jurisdiccion->cfinancieros()->create(['codigo' => "CF-{$sufijo}", 'nombre' => 'Centro Financiero 1']);
+
+    return $cfinanciero->ccostos()->create(['codigo' => "CC-{$sufijo}", 'nombre' => 'Centro de Costo 1']);
+}
+
+function crearFuncionarioDePruebaParaApi(int $ccostoId): Funcionario
+{
+    return Funcionario::create([
+        'rut' => fake()->unique()->numerify('#########'),
+        'nombre' => fake()->name(),
+        'ccosto_id' => $ccostoId,
+        'activo' => true,
+    ]);
 }
 
 /**
@@ -37,14 +51,27 @@ function usuarioConPermisosAdquisiciones(array $permisos = ['adquisiciones.consu
 
 /**
  * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
  */
 function datosProcesoAdquisicionParaApi(array $overrides = []): array
 {
+    $ccostoId = $overrides['ccosto_id'] ?? crearCcostoDePruebaParaApi()->id;
+
     return array_merge([
-        'codigo' => 'ADQ-API-'.fake()->unique()->numerify('#####'),
-        'modalidad_id' => ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id'),
-        'ccosto_id' => $overrides['ccosto_id'] ?? crearCcostoDePruebaParaApi()->id,
-        'objeto' => 'Adquisición de prueba vía API',
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Compra de prueba vía API',
+        'id_requerimiento' => null,
+        'ccosto_id' => $ccostoId,
+        'funcionario_requirente_id' => crearFuncionarioDePruebaParaApi($ccostoId)->id,
+        'caracteristicas' => 'Características de prueba',
+        'motivo_contratacion' => 'Motivo de prueba',
+        'en_plan_compras' => false,
+        'id_pac' => null,
+        'codigo_bip' => null,
+        'convenio_marco' => true,
+        'moneda_compra' => 'CLP',
+        'monto_estimado_solicitado' => 100000,
+        'fecha_paridad' => null,
     ], $overrides);
 }
 
@@ -79,17 +106,19 @@ test('procesos.show responde con el proceso, su Proceso, estado actual, historia
     $response->assertInertia(fn (Assert $page) => $page
         ->component('adquisiciones/procesos/show', shouldExist: false)
         ->where('proceso.codigo', $proceso->codigo)
+        ->where('proceso.nombre', 'Compra de prueba vía API')
         ->where('proceso.proceso.estado_actual.codigo', 'borrador')
         ->where('proceso.proceso.historial_transiciones', [])
         ->where('proceso.proceso.transiciones_disponibles.0.codigo', 'enviar_a_revision')
     );
 });
 
-test('procesos.create responde con las modalidades activas, ccostos y proveedores disponibles', function () {
+test('procesos.create responde con los ccostos y funcionarios disponibles, sin modalidades', function () {
     $this->withoutVite();
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
-    crearCcostoDePruebaParaApi();
+    $ccosto = crearCcostoDePruebaParaApi();
+    crearFuncionarioDePruebaParaApi($ccosto->id);
 
     $usuario = usuarioConPermisosAdquisiciones(['adquisiciones.crear_proceso']);
 
@@ -98,8 +127,9 @@ test('procesos.create responde con las modalidades activas, ccostos y proveedore
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('adquisiciones/procesos/crear', shouldExist: false)
-        ->where('modalidades.0.codigo', 'LICITACION_PUBLICA')
-        ->where('ccostos.0.codigo', 'CC-001')
+        ->where('ccostos.0.codigo', $ccosto->codigo)
+        ->where('funcionarios.0.ccosto_id', $ccosto->id)
+        ->missing('modalidades')
     );
 });
 
@@ -107,42 +137,92 @@ test('crear un proceso de adquisición con datos válidos crea el proceso y su w
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
     $ccosto = crearCcostoDePruebaParaApi();
-    $modalidadId = ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id');
+    $funcionario = crearFuncionarioDePruebaParaApi($ccosto->id);
 
     $usuario = usuarioConPermisosAdquisiciones(['adquisiciones.crear_proceso']);
 
     $response = $this->actingAs($usuario)->post(route('adquisiciones.procesos.store'), [
-        'codigo' => 'ADQ-CREADO-001',
-        'modalidad_id' => $modalidadId,
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Compra de equipos',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Compra de equipos',
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Equipos de oficina',
+        'motivo_contratacion' => 'Reposición de equipos dados de baja',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 500000,
     ]);
 
     $response->assertSessionHasNoErrors();
 
-    $proceso = ProcesoAdquisicion::where('codigo', 'ADQ-CREADO-001')->first();
+    $proceso = ProcesoAdquisicion::where('nombre', 'Compra de equipos')->first();
     expect($proceso)->not->toBeNull();
+    expect($proceso->modalidad->codigo)->toBe('CONVENIO_MARCO');
     expect($proceso->proceso->estadoActual->codigo)->toBe('borrador');
     $response->assertRedirect(route('adquisiciones.procesos.show', $proceso));
 });
 
-test('crear un proceso con una modalidad inexistente o inactiva es rechazado y no crea ningún registro', function () {
+test('crear con un funcionario requirente que no pertenece a la unidad elegida es rechazado', function () {
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
     $ccosto = crearCcostoDePruebaParaApi();
-    $modalidadInactiva = ModalidadAdquisicion::create(['codigo' => 'INACTIVA-API', 'nombre' => 'Inactiva', 'activo' => false]);
+    $otroCcosto = crearCcostoDePruebaParaApi();
+    $funcionarioDeOtraUnidad = crearFuncionarioDePruebaParaApi($otroCcosto->id);
 
     $usuario = usuarioConPermisosAdquisiciones(['adquisiciones.crear_proceso']);
 
     $response = $this->actingAs($usuario)->post(route('adquisiciones.procesos.store'), [
-        'codigo' => 'ADQ-RECHAZADO-001',
-        'modalidad_id' => $modalidadInactiva->id,
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Compra rechazada',
         'ccosto_id' => $ccosto->id,
-        'objeto' => 'Compra rechazada',
+        'funcionario_requirente_id' => $funcionarioDeOtraUnidad->id,
+        'caracteristicas' => 'Equipos de oficina',
+        'motivo_contratacion' => 'Motivo',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 500000,
     ]);
 
-    $response->assertSessionHasErrors('modalidad_id');
-    expect(ProcesoAdquisicion::where('codigo', 'ADQ-RECHAZADO-001')->exists())->toBeFalse();
+    $response->assertSessionHasErrors('funcionario_requirente_id');
+    expect(ProcesoAdquisicion::where('nombre', 'Compra rechazada')->exists())->toBeFalse();
+});
+
+test('crear con un monto estimado igual o mayor a 1.000 UTM es rechazado', function () {
+    $this->seed(ModalidadesAdquisicionSeeder::class);
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+    $ccosto = crearCcostoDePruebaParaApi();
+    $funcionario = crearFuncionarioDePruebaParaApi($ccosto->id);
+
+    $importacion = IndicadorEconomicoImportacion::create(['tipo_importacion' => 'mensual_utm', 'estado' => 'success']);
+    IndicadorEconomico::create([
+        'importacion_id' => $importacion->id,
+        'codigo' => 'UTM',
+        'nombre' => 'Unidad Tributaria Mensual',
+        'tipo' => 'utm',
+        'periodo' => now()->format('Y-m'),
+        'valor' => 65000,
+        'periodicidad_valor' => 'mensual',
+        'unidad_medida' => 'CLP',
+        'moneda_base' => 'CLP',
+        'fuente' => 'SII',
+    ]);
+
+    $usuario = usuarioConPermisosAdquisiciones(['adquisiciones.crear_proceso']);
+
+    $response = $this->actingAs($usuario)->post(route('adquisiciones.procesos.store'), [
+        'fecha_inicio' => now()->toDateString(),
+        'nombre' => 'Compra sobre el umbral',
+        'ccosto_id' => $ccosto->id,
+        'funcionario_requirente_id' => $funcionario->id,
+        'caracteristicas' => 'Equipos de oficina',
+        'motivo_contratacion' => 'Motivo',
+        'en_plan_compras' => false,
+        'convenio_marco' => true,
+        'monto_estimado_solicitado' => 65_000_000,
+    ]);
+
+    $response->assertSessionHasErrors('monto_estimado_solicitado');
+    expect(ProcesoAdquisicion::where('nombre', 'Compra sobre el umbral')->exists())->toBeFalse();
 });
 
 test('procesos.index y show se rechazan con 403 sin el permiso adquisiciones.consultar_proceso', function () {
@@ -165,7 +245,7 @@ test('procesos.create y store se rechazan con 403 sin el permiso adquisiciones.c
     $this->seed(ModalidadesAdquisicionSeeder::class);
     $this->seed(WorkflowAdquisicionesSeeder::class);
     $ccosto = crearCcostoDePruebaParaApi();
-    $modalidadId = ModalidadAdquisicion::where('codigo', 'LICITACION_PUBLICA')->value('id');
+    $funcionario = crearFuncionarioDePruebaParaApi($ccosto->id);
 
     // Solo consulta: puede ver, pero no crear.
     $usuarioSoloConsulta = usuarioConPermisosAdquisiciones(['adquisiciones.consultar_proceso']);
@@ -176,14 +256,19 @@ test('procesos.create y store se rechazan con 403 sin el permiso adquisiciones.c
 
     $this->actingAs($usuarioSoloConsulta)
         ->post(route('adquisiciones.procesos.store'), [
-            'codigo' => 'ADQ-SIN-PERMISO-001',
-            'modalidad_id' => $modalidadId,
+            'fecha_inicio' => now()->toDateString(),
+            'nombre' => 'Compra sin permiso',
             'ccosto_id' => $ccosto->id,
-            'objeto' => 'Compra sin permiso',
+            'funcionario_requirente_id' => $funcionario->id,
+            'caracteristicas' => 'Equipos de oficina',
+            'motivo_contratacion' => 'Motivo',
+            'en_plan_compras' => false,
+            'convenio_marco' => true,
+            'monto_estimado_solicitado' => 500000,
         ])
         ->assertForbidden();
 
-    expect(ProcesoAdquisicion::where('codigo', 'ADQ-SIN-PERMISO-001')->exists())->toBeFalse();
+    expect(ProcesoAdquisicion::where('nombre', 'Compra sin permiso')->exists())->toBeFalse();
 });
 
 test('el seeder de workflow otorga los permisos de proceso a admin y a administrativo_adquisiciones', function () {
@@ -199,6 +284,7 @@ test('el seeder de workflow otorga los permisos de proceso a admin y a administr
     expect($administrativo->hasPermissionTo('adquisiciones.consultar_proceso'))->toBeTrue();
     expect($administrativo->hasPermissionTo('adquisiciones.crear_proceso'))->toBeTrue();
     expect($administrativo->hasPermissionTo('adquisiciones.editar_proceso'))->toBeTrue();
+    expect($administrativo->hasPermissionTo('adquisiciones.publicar'))->toBeTrue();
 });
 
 test('ejecutar una transición válida con el permiso requerido cambia el estado del Proceso', function () {
@@ -234,4 +320,21 @@ test('ejecutar una transición sin el permiso requerido no cambia el estado y re
 
     $response->assertSessionHasErrors('transicion');
     expect($proceso->proceso->refresh()->estadoActual->codigo)->toBe('en_revision');
+});
+
+test('descargar el PDF de la solicitud requiere el permiso de consulta', function () {
+    $this->seed(ModalidadesAdquisicionSeeder::class);
+    $this->seed(WorkflowAdquisicionesSeeder::class);
+    $proceso = app(ProcesoAdquisicionService::class)->crear(datosProcesoAdquisicionParaApi());
+
+    $usuarioConPermiso = usuarioConPermisosAdquisiciones(['adquisiciones.consultar_proceso']);
+    $this->actingAs($usuarioConPermiso)
+        ->get(route('adquisiciones.procesos.pdf', $proceso))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'application/pdf');
+
+    $usuarioSinPermiso = User::factory()->create();
+    $this->actingAs($usuarioSinPermiso)
+        ->get(route('adquisiciones.procesos.pdf', $proceso))
+        ->assertForbidden();
 });

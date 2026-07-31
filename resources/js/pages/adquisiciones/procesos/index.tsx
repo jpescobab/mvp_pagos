@@ -36,6 +36,9 @@ export default function ProcesosIndex() {
                                     Código
                                 </th>
                                 <th className="px-4 py-2 font-medium">
+                                    Nombre
+                                </th>
+                                <th className="px-4 py-2 font-medium">
                                     Modalidad
                                 </th>
                                 <th className="px-4 py-2 font-medium">
@@ -54,7 +57,7 @@ export default function ProcesosIndex() {
                             {pagina.data.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="px-4 py-6 text-center text-muted-foreground"
                                     >
                                         No hay procesos de adquisición todavía.
@@ -75,6 +78,9 @@ export default function ProcesosIndex() {
                                         </Link>
                                     </td>
                                     <td className="px-4 py-2">
+                                        {proceso.nombre ?? '—'}
+                                    </td>
+                                    <td className="px-4 py-2">
                                         {proceso.modalidad.nombre ?? '—'}
                                     </td>
                                     <td className="px-4 py-2">
@@ -84,7 +90,7 @@ export default function ProcesosIndex() {
                                         {proceso.proveedor.nombre ?? '—'}
                                     </td>
                                     <td className="px-4 py-2">
-                                        <Monto valor={proceso.monto} />
+                                        <Monto valor={proceso.monto_estimado} />
                                     </td>
                                     <td className="px-4 py-2">
                                         <EstadoBadge

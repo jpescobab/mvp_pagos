@@ -27,9 +27,12 @@ class WorkflowAdquisicionesSeeder extends Seeder
         $admin = Role::where('name', 'admin')->first();
         $admin?->givePermissionTo($permisos);
 
-        // Personal administrativo de Adquisiciones: consulta y creación de
-        // procesos de adquisición. Las transiciones sensibles (publicar,
-        // adjudicar, anular) siguen reservadas a admin.
+        // Personal administrativo de Adquisiciones: consulta, creación y
+        // edición de procesos de adquisición, además de aprobar (publicar)
+        // solicitudes de compra — la nómina real ya sembrada mapea la
+        // jefatura de la sección de Adquisiciones a este rol (ver
+        // FuncionariosCapjSeeder). Adjudicar y anular siguen reservadas a
+        // admin.
         $administrativoAdquisiciones = Role::firstOrCreate(['name' => 'administrativo_adquisiciones']);
         $administrativoAdquisiciones->forceFill([
             'etiqueta' => 'Administrativo de adquisiciones',
@@ -39,6 +42,7 @@ class WorkflowAdquisicionesSeeder extends Seeder
             'adquisiciones.consultar_proceso',
             'adquisiciones.crear_proceso',
             'adquisiciones.editar_proceso',
+            'adquisiciones.publicar',
         ]);
 
         $definicion = DefinicionWorkflow::firstOrCreate(
