@@ -103,7 +103,8 @@ const IC = {
     reset: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>',
     expand: '<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>',
     eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
-    devolver: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+    devolver:
+        '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
 };
 
 function Icon({ path, className }: { path: string; className?: string }) {
@@ -123,18 +124,30 @@ function Icon({ path, className }: { path: string; className?: string }) {
 
 /* ============================ Helpers ============================ */
 
-const TIPO_META: Record<
-    string,
-    { icon: string; color: string; tpl: string }
-> = {
-    FACTURA: { icon: IC.factura, color: 'var(--accent)', tpl: 'factura' },
-    ORDEN_COMPRA: { icon: IC.oc, color: 'var(--purple)', tpl: 'oc' },
-    ACTA_RECEP: { icon: IC.recepcion, color: 'var(--teal)', tpl: 'recepcion' },
-    CONTRATO: { icon: IC.contrato, color: 'var(--orange)', tpl: 'contrato' },
-};
+const TIPO_META: Record<string, { icon: string; color: string; tpl: string }> =
+    {
+        FACTURA: { icon: IC.factura, color: 'var(--accent)', tpl: 'factura' },
+        ORDEN_COMPRA: { icon: IC.oc, color: 'var(--purple)', tpl: 'oc' },
+        ACTA_RECEP: {
+            icon: IC.recepcion,
+            color: 'var(--teal)',
+            tpl: 'recepcion',
+        },
+        CONTRATO: {
+            icon: IC.contrato,
+            color: 'var(--orange)',
+            tpl: 'contrato',
+        },
+    };
 
 function tipoMeta(codigo: string | null) {
-    return (codigo && TIPO_META[codigo]) || { icon: IC.otro, color: 'var(--fg-soft)', tpl: 'otro' };
+    return (
+        (codigo && TIPO_META[codigo]) || {
+            icon: IC.otro,
+            color: 'var(--fg-soft)',
+            tpl: 'otro',
+        }
+    );
 }
 
 const ESTADO_DOC: Record<string, { label: string; cls: string }> = {
@@ -179,14 +192,18 @@ export default function RevisionPagosIndex() {
         pago?.documentos[0]?.id ?? null,
     );
     const doc = useMemo(
-        () => pago?.documentos.find((d) => d.id === docId) ?? pago?.documentos[0],
+        () =>
+            pago?.documentos.find((d) => d.id === docId) ?? pago?.documentos[0],
         [pago, docId],
     );
 
     const [rejectingDoc, setRejectingDoc] = useState<number | null>(null);
     const [motivoDoc, setMotivoDoc] = useState('');
 
-    function post(url: string, data: Record<string, string | number | boolean>) {
+    function post(
+        url: string,
+        data: Record<string, string | number | boolean>,
+    ) {
         router.post(url, data, { preserveScroll: true, preserveState: true });
     }
 
@@ -209,58 +226,75 @@ export default function RevisionPagosIndex() {
     /* --------- acciones --------- */
     function validar(estado: string) {
         if (!egreso || !pago || !doc) {
-return;
-}
+            return;
+        }
 
         if (estado === 'rechazado' && !motivoDoc.trim()) {
-return;
-}
+            return;
+        }
 
-        post(validarDocumento({ egresoCgu: egreso.id, caso: pago.id, documento: doc.id }).url, {
-            estado,
-            observacion: motivoDoc,
-        });
+        post(
+            validarDocumento({
+                egresoCgu: egreso.id,
+                caso: pago.id,
+                documento: doc.id,
+            }).url,
+            {
+                estado,
+                observacion: motivoDoc,
+            },
+        );
         setRejectingDoc(null);
         setMotivoDoc('');
     }
 
     function verificar() {
         if (!egreso || !pago) {
-return;
-}
+            return;
+        }
 
-        post(verificarTotales({ egresoCgu: egreso.id, caso: pago.id }).url, { verificado: true });
+        post(verificarTotales({ egresoCgu: egreso.id, caso: pago.id }).url, {
+            verificado: true,
+        });
     }
 
     function aprobarPago() {
         if (!egreso || !pago) {
-return;
-}
+            return;
+        }
 
-        post(transicionPago({ egresoCgu: egreso.id, caso: pago.id }).url, { accion: 'aprobar', comentario: '' });
+        post(transicionPago({ egresoCgu: egreso.id, caso: pago.id }).url, {
+            accion: 'aprobar',
+            comentario: '',
+        });
     }
 
     function accionPagoConMotivo(accion: 'rechazar' | 'devolver') {
         if (!egreso || !pago) {
-return;
-}
+            return;
+        }
 
         const comentario = window.prompt(
-            accion === 'rechazar' ? 'Motivo del rechazo del pago:' : 'Motivo de la devolución:',
+            accion === 'rechazar'
+                ? 'Motivo del rechazo del pago:'
+                : 'Motivo de la devolución:',
             '',
         );
 
         if (comentario === null || comentario.trim() === '') {
-return;
-}
+            return;
+        }
 
-        post(transicionPago({ egresoCgu: egreso.id, caso: pago.id }).url, { accion, comentario });
+        post(transicionPago({ egresoCgu: egreso.id, caso: pago.id }).url, {
+            accion,
+            comentario,
+        });
     }
 
     function accionEgresoConfirm(accion: 'aprobar' | 'devolver') {
         if (!egreso) {
-return;
-}
+            return;
+        }
 
         let comentario = '';
 
@@ -268,8 +302,8 @@ return;
             const c = window.prompt('Motivo de la devolución del egreso:', '');
 
             if (c === null || c.trim() === '') {
-return;
-}
+                return;
+            }
 
             comentario = c;
         }
@@ -283,8 +317,10 @@ return;
     const docsOk = pago?.obligatorios_ok ?? 0;
     const docsTotal = pago?.obligatorios_total ?? 0;
     const pct = docsTotal ? Math.round((docsOk / docsTotal) * 100) : 0;
-    const documentosObligatorios = pago?.documentos.filter((d) => d.clasificacion === 'obligatorio') ?? [];
-    const documentosOpcionales = pago?.documentos.filter((d) => d.clasificacion === 'opcional') ?? [];
+    const documentosObligatorios =
+        pago?.documentos.filter((d) => d.clasificacion === 'obligatorio') ?? [];
+    const documentosOpcionales =
+        pago?.documentos.filter((d) => d.clasificacion === 'opcional') ?? [];
     const faltantes = pago?.faltantes ?? [];
 
     function renderDocCard(d: Documento) {
@@ -297,25 +333,40 @@ return;
             <button
                 key={d.id}
                 type="button"
-                className={`doc-card${d.id === doc?.id ? ' active' : ''}`}
+                className={`doc-card${d.id === doc?.id ? 'active' : ''}`}
                 onClick={() => {
                     setDocId(d.id);
                     setRejectingDoc(null);
                 }}
             >
-                <div className="doc-ic" style={{ background: `${meta.color}22`, color: meta.color }}>
+                <div
+                    className="doc-ic"
+                    style={{ background: `${meta.color}22`, color: meta.color }}
+                >
                     <Icon path={meta.icon} />
                 </div>
                 <div className="doc-meta">
                     <div className="dn">{d.titulo}</div>
                     <div className="dt">{d.tipo ?? 'Documento'}</div>
-                    <div className="dbadge"><span className={`badge ${est.cls}`}><span className="d" />{est.label}</span></div>
+                    <div className="dbadge">
+                        <span className={`badge ${est.cls}`}>
+                            <span className="d" />
+                            {est.label}
+                        </span>
+                    </div>
                 </div>
                 <div
                     className="doc-check"
                     style={{
-                        background: ok ? 'var(--green)' : bad ? 'var(--red)' : 'var(--panel)',
-                        border: ok || bad ? '1px solid transparent' : '1px solid var(--border-strong)',
+                        background: ok
+                            ? 'var(--green)'
+                            : bad
+                              ? 'var(--red)'
+                              : 'var(--panel)',
+                        border:
+                            ok || bad
+                                ? '1px solid transparent'
+                                : '1px solid var(--border-strong)',
                         color: ok || bad ? '#fff' : 'var(--fg-soft)',
                     }}
                 >
@@ -328,20 +379,38 @@ return;
 
     function renderFaltante(f: DocumentoFaltante) {
         return (
-            <div key={`faltante-${f.tipo_documento_id}`} className="doc-card faltante" aria-disabled>
-                <div className="doc-ic" style={{ background: 'var(--orange-soft)', color: 'var(--orange)' }}>
+            <div
+                key={`faltante-${f.tipo_documento_id}`}
+                className="doc-card faltante"
+                aria-disabled
+            >
+                <div
+                    className="doc-ic"
+                    style={{
+                        background: 'var(--orange-soft)',
+                        color: 'var(--orange)',
+                    }}
+                >
                     <Icon path={IC.otro} />
                 </div>
                 <div className="doc-meta">
-                    <div className="dn">{f.tipo_documento ?? 'Documento requerido'}</div>
+                    <div className="dn">
+                        {f.tipo_documento ?? 'Documento requerido'}
+                    </div>
                     <div className="dt">Sin documento vinculado</div>
-                    <div className="dbadge"><span className="badge orange"><span className="d" />Faltante</span></div>
+                    <div className="dbadge">
+                        <span className="badge orange">
+                            <span className="d" />
+                            Faltante
+                        </span>
+                    </div>
                 </div>
             </div>
         );
     }
     const finalizado = pago?.estado === 'lista_para_registro_cgu';
-    const readyAprobar = (pago?.listo_para_aprobar ?? false) && puedeOperar && !finalizado;
+    const readyAprobar =
+        (pago?.listo_para_aprobar ?? false) && puedeOperar && !finalizado;
 
     return (
         <>
@@ -351,7 +420,9 @@ return;
             <div className="revpay">
                 {egresos.length === 0 ? (
                     <div className="empty-viewer" style={{ minHeight: 320 }}>
-                        <div className="ic"><Icon path={IC.eye} /></div>
+                        <div className="ic">
+                            <Icon path={IC.eye} />
+                        </div>
                         <p>No hay egresos pendientes de tu revisión.</p>
                     </div>
                 ) : (
@@ -359,32 +430,53 @@ return;
                         {/* Strip de egresos */}
                         <div className="proc-strip">
                             {egresos.map((e) => {
-                                const est = ESTADO_EGRESO[e.estado] ?? ESTADO_EGRESO.sin_pagos;
+                                const est =
+                                    ESTADO_EGRESO[e.estado] ??
+                                    ESTADO_EGRESO.sin_pagos;
                                 const resumenProveedores =
                                     (e.proveedores[0] ?? '—') +
-                                    (e.proveedores.length > 1 ? ` +${e.proveedores.length - 1}` : '');
-                                const descripcion = e.observaciones?.trim() || resumenProveedores;
+                                    (e.proveedores.length > 1
+                                        ? ` +${e.proveedores.length - 1}`
+                                        : '');
+                                const descripcion =
+                                    e.observaciones?.trim() ||
+                                    resumenProveedores;
 
                                 return (
                                     <button
                                         key={e.id}
                                         type="button"
-                                        className={`proc-chip${e.id === egreso?.id ? ' active' : ''}`}
+                                        className={`proc-chip${e.id === egreso?.id ? 'active' : ''}`}
                                         onClick={() => seleccionarEgreso(e)}
                                     >
                                         <div className="pc-top">
-                                            <div className="pc-icon"><Icon path={IC.recibo} /></div>
+                                            <div className="pc-icon">
+                                                <Icon path={IC.recibo} />
+                                            </div>
                                             <div className="pc-text">
-                                                <span className="pc-id">{e.numero_egreso}</span>
-                                                <span className="pc-prov" title={descripcion}>
+                                                <span className="pc-id">
+                                                    {e.numero_egreso}
+                                                </span>
+                                                <span
+                                                    className="pc-prov"
+                                                    title={descripcion}
+                                                >
                                                     {descripcion}
                                                 </span>
-                                                <span className="pc-monto">{fmt(e.monto_total)}</span>
+                                                <span className="pc-monto">
+                                                    {fmt(e.monto_total)}
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="pc-bottom">
-                                            <span className={`badge ${est.cls}`}><span className="d" />
-                                                {e.cantidad_pagos} pago{e.cantidad_pagos > 1 ? 's' : ''}
+                                            <span
+                                                className={`badge ${est.cls}`}
+                                            >
+                                                <span className="d" />
+                                                {e.cantidad_pagos} pago
+                                                {e.cantidad_pagos > 1
+                                                    ? 's'
+                                                    : ''}
                                             </span>
                                         </div>
                                     </button>
@@ -396,18 +488,32 @@ return;
                         {egreso && (
                             <div className="pago-strip">
                                 {egreso.pagos.map((p) => {
-                                    const est = ESTADO_EGRESO[p.estado ?? ''] ?? { label: p.estado_label ?? '—', cls: 'gray' };
+                                    const est = ESTADO_EGRESO[
+                                        p.estado ?? ''
+                                    ] ?? {
+                                        label: p.estado_label ?? '—',
+                                        cls: 'gray',
+                                    };
 
                                     return (
                                         <button
                                             key={p.id}
                                             type="button"
-                                            className={`pago-chip${p.id === pago?.id ? ' active' : ''}`}
+                                            className={`pago-chip${p.id === pago?.id ? 'active' : ''}`}
                                             onClick={() => seleccionarPago(p)}
                                         >
-                                            <span className="pg-num">{p.proveedor}</span>
-                                            <span className="pg-monto">{fmt(p.monto)}</span>
-                                            <span className={`badge ${est.cls}`}><span className="d" />{est.label}</span>
+                                            <span className="pg-num">
+                                                {p.proveedor}
+                                            </span>
+                                            <span className="pg-monto">
+                                                {fmt(p.monto)}
+                                            </span>
+                                            <span
+                                                className={`badge ${est.cls}`}
+                                            >
+                                                <span className="d" />
+                                                {est.label}
+                                            </span>
                                         </button>
                                     );
                                 })}
@@ -417,27 +523,69 @@ return;
                         {/* Cabecera del pago */}
                         {pago && (
                             <div className="pago-head">
-                                <div className="ph-field"><span className="k">Proveedor</span><span className="v">{pago.proveedor}</span></div>
-                                <div className="ph-field"><span className="k">Folio</span><span className="v mono">{pago.folio ?? '—'}</span></div>
+                                <div className="ph-field">
+                                    <span className="k">Proveedor</span>
+                                    <span className="v">{pago.proveedor}</span>
+                                </div>
+                                <div className="ph-field">
+                                    <span className="k">Folio</span>
+                                    <span className="v mono">
+                                        {pago.folio ?? '—'}
+                                    </span>
+                                </div>
                                 <div className="ph-progress">
-                                    <div className="bar"><div className="bar-fill" style={{ width: `${pct}%`, background: pct === 100 ? 'var(--green)' : 'var(--orange)' }} /></div>
-                                    <span>{docsOk}/{docsTotal} docs OK</span>
+                                    <div className="bar">
+                                        <div
+                                            className="bar-fill"
+                                            style={{
+                                                width: `${pct}%`,
+                                                background:
+                                                    pct === 100
+                                                        ? 'var(--green)'
+                                                        : 'var(--orange)',
+                                            }}
+                                        />
+                                    </div>
+                                    <span>
+                                        {docsOk}/{docsTotal} docs OK
+                                    </span>
                                     {!pago.jurisdiccion_determinable && (
                                         <span className="jurisdiccion-warn">
-                                            Sin centro financiero determinable — vincula el caso a un Proceso de Adquisición antes de aprobar.
+                                            Sin centro financiero determinable —
+                                            vincula el caso a un Proceso de
+                                            Adquisición antes de aprobar.
                                         </span>
                                     )}
                                 </div>
                                 {puedeOperar && (
                                     <div className="right">
-                                        <button className="pbtn reject" onClick={() => accionPagoConMotivo('devolver')} disabled={finalizado}>
-                                            <Icon path={IC.devolver} />Devolver
+                                        <button
+                                            className="pbtn reject"
+                                            onClick={() =>
+                                                accionPagoConMotivo('devolver')
+                                            }
+                                            disabled={finalizado}
+                                        >
+                                            <Icon path={IC.devolver} />
+                                            Devolver
                                         </button>
-                                        <button className="pbtn reject" onClick={() => accionPagoConMotivo('rechazar')} disabled={finalizado}>
-                                            <Icon path={IC.trash} />Rechazar Pago
+                                        <button
+                                            className="pbtn reject"
+                                            onClick={() =>
+                                                accionPagoConMotivo('rechazar')
+                                            }
+                                            disabled={finalizado}
+                                        >
+                                            <Icon path={IC.trash} />
+                                            Rechazar Pago
                                         </button>
-                                        <button className="pbtn approve" onClick={aprobarPago} disabled={!readyAprobar}>
-                                            <Icon path={IC.check} />Aprobar Pago
+                                        <button
+                                            className="pbtn approve"
+                                            onClick={aprobarPago}
+                                            disabled={!readyAprobar}
+                                        >
+                                            <Icon path={IC.check} />
+                                            Aprobar Pago
                                         </button>
                                     </div>
                                 )}
@@ -451,13 +599,17 @@ return;
                                     <div className="docs-col-label">
                                         Obligatorios · {docsOk}/{docsTotal}
                                     </div>
-                                    {documentosObligatorios.length === 0 && faltantes.length === 0 ? (
+                                    {documentosObligatorios.length === 0 &&
+                                    faltantes.length === 0 ? (
                                         <p className="docs-col-empty">
-                                            El checklist del proceso no define documentos obligatorios.
+                                            El checklist del proceso no define
+                                            documentos obligatorios.
                                         </p>
                                     ) : (
                                         <>
-                                            {documentosObligatorios.map(renderDocCard)}
+                                            {documentosObligatorios.map(
+                                                renderDocCard,
+                                            )}
                                             {faltantes.map(renderFaltante)}
                                         </>
                                     )}
@@ -467,7 +619,9 @@ return;
                                             <div className="docs-col-label docs-col-label-sec">
                                                 Opcionales
                                             </div>
-                                            {documentosOpcionales.map(renderDocCard)}
+                                            {documentosOpcionales.map(
+                                                renderDocCard,
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -475,13 +629,24 @@ return;
                                 <div className="viewer-col">
                                     <div className="viewer-toolbar">
                                         <div>
-                                            <div className="vt-title">{doc?.titulo ?? 'Documento'}</div>
-                                            <div className="vt-sub">{doc?.tipo ?? ''} · {pago.proveedor}</div>
+                                            <div className="vt-title">
+                                                {doc?.titulo ?? 'Documento'}
+                                            </div>
+                                            <div className="vt-sub">
+                                                {doc?.tipo ?? ''} ·{' '}
+                                                {pago.proveedor}
+                                            </div>
                                         </div>
                                         {doc && egreso && (
                                             <a
                                                 className="expand-btn"
-                                                href={verDocumento({ egresoCgu: egreso.id, caso: pago.id, documento: doc.id }).url}
+                                                href={
+                                                    verDocumento({
+                                                        egresoCgu: egreso.id,
+                                                        caso: pago.id,
+                                                        documento: doc.id,
+                                                    }).url
+                                                }
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 title="Abrir en pestaña nueva"
@@ -496,34 +661,95 @@ return;
                                                 <iframe
                                                     key={doc.id}
                                                     className="doc-frame"
-                                                    src={verDocumento({ egresoCgu: egreso.id, caso: pago.id, documento: doc.id }).url}
+                                                    src={
+                                                        verDocumento({
+                                                            egresoCgu:
+                                                                egreso.id,
+                                                            caso: pago.id,
+                                                            documento: doc.id,
+                                                        }).url
+                                                    }
                                                     title={doc.titulo}
                                                 />
                                             ) : (
                                                 <div className="empty-viewer">
-                                                    <div className="ic"><Icon path={IC.eye} /></div>
-                                                    <p>Selecciona un documento para revisarlo</p>
+                                                    <div className="ic">
+                                                        <Icon path={IC.eye} />
+                                                    </div>
+                                                    <p>
+                                                        Selecciona un documento
+                                                        para revisarlo
+                                                    </p>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Panel de revisión */}
                                         <div className="review-panel">
-                                            <div className="rp-row"><span className="rp-title">Totales del pago</span></div>
+                                            <div className="rp-row">
+                                                <span className="rp-title">
+                                                    Totales del pago
+                                                </span>
+                                            </div>
                                             <div className="tot-card">
-                                                <div className="tot-item"><span className="k">Monto factura</span><span className="v">{fmt(pago.totales.factura)}</span></div>
-                                                <div className="tot-item"><span className="k">Monto recepción/OC</span><span className="v">{fmt(pago.totales.recepcion)}</span></div>
-                                                <div className="tot-item"><span className="k">Monto a pagar</span><span className="v">{fmt(pago.totales.monto)}</span></div>
-                                                <span className={`badge ${pago.totales.coinciden ? 'green' : 'red'}`} style={{ alignSelf: 'flex-start' }}>
-                                                    <span className="d" />{pago.totales.coinciden ? 'Totales coinciden' : 'Diferencia detectada'}
+                                                <div className="tot-item">
+                                                    <span className="k">
+                                                        Monto factura
+                                                    </span>
+                                                    <span className="v">
+                                                        {fmt(
+                                                            pago.totales
+                                                                .factura,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="tot-item">
+                                                    <span className="k">
+                                                        Monto recepción/OC
+                                                    </span>
+                                                    <span className="v">
+                                                        {fmt(
+                                                            pago.totales
+                                                                .recepcion,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="tot-item">
+                                                    <span className="k">
+                                                        Monto a pagar
+                                                    </span>
+                                                    <span className="v">
+                                                        {fmt(
+                                                            pago.totales.monto,
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <span
+                                                    className={`badge ${pago.totales.coinciden ? 'green' : 'red'}`}
+                                                    style={{
+                                                        alignSelf: 'flex-start',
+                                                    }}
+                                                >
+                                                    <span className="d" />
+                                                    {pago.totales.coinciden
+                                                        ? 'Totales coinciden'
+                                                        : 'Diferencia detectada'}
                                                 </span>
                                                 {puedeOperar && (
                                                     <button
-                                                        className={`verify-btn${pago.totales.verificados ? ' on' : ''}`}
+                                                        className={`verify-btn${pago.totales.verificados ? 'on' : ''}`}
                                                         onClick={verificar}
-                                                        disabled={pago.totales.verificados || finalizado}
+                                                        disabled={
+                                                            pago.totales
+                                                                .verificados ||
+                                                            finalizado
+                                                        }
                                                     >
-                                                        <Icon path={IC.check} />{pago.totales.verificados ? 'Totales verificados' : 'Verificar totales'}
+                                                        <Icon path={IC.check} />
+                                                        {pago.totales
+                                                            .verificados
+                                                            ? 'Totales verificados'
+                                                            : 'Verificar totales'}
                                                     </button>
                                                 )}
                                             </div>
@@ -533,10 +759,24 @@ return;
                                             {doc && (
                                                 <>
                                                     <div className="rp-row">
-                                                        <span className="rp-title">Revisión del documento</span>
+                                                        <span className="rp-title">
+                                                            Revisión del
+                                                            documento
+                                                        </span>
                                                         <span className="rp-status">
-                                                            <span className={`badge ${(ESTADO_DOC[doc.estado] ?? ESTADO_DOC.pendiente).cls}`}>
-                                                                <span className="d" />{(ESTADO_DOC[doc.estado] ?? ESTADO_DOC.pendiente).label}
+                                                            <span
+                                                                className={`badge ${(ESTADO_DOC[doc.estado] ?? ESTADO_DOC.pendiente).cls}`}
+                                                            >
+                                                                <span className="d" />
+                                                                {
+                                                                    (
+                                                                        ESTADO_DOC[
+                                                                            doc
+                                                                                .estado
+                                                                        ] ??
+                                                                        ESTADO_DOC.pendiente
+                                                                    ).label
+                                                                }
                                                             </span>
                                                         </span>
                                                     </div>
@@ -544,35 +784,97 @@ return;
                                                         <>
                                                             <div className="rp-row">
                                                                 <div className="rp-actions">
-                                                                    <button className={`rbtn approve${doc.estado === 'valido' ? ' on' : ''}`} onClick={() => validar('valido')} disabled={finalizado}>
-                                                                        <Icon path={IC.check} />Aprobar documento
+                                                                    <button
+                                                                        className={`rbtn approve${doc.estado === 'valido' ? 'on' : ''}`}
+                                                                        onClick={() =>
+                                                                            validar(
+                                                                                'valido',
+                                                                            )
+                                                                        }
+                                                                        disabled={
+                                                                            finalizado
+                                                                        }
+                                                                    >
+                                                                        <Icon
+                                                                            path={
+                                                                                IC.check
+                                                                            }
+                                                                        />
+                                                                        Aprobar
+                                                                        documento
                                                                     </button>
                                                                     <button
-                                                                        className={`rbtn reject${doc.estado === 'rechazado' ? ' on' : ''}`}
-                                                                        onClick={() => (rejectingDoc === doc.id ? validar('rechazado') : (setRejectingDoc(doc.id), setMotivoDoc(doc.observacion ?? '')))}
-                                                                        disabled={finalizado}
+                                                                        className={`rbtn reject${doc.estado === 'rechazado' ? 'on' : ''}`}
+                                                                        onClick={() =>
+                                                                            rejectingDoc ===
+                                                                            doc.id
+                                                                                ? validar(
+                                                                                      'rechazado',
+                                                                                  )
+                                                                                : (setRejectingDoc(
+                                                                                      doc.id,
+                                                                                  ),
+                                                                                  setMotivoDoc(
+                                                                                      doc.observacion ??
+                                                                                          '',
+                                                                                  ))
+                                                                        }
+                                                                        disabled={
+                                                                            finalizado
+                                                                        }
                                                                     >
-                                                                        <Icon path={IC.x} />Rechazar documento
+                                                                        <Icon
+                                                                            path={
+                                                                                IC.x
+                                                                            }
+                                                                        />
+                                                                        Rechazar
+                                                                        documento
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            <div className={`motivo-wrap${rejectingDoc === doc.id ? ' show' : ''}`}>
-                                                                <span className="motivo-note">Motivo del rechazo</span>
+                                                            <div
+                                                                className={`motivo-wrap${rejectingDoc === doc.id ? 'show' : ''}`}
+                                                            >
+                                                                <span className="motivo-note">
+                                                                    Motivo del
+                                                                    rechazo
+                                                                </span>
                                                                 <textarea
-                                                                    value={motivoDoc}
-                                                                    onChange={(e) => setMotivoDoc(e.target.value)}
+                                                                    value={
+                                                                        motivoDoc
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        setMotivoDoc(
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                        )
+                                                                    }
                                                                     placeholder="Describe la observación encontrada…"
                                                                 />
                                                             </div>
                                                         </>
                                                     ) : (
                                                         <p className="motivo-note">
-                                                            Este egreso está en otra instancia; solo puedes consultarlo.
+                                                            Este egreso está en
+                                                            otra instancia; solo
+                                                            puedes consultarlo.
                                                         </p>
                                                     )}
-                                                    {doc.observacion && doc.estado === 'rechazado' && (
-                                                        <p className="motivo-note">“{doc.observacion}”</p>
-                                                    )}
+                                                    {doc.observacion &&
+                                                        doc.estado ===
+                                                            'rechazado' && (
+                                                            <p className="motivo-note">
+                                                                “
+                                                                {
+                                                                    doc.observacion
+                                                                }
+                                                                ”
+                                                            </p>
+                                                        )}
                                                 </>
                                             )}
 
@@ -580,14 +882,49 @@ return;
                                             {puedeOperarEgreso && (
                                                 <>
                                                     <hr className="rp-divider" />
-                                                    <div className="rp-row"><span className="rp-title">Egreso completo</span></div>
+                                                    <div className="rp-row">
+                                                        <span className="rp-title">
+                                                            Egreso completo
+                                                        </span>
+                                                    </div>
                                                     <div className="rp-actions">
-                                                        <button className="rbtn approve" onClick={() => accionEgresoConfirm('aprobar')} disabled={!egreso?.listo_para_avanzar}>
-                                                            <Icon path={IC.check} />Aprobar egreso ({egreso?.instancia_label})
+                                                        <button
+                                                            className="rbtn approve"
+                                                            onClick={() =>
+                                                                accionEgresoConfirm(
+                                                                    'aprobar',
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                !egreso?.listo_para_avanzar
+                                                            }
+                                                        >
+                                                            <Icon
+                                                                path={IC.check}
+                                                            />
+                                                            Aprobar egreso (
+                                                            {
+                                                                egreso?.instancia_label
+                                                            }
+                                                            )
                                                         </button>
-                                                        {egreso?.instancia_activa === 'zonal' && (
-                                                            <button className="rbtn reject" onClick={() => accionEgresoConfirm('devolver')}>
-                                                                <Icon path={IC.devolver} />Devolver egreso a Finanzas
+                                                        {egreso?.instancia_activa ===
+                                                            'zonal' && (
+                                                            <button
+                                                                className="rbtn reject"
+                                                                onClick={() =>
+                                                                    accionEgresoConfirm(
+                                                                        'devolver',
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Icon
+                                                                    path={
+                                                                        IC.devolver
+                                                                    }
+                                                                />
+                                                                Devolver egreso
+                                                                a Finanzas
                                                             </button>
                                                         )}
                                                     </div>

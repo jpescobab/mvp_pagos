@@ -20,6 +20,7 @@ import {
     Receipt,
     ShieldCheck,
     ShoppingCart,
+    Stamp,
     Tags,
     TrendingUp,
     Users,
@@ -58,6 +59,7 @@ import { index as casos } from '@/routes/pago-proveedores/casos';
 import { index as egresosCgu } from '@/routes/pago-proveedores/egresos-cgu';
 import { index as requisitosDocumentales } from '@/routes/pago-proveedores/requisitos-documentales';
 import { index as revisionPagos } from '@/routes/pago-proveedores/revision';
+import { index as cdps } from '@/routes/presupuesto/cdps';
 import { index as importacionesPresupuesto } from '@/routes/presupuesto/importaciones';
 import { index as lineasPresupuesto } from '@/routes/presupuesto/lineas';
 import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
@@ -213,6 +215,12 @@ const presupuestoNavItems: NavItemConPermiso[] = [
         title: 'Líneas de Presupuesto',
         href: lineasPresupuesto(),
         icon: PiggyBank,
+        permiso: 'presupuesto.consultar',
+    },
+    {
+        title: 'Certificados de Disponibilidad',
+        href: cdps(),
+        icon: Stamp,
         permiso: 'presupuesto.consultar',
     },
     {

@@ -70,7 +70,9 @@ export default function ImportacionSgfShow() {
                                 Proveedores identificados
                             </p>
                             <p className="text-lg font-semibold tracking-tight">
-                                {formatNumero(resumen.proveedores_identificados)}
+                                {formatNumero(
+                                    resumen.proveedores_identificados,
+                                )}
                             </p>
                         </div>
                         <div className="rounded-xl border p-4">
@@ -177,7 +179,8 @@ export default function ImportacionSgfShow() {
                                     </div>
                                     <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                         <span>
-                                            Folio: {snapshot.folio_egreso ?? '—'}
+                                            Folio:{' '}
+                                            {snapshot.folio_egreso ?? '—'}
                                         </span>
                                         <span>
                                             Número: {snapshot.numero ?? '—'}

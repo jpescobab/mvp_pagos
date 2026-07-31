@@ -72,9 +72,7 @@ export default function EgresosCguCrear() {
 
         return casos.filter(
             (caso) =>
-                (caso.proveedor.nombre ?? '')
-                    .toLowerCase()
-                    .includes(termino) ||
+                (caso.proveedor.nombre ?? '').toLowerCase().includes(termino) ||
                 caso.sgf_id.toLowerCase().includes(termino),
         );
     }, [casos, busqueda]);
@@ -162,9 +160,8 @@ export default function EgresosCguCrear() {
                     {desdeImportacion && (
                         <p className="ctx-banner">
                             Viniendo de una importación SGF: los casos ya
-                            revisados y listos quedaron preseleccionados.
-                            Puedes ajustar la selección antes de crear el
-                            egreso.
+                            revisados y listos quedaron preseleccionados. Puedes
+                            ajustar la selección antes de crear el egreso.
                         </p>
                     )}
                 </div>
@@ -180,7 +177,7 @@ export default function EgresosCguCrear() {
                     <div className="card-body">
                         <div className="field-grid">
                             <div
-                                className={`field${camposInvalidos.numero ? ' invalid' : ''}`}
+                                className={`field${camposInvalidos.numero ? 'invalid' : ''}`}
                             >
                                 <label htmlFor="numeroEgreso">
                                     N° de egreso
@@ -206,7 +203,7 @@ export default function EgresosCguCrear() {
                                 </span>
                             </div>
                             <div
-                                className={`field${camposInvalidos.fecha ? ' invalid' : ''}`}
+                                className={`field${camposInvalidos.fecha ? 'invalid' : ''}`}
                             >
                                 <label htmlFor="fechaEgreso">
                                     Fecha
@@ -241,8 +238,8 @@ export default function EgresosCguCrear() {
                                     }
                                 />
                                 <span className="hint">
-                                    Ej. referencia al lote de pagos, motivo
-                                    del egreso, etc.
+                                    Ej. referencia al lote de pagos, motivo del
+                                    egreso, etc.
                                 </span>
                             </div>
                         </div>
@@ -268,7 +265,10 @@ export default function EgresosCguCrear() {
                     </div>
 
                     {errors.casos && (
-                        <p className="err-msg" style={{ display: 'block', padding: '0 22px' }}>
+                        <p
+                            className="err-msg"
+                            style={{ display: 'block', padding: '0 22px' }}
+                        >
                             {errors.casos}
                         </p>
                     )}
@@ -306,29 +306,24 @@ export default function EgresosCguCrear() {
                                         {seleccion.size}
                                     </span>
                                     de{' '}
-                                    <span className="mono">
-                                        {casos.length}
-                                    </span>
+                                    <span className="mono">{casos.length}</span>
                                     casos seleccionados
                                 </div>
                             </div>
 
                             {casosFiltrados.length === 0 ? (
                                 <div className="empty-inline">
-                                    No hay casos que coincidan con tu
-                                    búsqueda.
+                                    No hay casos que coincidan con tu búsqueda.
                                 </div>
                             ) : (
                                 <div className="caso-list">
                                     {casosFiltrados.map((caso) => {
-                                        const marcado = seleccion.has(
-                                            caso.id,
-                                        );
+                                        const marcado = seleccion.has(caso.id);
 
                                         return (
                                             <div
                                                 key={caso.id}
-                                                className={`caso-row${marcado ? ' checked' : ''}`}
+                                                className={`caso-row${marcado ? 'checked' : ''}`}
                                                 onClick={() =>
                                                     alternarCaso(caso)
                                                 }
@@ -346,8 +341,7 @@ export default function EgresosCguCrear() {
                                                             caso.sgf_id}
                                                     </div>
                                                     <div className="cid">
-                                                        Caso N°{' '}
-                                                        {caso.sgf_id}
+                                                        Caso N° {caso.sgf_id}
                                                     </div>
                                                 </div>
                                                 <div className="caso-monto">
@@ -374,9 +368,7 @@ export default function EgresosCguCrear() {
                             type="button"
                             className="fbtn ghost"
                             disabled={procesando}
-                            onClick={() =>
-                                router.get(egresosCgu.index().url)
-                            }
+                            onClick={() => router.get(egresosCgu.index().url)}
                         >
                             Cancelar
                         </button>

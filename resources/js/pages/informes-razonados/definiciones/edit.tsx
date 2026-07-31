@@ -17,7 +17,9 @@ export default function DefinicionInformeRazonadoEditar() {
 
     const [codigo, setCodigo] = useState(definicion.codigo);
     const [nombre, setNombre] = useState(definicion.nombre);
-    const [descripcion, setDescripcion] = useState(definicion.descripcion ?? '');
+    const [descripcion, setDescripcion] = useState(
+        definicion.descripcion ?? '',
+    );
     const [activo, setActivo] = useState(definicion.activo);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [procesando, setProcesando] = useState(false);

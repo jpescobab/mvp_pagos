@@ -66,7 +66,8 @@ export default function AuthSimpleLayout({
 
             {/* Footer */}
             <footer className="pointer-events-none fixed inset-x-0 bottom-5 z-[3] text-center text-xs text-muted-foreground">
-                © 2026 Corporación Administrativa del Poder Judicial - Zonal Coyhaique
+                © 2026 Corporación Administrativa del Poder Judicial - Zonal
+                Coyhaique
             </footer>
         </div>
     );

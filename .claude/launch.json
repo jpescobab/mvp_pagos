@@ -24,7 +24,7 @@
       "name": "SGF Playwright Stub",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "services/sgf-playwright", "start"],
-      "port": 4101,
+      "port": 4100,
       "autoPort": false
     }
   ]

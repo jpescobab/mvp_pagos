@@ -132,6 +132,63 @@ class ServicioImportacionIndicadores
         return $registrador->finalizar($importacion);
     }
 
+    /**
+     * Backfill every daily USD value published in a calendar month
+     * (`dolar/{año}/{mes}`, mismo patrón que `importarTramoUf`). Uso de
+     * reproceso/backfill de desarrollo — la importación diaria real
+     * (`importarUsd()`) solo trae el último valor publicado.
+     */
+    public function importarUsdDelMes(
+        string $periodo,
+        ?string $ejecutadoPorJob = null,
+    ): IndicadorEconomicoImportacion {
+        $mes = CarbonImmutable::createFromFormat('Y-m', $periodo)->startOfMonth();
+
+        $registrador = new RegistradorImportacionIndicadores;
+
+        $importacion = $registrador->iniciar([
+            'tipo_importacion' => 'reproceso_controlado',
+            'indicadores_solicitados' => ['USD'],
+            'fuente_principal' => 'CMF',
+            'periodo' => $periodo,
+            'ejecutado_por_job' => $ejecutadoPorJob,
+        ]);
+
+        try {
+            $respuesta = $this->cmf->dolar($mes->year, $mes->month);
+
+            foreach ($respuesta['data'] as $valor) {
+                $registrador->recibido();
+
+                $resultado = $this->persistencia->crearSiNoExiste([
+                    'importacion_id' => $importacion->id,
+                    'codigo' => 'USD',
+                    'nombre' => 'Dólar observado',
+                    'tipo' => 'moneda',
+                    'fecha_valor' => $valor['fecha'],
+                    'valor' => $valor['valor'],
+                    'periodicidad_valor' => 'diaria',
+                    'periodicidad_publicacion' => 'diaria_habil',
+                    'unidad_medida' => 'CLP',
+                    'moneda_base' => 'USD',
+                    'fuente' => 'CMF',
+                    'endpoint' => $respuesta['url'],
+                    'source_url' => $respuesta['url'],
+                    'source_payload' => $respuesta['raw'],
+                    'capturado_en' => now(),
+                    'capturado_por_job' => $ejecutadoPorJob,
+                    'requiere_dia_habil' => true,
+                ]);
+
+                $resultado['creado'] ? $registrador->creado() : $registrador->omitido();
+            }
+        } catch (\Throwable $e) {
+            $registrador->fallido($e->getMessage());
+        }
+
+        return $registrador->finalizar($importacion);
+    }
+
     private function importarTramoUf(
         IndicadorEconomicoImportacion $importacion,
         RegistradorImportacionIndicadores $registrador,

@@ -45,8 +45,7 @@ export function PreparacionEgresoCard({ caso }: { caso: CasoPagoProveedor }) {
                                     href={
                                         egresosCgu.create({
                                             query: {
-                                                caso_pago_proveedor_id:
-                                                    caso.id,
+                                                caso_pago_proveedor_id: caso.id,
                                             },
                                         }).url
                                     }

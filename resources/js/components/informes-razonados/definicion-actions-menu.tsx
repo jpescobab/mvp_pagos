@@ -59,7 +59,9 @@ export function DefinicionActionsMenu({
                     {puedeAdministrar && (
                         <>
                             <DropdownMenuItem asChild>
-                                <Link href={definiciones.edit(definicion.id).url}>
+                                <Link
+                                    href={definiciones.edit(definicion.id).url}
+                                >
                                     Editar
                                 </Link>
                             </DropdownMenuItem>

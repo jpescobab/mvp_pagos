@@ -27,7 +27,9 @@ export default function DefinicionInformeRazonadoShow() {
                     {puedeAdministrar && (
                         <div className="flex items-center gap-2">
                             <Button asChild variant="outline">
-                                <Link href={definiciones.edit(definicion.id).url}>
+                                <Link
+                                    href={definiciones.edit(definicion.id).url}
+                                >
                                     Editar
                                 </Link>
                             </Button>

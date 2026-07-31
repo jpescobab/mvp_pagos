@@ -275,7 +275,8 @@ export function ChecklistDocumentalCard({
                                                 // reclasifica (comportamiento
                                                 // previo).
                                                 if (
-                                                    seleccionado !== undefined &&
+                                                    seleccionado !==
+                                                        undefined &&
                                                     idsRevinculables.has(
                                                         seleccionado,
                                                     )

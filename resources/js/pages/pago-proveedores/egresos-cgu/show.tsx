@@ -42,8 +42,8 @@ export default function EgresoCguShow() {
                                 Egreso {egreso.numero_egreso}
                             </h1>
                             <p className="text-sm text-muted-foreground">
-                                {formatFecha(egreso.fecha)} · Monto
-                                total <Monto valor={egreso.monto_total} />
+                                {formatFecha(egreso.fecha)} · Monto total{' '}
+                                <Monto valor={egreso.monto_total} />
                             </p>
                         </div>
                         {egreso.generado_automaticamente && (
@@ -120,7 +120,8 @@ export default function EgresoCguShow() {
                                             className="cursor-pointer hover:bg-muted/30"
                                             onClick={() =>
                                                 router.visit(
-                                                    casos.show(item.caso.id).url,
+                                                    casos.show(item.caso.id)
+                                                        .url,
                                                 )
                                             }
                                         >
@@ -147,7 +148,8 @@ export default function EgresoCguShow() {
                                                         >
                                                             {item.proveedor
                                                                 ?.nombre ??
-                                                                item.caso.sgf_id}
+                                                                item.caso
+                                                                    .sgf_id}
                                                         </div>
                                                         <div className="truncate font-mono text-[10px] text-muted-foreground">
                                                             {item.proveedor

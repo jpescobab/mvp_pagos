@@ -7,13 +7,17 @@ use Illuminate\Support\Facades\Http;
 class CmfClient
 {
     /**
-     * Fetch the latest published "dólar observado" value.
+     * Fetch the "dólar observado" value(s). Without arguments, the latest
+     * published value. With `$anio`/`$mes`, every daily value published that
+     * calendar month (same shape as `uf()`).
      *
      * @return array{url: string, raw: array<string, mixed>, data: list<array{fecha: string, valor: float}>}
      */
-    public function dolar(): array
+    public function dolar(?int $anio = null, ?int $mes = null): array
     {
-        return $this->fetch('dolar', 'Dolares');
+        $path = $anio !== null && $mes !== null ? "dolar/{$anio}/{$mes}" : 'dolar';
+
+        return $this->fetch($path, 'Dolares');
     }
 
     /**

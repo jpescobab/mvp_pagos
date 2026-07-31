@@ -129,8 +129,7 @@ export default function PeriodosReportabilidadIndex() {
                                 {periodo.codigo}
                             </h2>
                             <span className="text-sm text-muted-foreground">
-                                {formatFecha(periodo.fecha_inicio)}{' '}
-                                –{' '}
+                                {formatFecha(periodo.fecha_inicio)} –{' '}
                                 {formatFecha(periodo.fecha_fin)}
                             </span>
                         </div>

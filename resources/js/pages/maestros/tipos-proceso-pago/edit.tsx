@@ -112,8 +112,8 @@ export default function TiposProcesoPagoEditar() {
                         <p className="text-sm text-muted-foreground">
                             Desactiva esta opción para tipos de proceso que
                             nunca generan un Traspaso (CGU), como Remesa. El
-                            formulario de registro quedará oculto en el
-                            detalle de esos casos.
+                            formulario de registro quedará oculto en el detalle
+                            de esos casos.
                         </p>
                     </div>
                 </div>

@@ -695,7 +695,8 @@ export default function CasoShow() {
                                     src={
                                         documentos.ver({
                                             proceso: caso.proceso.id,
-                                            documento: documentoPreviewIdVigente,
+                                            documento:
+                                                documentoPreviewIdVigente,
                                         }).url
                                     }
                                     title={
