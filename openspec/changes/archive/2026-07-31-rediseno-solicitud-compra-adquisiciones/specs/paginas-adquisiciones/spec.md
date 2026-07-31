@@ -12,12 +12,17 @@ El sistema SHALL renderizar una página que muestre los procesos de adquisición
 - **THEN** la aplicación navega a la página de detalle de ese proceso
 
 ### Requirement: Formulario de creación de un proceso de adquisición
-El sistema SHALL renderizar un formulario de solicitud de compra con los antecedentes generales de la compra (fecha de inicio, nombre, ID de requerimiento opcional, unidad requirente, funcionario requirente, características del bien o servicio, motivo de contratación, código BIP opcional, monto estimado), la verificación de si la compra está en el Plan Anual de Compras (revelando el ID del PAC solo cuando corresponda) y la verificación de Convenio Marco, y enviar la creación al endpoint existente. El formulario SHALL NOT incluir un campo de código (se genera automáticamente) ni un campo de selección manual de modalidad. El selector de funcionario requirente SHALL filtrarse según la unidad requirente elegida. El formulario SHALL validar los campos requeridos en el cliente antes de enviar la solicitud al backend.
+El sistema SHALL renderizar un formulario de solicitud de compra organizado en pasos (Identificación, Requerimientos, Moneda y Montos) con los antecedentes generales de la compra (fecha de inicio, nombre, ID de requerimiento opcional, unidad requirente, funcionario requirente, características del bien o servicio, motivo de contratación, código BIP opcional), la verificación de si la compra está en el Plan Anual de Compras (revelando el ID del PAC solo cuando corresponda), la verificación de Convenio Marco, y la moneda/monto estimado (con paridad cuando la moneda no es CLP), y enviar la creación al endpoint existente. El formulario SHALL NOT incluir un campo de código (se genera automáticamente) ni un campo de selección manual de modalidad. El selector de funcionario requirente SHALL filtrarse según la unidad requirente elegida. El formulario SHALL validar los campos requeridos en el cliente antes de enviar la solicitud al backend.
 
 #### Scenario: Crear un proceso con datos válidos
 - **WHEN** un usuario autenticado completa los antecedentes generales requeridos, elige un funcionario requirente de la unidad seleccionada, responde la verificación de Convenio Marco y envía el formulario
 - **THEN** el formulario envía los datos al endpoint de creación
 - **AND** tras la respuesta exitosa la aplicación navega al detalle del proceso creado
+
+#### Scenario: Navegar entre los pasos del formulario
+- **WHEN** un usuario completa un paso del formulario y avanza al siguiente
+- **THEN** el paso queda marcado como completo
+- **AND** el usuario puede volver a un paso anterior sin perder los datos ya ingresados
 
 #### Scenario: El selector de funcionario requirente se filtra por unidad
 - **WHEN** un usuario elige una unidad requirente en el formulario

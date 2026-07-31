@@ -3,7 +3,7 @@
 **Versión:** v9 optimizada  
 **Uso:** archivo rector para Claude Code, Codex, agentes IA y equipo de desarrollo  
 **Stack base:** Laravel 13 + PostgreSQL + React + Laravel Boost + OpenSpec  
-**Estado:** en producción activa. El core (§16, pasos 1-10) y Pago de Proveedores, Adquisiciones e Informes Razonados están implementados; el resto de módulos funcionales (§4.2) siguen siendo plan, no código.
+**Estado:** en producción activa. El core (§16, pasos 1-10), Pago de Proveedores, Adquisiciones e Informes Razonados están implementados; Presupuesto tiene implementado el certificado de disponibilidad presupuestaria (CDP) y la importación de montos asignados desde CGU; el resto de módulos funcionales (§4.2) siguen siendo plan, no código.
 
 ---
 
@@ -54,7 +54,7 @@ El sistema **no reemplaza** sistemas oficiales como SGF, CGU, BancoEstado, SII, 
 ## 4. Principios obligatorios
 
 1. **Core no desactivable.** Seguridad, usuarios, roles, permisos, estructura CAPJ, workflow, auditoría, documentos, parámetros, integraciones, indicadores económicos, cortes y trazabilidad forman parte del núcleo.
-2. **Módulos funcionales activables.** Pago de Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados e Informes razonados pueden activarse/desactivarse sin borrar datos ni evidencia. **Implementados:** Pago de Proveedores, Adquisiciones, Informes razonados. **Planeados (sin código todavía):** Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados — no asumir modelos/tablas/specs existentes para estos; proponer vía OpenSpec antes de codificar.
+2. **Módulos funcionales activables.** Pago de Proveedores, Adquisiciones, Presupuesto, Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados e Informes razonados pueden activarse/desactivarse sin borrar datos ni evidencia. **Implementados:** Pago de Proveedores, Adquisiciones, Informes razonados, Presupuesto (certificado de disponibilidad presupuestaria e importación de montos asignados desde CGU; ver `openspec/specs/presupuesto-certificado-disponibilidad/`). **Planeados (sin código todavía):** Mantenimiento, RR.HH., Consumo eléctrico, Servicios contratados — no asumir modelos/tablas/specs existentes para estos; proponer vía OpenSpec antes de codificar.
 3. **Workflow antes que CRUD.** Todo proceso relevante debe tener estado interno, transición, tarea, responsable, documento, notificación, auditoría e historial.
 4. **SGF es origen, no gobierno interno.** Los estados y grupos SGF no gobiernan workflow, unidades, permisos ni responsables internos.
 5. **Snapshot obligatorio.** Todo dato/documento recibido desde SGF o API externa relevante debe conservar payload, fuente, fecha, hash, método de captura, usuario/job y vínculo al caso.
