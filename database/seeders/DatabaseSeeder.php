@@ -45,6 +45,11 @@ class DatabaseSeeder extends Seeder
         // Quitar cuando ya no haga falta reproducir este período localmente.
         $this->call(IndicadoresEconomicosDesarrolloSeeder::class);
 
+        // Snapshot de desarrollo de OC/licitaciones 2182 reales importadas
+        // desde Mercado Público — ver docblock de cada seeder.
+        $this->call(OrdenesCompraMercadoPublicoDesarrolloSeeder::class);
+        $this->call(LicitacionesMercadoPublicoDesarrolloSeeder::class);
+
         $this->call(FuncionariosCapjSeeder::class);
 
         // User::factory(10)->create();

@@ -1,0 +1,366 @@
+[
+    {
+        "codigo": "2182-1-LE26",
+        "nombre": "JARDINERIA COYHAIQUE",
+        "estado_mercado_publico": "Adjudicada",
+        "codigo_estado_mercado_publico": 8,
+        "moneda": "CLF",
+        "monto_estimado": "870.00",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-02T00:00:00"
+            },
+            {
+                "estado": "Publicada",
+                "fecha": "2026-01-02T15:25:22.193"
+            },
+            {
+                "estado": "Inicio de preguntas",
+                "fecha": "2026-01-02T17:00:00"
+            },
+            {
+                "estado": "Cierre de preguntas",
+                "fecha": "2026-01-12T15:00:00"
+            },
+            {
+                "estado": "Publicación de respuestas",
+                "fecha": "2026-01-14T15:00:00"
+            },
+            {
+                "estado": "Cierre de recepción de ofertas",
+                "fecha": "2026-01-19T16:00:00"
+            },
+            {
+                "estado": "Apertura técnica",
+                "fecha": "2026-01-20T16:30:00"
+            },
+            {
+                "estado": "Apertura económica",
+                "fecha": "2026-01-20T16:30:00"
+            },
+            {
+                "estado": "Adjudicación",
+                "fecha": "2026-03-09T17:54:13.707"
+            }
+        ],
+        "adjudicacion": {
+            "tipo": 2,
+            "fecha": "2026-03-09T00:00:00",
+            "numero": "N°1400-007",
+            "numero_oferentes": 5,
+            "url_acta": "http:\/\/www.mercadopublico.cl\/Procurement\/Modules\/RFB\/StepsProcessAward\/PreviewAwardAct.aspx?qs=hHL+jI7G49m7ZoeRnj+18c4NyXvzCVoLDEzPFSGMkFE="
+        },
+        "items": [
+            {
+                "correlativo": 1,
+                "codigo_producto": "91111602",
+                "categoria": "Servicios de cuidado personal y domésticos \/ Servicio doméstico y de cuidados \/ Asistencia y cuidado doméstico",
+                "nombre_producto": "Servicios de mantenimiento de patios y piscinas",
+                "descripcion": "Servicio de Jardinería para edificios del Poder Judicial de Coyhaique",
+                "unidad_medida": "Mes",
+                "cantidad": "36.00",
+                "adjudicacion": {
+                    "rut_proveedor": "13.504.547-0",
+                    "nombre_proveedor": "ARNALDO FABIÁN TOBAR RAMÍREZ",
+                    "cantidad": 36,
+                    "monto_unitario": 25.2
+                }
+            }
+        ]
+    },
+    {
+        "codigo": "2182-7-LE26",
+        "nombre": "MANTENCION DE TECHO Y CONVENIO DE PRECIOS DE CARPINTERIA",
+        "estado_mercado_publico": "Cerrada",
+        "codigo_estado_mercado_publico": 6,
+        "moneda": "CLF",
+        "monto_estimado": null,
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-05-29T00:00:00"
+            },
+            {
+                "estado": "Publicada",
+                "fecha": "2026-05-29T13:42:19.437"
+            },
+            {
+                "estado": "Inicio de preguntas",
+                "fecha": "2026-05-29T15:30:00"
+            },
+            {
+                "estado": "Cierre de preguntas",
+                "fecha": "2026-06-10T15:00:00"
+            },
+            {
+                "estado": "Publicación de respuestas",
+                "fecha": "2026-06-12T15:00:00"
+            },
+            {
+                "estado": "Cierre de recepción de ofertas",
+                "fecha": "2026-06-18T16:00:00"
+            },
+            {
+                "estado": "Apertura técnica",
+                "fecha": "2026-06-19T16:30:00"
+            },
+            {
+                "estado": "Apertura económica",
+                "fecha": "2026-06-19T16:30:00"
+            },
+            {
+                "estado": "Adjudicación",
+                "fecha": "2026-08-19T16:00:00"
+            }
+        ],
+        "adjudicacion": null,
+        "items": [
+            {
+                "correlativo": 1,
+                "codigo_producto": "72101601",
+                "categoria": "Servicios de construcción y mantenimiento \/ Servicios de atención, mantenimiento y reparaciones de edificios \/ Revestimientos de techos, paredes o metalistería",
+                "nombre_producto": "Instalación o reparación de techos",
+                "descripcion": "MANTENCIÓN Y REPARACIÓN PREVENTIVA DE TECHUMBRES Y VENTANAS DE TRIBUNALES DE LA JURISDICCIÓN DE AYSEN.",
+                "unidad_medida": "Año",
+                "cantidad": "3.00",
+                "adjudicacion": null
+            }
+        ]
+    },
+    {
+        "codigo": "2182-3-LE26",
+        "nombre": "MANTENCION DE TABLEROS ELECTRICOS",
+        "estado_mercado_publico": "Adjudicada",
+        "codigo_estado_mercado_publico": 8,
+        "moneda": "CLF",
+        "monto_estimado": null,
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-25T00:00:00"
+            },
+            {
+                "estado": "Publicada",
+                "fecha": "2026-03-25T10:14:00"
+            },
+            {
+                "estado": "Inicio de preguntas",
+                "fecha": "2026-03-25T11:00:00"
+            },
+            {
+                "estado": "Cierre de preguntas",
+                "fecha": "2026-04-07T15:00:00"
+            },
+            {
+                "estado": "Publicación de respuestas",
+                "fecha": "2026-04-09T15:00:00"
+            },
+            {
+                "estado": "Cierre de recepción de ofertas",
+                "fecha": "2026-04-16T16:00:00"
+            },
+            {
+                "estado": "Apertura técnica",
+                "fecha": "2026-04-17T16:30:00"
+            },
+            {
+                "estado": "Apertura económica",
+                "fecha": "2026-04-17T16:30:00"
+            },
+            {
+                "estado": "Adjudicación",
+                "fecha": "2026-05-11T11:18:00.257"
+            }
+        ],
+        "adjudicacion": {
+            "tipo": 2,
+            "fecha": "2026-05-11T00:00:00",
+            "numero": "N°1400-016",
+            "numero_oferentes": 2,
+            "url_acta": "http:\/\/www.mercadopublico.cl\/Procurement\/Modules\/RFB\/StepsProcessAward\/PreviewAwardAct.aspx?qs=a1iI5wy8e\/5Kq\/DB\/2WbkKkpx11H3q6BeNse38lIZ3A="
+        },
+        "items": [
+            {
+                "correlativo": 1,
+                "codigo_producto": "81141806",
+                "categoria": "Servicios basados en ingeniería, ciencias sociales y tecnología de la información \/ Metodologías y tecnologías para mejorar la producción y la fabricación \/ Administración de edificios e instalaciones",
+                "nombre_producto": "Inspección de instalaciones eléctricas",
+                "descripcion": "SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE TABLEROS E INSTALACIONES ELECTRICAS DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN ",
+                "unidad_medida": "Año",
+                "cantidad": "1.00",
+                "adjudicacion": {
+                    "rut_proveedor": "9.728.223-4",
+                    "nombre_proveedor": "LUIS PATRICIO VALDÉS GUTIÉRREZ",
+                    "cantidad": 1,
+                    "monto_unitario": 124.95
+                }
+            }
+        ]
+    },
+    {
+        "codigo": "2182-6-LE26",
+        "nombre": "MANTENCION DE ALCANTARILLADO Y GASFITERIA",
+        "estado_mercado_publico": "Adjudicada",
+        "codigo_estado_mercado_publico": 8,
+        "moneda": "CLF",
+        "monto_estimado": null,
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-24T00:00:00"
+            },
+            {
+                "estado": "Publicada",
+                "fecha": "2026-04-24T09:22:19.13"
+            },
+            {
+                "estado": "Inicio de preguntas",
+                "fecha": "2026-04-24T12:00:00"
+            },
+            {
+                "estado": "Cierre de preguntas",
+                "fecha": "2026-05-06T15:00:00"
+            },
+            {
+                "estado": "Publicación de respuestas",
+                "fecha": "2026-05-08T15:00:00"
+            },
+            {
+                "estado": "Cierre de recepción de ofertas",
+                "fecha": "2026-05-14T16:00:00"
+            },
+            {
+                "estado": "Apertura técnica",
+                "fecha": "2026-05-15T16:30:00"
+            },
+            {
+                "estado": "Apertura económica",
+                "fecha": "2026-05-15T16:30:00"
+            },
+            {
+                "estado": "Adjudicación",
+                "fecha": "2026-06-12T13:43:13.363"
+            }
+        ],
+        "adjudicacion": {
+            "tipo": 2,
+            "fecha": "2026-06-11T00:00:00",
+            "numero": "N°1400-018",
+            "numero_oferentes": 3,
+            "url_acta": "http:\/\/www.mercadopublico.cl\/Procurement\/Modules\/RFB\/StepsProcessAward\/PreviewAwardAct.aspx?qs=kygsOdYuGN0HYIOYHO\/815cONcpkKRr9nglv51ezkSU="
+        },
+        "items": [
+            {
+                "correlativo": 1,
+                "codigo_producto": "81141806",
+                "categoria": "Servicios basados en ingeniería, ciencias sociales y tecnología de la información \/ Metodologías y tecnologías para mejorar la producción y la fabricación \/ Administración de edificios e instalaciones",
+                "nombre_producto": "Inspección de instalaciones eléctricas",
+                "descripcion": "SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE TABLEROS E INSTALACIONES ELECTRICAS DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN ",
+                "unidad_medida": "Año",
+                "cantidad": "1.00",
+                "adjudicacion": {
+                    "rut_proveedor": "9.728.223-4",
+                    "nombre_proveedor": "LUIS PATRICIO VALDÉS GUTIÉRREZ",
+                    "cantidad": 1,
+                    "monto_unitario": 167.8
+                }
+            }
+        ]
+    },
+    {
+        "codigo": "2182-5-LE26",
+        "nombre": "MANTENCION DE GRUPOS GENERADORES",
+        "estado_mercado_publico": "Adjudicada",
+        "codigo_estado_mercado_publico": 8,
+        "moneda": "CLF",
+        "monto_estimado": null,
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-23T00:00:00"
+            },
+            {
+                "estado": "Publicada",
+                "fecha": "2026-04-23T10:35:11.697"
+            },
+            {
+                "estado": "Inicio de preguntas",
+                "fecha": "2026-04-23T13:00:00"
+            },
+            {
+                "estado": "Cierre de preguntas",
+                "fecha": "2026-05-06T16:00:00"
+            },
+            {
+                "estado": "Publicación de respuestas",
+                "fecha": "2026-05-08T15:00:00"
+            },
+            {
+                "estado": "Cierre de recepción de ofertas",
+                "fecha": "2026-05-15T16:00:00"
+            },
+            {
+                "estado": "Apertura técnica",
+                "fecha": "2026-05-18T16:30:00"
+            },
+            {
+                "estado": "Apertura económica",
+                "fecha": "2026-05-18T16:30:00"
+            },
+            {
+                "estado": "Adjudicación",
+                "fecha": "2026-06-12T13:44:05.6"
+            }
+        ],
+        "adjudicacion": {
+            "tipo": 2,
+            "fecha": "2026-06-11T00:00:00",
+            "numero": "N°1400-017",
+            "numero_oferentes": 1,
+            "url_acta": "http:\/\/www.mercadopublico.cl\/Procurement\/Modules\/RFB\/StepsProcessAward\/PreviewAwardAct.aspx?qs=3FzsSidfl5Kxez3tZ8CGgau0Xo1n2dixKtjZOqATFRM="
+        },
+        "items": [
+            {
+                "correlativo": 1,
+                "codigo_producto": "81141806",
+                "categoria": "Servicios basados en ingeniería, ciencias sociales y tecnología de la información \/ Metodologías y tecnologías para mejorar la producción y la fabricación \/ Administración de edificios e instalaciones",
+                "nombre_producto": "Inspección de instalaciones eléctricas",
+                "descripcion": "SERVICIO DE MANTENCION PREVENTIVA DE GRUPOS ELECTROGENOS DE TRIBUNALES DE LA JURISDICCION DE AYSEN ",
+                "unidad_medida": "Mes",
+                "cantidad": "36.00",
+                "adjudicacion": {
+                    "rut_proveedor": "9.728.223-4",
+                    "nombre_proveedor": "LUIS PATRICIO VALDÉS GUTIÉRREZ",
+                    "cantidad": 36,
+                    "monto_unitario": 23
+                }
+            }
+        ]
+    }
+]

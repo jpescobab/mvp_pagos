@@ -224,7 +224,7 @@ class OrdenCompraMercadoPublicoService
             $proveedor = Proveedor::create([
                 'rutproveedor' => $datosProveedor['rut'],
                 'nombre' => '',
-                'activo' => true,
+                'estado' => Proveedor::ESTADO_ACTIVO,
                 ...$camposPayload,
             ]);
 

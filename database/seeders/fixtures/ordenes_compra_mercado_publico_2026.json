@@ -1,0 +1,2417 @@
+[
+    {
+        "codigo": "2182-1-SE26",
+        "proveedor": {
+            "rutproveedor": "76859605-0",
+            "nombre": "Sociedad Sur America Limitada",
+            "direccion": "STA ALEJANDRA LT A- 5 N° No hay Dato",
+            "comuna": "Cochrane",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "GESTIÓN E INVERSIONES",
+            "correo": null,
+            "contacto": "Sociedad Sur América  Ltda.",
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "178.92",
+        "monto_total": "212.91",
+        "fecha_emision": "2026-02-06",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-09T11:58:01.287"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-02-06T11:21:51.353"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-02-08T16:12:15.873"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "91111602",
+                "descripcion": "Servicios de mantenimiento de patios y piscinas",
+                "cantidad": "36.00",
+                "precio_unitario": "4.97",
+                "monto_total": "178.92"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-2-AG26",
+        "proveedor": {
+            "rutproveedor": "76295154-1",
+            "nombre": "Servicentro Aysen patagonia Ltda",
+            "direccion": "Km1 camiono aysen coyhaique",
+            "comuna": "Aysén",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "Venta de combustible , lavado de vehiculos, lubricentro",
+            "correo": null,
+            "contacto": "Gonzalo  Esquivel",
+            "contacto_cargo": "Puerto Aysen",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "4798319.00",
+        "monto_total": "5710000.00",
+        "fecha_emision": "2026-01-19",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-19T08:48:48.53"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-01-19T10:01:43.66"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-01-19T10:03:43.817"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "15101505",
+                "descripcion": "Diesel",
+                "cantidad": "1.00",
+                "precio_unitario": "4798319.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-3-AG26",
+        "proveedor": {
+            "rutproveedor": "78095657-7",
+            "nombre": "AURORA AUSTRAL SERVICIOS INTEGRALES SPA",
+            "direccion": "EL CLARO LT 5 -A- 12 N° No hay Dato",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OTRAS ACTIVIDADES DE VENTA AL POR MENOR EN COMERCIOS NO ESPECIALIZADOS",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "50000.00",
+        "monto_total": "59500.00",
+        "fecha_emision": "2026-01-20",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-20T12:39:05.353"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-01-20T15:10:08.803"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-01-22T10:28:35.49"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "76101501",
+                "descripcion": "Servicios de saneamiento de aseos",
+                "cantidad": "2.00",
+                "precio_unitario": "25000.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-4-AG26",
+        "proveedor": {
+            "rutproveedor": "99520000-7",
+            "nombre": "CIA.DE PETROLEOS DE CHILE COPEC S.A",
+            "direccion": "5 DE ABRIL N° 6198",
+            "comuna": "Estación Central",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "VENTA AL POR MAYOR DE COMBUSTIBLES LIQUIDOS| VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.",
+            "correo": "morrego@copec.cl",
+            "contacto": "Miguel Angel Barria Sanhueza",
+            "contacto_cargo": "Ejecutivo Comercial",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "420168.00",
+        "monto_total": "500000.00",
+        "fecha_emision": "2026-01-21",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-21T09:04:30.837"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-01-21T09:40:55.47"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-01-21T10:32:37.413"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "15101505",
+                "descripcion": "Diesel",
+                "cantidad": "1.00",
+                "precio_unitario": "420168.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-5-SE26",
+        "proveedor": {
+            "rutproveedor": "76618239-9",
+            "nombre": "COMERCIALIZADORA LOS CIPRESES EIRL",
+            "direccion": "LAS GOLONDRINAS 1740",
+            "comuna": "Aysén",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "ENVASADO Y DISTRIBUCIÓN DE AGUA",
+            "correo": "aquanavsoda@gmail.com",
+            "contacto": "JOSE GERARDO NAVARRO GONZALEZ",
+            "contacto_cargo": "PUERTO AYSEN",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "5.41",
+        "monto_total": "6.44",
+        "fecha_emision": "2026-01-23",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-22T11:04:25.507"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-01-23T11:05:30.007"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-02-01T19:35:42.173"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "50202301",
+                "descripcion": "Agua",
+                "cantidad": "46.00",
+                "precio_unitario": "0.12",
+                "monto_total": "5.41"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-7-SE26",
+        "proveedor": {
+            "rutproveedor": "12975530-K",
+            "nombre": "MARCIAL MORENO GATICA",
+            "direccion": "ADOLFO VALDEBENITO N° 3351",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OBRAS MENORES CONSTRUCCION (CONTRATISTAS, ALBANILE",
+            "correo": "mmg.instalaciones@gmail.com",
+            "contacto": "Marcial  Moreno",
+            "contacto_cargo": "Dueño",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "432.00",
+        "monto_total": "514.08",
+        "fecha_emision": "2026-04-29",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-26T12:48:01.473"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-29T12:20:03.353"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-29T13:29:14.69"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "72102301",
+                "descripcion": "Supervisión de instalación, ajuste o mantenimiento de calderas",
+                "cantidad": "1.00",
+                "precio_unitario": "432.00",
+                "monto_total": "432.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-8-SE26",
+        "proveedor": {
+            "rutproveedor": "8258735-7",
+            "nombre": "EDUARDO HERNANDEZ MANCILLA",
+            "direccion": "LOS COPIHUES 1485-COYHAIQUE",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OTROS DISENADORES N.C.P.| OTRAS ACTIVIDADES DE SER",
+            "correo": "encuadernandez@yahoo.es",
+            "contacto": "572287",
+            "contacto_cargo": "Gerente General",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Enviada a proveedor",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "0.49",
+        "monto_total": "0.49",
+        "fecha_emision": "2026-04-10",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-27T12:36:00.77"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-10T11:55:16.503"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "82121903",
+                "descripcion": "Encuadernación con cola fría o pegamento",
+                "cantidad": "1.00",
+                "precio_unitario": "0.49",
+                "monto_total": "0.49"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-10-AG26",
+        "proveedor": {
+            "rutproveedor": "76199800-5",
+            "nombre": "DISTRIBUIDORA HIMAX LTDA ALMIRANTE",
+            "direccion": "SIMPSON Nº 665 COYHAIQUE",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "MAYORISTAS DE VINOS Y BEBIDAS ALCOHOLICAS Y DE FANTASIA| VENTA AL POR MAYOR DE PAPEL Y CARTON| VENTA AL POR MAYOR DE PRODUCTOS QUIMICOS| VENTA AL POR MAYOR DE MAQUINARIA, HERRAMIENTAS, EQUIPO Y MATERIALES N.| VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.|",
+            "correo": "secretaria@himax.cl",
+            "contacto": "573610",
+            "contacto_cargo": "Gerente",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "1447035.00",
+        "monto_total": "1721972.00",
+        "fecha_emision": "2026-01-30",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-01-30T11:37:23.677"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-01-30T11:57:30.717"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-01-30T12:26:44.577"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "14111703",
+                "descripcion": "Toallas de papel",
+                "cantidad": "1.00",
+                "precio_unitario": "1447035.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-12-AG26",
+        "proveedor": {
+            "rutproveedor": "76074982-6",
+            "nombre": "SERVICOM LTDA.",
+            "direccion": "SARGENTO ALDEA N° 1382",
+            "comuna": "Aysén",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "VENTA AL POR MAYOR DE ART. DE PERFUMERIA, COSMETICOS Y PROD. LIMPIEZA| OTROS PRODUCTOS EN PEQUENOS ALMACENES NO ESPECIALIZADOS| VENTA AL POR MENOR DE PRODUCTOS DE PANADERIA Y PASTELERIA| VENTA AL POR MENOR DE PRODUCTOS DE CONFITERIAS, CIGARRILLOS, Y OTROS",
+            "correo": "libreriaservicom@gmail.com",
+            "contacto": "231090",
+            "contacto_cargo": "GERENTE",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "742921.00",
+        "monto_total": "884076.00",
+        "fecha_emision": "2026-02-04",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-02-04T12:41:20.29"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-02-04T12:58:19.137"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-02-04T20:38:07.513"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "14111507",
+                "descripcion": "Papel para fotocopiadora o impresora",
+                "cantidad": "1.00",
+                "precio_unitario": "742921.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-13-AG26",
+        "proveedor": {
+            "rutproveedor": "78193629-4",
+            "nombre": "GANEMANN SPA",
+            "direccion": "D ALMAGRO 1664",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "VENTA AL POR MENOR DE COMPUTADORES, EQUIPO PERIFERICO, PROGRAMAS INFOR",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "180504.00",
+        "monto_total": "214800.00",
+        "fecha_emision": "2026-02-06",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-02-04T16:06:05.01"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-02-06T11:27:23.437"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-02-06T14:06:42.737"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "47131602",
+                "descripcion": "Paños de limpieza absorbente",
+                "cantidad": "1.00",
+                "precio_unitario": "180504.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-14-SE26",
+        "proveedor": {
+            "rutproveedor": "11717210-4",
+            "nombre": "SAVIA HUENTEO HERRERA",
+            "direccion": "Circunvalacion oriente poniente 1538, Pobl. divisa",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OBRAS MENORES EN CONSTRUCCION (CONTRATISTAS, ALBAN",
+            "correo": "saviadel@hotmail.com",
+            "contacto": "Savia  Huenteo Herrera",
+            "contacto_cargo": "Dueña",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "5.25",
+        "monto_total": "6.25",
+        "fecha_emision": "2026-04-08",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-02-06T11:58:01.04"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-08T07:57:50.287"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-09T07:05:52.92"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "91111602",
+                "descripcion": "Servicios de mantenimiento de patios y piscinas",
+                "cantidad": "1.00",
+                "precio_unitario": "5.25",
+                "monto_total": "5.25"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-136-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "222239.00",
+        "monto_total": "236201.00",
+        "fecha_emision": "2026-07-09",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-09T10:59:34.187"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-09T11:49:20.24"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-09T11:49:20.297"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "222239.00",
+                "monto_total": "222239.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-135-SE26",
+        "proveedor": {
+            "rutproveedor": "76618239-9",
+            "nombre": "COMERCIALIZADORA LOS CIPRESES EIRL",
+            "direccion": "LAS GOLONDRINAS 1740",
+            "comuna": "Aysén",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "ENVASADO Y DISTRIBUCIÓN DE AGUA",
+            "correo": "aquanavsoda@gmail.com",
+            "contacto": "JOSE GERARDO NAVARRO GONZALEZ",
+            "contacto_cargo": "PUERTO AYSEN",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Enviada a proveedor",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "6.00",
+        "monto_total": "7.14",
+        "fecha_emision": "2026-07-14",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-09T07:33:22.677"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-14T08:47:00.34"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "50202301",
+                "descripcion": "Agua",
+                "cantidad": "51.00",
+                "precio_unitario": "0.12",
+                "monto_total": "6.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-134-CM26",
+        "proveedor": {
+            "rutproveedor": "88417000-1",
+            "nombre": "SKY AIRLINE S.A.",
+            "direccion": "ARTURO PRAT 203",
+            "comuna": null,
+            "region": null,
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.",
+            "correo": "cobranza@skyairline.com",
+            "contacto": "240825",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "181782.00",
+        "monto_total": "195744.00",
+        "fecha_emision": "2026-07-08",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-08T14:13:58.5"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-08T14:30:12"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-08T14:30:12.063"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "116091.00",
+                "monto_total": "116091.00"
+            },
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "65691.00",
+                "monto_total": "65691.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-133-CM26",
+        "proveedor": {
+            "rutproveedor": "88417000-1",
+            "nombre": "SKY AIRLINE S.A.",
+            "direccion": "ARTURO PRAT 203",
+            "comuna": null,
+            "region": null,
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.",
+            "correo": "cobranza@skyairline.com",
+            "contacto": "240825",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "59391.00",
+        "monto_total": "67314.00",
+        "fecha_emision": "2026-07-07",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-07T10:37:24.637"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-07T11:02:38.427"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-07T11:02:38.547"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "59391.00",
+                "monto_total": "59391.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-132-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "139557.00",
+        "monto_total": "145596.00",
+        "fecha_emision": "2026-07-07",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-07T10:12:18.363"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-07T10:56:50.593"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-07T10:56:50.63"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "139557.00",
+                "monto_total": "139557.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-131-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "270935.00",
+        "monto_total": "284897.00",
+        "fecha_emision": "2026-07-06",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-06T13:48:14.34"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-06T14:05:52.743"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-06T14:05:52.803"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "270935.00",
+                "monto_total": "270935.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-130-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "256179.00",
+        "monto_total": "270141.00",
+        "fecha_emision": "2026-07-03",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-03T08:26:31.023"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-03T08:54:09.77"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-03T08:54:09.817"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "256179.00",
+                "monto_total": "256179.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-16-SE26",
+        "proveedor": {
+            "rutproveedor": "9728223-4",
+            "nombre": "Luis Patricio Valdes Gutierrez",
+            "direccion": "Almirante Simpson 1106",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "FABRICACION DE MOTORES, GENERADORES Y TRANSFORMADO",
+            "correo": "mbadilla@difener.cl",
+            "contacto": "Luis Patricio valdes Gutierrez",
+            "contacto_cargo": "administrador",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "15.89",
+        "monto_total": "18.91",
+        "fecha_emision": "2026-02-13",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-02-12T09:25:00.37"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-02-13T09:35:22.7"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-02-14T10:38:48.72"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "72102302",
+                "descripcion": "Instalación, reparación o mantenimiento de sistema",
+                "cantidad": "1.00",
+                "precio_unitario": "15.89",
+                "monto_total": "15.89"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-23-SE26",
+        "proveedor": {
+            "rutproveedor": "13504547-0",
+            "nombre": "ARNALDO TOBAR RAMIREZ",
+            "direccion": "Parcela 8, Sector El Claro",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "Servicios de Jardinería, Corte de Pasto, Ornato y",
+            "correo": "fabian.tobar.r@gmail.com ",
+            "contacto": "Arnaldo Tobar Ramirez",
+            "contacto_cargo": "Coyhaique",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "907.26",
+        "monto_total": "1079.64",
+        "fecha_emision": "2026-04-07",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-09T17:56:00.247"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-07T10:10:36.83"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-08T09:43:01.52"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "91111602",
+                "descripcion": "Servicios de mantenimiento de patios y piscinas",
+                "cantidad": "36.00",
+                "precio_unitario": "25.20",
+                "monto_total": "907.26"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-26-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "264389.00",
+        "monto_total": "278159.00",
+        "fecha_emision": "2026-03-13",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-13T08:56:10.43"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-13T11:07:31.59"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-13T11:07:31.643"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "264389.00",
+                "monto_total": "264389.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-30-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "237946.00",
+        "monto_total": "251716.00",
+        "fecha_emision": "2026-03-20",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-20T10:23:06.217"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-20T11:20:59.87"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-20T11:20:59.987"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "237946.00",
+                "monto_total": "237946.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-33-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "286882.00",
+        "monto_total": "300652.00",
+        "fecha_emision": "2026-03-20",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-20T11:38:58.01"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-20T11:57:34.37"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-20T11:57:34.45"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "286882.00",
+                "monto_total": "286882.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-34-CM26",
+        "proveedor": {
+            "rutproveedor": "88417000-1",
+            "nombre": "SKY AIRLINE S.A.",
+            "direccion": "ARTURO PRAT 203",
+            "comuna": null,
+            "region": null,
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.",
+            "correo": "cobranza@skyairline.com",
+            "contacto": "240825",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "257382.00",
+        "monto_total": "271152.00",
+        "fecha_emision": "2026-03-20",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-20T12:21:54.63"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-20T12:33:33.487"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-20T12:33:34.953"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "170991.00",
+                "monto_total": "170991.00"
+            },
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "86391.00",
+                "monto_total": "86391.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-37-CM26",
+        "proveedor": {
+            "rutproveedor": "88417000-1",
+            "nombre": "SKY AIRLINE S.A.",
+            "direccion": "ARTURO PRAT 203",
+            "comuna": null,
+            "region": null,
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.",
+            "correo": "cobranza@skyairline.com",
+            "contacto": "240825",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "216882.00",
+        "monto_total": "230652.00",
+        "fecha_emision": "2026-03-23",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-23T15:14:18.057"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-23T16:02:45.45"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-23T16:02:51.423"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "143091.00",
+                "monto_total": "143091.00"
+            },
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "73791.00",
+                "monto_total": "73791.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-38-CM26",
+        "proveedor": {
+            "rutproveedor": "88417000-1",
+            "nombre": "SKY AIRLINE S.A.",
+            "direccion": "ARTURO PRAT 203",
+            "comuna": null,
+            "region": null,
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.",
+            "correo": "cobranza@skyairline.com",
+            "contacto": "240825",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "185382.00",
+        "monto_total": "199152.00",
+        "fecha_emision": "2026-03-23",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-23T15:47:06.093"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-23T16:02:21.207"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-23T16:02:21.28"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "111591.00",
+                "monto_total": "111591.00"
+            },
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "73791.00",
+                "monto_total": "73791.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-44-SE26",
+        "proveedor": {
+            "rutproveedor": "8258735-7",
+            "nombre": "EDUARDO HERNANDEZ MANCILLA",
+            "direccion": "LOS COPIHUES 1485-COYHAIQUE",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OTROS DISENADORES N.C.P.| OTRAS ACTIVIDADES DE SER",
+            "correo": "encuadernandez@yahoo.es",
+            "contacto": "572287",
+            "contacto_cargo": "Gerente General",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Enviada a proveedor",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "14.70",
+        "monto_total": "14.70",
+        "fecha_emision": "2026-03-26",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-26T09:28:13.427"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-26T14:41:37.763"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "82121903",
+                "descripcion": "Encuadernación con cola fría o pegamento",
+                "cantidad": "30.00",
+                "precio_unitario": "0.49",
+                "monto_total": "14.70"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-45-AG26",
+        "proveedor": {
+            "rutproveedor": "77225200-5",
+            "nombre": "ARRENDADORA DE VEHICULOS S.A.",
+            "direccion": "21 ORIENTE N° 790",
+            "comuna": "Talca",
+            "region": "Región del Maule",
+            "giro": "VENTA O COMPRAVENTA AL POR MENOR DE VEHICULOS AUTOMOTORES NUEVOS O USA| MANTENIMIENTO Y REPARACION DE VEHICULOS AUTOMOTORES| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": null,
+            "contacto": "Franco  Capurro",
+            "contacto_cargo": "Gerente Rentacar",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "159268.00",
+        "monto_total": "189529.00",
+        "fecha_emision": "2026-03-26",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-26T15:35:00.167"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-26T16:07:18.163"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-03-26T16:46:03.65"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "78111808",
+                "descripcion": "Arriendo de vehículos",
+                "cantidad": "1.00",
+                "precio_unitario": "159268.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-46-AG26",
+        "proveedor": {
+            "rutproveedor": "99520000-7",
+            "nombre": "CIA.DE PETROLEOS DE CHILE COPEC S.A",
+            "direccion": "5 DE ABRIL N° 6198",
+            "comuna": "Estación Central",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "VENTA AL POR MAYOR DE COMBUSTIBLES LIQUIDOS| VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.",
+            "correo": "morrego@copec.cl",
+            "contacto": "Miguel Angel Barria Sanhueza",
+            "contacto_cargo": "Ejecutivo Comercial",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Enviada a proveedor",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "420168.00",
+        "monto_total": "500000.00",
+        "fecha_emision": "2026-03-30",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-03-30T08:14:31.983"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-03-30T10:55:11.823"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "15101505",
+                "descripcion": "Diesel",
+                "cantidad": "1.00",
+                "precio_unitario": "420168.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-48-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "304932.00",
+        "monto_total": "318702.00",
+        "fecha_emision": "2026-04-01",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-01T10:29:42.8"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-01T10:52:25.697"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-01T10:52:25.847"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "304932.00",
+                "monto_total": "304932.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-53-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "233242.00",
+        "monto_total": "247012.00",
+        "fecha_emision": "2026-04-07",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-07T10:24:21.343"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-07T11:12:22.237"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-07T11:12:22.32"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "233242.00",
+                "monto_total": "233242.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-54-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "287293.00",
+        "monto_total": "301063.00",
+        "fecha_emision": "2026-04-07",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-07T15:18:03.45"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-07T15:32:20.827"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-07T15:32:21.013"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "287293.00",
+                "monto_total": "287293.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-56-CM26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "219201.00",
+        "monto_total": "232971.00",
+        "fecha_emision": "2026-04-08",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-08T11:00:44.32"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-08T11:12:44.46"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-08T11:12:44.547"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "0",
+                "descripcion": "PASAJE AÉREO NACIONAL",
+                "cantidad": "1.00",
+                "precio_unitario": "219201.00",
+                "monto_total": "219201.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-60-AG26",
+        "proveedor": {
+            "rutproveedor": "77511893-8",
+            "nombre": "TRANSPORTE ALEX TRIVIÑO PLANZER E.I.R.L.",
+            "direccion": "QUEULAT 3124 LOS CIERVOS N° No hay Dato",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "TRANSPORTE DE CARGA POR CARRETERA",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "110000.00",
+        "monto_total": "130900.00",
+        "fecha_emision": "2026-04-14",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-14T07:52:03.027"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-14T14:41:56.573"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-14T16:43:24.133"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "30221012",
+                "descripcion": "Jardines",
+                "cantidad": "1.00",
+                "precio_unitario": "110000.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-63-SE26",
+        "proveedor": {
+            "rutproveedor": "13504547-0",
+            "nombre": "ARNALDO TOBAR RAMIREZ",
+            "direccion": "Parcela 8, Sector El Claro",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "Servicios de Jardinería, Corte de Pasto, Ornato y",
+            "correo": "fabian.tobar.r@gmail.com ",
+            "contacto": "Arnaldo Tobar Ramirez",
+            "contacto_cargo": "Coyhaique",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "18.87",
+        "monto_total": "22.46",
+        "fecha_emision": "2026-04-21",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-20T10:27:58.333"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-21T11:58:02.19"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-21T19:55:42.537"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "30221012",
+                "descripcion": "Jardines",
+                "cantidad": "1.00",
+                "precio_unitario": "18.87",
+                "monto_total": "18.87"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-65-AG26",
+        "proveedor": {
+            "rutproveedor": "77790852-9",
+            "nombre": "THE SHEPHERD COMPANY SPA",
+            "direccion": "AV LA DEHESA 1822 OF 413 PISO 4",
+            "comuna": "Lo Barnechea",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "SERVICIOS DE TRANSPORTE A TURISTAS",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "200000.00",
+        "monto_total": "261800.00",
+        "fecha_emision": "2026-04-21",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-21T10:54:49.17"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-21T11:58:21.843"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-21T14:47:15.41"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "78111808",
+                "descripcion": "Arriendo de vehículos",
+                "cantidad": "1.00",
+                "precio_unitario": "200000.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-70-SE26",
+        "proveedor": {
+            "rutproveedor": "11717210-4",
+            "nombre": "SAVIA HUENTEO HERRERA",
+            "direccion": "Circunvalacion oriente poniente 1538, Pobl. divisa",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "OBRAS MENORES EN CONSTRUCCION (CONTRATISTAS, ALBAN",
+            "correo": "saviadel@hotmail.com",
+            "contacto": "Savia  Huenteo Herrera",
+            "contacto_cargo": "Dueña",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "8.66",
+        "monto_total": "10.30",
+        "fecha_emision": "2026-04-29",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-04-29T09:34:56.3"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-04-29T12:14:45.99"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-04-29T13:12:12.113"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "72102303",
+                "descripcion": "Construcción de sistemas de fontanería o gasfiterí",
+                "cantidad": "1.00",
+                "precio_unitario": "8.66",
+                "monto_total": "8.66"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-73-SE26",
+        "proveedor": {
+            "rutproveedor": "89862200-2",
+            "nombre": "LATAM AIRLINES GROUP S.A.",
+            "direccion": "BALMACEDA 406",
+            "comuna": "Santiago",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "TRANSPORTE REGULAR POR VIA AEREA DE PASAJEROS| TRANSPORTE REGULAR POR VIA AEREA DE CARGA| OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE N.C.P.| ARRIENDO DE INMUEBLES AMOBLADOS O CON EQUIPOS Y MAQUINARIAS| ALQUILER DE AUTOS Y CAMIONETAS SIN CHOFER",
+            "correo": "recaudacion@fi-latam.com",
+            "contacto": "240975",
+            "contacto_cargo": "Contacto",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Cancelada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "12008.00",
+        "monto_total": "12008.00",
+        "fecha_emision": "2026-05-04",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-05-04T10:33:28.77"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-05-04T10:56:53.817"
+            },
+            {
+                "estado": "Cancelada",
+                "fecha": "2026-05-04T13:37:24.167"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "78111502",
+                "descripcion": "Viajes en aviones comerciales, pasajes aéreos",
+                "cantidad": "1.00",
+                "precio_unitario": "12008.00",
+                "monto_total": "12008.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-80-AG26",
+        "proveedor": {
+            "rutproveedor": "76156939-2",
+            "nombre": "Sociedad Enerset Ltda.",
+            "direccion": "3 ORIENTE 720",
+            "comuna": "Viña del Mar",
+            "region": "Región de Valparaíso",
+            "giro": "VENTA AL POR MAYOR DE MAQUINARIA, HERRAMIENTAS, EQUIPO Y MATERIALES N.| VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.| VENTA AL POR MENOR DE ARTICULOS ELECTRODOMESTICOS Y ELECTRONICOS PARA| OTROS SERVICIOS DE TELECOMUNICACIONES N.C.P.",
+            "correo": null,
+            "contacto": "Roberto Lanas",
+            "contacto_cargo": "Representante",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "299800.00",
+        "monto_total": "356762.00",
+        "fecha_emision": "2026-05-08",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-05-08T07:34:26.61"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-05-08T13:55:50.13"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-05-12T14:16:13.48"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "60104906",
+                "descripcion": "Kits de batería",
+                "cantidad": "20.00",
+                "precio_unitario": "14990.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-81-AG26",
+        "proveedor": {
+            "rutproveedor": "76634394-5",
+            "nombre": "ROCIO ANDREA",
+            "direccion": "DIEGO PORTALES N° 1241",
+            "comuna": "Aysén",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "RENT A CAR",
+            "correo": null,
+            "contacto": "ROCIO ANDREA  GONZALEZ VIDELA",
+            "contacto_cargo": "Representante Legal",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "210084.00",
+        "monto_total": "250000.00",
+        "fecha_emision": "2026-05-11",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-05-11T08:05:02.397"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-05-11T08:19:20.773"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-05-11T10:39:35.093"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "78111808",
+                "descripcion": "Arriendo de vehículos",
+                "cantidad": "1.00",
+                "precio_unitario": "210084.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-113-AG26",
+        "proveedor": {
+            "rutproveedor": "77514468-8",
+            "nombre": "AUTOMOTRIZ MONTINO SPA",
+            "direccion": "EL VERDIN LT 1 A 6 A 4 N° No hay Dato",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "VENTA AL POR MENOR DE VEHICULOS AUTOMOTORES NUEVOS O USADOS (INCLUYE C",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Recepción Conforme",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "85899.00",
+        "monto_total": "102220.00",
+        "fecha_emision": "2026-06-09",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-09T11:39:20.367"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-06-09T16:05:53.24"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-06-09T18:03:59.393"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "78111808",
+                "descripcion": "Arriendo de vehículos",
+                "cantidad": "1.00",
+                "precio_unitario": "85899.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-118-AG26",
+        "proveedor": {
+            "rutproveedor": "76882985-3",
+            "nombre": "RACHID NICOLAS",
+            "direccion": "AV. SIMPSON N° 1521",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "CONSTRUCCIÓN",
+            "correo": null,
+            "contacto": "RACHID NICOLAS SALAZAR MONSALVE",
+            "contacto_cargo": "gerente general",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "2778000.00",
+        "monto_total": "3305820.00",
+        "fecha_emision": "2026-06-15",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-12T09:45:43.613"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-06-15T14:48:42.233"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-06-15T14:54:32.41"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "56101532",
+                "descripcion": "Mobiliario",
+                "cantidad": "5.00",
+                "precio_unitario": "555600.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-119-SE26",
+        "proveedor": {
+            "rutproveedor": "76459713-3",
+            "nombre": "HP INC CHILE COMERCIAL LIMITADA",
+            "direccion": "GUACOLDA N° 2152",
+            "comuna": "Quilicura",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "Venta y Servicios",
+            "correo": null,
+            "contacto": "Alex Sepulveda",
+            "contacto_cargo": "Santiago",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Cancelada",
+        "moneda": "USD",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "1047.13",
+        "monto_total": "1246.08",
+        "fecha_emision": "2026-06-12",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-12T09:52:27.23"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-06-12T13:17:06.043"
+            },
+            {
+                "estado": "Cancelada",
+                "fecha": "2026-06-15T11:22:56.037"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "44103103",
+                "descripcion": "Tóner",
+                "cantidad": "3.00",
+                "precio_unitario": "124.31",
+                "monto_total": "372.93"
+            },
+            {
+                "codigo_producto": "44103103",
+                "descripcion": "Tóner",
+                "cantidad": "20.00",
+                "precio_unitario": "33.71",
+                "monto_total": "674.20"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-120-SE26",
+        "proveedor": {
+            "rutproveedor": "9728223-4",
+            "nombre": "Luis Patricio Valdes Gutierrez",
+            "direccion": "Almirante Simpson 1106",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "FABRICACION DE MOTORES, GENERADORES Y TRANSFORMADO",
+            "correo": "mbadilla@difener.cl",
+            "contacto": "Luis Patricio valdes Gutierrez",
+            "contacto_cargo": "administrador",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "503.39",
+        "monto_total": "599.04",
+        "fecha_emision": "2026-07-03",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-12T13:44:00.44"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-03T11:06:13.947"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-05T12:01:05.11"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "81141806",
+                "descripcion": "Inspección de instalaciones eléctricas",
+                "cantidad": "3.00",
+                "precio_unitario": "167.80",
+                "monto_total": "503.39"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-121-SE26",
+        "proveedor": {
+            "rutproveedor": "9728223-4",
+            "nombre": "Luis Patricio Valdes Gutierrez",
+            "direccion": "Almirante Simpson 1106",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "FABRICACION DE MOTORES, GENERADORES Y TRANSFORMADO",
+            "correo": "mbadilla@difener.cl",
+            "contacto": "Luis Patricio valdes Gutierrez",
+            "contacto_cargo": "administrador",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Enviada a proveedor",
+        "moneda": "CLF",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "828.00",
+        "monto_total": "985.32",
+        "fecha_emision": "2026-07-31",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-12T13:46:00.44"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-31T09:44:42.313"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "81141806",
+                "descripcion": "Inspección de instalaciones eléctricas",
+                "cantidad": "36.00",
+                "precio_unitario": "23.00",
+                "monto_total": "828.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-123-AG26",
+        "proveedor": {
+            "rutproveedor": "77539867-1",
+            "nombre": "NETWORK DATA SPA",
+            "direccion": "BADAJOZ 100 OF 820 PS 8 N° No hay Dato",
+            "comuna": "Las Condes",
+            "region": "Región Metropolitana de Santiago",
+            "giro": "VENTA AL POR MENOR DE COMPUTADORES, EQUIPO PERIFERICO, PROGRAMAS INFOR",
+            "correo": null,
+            "contacto": "Pilar Andrea Salas Álvarez",
+            "contacto_cargo": "Administrativo",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "4112115.00",
+        "monto_total": "4893417.00",
+        "fecha_emision": "2026-06-24",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-17T09:35:57.877"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-06-24T15:57:59.403"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-08T14:40:30.823"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "46171610",
+                "descripcion": "Cámaras de seguridad",
+                "cantidad": "1.00",
+                "precio_unitario": "4112115.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-125-AG26",
+        "proveedor": {
+            "rutproveedor": "77694892-6",
+            "nombre": "CONSTRUCCIONES SAN FRANCISCO SPA",
+            "direccion": "MARIANO LATORRE N° 009",
+            "comuna": "San Javier",
+            "region": "Región del Maule",
+            "giro": "CONSTRUCCION DE PROYECTOS DE SERVICIO PUBLICO",
+            "correo": null,
+            "contacto": null,
+            "contacto_cargo": null,
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "2510000.00",
+        "monto_total": "2986900.00",
+        "fecha_emision": "2026-06-24",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-06-22T15:10:05.4"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-06-24T08:43:34.81"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-06-26T10:10:45.597"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "32101625",
+                "descripcion": "Circuitos integrados de accionamiento o control por motor",
+                "cantidad": "1.00",
+                "precio_unitario": "2510000.00",
+                "monto_total": "0.00"
+            }
+        ]
+    },
+    {
+        "codigo": "2182-139-AG26",
+        "proveedor": {
+            "rutproveedor": "7662832-7",
+            "nombre": "JHONSON HUMBERTO ROSSEL VARGAS",
+            "direccion": "BARROSO Nº 713",
+            "comuna": "Coyhaique",
+            "region": "Región Aysén del General Carlos Ibáñez del Campo",
+            "giro": "VENTA AL POR MAYOR DE MATERIALES DE CONSTRUCCION, ART. DE FERRETERIA| VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.| TRANSPORTE DE CARGA POR CARRETERA",
+            "correo": "transrossel@gmail.com",
+            "contacto": "672232452",
+            "contacto_cargo": "DUEÑO",
+            "contacto_telefono": null
+        },
+        "estado_mercado_publico": "Aceptada",
+        "moneda": "CLP",
+        "forma_pago": "2",
+        "plazo_entrega_dias": null,
+        "monto_neto": "3300000.00",
+        "monto_total": "3927000.00",
+        "fecha_emision": "2026-07-23",
+        "organismo_comprador": {
+            "nombre": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+            "unidad": "Corp. Adm. del Poder Judicial - Coyhaique",
+            "rut": "60.301.001-9"
+        },
+        "cronograma": [
+            {
+                "estado": "Creada",
+                "fecha": "2026-07-14T14:54:47.99"
+            },
+            {
+                "estado": "Enviada",
+                "fecha": "2026-07-23T15:57:32.08"
+            },
+            {
+                "estado": "Aceptada",
+                "fecha": "2026-07-25T12:34:24.55"
+            }
+        ],
+        "items": [
+            {
+                "codigo_producto": "30201803",
+                "descripcion": "Unidades para contenedores",
+                "cantidad": "1.00",
+                "precio_unitario": "3300000.00",
+                "monto_total": "0.00"
+            }
+        ]
+    }
+]
