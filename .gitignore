@@ -35,3 +35,4 @@ yarn-error.log
 # Datos reales de funcionarios (RUT, correo institucional) para sembrar
 # usuarios de prueba localmente. Nunca se commitea: el repo es público.
 /database/seeders/data/*.local.php
+/storage/templates/

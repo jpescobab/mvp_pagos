@@ -48,6 +48,7 @@ Notas importantes:
 - Se pide automatizar acciones sensibles (pagos, cierres, informes) sin aprobación humana.
 - Se pide saltarse `TransicionWorkflowService` para cambiar un estado.
 - Se pide usar Playwright para evadir MFA, CAPTCHA o controles de acceso.
+- Se pide que React consulte una API externa directamente (SGF, Mercado Público, CMF, etc.) en vez de pasar por el backend propio.
 
 ## Reglas arquitectónicas críticas (de HARNESS_IA.md)
 

@@ -13,8 +13,17 @@ use Database\Seeders\JurisdiccionesSeeder;
 use Database\Seeders\PresupuestoSeeder;
 use Database\Seeders\TiposDocumentoSeeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+beforeEach(function () {
+    // ImportadorPresupuestoCguService::importar() guarda el Excel subido en
+    // el disco 'local' (storage/app/private/documentos) — sin fakear el
+    // disco, cada corrida de este test deja un .xlsx real huérfano ahí,
+    // acumulando espacio en disco indefinidamente.
+    Storage::fake('local');
+});
 
 /**
  * @param  list<list<mixed>>  $filas  el monto (última columna) siempre numérico,

@@ -110,6 +110,7 @@ export type OrdenCompraMercadoPublico = {
         rutproveedor: string | null;
     } | null;
     proceso_adquisicion: { id: number; codigo: string } | null;
+    contrato: { id: number; codigo: string } | null;
     items?: OrdenCompraMercadoPublicoItem[];
 };
 

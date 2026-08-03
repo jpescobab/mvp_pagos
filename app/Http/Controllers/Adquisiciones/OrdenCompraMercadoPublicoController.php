@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Adquisiciones\BuscarOrdenCompraMercadoPublicoRequest;
 use App\Http\Requests\Adquisiciones\GuardarOrdenCompraMercadoPublicoRequest;
 use App\Http\Resources\Adquisiciones\OrdenCompraMercadoPublicoResource;
+use App\Models\Contrato;
 use App\Models\OrdenCompraMercadoPublico;
 use App\Models\ProcesoAdquisicion;
 use App\Services\Adquisiciones\OrdenCompraMercadoPublicoService;
@@ -134,11 +135,12 @@ class OrdenCompraMercadoPublicoController extends Controller
     {
         Gate::authorize('view', $orden);
 
-        $orden->load(['items', 'proveedor', 'procesoAdquisicion', 'snapshot']);
+        $orden->load(['items', 'proveedor', 'procesoAdquisicion', 'contrato', 'snapshot']);
 
         return Inertia::render('adquisiciones/ordenes-compra-mercado-publico/show', [
             'orden' => new OrdenCompraMercadoPublicoResource($orden),
             'procesosAdquisicion' => ProcesoAdquisicion::all(['id', 'codigo']),
+            'contratos' => Contrato::all(['id', 'codigo']),
         ]);
     }
 

@@ -46,6 +46,7 @@ export default function ProcesoShow() {
     const [comentario, setComentario] = useState('');
     const [procesando, setProcesando] = useState(false);
     const [errorTransicion, setErrorTransicion] = useState<string | null>(null);
+    const [vistaPreviaPdfAbierta, setVistaPreviaPdfAbierta] = useState(false);
 
     function ejecutar(transicion: TransicionWorkflow, comentarioTexto = '') {
         setProcesando(true);
@@ -219,10 +220,12 @@ export default function ProcesoShow() {
                                 {proceso.proveedor.nombre}
                             </span>
                         )}
-                        <Button variant="outline" size="sm" asChild>
-                            <a href={procesos.pdf(proceso.id).url}>
-                                Descargar PDF
-                            </a>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setVistaPreviaPdfAbierta(true)}
+                        >
+                            Ver PDF
                         </Button>
                         {puedeEditar && (
                             <Button
@@ -837,6 +840,40 @@ export default function ProcesoShow() {
                             onClick={confirmarRechazo}
                         >
                             Confirmar rechazo
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={vistaPreviaPdfAbierta}
+                onOpenChange={setVistaPreviaPdfAbierta}
+            >
+                <DialogContent className="max-h-[90vh] max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            Solicitud de compra — {proceso.codigo}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Vista previa del documento. Revísalo antes de
+                            enviarlo a autorización.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <iframe
+                        src={procesos.pdf(proceso.id).url}
+                        title={`Solicitud de compra ${proceso.codigo}`}
+                        className="h-[70vh] w-full rounded-md border"
+                    />
+
+                    <DialogFooter>
+                        <Button variant="outline" asChild>
+                            <a
+                                href={procesos.pdf(proceso.id).url}
+                                download={`${proceso.codigo}.pdf`}
+                            >
+                                Descargar
+                            </a>
                         </Button>
                     </DialogFooter>
                 </DialogContent>

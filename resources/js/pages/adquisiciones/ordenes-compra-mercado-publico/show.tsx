@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     AccionesEncabezadoFichaMercadoPublico,
@@ -20,7 +20,9 @@ import { restarMontos } from '@/lib/format';
 import ordenesCompraMp, {
     pdf as pdfOrdenCompraMp,
 } from '@/routes/adquisiciones/ordenes_compra_mp';
+import contratosRoutes from '@/routes/contratos';
 import type { OrdenCompraMercadoPublico } from '@/types/adquisiciones';
+import type { ContratoSeleccionable } from '@/types/contratos';
 
 const URL_BASE_DETALLE_OC_MERCADO_PUBLICO =
     'https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=';
@@ -37,6 +39,7 @@ type ProcesoAdquisicionSeleccionable = {
 type PageProps = {
     orden: OrdenCompraMercadoPublico;
     procesosAdquisicion: ProcesoAdquisicionSeleccionable[];
+    contratos: ContratoSeleccionable[];
 };
 
 function construirSecciones(
@@ -205,6 +208,7 @@ function construirSecciones(
 export default function OrdenCompraMercadoPublicoShow({
     orden,
     procesosAdquisicion,
+    contratos: contratosSeleccionables,
 }: PageProps) {
     const [procesoSeleccionado, setProcesoSeleccionado] = useState<string>(
         orden.proceso_adquisicion ? String(orden.proceso_adquisicion.id) : '',
@@ -229,6 +233,35 @@ export default function OrdenCompraMercadoPublicoShow({
         router.delete(ordenesCompraMp.vinculo.destroy.url(orden.id), {
             preserveScroll: true,
             onFinish: () => setProcesando(false),
+        });
+    }
+
+    const [contratoSeleccionado, setContratoSeleccionado] = useState<string>(
+        orden.contrato ? String(orden.contrato.id) : '',
+    );
+    const [procesandoContrato, setProcesandoContrato] = useState(false);
+
+    function vincularContrato() {
+        if (contratoSeleccionado === '') {
+            return;
+        }
+
+        setProcesandoContrato(true);
+        router.post(
+            ordenesCompraMp.vinculo_contrato.store.url(orden.id),
+            { contrato_id: Number(contratoSeleccionado) },
+            {
+                preserveScroll: true,
+                onFinish: () => setProcesandoContrato(false),
+            },
+        );
+    }
+
+    function desvincularContrato() {
+        setProcesandoContrato(true);
+        router.delete(ordenesCompraMp.vinculo_contrato.destroy.url(orden.id), {
+            preserveScroll: true,
+            onFinish: () => setProcesandoContrato(false),
         });
     }
 
@@ -314,6 +347,62 @@ export default function OrdenCompraMercadoPublicoShow({
                                     procesando || procesoSeleccionado === ''
                                 }
                                 onClick={vincular}
+                            >
+                                Vincular
+                            </Button>
+                        </div>
+                    )}
+                </section>
+
+                <section className="space-y-3 rounded-xl border p-4">
+                    <h2 className="text-base font-medium">
+                        Contrato vinculado
+                    </h2>
+
+                    {orden.contrato ? (
+                        <div className="flex items-center justify-between">
+                            <Link
+                                href={contratosRoutes.show.url(
+                                    orden.contrato.id,
+                                )}
+                                className="text-sm underline"
+                            >
+                                {orden.contrato.codigo}
+                            </Link>
+                            <Button
+                                variant="outline"
+                                disabled={procesandoContrato}
+                                onClick={desvincularContrato}
+                            >
+                                Desvincular
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap items-end gap-2">
+                            <Select
+                                value={contratoSeleccionado}
+                                onValueChange={setContratoSeleccionado}
+                            >
+                                <SelectTrigger className="w-64">
+                                    <SelectValue placeholder="Selecciona un contrato" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {contratosSeleccionables.map((contrato) => (
+                                        <SelectItem
+                                            key={contrato.id}
+                                            value={String(contrato.id)}
+                                        >
+                                            {contrato.codigo}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button
+                                disabled={
+                                    procesandoContrato ||
+                                    contratoSeleccionado === ''
+                                }
+                                onClick={vincularContrato}
                             >
                                 Vincular
                             </Button>

@@ -36,6 +36,10 @@ class OrdenCompraMercadoPublicoResource extends JsonResource
                 'id' => $this->procesoAdquisicion->id,
                 'codigo' => $this->procesoAdquisicion->codigo,
             ]),
+            'contrato' => $this->when($this->contrato !== null, fn () => [
+                'id' => $this->contrato->id,
+                'codigo' => $this->contrato->codigo,
+            ]),
             'items' => $this->whenLoaded('items', fn () => $this->items->map(fn ($item) => [
                 'id' => $item->id,
                 'codigo_producto' => $item->codigo_producto,

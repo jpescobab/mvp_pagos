@@ -23,6 +23,7 @@ class OrdenCompraMercadoPublico extends Model
         'codigo',
         'proveedor_id',
         'proceso_adquisicion_id',
+        'contrato_id',
         'snapshot_datos_externo_id',
         'estado_mercado_publico',
         'moneda',
@@ -68,6 +69,14 @@ class OrdenCompraMercadoPublico extends Model
     public function procesoAdquisicion(): BelongsTo
     {
         return $this->belongsTo(ProcesoAdquisicion::class);
+    }
+
+    /**
+     * @return BelongsTo<Contrato, $this>
+     */
+    public function contrato(): BelongsTo
+    {
+        return $this->belongsTo(Contrato::class);
     }
 
     /**

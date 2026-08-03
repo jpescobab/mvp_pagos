@@ -26,4 +26,9 @@ class OrdenCompraMercadoPublicoPolicy
     {
         return $user->can('adquisiciones.consultar_orden_compra_mp');
     }
+
+    public function vincularContrato(User $user, OrdenCompraMercadoPublico $orden): bool
+    {
+        return $user->can('adquisiciones.consultar_orden_compra_mp');
+    }
 }
