@@ -6,6 +6,7 @@ import {
     Coins,
     FileBarChart,
     FileSearch,
+    FileSignature,
     FileStack,
     Gauge,
     Grid3x3,
@@ -43,6 +44,7 @@ import { index as licitacionesMercadoPublico } from '@/routes/adquisiciones/lici
 import { index as ordenesCompraMercadoPublico } from '@/routes/adquisiciones/ordenes_compra_mp';
 import { index as procesosAdquisicion } from '@/routes/adquisiciones/procesos';
 import { index as auditoria } from '@/routes/auditoria';
+import { index as contratos } from '@/routes/contratos';
 import { index as indicadoresEconomicos } from '@/routes/indicadores-economicos';
 import { index as definicionesInformeRazonado } from '@/routes/informes-razonados/definiciones';
 import { index as ejecucionesInformeRazonado } from '@/routes/informes-razonados/ejecuciones';
@@ -180,6 +182,12 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
         href: procesosAdquisicion(),
         icon: ShoppingCart,
         permiso: 'adquisiciones.consultar_proceso',
+    },
+    {
+        title: 'Contratos',
+        href: contratos(),
+        icon: FileSignature,
+        permiso: 'contratos.ver',
     },
     {
         title: 'Órdenes de Compra (Mercado Público)',

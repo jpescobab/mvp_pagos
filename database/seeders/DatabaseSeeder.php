@@ -39,6 +39,8 @@ class DatabaseSeeder extends Seeder
         $this->call(WorkflowAdquisicionesSeeder::class);
         $this->call(RequisitosDocumentalesAdquisicionesSeeder::class);
         $this->call(WorkflowPresupuestoCdpSeeder::class);
+        $this->call(WorkflowContratosSeeder::class);
+        $this->call(RequisitosDocumentalesContratosSeeder::class);
 
         // Snapshot de desarrollo (UF/USD/UTM/UTA/IPC ene-ago 2026) para no
         // golpear la API de la CMF en cada fresh — ver docblock del seeder.
@@ -49,6 +51,12 @@ class DatabaseSeeder extends Seeder
         // desde Mercado Público — ver docblock de cada seeder.
         $this->call(OrdenesCompraMercadoPublicoDesarrolloSeeder::class);
         $this->call(LicitacionesMercadoPublicoDesarrolloSeeder::class);
+
+        // Snapshot de desarrollo de los 70 contratos reales de la planilla
+        // institucional, vinculados a las licitaciones recién sembradas
+        // arriba — ver docblock del seeder. Debe correr después de
+        // LicitacionesMercadoPublicoDesarrolloSeeder para poder vincular.
+        $this->call(ContratosDesarrolloSeeder::class);
 
         $this->call(FuncionariosCapjSeeder::class);
 

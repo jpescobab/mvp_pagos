@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Requests\Contratos;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateContratoRequest extends FormRequest
+{
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    public function rules(): array
+    {
+        return [
+            'id_institucional' => [
+                'required',
+                'integer',
+                Rule::unique('contratos', 'id_institucional')->ignore($this->route('contrato')),
+            ],
+            'modalidad_compra' => ['required', 'in:licitacion,trato_directo,fuera_de_portal'],
+            'id_proceso_mp' => ['nullable', 'string', 'max:255'],
+            'tipo_contrato' => ['required', 'in:contrato,convenio_precio,orden_compra,arriendo'],
+            'referencia' => ['required', 'string'],
+            'fecha_inicio_vigencia' => ['required', 'date'],
+            'fecha_fin_vigencia' => ['required', 'date', 'after_or_equal:fecha_inicio_vigencia'],
+            'materia' => ['nullable', 'string', 'max:255'],
+            'submateria' => ['nullable', 'string', 'max:255'],
+            'tiene_convenio_precio' => ['required', 'boolean'],
+            'tiene_calendario_pago' => ['required', 'boolean'],
+            'periodicidad_pago' => ['required_if:tiene_calendario_pago,true', 'nullable', 'in:mensual,bimestral,trimestral,semestral,anual,unica'],
+            'monto_total' => ['nullable', 'numeric', 'min:0'],
+            'proveedor_id' => ['required', 'exists:proveedores,id'],
+        ];
+    }
+}

@@ -5,6 +5,7 @@ use App\Http\Controllers\Adquisiciones\OrdenCompraMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\ParidadAdquisicionController;
 use App\Http\Controllers\Adquisiciones\ProcesoAdquisicionController;
 use App\Http\Controllers\Adquisiciones\TransicionProcesoAdquisicionController;
+use App\Http\Controllers\Adquisiciones\VinculoOrdenCompraContratoController;
 use App\Http\Controllers\Adquisiciones\VinculoProcesoAdquisicionLicitacionMercadoPublicoController;
 use App\Http\Controllers\Adquisiciones\VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::middleware(['auth'])->prefix('adquisiciones')->name('adquisiciones.')->gr
         Route::post('{orden}/actualizar', [OrdenCompraMercadoPublicoController::class, 'actualizar'])->name('actualizar');
         Route::post('{orden}/vinculo', [VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController::class, 'store'])->name('vinculo.store');
         Route::delete('{orden}/vinculo', [VinculoProcesoAdquisicionOrdenCompraMercadoPublicoController::class, 'destroy'])->name('vinculo.destroy');
+        Route::post('{orden}/vinculo-contrato', [VinculoOrdenCompraContratoController::class, 'store'])->name('vinculo_contrato.store');
+        Route::delete('{orden}/vinculo-contrato', [VinculoOrdenCompraContratoController::class, 'destroy'])->name('vinculo_contrato.destroy');
     });
 
     Route::prefix('licitaciones-mercado-publico')->name('licitaciones_mp.')->group(function () {

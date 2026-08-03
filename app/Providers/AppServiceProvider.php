@@ -11,6 +11,7 @@ use App\Models\Ccosto;
 use App\Models\Cfinanciero;
 use App\Models\ClienteMedidor;
 use App\Models\ConectorAutomatizacionNavegador;
+use App\Models\Contrato;
 use App\Models\CorteReportabilidad;
 use App\Models\DefinicionInformeRazonado;
 use App\Models\EgresoCgu;
@@ -43,6 +44,7 @@ use App\Policies\CcostoPolicy;
 use App\Policies\CfinancieroPolicy;
 use App\Policies\ClienteMedidorPolicy;
 use App\Policies\ConectorAutomatizacionNavegadorPolicy;
+use App\Policies\ContratoPolicy;
 use App\Policies\CorteReportabilidadPolicy;
 use App\Policies\DefinicionInformeRazonadoPolicy;
 use App\Policies\EgresoCguPolicy;
@@ -163,6 +165,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ImportacionPresupuesto::class, ImportacionPresupuestoPolicy::class);
         Gate::policy(Presupuesto::class, PresupuestoPolicy::class);
         Gate::policy(CertificadoDisponibilidadPresupuestaria::class, CertificadoDisponibilidadPresupuestariaPolicy::class);
+        Gate::policy(Contrato::class, ContratoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

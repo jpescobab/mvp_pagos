@@ -148,6 +148,13 @@ class Proceso extends Model
             ];
         }
 
+        if ($sujeto instanceof Contrato) {
+            return [
+                'descripcion' => "Contrato {$sujeto->codigo}",
+                'url' => route('contratos.show', $sujeto),
+            ];
+        }
+
         return [
             'descripcion' => "Proceso #{$this->id}",
             'url' => null,

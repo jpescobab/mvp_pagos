@@ -1,0 +1,1402 @@
+[
+  {
+    "id_institucional": 26417,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-5-LE26",
+    "estado_origen": "PENDIENTE",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACION DE SERVICIO DE MANTENCION DE GRUPOS ELECTROGENOS DE LOS TRIBUNALES DE LA JURISDICCION DE AYSEN.",
+    "fecha_inicio_vigencia": "2026-08-04",
+    "fecha_fin_vigencia": "2029-08-04",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. GRUPO ELECTROGENO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26386,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-6-LE26",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACION DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE ALCANTARILLADO Y SERVICIOS HIGIENICOS DE TRIBUNALES DE LA JURISDICCION DE AYSEN.",
+    "fecha_inicio_vigencia": "2026-07-20",
+    "fecha_fin_vigencia": "2029-07-20",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "GASFITERIA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26382,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741488-1-L126",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL TOP COYHAIQUE",
+    "fecha_inicio_vigencia": "2026-08-01",
+    "fecha_fin_vigencia": "2029-08-01",
+    "proveedor": {
+      "rutproveedor": "76.945.689-9",
+      "nombre": "TRANSPORTE URBANO Y SUBURBANO DE PASAJEROS VÍA LOC"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJES, FLETES Y BODEGAJES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26340,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-3-LE26",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE TABLEROS E INSTALACIONES ELECTRICAS DE TRIBUNALES DE AYSEN",
+    "fecha_inicio_vigencia": "2026-07-22",
+    "fecha_fin_vigencia": "2029-07-22",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. TABLERO ELECTRICO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26309,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741422-1-LE26",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL JUZGADO DE FAMILIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2026-05-06",
+    "fecha_fin_vigencia": "2029-05-06",
+    "proveedor": {
+      "rutproveedor": "7.672.718-k",
+      "nombre": "JULIA GLADYS MARTÍNEZ GARCÍA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJES, FLETES Y BODEGAJES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26292,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-6-LR25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE SERVICIO DE ASEO E INSUMOS EN TRIBUNALES DE LA JURISDICCION DE COYHAIQUE Y CAPJ.",
+    "fecha_inicio_vigencia": "2026-03-16",
+    "fecha_fin_vigencia": "2028-03-16",
+    "proveedor": {
+      "rutproveedor": "76.178.390-4",
+      "nombre": "CENTRAL DE RESTAURANTES ARAMARK MULTISERVICIOS LIMITADA"
+    },
+    "materia": "SERVICIO DE ASEO",
+    "submateria": "SERVICIO DE ASEO DEPENDENCIAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26276,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE26",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES - EDIFICIOS DEL PODER JUDICIAL DE COYHAIQUE.",
+    "fecha_inicio_vigencia": "2026-03-18",
+    "fecha_fin_vigencia": "2029-03-16",
+    "proveedor": {
+      "rutproveedor": "13.504.547-0",
+      "nombre": "ARNALDO FABIÁN TOBAR RAMÍREZ"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26225,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-12-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO SERVICIO DE JARDINERIA DEL JUZGADO DE LETRAS DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2026-03-18",
+    "fecha_fin_vigencia": "2029-03-18",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRÁNSITO HUENTEO HERRERA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26220,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-11-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACION DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE CALDERAS DE CALEFACCION EN TRIBUNALES DE LA JURISDICCION DE AYSEN.",
+    "fecha_inicio_vigencia": "2026-03-04",
+    "fecha_fin_vigencia": "2029-03-04",
+    "proveedor": {
+      "rutproveedor": "12.975.530-k",
+      "nombre": "MARCIAL ROBERTO MORENO GATICA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. CALDERAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26179,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-10-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES  JUZGADO DE PUERTO CISNES",
+    "fecha_inicio_vigencia": "2026-03-16",
+    "fecha_fin_vigencia": "2029-03-16",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26164,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-9-L125",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE PRECIOS SERVICIO DE ENCUADERNACION Y EMPASTE",
+    "fecha_inicio_vigencia": "2026-02-03",
+    "fecha_fin_vigencia": "2029-02-02",
+    "proveedor": {
+      "rutproveedor": "8.258.735-7",
+      "nombre": "EDUARDO ANTONIO HERNÁNDEZ MANSILLA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "ENCUADERNACION",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26161,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-8-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES DEL JUZGADO DE COCHRANE",
+    "fecha_inicio_vigencia": "2026-03-01",
+    "fecha_fin_vigencia": "2029-03-01",
+    "proveedor": {
+      "rutproveedor": "77.858.458-1",
+      "nombre": "Agrícola Río Neff SpA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26160,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-5-LR25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE GUARDIAS DE SEGURIDAD PARA LA JURISDICCION DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2026-02-03",
+    "fecha_fin_vigencia": "2027-12-01",
+    "proveedor": {
+      "rutproveedor": "96.888.810-2",
+      "nombre": "GROWING S A"
+    },
+    "materia": "SERVICIO DE VIGILANCIA",
+    "submateria": "SERVICIO DE GUARDIAS DE SEGURIDAD",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 26028,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-4-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACION DE SERVICIO DE MANTENCION DE EQUIPOS DE CLIMATIZACION DE TRIBUNALES DE LA JURISDICCION DE AYSEN.",
+    "fecha_inicio_vigencia": "2025-10-13",
+    "fecha_fin_vigencia": "2028-10-13",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. AIRE ACONDICIONADO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25967,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE25",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE EJECUCION DE OBRAS DE CONSERVACION DEL EDIFICIO DEL JUZGADO DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2025-09-01",
+    "fecha_fin_vigencia": "2027-02-18",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25640,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741465-1-LE24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "APRUEBA CONTRATO DE SERVICIO DE MANTENCION DE JARDINES JUZGADO DE LETRAS Y GARANTIA DE PTO. AYSEN",
+    "fecha_inicio_vigencia": "2025-02-17",
+    "fecha_fin_vigencia": "2028-02-17",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRÁNSITO HUENTEO HERRERA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25447,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-17-LE24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE ARRENDAMIENTO Y SUMIMISTRO DE AGUA PURIFICADA EN TRIBUNALES DE LA JURISDICCION",
+    "fecha_inicio_vigencia": "2024-10-21",
+    "fecha_fin_vigencia": "2027-10-21",
+    "proveedor": {
+      "rutproveedor": "76.618.239-9",
+      "nombre": "COMERCIALIZADORA LOS CIPRESES JOSE NAVARRO GONZALE"
+    },
+    "materia": "ALIMENTOS Y BEBIDAS PARA PERSONAS",
+    "submateria": "AGUA PURIFICADA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25433,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-14-LP24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE SERVICIO DE OBRAS DE CONSERVACION DE EDIFICIO DEL JUZGADO DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2024-10-04",
+    "fecha_fin_vigencia": "2025-03-18",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25389,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-7-LE24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE OBRAS DE CONSERVACION DE EDIFICIO DEL JUZGADO DE COCHRANE",
+    "fecha_inicio_vigencia": "2024-08-27",
+    "fecha_fin_vigencia": "2025-01-30",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25260,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741484-1-L124",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "Convenio de transporte preferente del Servicio de transporte para notificaciones y viajes especiales radio urbano y rural del Juzgado de Letras del Trabajo de Coyhaique.",
+    "fecha_inicio_vigencia": "2024-06-19",
+    "fecha_fin_vigencia": "2027-06-19",
+    "proveedor": {
+      "rutproveedor": "7.762.264-0",
+      "nombre": "DELFÍN OLIVARES JARA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25259,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-3-LE24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACION DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE MOTOBOMBAS DE TRIBUNALES DE LA JURISDICCION DE AYSEN.",
+    "fecha_inicio_vigencia": "2024-07-05",
+    "fecha_fin_vigencia": "2027-07-05",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. BOMBAS DE ELEVACION DE AGUA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25147,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE24",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE SERVICIO DE MANTENCION PREVENTIVA Y REPARATIVA DE SISTEMAS DE CALEFACCION POR TERMOACUMULADORES ELECTRICOS.",
+    "fecha_inicio_vigencia": "2024-04-06",
+    "fecha_fin_vigencia": "2027-04-06",
+    "proveedor": {
+      "rutproveedor": "76.499.318-7",
+      "nombre": "Constructora EHG Limitada"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. SISTEMA DE CALEFACCIÓN",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 25013,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-15-LR23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIOS DE ASEO E INSUMOS EN UNIDADES JUDICIALES DE LA REGÓN DE AYSEN",
+    "fecha_inicio_vigencia": "2024-03-15",
+    "fecha_fin_vigencia": "2026-03-15",
+    "proveedor": {
+      "rutproveedor": "76.893.640-4",
+      "nombre": "COM PANGUILEMU LTDA"
+    },
+    "materia": "SERVICIO DE ASEO",
+    "submateria": "SERVICIO DE ASEO DEPENDENCIAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 24017,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-11-LP23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "OBRAS DE CONSERVACION DEL EDIFICIO JUZGADO DE LETRAS Y GARANTIA DE COCHRANE",
+    "fecha_inicio_vigencia": "2023-10-04",
+    "fecha_fin_vigencia": "2023-12-04",
+    "proveedor": {
+      "rutproveedor": "16.831.929-0",
+      "nombre": "SEBASTIAN FRANCISCO BOSSEL SOLIS"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23960,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-10-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE “SERVICIO DE MANTENCIÓN Y REPARACIÓN PREVENTIVA DE TECHUMBRES Y VENTANAS DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN Y CONVENIO DE PRECIOS DE OBRAS MENORES PARA EDIFICIOS DE TRIBUNALES Y VIVIENDAS JUDICIALESC",
+    "fecha_inicio_vigencia": "2023-09-03",
+    "fecha_fin_vigencia": "2026-09-03",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRÁNSITO HUENTEO HERRERA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. TECHUMBRE /CANALETA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23957,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741256-1-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL JUZGADO DE GTIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2023-08-21",
+    "fecha_fin_vigencia": "2026-08-21",
+    "proveedor": {
+      "rutproveedor": "11.692.530-3",
+      "nombre": "OSCAR ANDREY MARIANTE MUÑOZ"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23930,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-9-LP23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE OBRAS DE CONSERVACION DE EDIFICIO JUZGADO DE GARANTIA DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2023-09-04",
+    "fecha_fin_vigencia": "2023-11-04",
+    "proveedor": {
+      "rutproveedor": "16.831.929-0",
+      "nombre": "SEBASTIAN FRANCISCO BOSSEL SOLIS"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23890,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-5-LP23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE OBRAS DE CONSERVACION DE EDIFICIO DE LA CORTE DE APELACIONES DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2023-09-04",
+    "fecha_fin_vigencia": "2023-11-04",
+    "proveedor": {
+      "rutproveedor": "76.092.765-1",
+      "nombre": "GESTION Y GERENCIA DE PROYECTOS LTDA"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23885,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-8-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE SERVICIO DE MANTENCIÓN PREVENTIVA Y CORRECTIVA DE ALCANTARILLADO Y SERVICIOS HIGIENICOS TRIB DE AYSEN",
+    "fecha_inicio_vigencia": "2023-07-18",
+    "fecha_fin_vigencia": "2026-07-18",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRÁNSITO HUENTEO HERRERA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. DE CAMARAS ALCANTARILLADO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23840,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-6-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE TABLEROS E INSTALACIONES ELECTRICAS DE TRIBUNALES DE AYSEN",
+    "fecha_inicio_vigencia": "2023-07-21",
+    "fecha_fin_vigencia": "2026-07-21",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. TABLERO ELECTRICO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23839,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-7-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE GRUPOS ELECTROGENOS DE TRIBUNALES JURISDICCION DE AYSEN",
+    "fecha_inicio_vigencia": "2023-08-03",
+    "fecha_fin_vigencia": "2026-08-03",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. GRUPO ELECTROGENO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23468,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741488-1-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL TOP COYHAIQUE",
+    "fecha_inicio_vigencia": "2023-04-03",
+    "fecha_fin_vigencia": "2026-04-03",
+    "proveedor": {
+      "rutproveedor": "76.945.689-9",
+      "nombre": "MARIA TERESA SPA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23422,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741422-1-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL JUZGADO DE FAMILIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2023-04-03",
+    "fecha_fin_vigencia": "2026-04-03",
+    "proveedor": {
+      "rutproveedor": "7.672.718-K",
+      "nombre": "JULIA GLADYS MARTINEZ GARCIA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23398,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-2-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE SERVICIO DE MANTENCIÓN PREVENTIVA Y CORRECTIVA DE CALDERAS DE CALEFACCIÓN DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN",
+    "fecha_inicio_vigencia": "2023-03-03",
+    "fecha_fin_vigencia": "2026-03-03",
+    "proveedor": {
+      "rutproveedor": "12.975.530-K",
+      "nombre": "MARCIAL ROBERTO MORENO GATICA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. CALDERAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23321,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-4-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "MANTENCION DE JARDINES  Y AREAS VERDES DEL JUZGADO DE LETRAS DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2023-03-17",
+    "fecha_fin_vigencia": "2026-03-17",
+    "proveedor": {
+      "rutproveedor": "76.893.640-4",
+      "nombre": "COMERCIAL PANGUILEMU LTDA."
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23320,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-3-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "MANTENCION DE JARDINES  Y AREAS VERDES DEL JUZGADO DE LETRAS DE COCHRANE",
+    "fecha_inicio_vigencia": "2023-02-22",
+    "fecha_fin_vigencia": "2026-02-22",
+    "proveedor": {
+      "rutproveedor": "76.893.640-4",
+      "nombre": "COMERCIAL PANGUILEMU LTDA."
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23226,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE23",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "APRUEBA CONVENIO DE PRECIOS PARA EL SERVICIO DE ENCUADERNACIÓN Y EMPASTE PARA LA CORPORACIÓN ADMINISTRATIVA DEL PODER JUDICIAL ZONAL COYHAIQUE.",
+    "fecha_inicio_vigencia": "2023-02-03",
+    "fecha_fin_vigencia": "2026-01-31",
+    "proveedor": {
+      "rutproveedor": "8.258.735-7",
+      "nombre": "EDUARDO ANTONIO HERNANDEZ MANSILLA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "ENCUADERNACION",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23222,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-12-LE22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "APRUEBA CONTRATO POR SERVICIO DE MANTENCIÓN DE JARDINES Y ÁREAS VERDES PARA LOCALIDADES DE COYHAIQUE.",
+    "fecha_inicio_vigencia": "2023-02-03",
+    "fecha_fin_vigencia": "2026-02-03",
+    "proveedor": {
+      "rutproveedor": "13.969.655-7",
+      "nombre": "ALEX DAVID MILLALONCO RIVAS"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23220,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-11-LE22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES PUERTO CISNES",
+    "fecha_inicio_vigencia": "2023-03-13",
+    "fecha_fin_vigencia": "2026-03-13",
+    "proveedor": {
+      "rutproveedor": "9.348.839-3",
+      "nombre": "SANDRA SOLEDAD AGUILA ROSAS"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 23163,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "425-56-LR22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE GUARDIAS DE SEGURIDAD JURISDICCION COYHAIQUE",
+    "fecha_inicio_vigencia": "2025-12-02",
+    "fecha_fin_vigencia": "2026-02-28",
+    "proveedor": {
+      "rutproveedor": "76.806.170-K",
+      "nombre": "SERVICIOS INTEGRALES DE SEGURIDAD DE LA PATAGONIA LIMITADA"
+    },
+    "materia": "SERVICIO DE VIGILANCIA",
+    "submateria": "SERVICIO DE GUARDIAS DE SEGURIDAD",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22998,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-8-LE22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "APRUEBA CONTRATO DE SERVICIO DE MAN PREVENTIVA DE CLIMATIZACION TRIBUNALES ZONAL COYHAIQUE",
+    "fecha_inicio_vigencia": "2022-10-01",
+    "fecha_fin_vigencia": "2025-10-01",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. AIRE ACONDICIONADO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22943,
+    "modalidad_compra": "trato_directo",
+    "id_proceso_mp": "2182-121-SE22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "orden_compra",
+    "referencia": "ARRIENDO DE CASILLA DE CORREOS 2022 2023",
+    "fecha_inicio_vigencia": "2022-11-18",
+    "fecha_fin_vigencia": "2023-11-22",
+    "proveedor": {
+      "rutproveedor": "60.503.000-9",
+      "nombre": "EMPRESA DE CORREOS DE CHILE"
+    },
+    "materia": "CORREO",
+    "submateria": "CORREO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22799,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-3-LP22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "OBRAS DE CONSERVACION DEL EDIFICIO DE LA CORTE DE APELACIONES DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2022-09-08",
+    "fecha_fin_vigencia": "2022-11-20",
+    "proveedor": {
+      "rutproveedor": "16.831.929-0",
+      "nombre": "SEBASTIAN FRANCISCO BOSSEL SOLIS"
+    },
+    "materia": "31 - PROGRAMAS DE INVERSION",
+    "submateria": "OBRAS CIVILES - PROYECTOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22482,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-9-LR21",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE ASEO E INSUMOS EN UNIDADES JUDICIALES DE LA REGIÓN DE AYSÉN",
+    "fecha_inicio_vigencia": "2022-03-14",
+    "fecha_fin_vigencia": "2024-03-14",
+    "proveedor": {
+      "rutproveedor": "76.893.640-4",
+      "nombre": "COMERCIAL PANGUILEMU LTDA."
+    },
+    "materia": "SERVICIO DE ASEO",
+    "submateria": "SERVICIO DE ASEO DEPENDENCIAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22363,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741465-1-CO22",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "MANTENCION DE JARDINES Y AREAS VERDES DEL JUZGADO DE LETRAS DE PUERTO AYSEN",
+    "fecha_inicio_vigencia": "2022-02-16",
+    "fecha_fin_vigencia": "2025-02-16",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRANSITO HUENTEO HERRERA"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22125,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "PJ22125",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "orden_compra",
+    "referencia": "SERVICIO TELEFONÍA MÓVIL J. CHILE CHICO Y COCHRANE",
+    "fecha_inicio_vigencia": "2020-04-28",
+    "fecha_fin_vigencia": "2030-12-31",
+    "proveedor": {
+      "rutproveedor": "96.806.980-2",
+      "nombre": "ENTEL PCS TELECOMUNICACIONES S.A."
+    },
+    "materia": "ACCESO A INTERNET",
+    "submateria": "ACCESO A INTERNET",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 22000,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-5-LE21",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "ARRIENDO DE EQUIPOS DISPENSADORES  Y SUMINISTRO DE AGUA PURIFICADA PARA EDIFICIOS DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN",
+    "fecha_inicio_vigencia": "2021-10-01",
+    "fecha_fin_vigencia": "2024-10-01",
+    "proveedor": {
+      "rutproveedor": "76.618.239-9",
+      "nombre": "COMERCIALIZADORA LOS CIPRESES JOSE NAVARRO GONZALEZ E.I.R.L."
+    },
+    "materia": "ALIMENTOS Y BEBIDAS PARA PERSONAS",
+    "submateria": "AGUA PURIFICADA",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 21577,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741484-1-LE21",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE SERVICIO DE TRANSPORTE PARA NOTIFICACIONES DEL JUZGADO DE LETRAS DEL TRABAJO DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2021-06-18",
+    "fecha_fin_vigencia": "2024-06-18",
+    "proveedor": {
+      "rutproveedor": "7.762.264-0",
+      "nombre": "DELFIN OLIVARES JARA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 21576,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-2-LE21",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE MOTOBOMBAS DE TRIBUNALES DE LA JURISDICCION DE AYSÉN",
+    "fecha_inicio_vigencia": "2021-07-04",
+    "fecha_fin_vigencia": "2024-07-04",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. BOMBAS DE ELEVACION DE AGUA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 21414,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE21",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE MANTENCIÓN PREVENTIVA Y REPARATIVA DE SISTEMA DE CALEFACCION POR TERMO ACUMULADORES ELECTRICOS PARA TRIBUNALES DE LA JURISDICCION DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2021-04-05",
+    "fecha_fin_vigencia": "2024-04-05",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. CALDERAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 21211,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "PJ21211",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "MANTENCION DE JARDINES EN TRIBUNAL DE JUICIO ORAL EN LO PENAL COYHAIQUE",
+    "fecha_inicio_vigencia": "2005-02-11",
+    "fecha_fin_vigencia": "2030-12-31",
+    "proveedor": {
+      "rutproveedor": "9.781.824-K",
+      "nombre": "ALVARO JARA POBLETE"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 20041,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-12-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE MANTENCIÓN Y REPARACIÓN  DE TECHUMBRES, VENTANAS Y CONVENIO DE PRECIOS DE OBRAS MENORES DE TRIBUNALES DE LA JURISDICCIÓN DE AYSEN",
+    "fecha_inicio_vigencia": "2020-09-02",
+    "fecha_fin_vigencia": "2023-09-02",
+    "proveedor": {
+      "rutproveedor": "11.717.210-4",
+      "nombre": "SAVIA DEL TRANSITO HUENTEO HERRERA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. TECHUMBRE /CANALETA",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 19718,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741256-2-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL JUZGADO DE GARANTIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2020-08-04",
+    "fecha_fin_vigencia": "2023-08-04",
+    "proveedor": {
+      "rutproveedor": "14.043.093-5",
+      "nombre": "ISMAEL ALFONSO GODOY ALVAREZ"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 19717,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-10-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE MANTENCION PREVENTIVA Y CORRECTIVA DE  GRUPOS ELECTROGENOS DE TRIBUNALES JURISDICCION DE AYSEN",
+    "fecha_inicio_vigencia": "2020-08-02",
+    "fecha_fin_vigencia": "2023-08-02",
+    "proveedor": {
+      "rutproveedor": "76.499.318-7",
+      "nombre": "CONSTRUCTORA EHG LIMITADA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. GRUPO ELECTROGENO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 19336,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-7-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE TABLEROS ELÉCTRICOS DE EDIFICIOS DE LA JURISDICCIÓN DE AYSEN",
+    "fecha_inicio_vigencia": "2020-07-20",
+    "fecha_fin_vigencia": "2023-07-20",
+    "proveedor": {
+      "rutproveedor": "76.499.318-7",
+      "nombre": "CONSTRUCTORA EHG LIMITADA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. TABLERO ELECTRICO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 19236,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-6-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE ALCANTARILLADO Y SSHH DE TRIBUNALES DE LA JURISDICCIÓN DE AYSEN",
+    "fecha_inicio_vigencia": "2020-07-17",
+    "fecha_fin_vigencia": "2023-07-17",
+    "proveedor": {
+      "rutproveedor": "9.728.223-4",
+      "nombre": "LUIS PATRICIO VALDÉS GUTIÉRREZ"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. DE CAMARAS ALCANTARILLADO",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 18427,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741488-1-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA TRIBUNAL DE JUICIO ORAL EN LO PENAL DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2020-03-03",
+    "fecha_fin_vigencia": "2023-03-03",
+    "proveedor": {
+      "rutproveedor": "7.762.264-0",
+      "nombre": "DELFIN OLIVARES JARA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 18426,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "741422-1-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "convenio_precio",
+    "referencia": "CONVENIO DE USO PREFERENTE DE TRANSPORTE POR NOTIFICACIONES PARA EL JUZGADO DE FAMILIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2020-04-02",
+    "fecha_fin_vigencia": "2023-04-02",
+    "proveedor": {
+      "rutproveedor": "7.672.718-K",
+      "nombre": "JULIA GLADYS MARTINEZ GARCIA"
+    },
+    "materia": "SERVICIO DE TRANSPORTE",
+    "submateria": "PASAJE DE MOVILIZACIÓN POR NOTIFICACIONES",
+    "tiene_convenio_precio": true,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 18407,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-2-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE PRESTACIÓN DE SERVICIO DE MANTENCIÓN PREVENTIVA Y  CORRECTIVA DE CALDERAS DE CALEFACCIÓN DE TRIBUNALES DE LA JURISDICCIÓN DE AYSÉN",
+    "fecha_inicio_vigencia": "2020-03-02",
+    "fecha_fin_vigencia": "2023-03-02",
+    "proveedor": {
+      "rutproveedor": "12.975.530-K",
+      "nombre": "MARCIAL ROBERTO MORENO GATICA"
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. CALDERAS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 18388,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-3-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE MANTENCION DE JARDINES DE EDIFICIO DEL JUZGADO DE LETRAS DE CHILE CHICO",
+    "fecha_inicio_vigencia": "2020-03-16",
+    "fecha_fin_vigencia": "2023-03-16",
+    "proveedor": {
+      "rutproveedor": "10.416.953-8",
+      "nombre": "CESAR ULISES MARDONES QUIROZ"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 18387,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-5-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE MANTENCION DE JARDINES DE EDIFICIO DEL JUZGADO DE LETRAS DE PUERTO CISNES",
+    "fecha_inicio_vigencia": "2020-03-13",
+    "fecha_fin_vigencia": "2023-03-13",
+    "proveedor": {
+      "rutproveedor": "9.348.839-3",
+      "nombre": "SANDRA SOLEDAD AGUILA ROSAS"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 17828,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE JARDINERIA PARA LOCALIDAD DE COCHRANE",
+    "fecha_inicio_vigencia": "2020-02-03",
+    "fecha_fin_vigencia": "2023-02-03",
+    "proveedor": {
+      "rutproveedor": "15.305.910-1",
+      "nombre": "JUAN ANDRES IRQUEN IRQUEN"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 17827,
+    "modalidad_compra": "licitacion",
+    "id_proceso_mp": "2182-1-LE20",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "SERVICIO DE JARDINERÍA PARA LOCALIDADES DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2020-02-02",
+    "fecha_fin_vigencia": "2023-02-02",
+    "proveedor": {
+      "rutproveedor": "13.504.547-0",
+      "nombre": "ARNALDO TOBAR RAMIREZ"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 16913,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "CALLE 21 DE MAYO N° 583",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "arriendo",
+    "referencia": "Contrato de Arrendamiento de inmueble para la Administración Zonal de Coyhaique",
+    "fecha_inicio_vigencia": "2021-12-21",
+    "fecha_fin_vigencia": "2027-12-31",
+    "proveedor": {
+      "rutproveedor": "8.481.744-9",
+      "nombre": "SADI DEL CARMEN AUAD NASER"
+    },
+    "materia": "MODULO ARRIENDOS",
+    "submateria": "ARRIENDOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 4564,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "FRANCISCO BILBAO N° 777-A",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "arriendo",
+    "referencia": "Contrato de arrendamiento para el Primer Juzgado de Letras de Coyhaique con Sociedad Inmobiliaria Pangal Ltda.",
+    "fecha_inicio_vigencia": "2002-04-15",
+    "fecha_fin_vigencia": "2027-04-15",
+    "proveedor": {
+      "rutproveedor": "79.952.920-3",
+      "nombre": "SOCIEDAD INMOBILIARIA PANGAL LTDA."
+    },
+    "materia": "MODULO ARRIENDOS",
+    "submateria": "ARRIENDOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 1313,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "PJ1313",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES DEL JUZGADO DE GARANTIA DE COYHAIQUE",
+    "fecha_inicio_vigencia": "2005-01-01",
+    "fecha_fin_vigencia": "2030-12-31",
+    "proveedor": {
+      "rutproveedor": "9.781.824-K",
+      "nombre": "ALVARO JARA POBLETE"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 1312,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "PJ1312",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENCION DE JARDINES Y AREAS VERDES EDIFICIO JUZGADO DE LETRAS DEL TRABAJO",
+    "fecha_inicio_vigencia": "2008-02-15",
+    "fecha_fin_vigencia": "2030-12-31",
+    "proveedor": {
+      "rutproveedor": "9.781.824-K",
+      "nombre": "ALVARO JARA POBLETE"
+    },
+    "materia": "SERVICIOS GENERALES",
+    "submateria": "MANTENCIÓN DE JARDINES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 1309,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "PJ1309",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "contrato",
+    "referencia": "CONTRATO DE MANTENIMIENTO DE SERVICIO BÁSICO DE ASCENSORES EDIFICIO ICA COYHAIQUE",
+    "fecha_inicio_vigencia": "2008-01-02",
+    "fecha_fin_vigencia": "2030-12-31",
+    "proveedor": {
+      "rutproveedor": "96.726.480-6",
+      "nombre": "TK ELEVADORES CHILE S.A."
+    },
+    "materia": "MANTENIMIENTO Y REPARACION DE EDIFICACIONES",
+    "submateria": "MANT. ASCENSORES",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 285,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "Freire 293",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "arriendo",
+    "referencia": "Contrato de Arrendamiento del inmueble del Juzgado de Letras del Trabajo Coyhaique",
+    "fecha_inicio_vigencia": "2004-12-01",
+    "fecha_fin_vigencia": "2026-12-28",
+    "proveedor": {
+      "rutproveedor": "76.284.170-3",
+      "nombre": "INVERSIONES VARONA LTDA."
+    },
+    "materia": "MODULO ARRIENDOS",
+    "submateria": "ARRIENDOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  },
+  {
+    "id_institucional": 269,
+    "modalidad_compra": "fuera_de_portal",
+    "id_proceso_mp": "Moraleda 448",
+    "estado_origen": "APROBADO",
+    "tipo_contrato": "arriendo",
+    "referencia": "CONTRATO DE ARRENDAMIENTO PARA JUZGADO DE LETRAS DE FAMILIA COYHAIQUE",
+    "fecha_inicio_vigencia": "2021-01-01",
+    "fecha_fin_vigencia": "2027-12-31",
+    "proveedor": {
+      "rutproveedor": "76.524.302-5",
+      "nombre": "INMOBILIARIA E INVERSIONES ANGIRO SpA.,"
+    },
+    "materia": "MODULO ARRIENDOS",
+    "submateria": "ARRIENDOS",
+    "tiene_convenio_precio": false,
+    "tiene_calendario_pago": false,
+    "periodicidad_pago": null,
+    "monto_total": null
+  }
+]
