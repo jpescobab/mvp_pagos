@@ -61,15 +61,36 @@ async function capturarDiagnostico(page, contexto) {
 
 /**
  * Comprueba que los bytes recibidos realmente empiecen con la firma "%PDF-".
- * Sirve para detectar el caso en que page.context().request.get() no logró
- * propagar la autenticación completa (ej. SGF usa un token en localStorage
- * en vez de (o además de) cookies de sesión): en ese escenario la petición
- * directa suele volver 200 OK igual, pero con el HTML de una página de login
- * o un JSON de error en vez del PDF — por eso no basta con revisar
- * respuesta.ok(), hay que verificar el contenido mismo.
+ * Red de seguridad ante cualquier respuesta inesperada de SGF (ej. HTML de
+ * una página de login o un JSON de error en vez del PDF): no basta con
+ * revisar respuesta.ok(), hay que verificar el contenido mismo.
  */
 function bytesParecenPdf(bytes) {
     return bytes.subarray(0, 5).toString('latin1') === '%PDF-';
+}
+
+/**
+ * Enmascara cualquier parámetro de query que luzca como una credencial de
+ * un solo uso (access_token y similares) antes de interpolar una URL en un
+ * mensaje de error — esas URLs quedan en trabajos_integracion.error y en
+ * los logs del microservicio, así que nunca deben exponer el valor real
+ * del token.
+ */
+function enmascararUrl(url) {
+    try {
+        const parsed = new URL(url);
+        const clavesSensibles = ['token', 'auth', 'key', 'secret'];
+
+        for (const clave of parsed.searchParams.keys()) {
+            if (clavesSensibles.some((sensible) => clave.toLowerCase().includes(sensible))) {
+                parsed.searchParams.set(clave, '***');
+            }
+        }
+
+        return parsed.toString();
+    } catch {
+        return '(url no parseable)';
+    }
 }
 
 const REGEX_RUT = /\d{1,2}(?:\.\d{3}){2}-[\dkK]/;
@@ -666,63 +687,81 @@ async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
         const celdas = await fila.locator('td').allTextContents();
         const nombreArchivo = (celdas[VER_DOCUMENTOS.columnaNombre] ?? `documento-${i + 1}.pdf`).trim();
 
-        const enlaceDescarga = await primerSelectorExistente(fila, VER_DOCUMENTOS.iconoDescarga, `ícono de descarga del documento "${nombreArchivo}"`);
+        // Cada documento se procesa de forma aislada: si uno falla (ícono no
+        // encontrado, descarga fallida, contenido inesperado), se registra el
+        // error puntual y se sigue con el resto de los documentos de este
+        // mismo proceso — antes, cualquier throw acá abortaba TODA la
+        // importación masiva (65 procesos perdidos por un solo PDF en la
+        // corrida real del 2026-07-29).
+        try {
+            const enlaceDescarga = await primerSelectorExistente(fila, VER_DOCUMENTOS.iconoDescarga, `ícono de descarga del documento "${nombreArchivo}"`);
 
-        await esperarSpinnerAusente(page);
+            await esperarSpinnerAusente(page);
 
-        // VERIFICADO (2026-07-08): no existe un botón "Descargar" dentro del
-        // panel de SGF. Clickear el ícono abre el PDF en una pestaña/ventana
-        // nueva del navegador (popup) con la URL directa del archivo — no
-        // dispara un evento 'download' de Playwright porque Chromium
-        // renderiza el PDF inline ahí. Se captura ese popup, se lee su URL,
-        // y se descarga el archivo con una petición HTTP que reutiliza las
-        // cookies de la sesión (page.context().request comparte el cookie
-        // jar del contexto del navegador). Como la pestaña principal nunca
-        // navega, no hace falta volver a "Lista documentos" para el
-        // siguiente documento.
-        const [popup] = await Promise.all([page.waitForEvent('popup'), enlaceDescarga.click()]);
-        await popup.waitForLoadState('domcontentloaded');
+            // VERIFICADO (2026-07-08): no existe un botón "Descargar" dentro
+            // del panel de SGF. Clickear el ícono abre el PDF en una
+            // pestaña/ventana nueva del navegador (popup) con la URL directa
+            // del archivo, que YA descarga el PDF exitosamente (Chromium lo
+            // renderiza inline ahí). CORREGIDO (2026-08-03): antes se volvía
+            // a pedir esa misma URL con page.context().request.get(pdfUrl) —
+            // una segunda petición que fallaba con 417 Expectation Failed
+            // porque la URL lleva un access_token de un solo uso, ya
+            // consumido por la navegación del popup. Ahora se captura la
+            // respuesta de red que la propia navegación del popup dispara,
+            // registrando el listener ANTES de esperar domcontentloaded para
+            // no perder el evento por una carrera de tiempos (entre ambos
+            // await no hay ningún punto donde el event loop pueda procesar
+            // la respuesta antes de que quedemos escuchando). Como la
+            // pestaña principal nunca navega, no hace falta volver a "Lista
+            // documentos" para el siguiente documento.
+            const [popup] = await Promise.all([page.waitForEvent('popup'), enlaceDescarga.click()]);
+            const respuestaDescarga = popup.waitForEvent('response');
+            await popup.waitForLoadState('domcontentloaded');
+            const respuesta = await respuestaDescarga;
 
-        const pdfUrl = popup.url();
-        const respuesta = await page.context().request.get(pdfUrl);
+            const pdfUrl = popup.url();
 
-        if (!respuesta.ok()) {
+            if (!respuesta.ok()) {
+                await popup.close();
+
+                throw new Error(
+                    `La descarga de "${nombreArchivo}" devolvió estado ${respuesta.status()} para ${enmascararUrl(pdfUrl)}.`,
+                );
+            }
+
+            const bytes = await respuesta.body();
+
+            if (!bytesParecenPdf(bytes)) {
+                const contentType = respuesta.headers()['content-type'] ?? '(sin content-type)';
+                const nombreDiagnostico = `respuesta-no-pdf-${sgfId}-${i + 1}`;
+                await mkdir(RUTA_DEBUG, { recursive: true });
+                await writeFile(path.join(RUTA_DEBUG, `${nombreDiagnostico}.bin`), bytes);
+                await popup.close();
+
+                throw new Error(
+                    `La respuesta para "${nombreArchivo}" (${enmascararUrl(pdfUrl)}) no empieza con la firma "%PDF-" ` +
+                        `(content-type: "${contentType}", ${bytes.length} bytes). Se guardó el contenido recibido en ` +
+                        `services/sgf-playwright/debug/${nombreDiagnostico}.bin para inspeccionar qué llegó realmente ` +
+                        `(probablemente HTML de una página de login o un error de la API).`,
+                );
+            }
+
+            const rutaDestino = path.join(carpetaDestino, nombreArchivo);
+            await writeFile(rutaDestino, bytes);
+
             await popup.close();
 
-            throw new Error(
-                `La descarga de "${nombreArchivo}" devolvió estado ${respuesta.status()} para ${pdfUrl} — puede que la sesión no se haya propagado a la petición directa (revisar cookies/headers).`,
-            );
+            documentos.push({
+                tipo_documento_codigo: inferirTipoDocumento(nombreArchivo),
+                nombre_archivo: nombreArchivo,
+                ruta_archivo: `sgf-documentos/${sgfId}/${nombreArchivo}`,
+            });
+        } catch (error) {
+            pasos.push(paso(`descargar_documento_${sgfId}_${i + 1}`, 'error', {
+                nombre_archivo: nombreArchivo,
+                error: error.message,
+            }));
         }
-
-        const bytes = await respuesta.body();
-
-        if (!bytesParecenPdf(bytes)) {
-            const contentType = respuesta.headers()['content-type'] ?? '(sin content-type)';
-            const nombreDiagnostico = `respuesta-no-pdf-${sgfId}-${i + 1}`;
-            await mkdir(RUTA_DEBUG, { recursive: true });
-            await writeFile(path.join(RUTA_DEBUG, `${nombreDiagnostico}.bin`), bytes);
-            await popup.close();
-
-            throw new Error(
-                `La respuesta para "${nombreArchivo}" (${pdfUrl}) no empieza con la firma "%PDF-" ` +
-                    `(content-type: "${contentType}", ${bytes.length} bytes) — la petición directa probablemente ` +
-                    `no llevó la autenticación completa (ej. SGF usa un token en localStorage que ` +
-                    `page.context().request no reenvía junto a las cookies). Se guardó el contenido recibido en ` +
-                    `services/sgf-playwright/debug/${nombreDiagnostico}.bin para inspeccionar qué llegó realmente ` +
-                    `(probablemente HTML de una página de login o un error de la API).`,
-            );
-        }
-
-        const rutaDestino = path.join(carpetaDestino, nombreArchivo);
-        await writeFile(rutaDestino, bytes);
-
-        await popup.close();
-
-        documentos.push({
-            tipo_documento_codigo: inferirTipoDocumento(nombreArchivo),
-            nombre_archivo: nombreArchivo,
-            ruta_archivo: `sgf-documentos/${sgfId}/${nombreArchivo}`,
-        });
     }
 
     pasos.push(paso(`descargar_documentos_${sgfId}`, 'completado', { total_documentos: documentos.length }));
@@ -847,14 +886,24 @@ export async function importarPendientes() {
         // lista.
         for (let i = 0; i < total; i++) {
             const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
-            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
 
-            // null = fila placeholder de "tabla vacía" (ver
-            // filaEsPlaceholderTablaVacia) — se descarta en vez de empujarla
-            // al resultado, igual que importarGrupoPagoOperaciones() ya hace
-            // con las filas que su propio filtro descarta.
-            if (procesado) {
-                resultado.push(procesado);
+            // Un caso completo que falla (más allá de un documento puntual,
+            // ya resiliente dentro de descargarDocumentosDeFila) no aborta el
+            // resto del lote: se registra el error y se sigue con el
+            // siguiente caso.
+            try {
+                const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
+
+                // null = fila placeholder de "tabla vacía" (ver
+                // filaEsPlaceholderTablaVacia) — se descarta en vez de
+                // empujarla al resultado, igual que
+                // importarGrupoPagoOperaciones() ya hace con las filas que su
+                // propio filtro descarta.
+                if (procesado) {
+                    resultado.push(procesado);
+                }
+            } catch (error) {
+                pasos.push(paso(`procesar_fila_${numeroPagina}_${i + 1}`, 'error', { error: error.message }));
             }
         }
 
@@ -953,6 +1002,7 @@ export async function importarGrupoPagoOperaciones() {
 
         for (let i = 0; i < total; i++) {
             const fila = page.locator(BANDEJA_PROCESOS.filaProceso).nth(i);
+
             // El filtro nativo de la Bandeja (dropdown "GRUPO" = "Pago
             // Operaciones") ya acotó el listado en origen: se confía en él. NO
             // se vuelve a filtrar por la columna "Grupo Actual", que es un
@@ -960,11 +1010,19 @@ export async function importarGrupoPagoOperaciones() {
             // tiene por qué coincidir con el grupo filtrado — hacerlo descartaba
             // el 100% de las filas legítimas. Se registran los valores distintos
             // de "grupo actual" vistos para trazabilidad/diagnóstico.
-            const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
+            //
+            // Un caso completo que falla no aborta el resto del lote: se
+            // registra el error y se sigue con el siguiente caso (mismo
+            // criterio que importarPendientes()).
+            try {
+                const procesado = await procesarFilaProceso(page, fila, encabezados, pasos);
 
-            if (procesado) {
-                gruposActuales.add(procesado.payload_crudo.grupo_actual || '(vacío)');
-                resultado.push(procesado);
+                if (procesado) {
+                    gruposActuales.add(procesado.payload_crudo.grupo_actual || '(vacío)');
+                    resultado.push(procesado);
+                }
+            } catch (error) {
+                pasos.push(paso(`procesar_fila_${numeroPagina}_${i + 1}`, 'error', { error: error.message }));
             }
         }
 
