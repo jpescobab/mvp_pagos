@@ -5,6 +5,7 @@ namespace App\Http\Resources\Seguridad;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Role;
 
 /** @mixin User */
 class UserResource extends JsonResource
@@ -27,10 +28,12 @@ class UserResource extends JsonResource
             'active' => $this->active,
             'last_login_at' => $this->last_login_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
-            'roles' => $this->roles->map(fn ($rol): array => [
-                'name' => $rol->name,
-                'etiqueta' => $rol->etiqueta,
-            ])->values(),
+            'roles' => $this->roles
+                ->filter(fn ($rol) => $rol instanceof Role)
+                ->map(fn (Role $rol): array => [
+                    'name' => $rol->name,
+                    'etiqueta' => $rol->etiqueta,
+                ])->values(),
             'jurisdiccion' => $cfinanciero?->jurisdiccion === null ? null : [
                 'id' => $cfinanciero->jurisdiccion->id,
                 'nombre' => $cfinanciero->jurisdiccion->nombre,

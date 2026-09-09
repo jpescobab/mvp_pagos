@@ -1,0 +1,15 @@
+<?php
+
+namespace Spatie\Permission\Models;
+
+/**
+ * `etiqueta` y `descripcion` son columnas reales de la tabla `roles`,
+ * agregadas por la migración `2026_07_28_194825_agregar_etiqueta_descripcion_a_roles.php`
+ * — la clase vendor no las declara en su propio PHPDoc.
+ *
+ * @property-read string|null $etiqueta
+ * @property-read string|null $descripcion
+ */
+class Role
+{
+}

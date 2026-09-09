@@ -11,3 +11,6 @@ parameters:
         - routes/
 
     level: 7
+
+    stubFiles:
+        - stubs/spatie-permission-role.stub

@@ -22,7 +22,7 @@ class ImportarOrdenesCompra2182Command extends Command
         $desde = (int) $this->option('desde');
         $hasta = (int) $this->option('hasta');
         $prefijo = (string) $this->option('prefijo');
-        $sufijos = array_filter(array_map('trim', explode(',', (string) $this->option('sufijos'))));
+        $sufijos = array_values(array_filter(array_map('trim', explode(',', (string) $this->option('sufijos')))));
 
         $guardadas = 0;
         $yaExistentes = 0;

@@ -158,17 +158,20 @@ class ProcesoAdquisicionController extends Controller
     }
 
     /**
-     * @return Collection<int, array{id: int, nombre: string, cargo: ?string, ccosto_id: int<0, max>|null}>
+     * @return list<array{id: int, nombre: string, cargo: string|null, ccosto_id: int<0, max>|null}>
      */
-    private function funcionariosActivos(): Collection
+    private function funcionariosActivos(): array
     {
-        return Funcionario::where('activo', true)->get()
-            ->map(fn (Funcionario $funcionario) => [
-                'id' => $funcionario->id,
-                'nombre' => $funcionario->nombre,
-                'cargo' => $funcionario->cargo,
-                'ccosto_id' => $funcionario->ccosto_id,
-            ]);
+        return array_values(
+            Funcionario::where('activo', true)->get()
+                ->map(fn (Funcionario $funcionario) => [
+                    'id' => $funcionario->id,
+                    'nombre' => $funcionario->nombre,
+                    'cargo' => $funcionario->cargo,
+                    'ccosto_id' => $funcionario->ccosto_id,
+                ])
+                ->all(),
+        );
     }
 
     /**
