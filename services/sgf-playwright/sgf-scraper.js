@@ -111,6 +111,12 @@ function inferirTipoDocumento(nombreArchivo) {
 let contextoNavegador = null;
 let paginaActiva = null;
 
+// Resuelve la próxima respuesta interceptada del endpoint de descarga de
+// PDF (ver la ruta registrada en obtenerPagina() y su uso en
+// descargarDocumentosDeFila()). Un único resolver a la vez porque las
+// descargas de esta bandeja se procesan secuencialmente, nunca en paralelo.
+let resolverRespuestaPdf = null;
+
 function paso(accion, estado, detalle = null) {
     return { orden: 0, accion, estado, detalle };
 }
@@ -214,6 +220,30 @@ async function obtenerPagina() {
             '--disable-save-password-bubble',
         ],
     });
+
+    // CORREGIDO (2026-09-16): al navegar directo a la URL de un PDF, el
+    // visor integrado de Chromium intercepta la respuesta real y la
+    // reemplaza por su propio wrapper HTML (un <embed> apuntando a un
+    // recurso interno chrome-extension://...) — Playwright nunca ve los
+    // bytes reales del PDF a través del evento 'response' de la página en
+    // ese caso (falló 9/9 documentos en una corrida real completa). Se
+    // intercepta la petición a nivel de contexto (aplica también a los
+    // popups que abre cada descarga) para capturar la respuesta real con
+    // route.fetch() ANTES de que el visor de Chromium llegue a
+    // transformarla, y se la entrega tal cual con fulfill() para no alterar
+    // el comportamiento normal de la pestaña.
+    await contextoNavegador.route('**/api/general/documentos/descargar-pdf*', async (route) => {
+        const respuesta = await route.fetch();
+
+        if (resolverRespuestaPdf) {
+            const resolver = resolverRespuestaPdf;
+            resolverRespuestaPdf = null;
+            resolver(respuesta);
+        }
+
+        await route.fulfill({ response: respuesta });
+    });
+
     paginaActiva = contextoNavegador.pages()[0] ?? (await contextoNavegador.newPage());
 
     return paginaActiva;
@@ -701,25 +731,38 @@ async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
             // VERIFICADO (2026-07-08): no existe un botón "Descargar" dentro
             // del panel de SGF. Clickear el ícono abre el PDF en una
             // pestaña/ventana nueva del navegador (popup) con la URL directa
-            // del archivo, que YA descarga el PDF exitosamente (Chromium lo
-            // renderiza inline ahí). CORREGIDO (2026-08-03): antes se volvía
-            // a pedir esa misma URL con page.context().request.get(pdfUrl) —
-            // una segunda petición que fallaba con 417 Expectation Failed
-            // porque la URL lleva un access_token de un solo uso, ya
-            // consumido por la navegación del popup. Ahora se captura la
-            // respuesta de red que la propia navegación del popup dispara,
-            // registrando el listener ANTES de esperar domcontentloaded para
-            // no perder el evento por una carrera de tiempos (entre ambos
-            // await no hay ningún punto donde el event loop pueda procesar
-            // la respuesta antes de que quedemos escuchando). Como la
-            // pestaña principal nunca navega, no hace falta volver a "Lista
-            // documentos" para el siguiente documento.
+            // del archivo. CORREGIDO (2026-08-03): antes se volvía a pedir
+            // esa misma URL con page.context().request.get(pdfUrl) — una
+            // segunda petición que fallaba con 417 Expectation Failed porque
+            // la URL lleva un access_token de un solo uso, ya consumido por
+            // la navegación del popup.
+            //
+            // CORREGIDO (2026-09-16): capturar la respuesta vía el evento
+            // 'response' de la página (dos intentos sucesivos, ver historial
+            // git) NUNCA funcionó de verdad: al navegar directo a una URL de
+            // PDF, el visor integrado de Chromium intercepta la respuesta
+            // real y la reemplaza por su propio wrapper HTML (un <embed>
+            // apuntando a un recurso interno chrome-extension://...) antes
+            // de que llegue a la página — Playwright nunca ve los bytes
+            // reales del PDF por esa vía (falló 9/9 documentos en una
+            // corrida real completa, dos veces, con "respuestas" distintas
+            // pero igual de inválidas). La captura real ahora ocurre a nivel
+            // de red en la ruta registrada en obtenerPagina() (interceptando
+            // la request ANTES de que el visor la transforme); acá solo se
+            // espera esa respuesta ya resuelta.
+            const respuestaPromise = new Promise((resolve, reject) => {
+                resolverRespuestaPdf = resolve;
+                setTimeout(() => {
+                    if (resolverRespuestaPdf === resolve) {
+                        resolverRespuestaPdf = null;
+                        reject(new Error('No se interceptó ninguna respuesta del endpoint de descarga dentro de 20s.'));
+                    }
+                }, 20000);
+            });
             const [popup] = await Promise.all([page.waitForEvent('popup'), enlaceDescarga.click()]);
-            const respuestaDescarga = popup.waitForEvent('response');
-            await popup.waitForLoadState('domcontentloaded');
-            const respuesta = await respuestaDescarga;
+            const respuesta = await respuestaPromise;
 
-            const pdfUrl = popup.url();
+            const pdfUrl = respuesta.url();
 
             if (!respuesta.ok()) {
                 await popup.close();
