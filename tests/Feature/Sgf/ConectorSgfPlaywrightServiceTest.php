@@ -163,6 +163,55 @@ test('importarPendientes registra un snapshot por fila y vincula documentos entr
     expect($vinculo->activo)->toBeTrue();
 });
 
+test('reimportar el mismo caso no duplica un documento ya vinculado con la misma ruta', function () {
+    autorizarConectorSgfDePrueba();
+
+    $respuesta = [
+        'filas' => [
+            [
+                'sgf_id' => '222',
+                'payload_crudo' => [
+                    'sgf_id' => '222',
+                    'estado' => 'PAGADA',
+                    'rut' => '22222222-2',
+                    'monto' => '200.000',
+                    'documentos' => [
+                        ['tipo_documento_codigo' => 'FACTURA', 'nombre_archivo' => 'factura.pdf', 'ruta_archivo' => 'sgf/factura.pdf'],
+                    ],
+                ],
+            ],
+        ],
+        'pasos' => [['orden' => 1, 'accion' => 'listar_pendientes', 'estado' => 'completado']],
+    ];
+
+    Http::fake(['*/casos/importar-pendientes' => Http::response($respuesta, 200)]);
+
+    $sistema = SistemaExterno::where('codigo', 'SGF')->firstOrFail();
+
+    $primero = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now(),
+    ]);
+    $this->servicio->importarPendientes($primero);
+
+    $segundo = TrabajoIntegracion::create([
+        'sistema_externo_id' => $sistema->id,
+        'tipo' => 'importar_pendientes',
+        'mecanismo' => 'playwright',
+        'estado' => 'en_progreso',
+        'iniciado_en' => now(),
+    ]);
+    $this->servicio->importarPendientes($segundo);
+
+    expect(Documento::count())->toBe(1);
+
+    $caso = CasoPagoProveedor::where('sgf_id', '222')->sole();
+    expect($caso->proceso->vinculosDocumento()->where('activo', true)->count())->toBe(1);
+});
+
 test('importarGrupoPagoOperaciones solo persiste casos del grupo Pago Operaciones', function () {
     autorizarConectorSgfDePrueba();
 

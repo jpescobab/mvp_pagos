@@ -177,7 +177,7 @@ export default function EgresosCguCrear() {
                     <div className="card-body">
                         <div className="field-grid">
                             <div
-                                className={`field${camposInvalidos.numero ? 'invalid' : ''}`}
+                                className={`field${camposInvalidos.numero ? ' invalid' : ''}`}
                             >
                                 <label htmlFor="numeroEgreso">
                                     N° de egreso
@@ -203,7 +203,7 @@ export default function EgresosCguCrear() {
                                 </span>
                             </div>
                             <div
-                                className={`field${camposInvalidos.fecha ? 'invalid' : ''}`}
+                                className={`field${camposInvalidos.fecha ? ' invalid' : ''}`}
                             >
                                 <label htmlFor="fechaEgreso">
                                     Fecha
@@ -323,7 +323,7 @@ export default function EgresosCguCrear() {
                                         return (
                                             <div
                                                 key={caso.id}
-                                                className={`caso-row${marcado ? 'checked' : ''}`}
+                                                className={`caso-row${marcado ? ' checked' : ''}`}
                                                 onClick={() =>
                                                     alternarCaso(caso)
                                                 }

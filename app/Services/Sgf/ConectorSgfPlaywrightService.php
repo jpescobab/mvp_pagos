@@ -230,6 +230,25 @@ class ConectorSgfPlaywrightService
      */
     private function vincularDocumento(SnapshotDatosExterno $snapshot, CasoPagoProveedor $caso, array $documentoSgf): void
     {
+        // Reimportar un caso que sigue en la Bandeja (reintento manual, o la
+        // corrida mensual programada sobre un caso todavía no cerrado) no
+        // debe duplicar sus documentos en cada corrida. La ruta de descarga
+        // es determinística por sgf_id + nombre de archivo (se sobrescribe
+        // en disco en cada corrida, ver sgf-scraper.js), así que ya existir
+        // un vínculo activo del Proceso a un Documento con esa misma ruta
+        // significa que es el mismo archivo, no uno nuevo.
+        $yaVinculado = $caso->proceso?->vinculosDocumento()
+            ->where('activo', true)
+            ->whereHas(
+                'documento.versiones',
+                fn ($query) => $query->where('ruta_archivo', $documentoSgf['ruta_archivo']),
+            )
+            ->exists() ?? false;
+
+        if ($yaVinculado) {
+            return;
+        }
+
         $tipo = TipoDocumento::firstOrCreate(
             ['codigo' => $documentoSgf['tipo_documento_codigo']],
             ['nombre' => $documentoSgf['tipo_documento_codigo']],

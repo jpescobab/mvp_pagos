@@ -427,98 +427,102 @@ export default function RevisionPagosIndex() {
                     </div>
                 ) : (
                     <>
-                        {/* Strip de egresos */}
-                        <div className="proc-strip">
-                            {egresos.map((e) => {
-                                const est =
-                                    ESTADO_EGRESO[e.estado] ??
-                                    ESTADO_EGRESO.sin_pagos;
-                                const resumenProveedores =
-                                    (e.proveedores[0] ?? '—') +
-                                    (e.proveedores.length > 1
-                                        ? ` +${e.proveedores.length - 1}`
-                                        : '');
-                                const descripcion =
-                                    e.observaciones?.trim() ||
-                                    resumenProveedores;
-
-                                return (
-                                    <button
-                                        key={e.id}
-                                        type="button"
-                                        className={`proc-chip${e.id === egreso?.id ? 'active' : ''}`}
-                                        onClick={() => seleccionarEgreso(e)}
-                                    >
-                                        <div className="pc-top">
-                                            <div className="pc-icon">
-                                                <Icon path={IC.recibo} />
-                                            </div>
-                                            <div className="pc-text">
-                                                <span className="pc-id">
-                                                    {e.numero_egreso}
-                                                </span>
-                                                <span
-                                                    className="pc-prov"
-                                                    title={descripcion}
-                                                >
-                                                    {descripcion}
-                                                </span>
-                                                <span className="pc-monto">
-                                                    {fmt(e.monto_total)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="pc-bottom">
-                                            <span
-                                                className={`badge ${est.cls}`}
-                                            >
-                                                <span className="d" />
-                                                {e.cantidad_pagos} pago
-                                                {e.cantidad_pagos > 1
-                                                    ? 's'
-                                                    : ''}
-                                            </span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        {/* Strip de pagos */}
-                        {egreso && (
-                            <div className="pago-strip">
-                                {egreso.pagos.map((p) => {
-                                    const est = ESTADO_EGRESO[
-                                        p.estado ?? ''
-                                    ] ?? {
-                                        label: p.estado_label ?? '—',
-                                        cls: 'gray',
-                                    };
+                        {/* Selector de egresos (izquierda) + casos del egreso elegido (derecha) */}
+                        <div className="strips-row">
+                            <div className="proc-strip">
+                                {egresos.map((e) => {
+                                    const est =
+                                        ESTADO_EGRESO[e.estado] ??
+                                        ESTADO_EGRESO.sin_pagos;
+                                    const resumenProveedores =
+                                        (e.proveedores[0] ?? '—') +
+                                        (e.proveedores.length > 1
+                                            ? ` +${e.proveedores.length - 1}`
+                                            : '');
+                                    const descripcion =
+                                        e.observaciones?.trim() ||
+                                        resumenProveedores;
 
                                     return (
                                         <button
-                                            key={p.id}
+                                            key={e.id}
                                             type="button"
-                                            className={`pago-chip${p.id === pago?.id ? 'active' : ''}`}
-                                            onClick={() => seleccionarPago(p)}
+                                            className={`proc-chip${e.id === egreso?.id ? 'active' : ''}`}
+                                            onClick={() => seleccionarEgreso(e)}
                                         >
-                                            <span className="pg-num">
-                                                {p.proveedor}
-                                            </span>
-                                            <span className="pg-monto">
-                                                {fmt(p.monto)}
-                                            </span>
-                                            <span
-                                                className={`badge ${est.cls}`}
-                                            >
-                                                <span className="d" />
-                                                {est.label}
-                                            </span>
+                                            <div className="pc-top">
+                                                <div className="pc-icon">
+                                                    <Icon path={IC.recibo} />
+                                                </div>
+                                                <div className="pc-text">
+                                                    <span className="pc-id">
+                                                        {e.numero_egreso}
+                                                    </span>
+                                                    <span
+                                                        className="pc-prov"
+                                                        title={descripcion}
+                                                    >
+                                                        {descripcion}
+                                                    </span>
+                                                    <span className="pc-monto">
+                                                        {fmt(e.monto_total)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="pc-bottom">
+                                                <span
+                                                    className={`badge ${est.cls}`}
+                                                >
+                                                    <span className="d" />
+                                                    {e.cantidad_pagos} pago
+                                                    {e.cantidad_pagos > 1
+                                                        ? 's'
+                                                        : ''}
+                                                </span>
+                                            </div>
                                         </button>
                                     );
                                 })}
                             </div>
-                        )}
+
+                            {/* Strip de pagos */}
+                            {egreso && (
+                                <div className="pago-strip">
+                                    {egreso.pagos.map((p) => {
+                                        const est = ESTADO_EGRESO[
+                                            p.estado ?? ''
+                                        ] ?? {
+                                            label: p.estado_label ?? '—',
+                                            cls: 'gray',
+                                        };
+
+                                        return (
+                                            <button
+                                                key={p.id}
+                                                type="button"
+                                                className={`pago-chip${p.id === pago?.id ? 'active' : ''}`}
+                                                onClick={() =>
+                                                    seleccionarPago(p)
+                                                }
+                                            >
+                                                <span className="pg-num">
+                                                    {p.proveedor}
+                                                </span>
+                                                <span className="pg-monto">
+                                                    {fmt(p.monto)}
+                                                </span>
+                                                <span
+                                                    className={`badge ${est.cls}`}
+                                                >
+                                                    <span className="d" />
+                                                    {est.label}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Cabecera del pago */}
                         {pago && (
@@ -980,8 +984,9 @@ html.dark .revpay{
 .revpay *{box-sizing:border-box;}
 .revpay button{font:inherit;}
 
-.revpay .proc-strip{display:flex;gap:6px;padding:4px 4px 0;overflow-x:auto;flex-shrink:0;}
-.revpay .proc-chip{display:flex;flex-direction:column;gap:2px;min-width:190px;padding:7px 10px;border-radius:9px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all .15s;flex-shrink:0;text-align:left;}
+.revpay .strips-row{display:flex;align-items:flex-start;gap:12px;padding:4px 4px 0;min-height:0;}
+.revpay .proc-strip{display:flex;flex-direction:column;gap:6px;width:220px;flex-shrink:0;overflow-y:auto;max-height:420px;}
+.revpay .proc-chip{display:flex;flex-direction:column;gap:2px;width:100%;padding:7px 10px;border-radius:9px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all .15s;flex-shrink:0;text-align:left;}
 .revpay .proc-chip:hover{border-color:var(--border-strong);}
 .revpay .proc-chip.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
 .revpay .proc-chip .pc-top{display:flex;align-items:stretch;gap:9px;}
@@ -1003,7 +1008,7 @@ html.dark .revpay{
 .revpay .badge.blue{color:var(--accent);background:var(--accent-soft);}
 .revpay .badge.gray{color:var(--fg-soft);background:var(--panel-2);}
 
-.revpay .pago-strip{display:flex;align-items:center;gap:6px;padding:8px 4px 0;flex-shrink:0;flex-wrap:wrap;}
+.revpay .pago-strip{display:flex;align-items:flex-start;align-content:flex-start;gap:6px;flex:1;min-width:0;flex-wrap:wrap;}
 .revpay .pago-chip{display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:9px;border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all .15s;font-size:12px;}
 .revpay .pago-chip:hover{border-color:var(--border-strong);}
 .revpay .pago-chip.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
@@ -1095,5 +1100,8 @@ html.dark .revpay{
   .revpay .review-body{grid-template-columns:1fr;}
   .revpay .viewer-body{flex-direction:column;}
   .revpay .review-panel{width:100%;border-left:none;border-top:1px solid var(--border);}
+  .revpay .strips-row{flex-direction:column;}
+  .revpay .proc-strip{flex-direction:row;width:100%;overflow-x:auto;overflow-y:visible;max-height:none;}
+  .revpay .proc-chip{width:190px;}
 }
 `;
