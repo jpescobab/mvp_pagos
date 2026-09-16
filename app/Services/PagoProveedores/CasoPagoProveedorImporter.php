@@ -28,6 +28,13 @@ class CasoPagoProveedorImporter
 
         if ($caso !== null) {
             $caso->update([
+                // El proveedor puede no haber existido todavía en el catálogo
+                // al momento de la importación original (queda null a
+                // propósito, ver rama de creación más abajo). Cada
+                // reimportación reintenta resolverlo si sigue sin vincular,
+                // para no depender de que alguien lo repare a mano.
+                'proveedor_id' => $caso->proveedor_id
+                    ?? Proveedor::where('rutproveedor', Proveedor::normalizarRut($normalizado['rut']))->value('id'),
                 'rut_proveedor' => $normalizado['rut'],
                 'monto' => $normalizado['monto'],
                 'sgf_status' => $normalizado['estado'],

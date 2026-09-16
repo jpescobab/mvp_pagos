@@ -44,16 +44,22 @@ class ProcesoResource extends JsonResource
                     ->values(),
             ),
             'checklist' => $this->whenLoaded('checklist', fn () => $this->checklist === null ? null : [
-                'items' => $this->checklist->items->map(fn ($item) => [
-                    'tipo_documento' => $item->tipoDocumento?->nombre,
-                    'tipo_documento_id' => $item->tipo_documento_id,
-                    'tipo_requisito' => $item->tipo_requisito,
-                    'estado_cumplimiento' => $item->estado_cumplimiento,
-                    'documento_id' => $item->documento_id,
-                    'nombre_archivo' => $item->documento_id !== null
-                        ? ($nombresPorDocumento[$item->documento_id] ?? null)
-                        : null,
-                ])->values()->all(),
+                // Obligatorios primero, opcionales después: es lo que el
+                // usuario necesita resolver primero para poder pagar.
+                // sortBy es estable, así que dentro de cada grupo se
+                // conserva el orden original del checklist.
+                'items' => $this->checklist->items
+                    ->sortBy(fn ($item) => $item->tipo_requisito === 'obligatorio' ? 0 : 1)
+                    ->map(fn ($item) => [
+                        'tipo_documento' => $item->tipoDocumento?->nombre,
+                        'tipo_documento_id' => $item->tipo_documento_id,
+                        'tipo_requisito' => $item->tipo_requisito,
+                        'estado_cumplimiento' => $item->estado_cumplimiento,
+                        'documento_id' => $item->documento_id,
+                        'nombre_archivo' => $item->documento_id !== null
+                            ? ($nombresPorDocumento[$item->documento_id] ?? null)
+                            : null,
+                    ])->values()->all(),
             ]),
             'documentos' => $this->whenLoaded(
                 'vinculosDocumento',

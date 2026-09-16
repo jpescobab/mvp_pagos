@@ -113,10 +113,7 @@ export default function CasosIndex() {
                                 <th className="w-[14%] px-2.5 py-1 font-medium">
                                     Monto
                                 </th>
-                                <th className="hidden w-[9%] px-2.5 py-1 font-medium md:table-cell">
-                                    Estado SGF
-                                </th>
-                                <th className="w-[5%] px-2.5 py-1 text-center font-medium">
+                                <th className="w-[9%] px-2.5 py-1 text-center font-medium">
                                     Estado
                                 </th>
                             </tr>
@@ -125,7 +122,7 @@ export default function CasosIndex() {
                             {pagina.data.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={11}
+                                        colSpan={10}
                                         className="px-2.5 py-5 text-center text-muted-foreground"
                                     >
                                         No hay casos de pago de proveedores
@@ -198,16 +195,12 @@ export default function CasosIndex() {
                                     <td className="px-2.5 py-1 whitespace-nowrap">
                                         <Monto valor={caso.monto} />
                                     </td>
-                                    <td className="hidden truncate px-2.5 py-1 text-muted-foreground md:table-cell">
-                                        {caso.sgf_status ?? '—'}
-                                    </td>
                                     <td className="px-2.5 py-1">
                                         <div className="flex items-center justify-center gap-1">
                                             <EstadoBadge
                                                 estado={
                                                     caso.proceso.estado_actual
                                                 }
-                                                compact
                                             />
                                             {caso.listo_para_aprobar && (
                                                 <ListoParaRevisarBadge />
