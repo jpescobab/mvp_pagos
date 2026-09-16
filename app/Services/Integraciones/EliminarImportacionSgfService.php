@@ -9,11 +9,14 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
- * Elimina una corrida de importación SGF (`trabajo_integracion`) únicamente
- * cuando no produjo trazabilidad: sin snapshots y no en progreso. Nunca borra
- * snapshots, casos, procesos ni auditoría preexistente; solo el trabajo y sus
- * artefactos propios del intento (ejecuciones + pasos, solicitudes API), y deja
- * registrada la eliminación en la auditoría de acciones.
+ * Elimina una corrida de importación SGF (`trabajo_integracion`) mientras no
+ * esté en progreso. Nunca borra snapshots, casos, procesos ni auditoría
+ * preexistente: `snapshots_datos_externos.trabajo_integracion_id` es
+ * `nullOnDelete`, así que un snapshot ya capturado sobrevive intacto, solo
+ * pierde la referencia a qué corrida en particular lo generó. Solo borra el
+ * trabajo y sus artefactos propios del intento (ejecuciones + pasos,
+ * solicitudes API), y deja registrada la eliminación en la auditoría de
+ * acciones.
  */
 class EliminarImportacionSgfService
 {
@@ -23,7 +26,7 @@ class EliminarImportacionSgfService
     {
         if (! $trabajo->puedeEliminarse()) {
             throw new RuntimeException(
-                'Esta importación no se puede eliminar: tiene casos o snapshots asociados, o está en progreso. Borrarla eliminaría trazabilidad.'
+                'Esta importación no se puede eliminar porque todavía está en progreso.'
             );
         }
 

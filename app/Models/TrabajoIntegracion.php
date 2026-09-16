@@ -51,14 +51,18 @@ class TrabajoIntegracion extends Model
     }
 
     /**
-     * Una corrida solo puede eliminarse si no produjo trazabilidad: no tiene
-     * snapshots asociados y no está en progreso. Fuente de verdad de la regla,
-     * revalidada al borrar (el Presenter la replica en bloque para el listado).
+     * Una corrida puede eliminarse mientras no esté en progreso. Borrar el
+     * trabajo NO destruye trazabilidad: `snapshots_datos_externos.trabajo_integracion_id`
+     * es `nullOnDelete` (ver migración), así que un snapshot ya capturado
+     * (payload, hash, fecha, fuente) sobrevive intacto — solo se pierde la
+     * referencia a qué corrida en particular lo generó, útil para limpiar
+     * reintentos/corridas duplicadas del historial. Fuente de verdad de la
+     * regla, revalidada al borrar (el Presenter la replica en bloque para el
+     * listado).
      */
     public function puedeEliminarse(): bool
     {
-        return $this->estado !== 'en_progreso'
-            && $this->snapshotsDatosExternos()->doesntExist();
+        return $this->estado !== 'en_progreso';
     }
 
     /**

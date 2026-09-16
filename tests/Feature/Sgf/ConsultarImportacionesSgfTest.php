@@ -927,7 +927,9 @@ test('el desglose de etapas se calcula en un número acotado de consultas sin es
     // no debe crecer con la cantidad de corridas.
     expect($consultas)->toBeLessThanOrEqual(5);
     expect($contexto['desglosePorTrabajo'][$trabajos->first()->id])->toHaveCount(1);
-    expect($contexto['eliminablePorTrabajo'][$trabajos->first()->id])->toBeFalse();
+    // Completada y sin estar en progreso: eliminable aunque haya producido
+    // snapshots (borrarla no los destruye, ver puedeEliminarse()).
+    expect($contexto['eliminablePorTrabajo'][$trabajos->first()->id])->toBeTrue();
 });
 
 test('un usuario no autenticado es redirigido al login', function () {

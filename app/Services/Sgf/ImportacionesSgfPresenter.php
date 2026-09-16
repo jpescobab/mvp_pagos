@@ -33,8 +33,6 @@ class ImportacionesSgfPresenter
                 ->whereIn('trabajo_integracion_id', $trabajoIds)
                 ->get(['id', 'trabajo_integracion_id', 'referencia_externa']);
 
-        $trabajosConSnapshot = $snapshots->pluck('trabajo_integracion_id')->unique()->flip();
-
         $sgfIds = $snapshots->pluck('referencia_externa')->filter()->unique()->values()->all();
 
         /** @var Collection<string, CasoPagoProveedor> $casosPorSgfId */
@@ -52,8 +50,7 @@ class ImportacionesSgfPresenter
         $eliminablePorTrabajo = [];
 
         foreach ($trabajos as $trabajo) {
-            $eliminablePorTrabajo[$trabajo->id] = ! $trabajosConSnapshot->has($trabajo->id)
-                && $trabajo->estado !== 'en_progreso';
+            $eliminablePorTrabajo[$trabajo->id] = $trabajo->estado !== 'en_progreso';
 
             $desglosePorTrabajo[$trabajo->id] = $this->desglose(
                 $snapshotsPorTrabajo->get($trabajo->id) ?? collect(),

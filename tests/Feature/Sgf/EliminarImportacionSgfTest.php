@@ -49,7 +49,7 @@ test('elimina una corrida en error sin snapshots y registra la eliminación en a
     )->toBeTrue();
 });
 
-test('no elimina una corrida que produjo snapshots y no toca su trazabilidad', function () {
+test('elimina una corrida que produjo snapshots sin tocar su trazabilidad', function () {
     $trabajo = crearCorridaSgf($this->sistema->id, 'completado');
 
     $snapshot = SnapshotDatosExterno::create([
@@ -67,10 +67,16 @@ test('no elimina una corrida que produjo snapshots y no toca su trazabilidad', f
 
     $response = $this->actingAs($usuario)->delete(route('sgf.importaciones.destroy', $trabajo));
 
-    $response->assertRedirect();
+    $response->assertRedirect(route('sgf.importaciones.index'));
 
-    expect(TrabajoIntegracion::find($trabajo->id))->not->toBeNull();
-    expect(SnapshotDatosExterno::find($snapshot->id))->not->toBeNull();
+    expect(TrabajoIntegracion::find($trabajo->id))->toBeNull();
+
+    // El snapshot sobrevive intacto (payload, hash, fecha): solo pierde la
+    // referencia a qué corrida en particular lo generó (nullOnDelete).
+    $snapshot = $snapshot->refresh();
+    expect($snapshot)->not->toBeNull();
+    expect($snapshot->trabajo_integracion_id)->toBeNull();
+    expect($snapshot->payload_normalizado)->toBe(['monto' => 100000]);
 });
 
 test('no elimina una corrida en progreso', function () {

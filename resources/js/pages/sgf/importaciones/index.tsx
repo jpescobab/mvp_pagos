@@ -372,7 +372,7 @@ export default function ImportacionesSgfIndex() {
                                                         title={
                                                             importacion.eliminable
                                                                 ? undefined
-                                                                : 'Tiene casos o snapshots asociados; borrarla eliminaría trazabilidad.'
+                                                                : 'Está en progreso; espera a que termine para poder eliminarla.'
                                                         }
                                                     >
                                                         <Trash2 className="size-3.5" />
