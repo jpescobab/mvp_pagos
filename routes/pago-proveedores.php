@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PagoProveedores\BuscarProcesoAdquisicionController;
 use App\Http\Controllers\PagoProveedores\CasoPagoProveedorController;
+use App\Http\Controllers\PagoProveedores\DetalleFacturaController;
 use App\Http\Controllers\PagoProveedores\EgresoCguController;
 use App\Http\Controllers\PagoProveedores\FacturaController;
 use App\Http\Controllers\PagoProveedores\RegistroContableCguController;
@@ -33,6 +34,11 @@ Route::middleware(['auth'])->prefix('pago-proveedores')->name('pago-proveedores.
     Route::post('casos/{caso}/registros-contables-cgu', [RegistroContableCguController::class, 'store'])->name('casos.registros-contables-cgu.store');
     Route::post('casos/{caso}/registros-pago-bancario', [RegistroPagoBancarioController::class, 'store'])->name('casos.registros-pago-bancario.store');
     Route::post('casos/{caso}/facturas', [FacturaController::class, 'store'])->name('casos.facturas.store');
+
+    Route::get('facturas/{factura}/detalle-factura/crear', [DetalleFacturaController::class, 'create'])->name('facturas.detalle-factura.create');
+    Route::post('facturas/{factura}/detalle-factura', [DetalleFacturaController::class, 'store'])->name('facturas.detalle-factura.store');
+    Route::get('facturas/{factura}/detalle-factura/editar', [DetalleFacturaController::class, 'edit'])->name('facturas.detalle-factura.edit');
+    Route::patch('facturas/{factura}/detalle-factura', [DetalleFacturaController::class, 'update'])->name('facturas.detalle-factura.update');
 
     Route::get('requisitos-documentales', [RequisitoDocumentalController::class, 'index'])->name('requisitos-documentales.index');
     Route::put('requisitos-documentales/{tipoDocumento}', [RequisitoDocumentalController::class, 'update'])->name('requisitos-documentales.update');

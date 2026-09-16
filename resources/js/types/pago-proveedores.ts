@@ -89,6 +89,11 @@ export type TipoDocumentoSeleccionable = {
     nombre: string;
 };
 
+export type ArchivoSgfSuelto = {
+    ruta_archivo: string;
+    nombre_archivo: string;
+};
+
 export type Proceso = {
     id: number;
     estado_actual: EstadoWorkflow;
@@ -147,6 +152,29 @@ export type Factura = {
     folio: string;
     monto: string;
     fecha_emision: string;
+    tiene_detalle: boolean;
+};
+
+export type FacturaResumen = {
+    id: number;
+    folio: string;
+    monto: string;
+    caso_pago_proveedor_id: number;
+};
+
+export type TipoCompraSeleccionable = {
+    id: number;
+    nombre: string;
+};
+
+export type DetalleFactura = {
+    id: number;
+    factura_id: number;
+    tipo_compra_id: number;
+    ccosto_id: number;
+    cantidad: string;
+    unidad_medida: string | null;
+    monto: string;
 };
 
 export type CriterioPreparacionEgreso = {
@@ -179,6 +207,8 @@ export type CasoPagoProveedor = {
     snapshots_sgf?: SnapshotSgf[];
     egresos_cgu?: EgresoCguAsociado[];
     facturas?: Factura[];
+    es_candidato_consumo_basico: boolean;
+    consumo_basico: { id: number } | null;
 };
 
 export type ProcesoAdquisicionResumen = {

@@ -43,6 +43,16 @@ export type CatalogosProveedor = {
     bancos: string[];
 };
 
+export type ConsumoBasicoHistorial = {
+    id: number;
+    numero_documento: string;
+    fecha_inicio_lectura: string;
+    fecha_fin_lectura: string;
+    consumo: string | null;
+    lectura_estimada: boolean;
+    monto_total: string;
+};
+
 export type ClienteMedidor = {
     id: number;
     numero_cliente: string;
@@ -51,6 +61,7 @@ export type ClienteMedidor = {
     tipo_suministro: string;
     direccion_suministro: string | null;
     activo: boolean;
+    consumos?: ConsumoBasicoHistorial[];
 };
 
 export type Cfinanciero = {
@@ -114,6 +125,13 @@ export type TipoProcesoPagoMaestro = {
     nombre: string;
     activo: boolean;
     requiere_traspaso_cgu: boolean;
+};
+
+export type TipoCompraMaestro = {
+    id: number;
+    codigo: string;
+    nombre: string;
+    activo: boolean;
 };
 
 export type TipoDocumentoMaestro = {

@@ -65,7 +65,7 @@ class ClienteMedidorController extends Controller
     {
         Gate::authorize('view', $clienteMedidor);
 
-        $clienteMedidor->load(['proveedor', 'ccosto']);
+        $clienteMedidor->load(['proveedor', 'ccosto', 'consumos']);
 
         return Inertia::render('maestros/clientes-medidores/show', [
             'clienteMedidor' => new ClienteMedidorResource($clienteMedidor),

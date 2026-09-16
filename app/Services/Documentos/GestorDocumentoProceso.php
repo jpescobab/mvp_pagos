@@ -42,6 +42,41 @@ class GestorDocumentoProceso
         });
     }
 
+    /**
+     * Vincula un archivo que YA existe en el disco (nunca se pide volver a
+     * subirlo) — el hash se calcula del archivo real, igual trazabilidad que
+     * subirYVincular(). El llamador es responsable de revalidar que
+     * $rutaArchivo pertenece efectivamente a $vinculable antes de invocar
+     * este método (ver DocumentoProcesoController::vincularExistente()).
+     */
+    public function vincularArchivoExistente(Proceso $vinculable, string $rutaArchivo, TipoDocumento $tipoDocumento, User $usuario): VinculoDocumento
+    {
+        return DB::transaction(function () use ($vinculable, $rutaArchivo, $tipoDocumento, $usuario) {
+            $nombreArchivo = basename($rutaArchivo);
+
+            $documento = Documento::create([
+                'tipo_documento_id' => $tipoDocumento->id,
+                'titulo' => $nombreArchivo,
+                'subido_por' => $usuario->id,
+            ]);
+
+            $documento->versiones()->create([
+                'numero_version' => 1,
+                'ruta_archivo' => $rutaArchivo,
+                'nombre_archivo' => $nombreArchivo,
+                'tipo_mime' => Storage::disk('local')->mimeType($rutaArchivo) ?: null,
+                'tamano_bytes' => Storage::disk('local')->size($rutaArchivo),
+                'hash' => hash_file('sha256', Storage::disk('local')->path($rutaArchivo)),
+                'subido_por' => $usuario->id,
+            ]);
+
+            return $vinculable->vinculosDocumento()->create([
+                'documento_id' => $documento->id,
+                'activo' => true,
+            ]);
+        });
+    }
+
     public function subirNuevaVersion(Documento $documento, UploadedFile $archivo, User $usuario): VersionDocumento
     {
         return DB::transaction(function () use ($documento, $archivo, $usuario) {

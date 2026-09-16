@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ClienteMedidor extends Model
@@ -44,5 +45,13 @@ class ClienteMedidor extends Model
     public function ccosto(): BelongsTo
     {
         return $this->belongsTo(Ccosto::class);
+    }
+
+    /**
+     * @return HasMany<ConsumoBasico, $this>
+     */
+    public function consumos(): HasMany
+    {
+        return $this->hasMany(ConsumoBasico::class)->orderBy('fecha_inicio_lectura');
     }
 }

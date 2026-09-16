@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Factura extends Model
 {
@@ -39,5 +40,13 @@ class Factura extends Model
     public function proveedor(): BelongsTo
     {
         return $this->belongsTo(Proveedor::class);
+    }
+
+    /**
+     * @return HasOne<DetalleFactura, $this>
+     */
+    public function detalle(): HasOne
+    {
+        return $this->hasOne(DetalleFactura::class);
     }
 }

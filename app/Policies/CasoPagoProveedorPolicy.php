@@ -42,6 +42,11 @@ class CasoPagoProveedorPolicy
         return $user->can('pago_proveedores.registrar_factura');
     }
 
+    public function registrarDetalleFactura(User $user, CasoPagoProveedor $caso): bool
+    {
+        return $user->can('pago_proveedores.registrar_detalle_factura');
+    }
+
     public function verificarCasoSgf(User $user): bool
     {
         return $user->can('pago_proveedores.verificar_caso_sgf');

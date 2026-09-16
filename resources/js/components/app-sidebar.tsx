@@ -55,6 +55,7 @@ import { index as cfinancieros } from '@/routes/maestros/cfinancieros';
 import { index as clientesMedidores } from '@/routes/maestros/clientes-medidores';
 import { index as items } from '@/routes/maestros/items';
 import { index as proveedores } from '@/routes/maestros/proveedores';
+import { index as tiposCompra } from '@/routes/maestros/tipos-compra';
 import { index as tiposDocumento } from '@/routes/maestros/tipos-documento';
 import { index as tiposProcesoPago } from '@/routes/maestros/tipos-proceso-pago';
 import { index as casos } from '@/routes/pago-proveedores/casos';
@@ -167,6 +168,12 @@ const pagoProveedoresNavItems: NavItemConPermiso[] = [
         href: tiposProcesoPago(),
         icon: Layers,
         permiso: 'pago_proveedores.administrar_requisitos_documentales',
+    },
+    {
+        title: 'Tipos de Compra',
+        href: tiposCompra(),
+        icon: Layers,
+        permiso: 'pago_proveedores.administrar_tipos_compra',
     },
     {
         title: 'Requisitos Documentales',

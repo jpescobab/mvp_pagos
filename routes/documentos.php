@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->prefix('procesos/{proceso}/documentos')->name('procesos.documentos.')->group(function () {
     Route::post('/', [DocumentoProcesoController::class, 'store'])->name('store');
+    Route::post('vincular-existente', [DocumentoProcesoController::class, 'vincularExistente'])->name('vincular-existente');
     Route::get('{documento}/descargar', [DocumentoProcesoController::class, 'descargar'])->name('descargar');
     Route::get('{documento}/ver', [DocumentoProcesoController::class, 'ver'])->name('ver');
     Route::delete('{vinculo}', [DocumentoProcesoController::class, 'destroy'])->name('destroy');

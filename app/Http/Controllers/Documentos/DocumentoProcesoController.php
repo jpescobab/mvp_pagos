@@ -6,18 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Documentos\ReclasificarDocumentoRequest;
 use App\Http\Requests\Documentos\SubirDocumentoProcesoRequest;
 use App\Http\Requests\Documentos\SubirNuevaVersionDocumentoRequest;
+use App\Http\Requests\Documentos\VincularArchivoExistenteRequest;
+use App\Models\CasoPagoProveedor;
 use App\Models\Documento;
 use App\Models\Proceso;
 use App\Models\TipoDocumento;
 use App\Models\VinculoDocumento;
 use App\Services\Documentos\GestorDocumentoProceso;
+use App\Services\Sgf\ArchivosSgfSueltosResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DocumentoProcesoController extends Controller
 {
-    public function __construct(private readonly GestorDocumentoProceso $gestorDocumento) {}
+    public function __construct(
+        private readonly GestorDocumentoProceso $gestorDocumento,
+        private readonly ArchivosSgfSueltosResolver $archivosSueltosResolver,
+    ) {}
 
     public function store(Proceso $proceso, SubirDocumentoProcesoRequest $request): RedirectResponse
     {
@@ -62,6 +68,29 @@ class DocumentoProcesoController extends Controller
     public function ver(Proceso $proceso, Documento $documento): BinaryFileResponse
     {
         return response()->file($this->gestorDocumento->descargarRutaArchivo($documento));
+    }
+
+    public function vincularExistente(Proceso $proceso, VincularArchivoExistenteRequest $request): RedirectResponse
+    {
+        Gate::authorize('gestionarDocumentos', $proceso);
+
+        $rutaArchivo = $request->string('ruta_archivo')->toString();
+
+        $disponibles = $proceso->sujeto instanceof CasoPagoProveedor
+            ? $this->archivosSueltosResolver->disponibles($proceso->sujeto)
+            : [];
+
+        $rutaVigente = collect($disponibles)->contains('ruta_archivo', $rutaArchivo);
+
+        if (! $rutaVigente) {
+            return back()->withErrors(['ruta_archivo' => 'Este archivo ya no está disponible para vincular.']);
+        }
+
+        $tipoDocumento = TipoDocumento::findOrFail($request->integer('tipo_documento_id'));
+
+        $this->gestorDocumento->vincularArchivoExistente($proceso, $rutaArchivo, $tipoDocumento, $request->user());
+
+        return back();
     }
 
     public function destroy(Proceso $proceso, VinculoDocumento $vinculo): RedirectResponse

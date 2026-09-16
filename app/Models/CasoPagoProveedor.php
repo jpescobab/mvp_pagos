@@ -6,12 +6,14 @@ use App\Services\PagoProveedores\CfinancieroPorDefectoResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
  * @property-read Proveedor|null $proveedor
  * @property-read Proceso|null $proceso
  * @property-read ProcesoAdquisicion|null $procesoAdquisicion
+ * @property-read ConsumoBasico|null $consumoBasico
  */
 class CasoPagoProveedor extends Model
 {
@@ -114,6 +116,14 @@ class CasoPagoProveedor extends Model
     public function revisionesInstancia(): HasMany
     {
         return $this->hasMany(RevisionPagoInstancia::class);
+    }
+
+    /**
+     * @return HasOne<ConsumoBasico, $this>
+     */
+    public function consumoBasico(): HasOne
+    {
+        return $this->hasOne(ConsumoBasico::class);
     }
 
     /**

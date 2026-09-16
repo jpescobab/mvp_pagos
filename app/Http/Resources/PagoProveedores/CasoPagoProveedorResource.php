@@ -9,6 +9,7 @@ use App\Models\Factura;
 use App\Models\RegistroContableCgu;
 use App\Models\RegistroPagoBancario;
 use App\Models\SnapshotDatosExterno;
+use App\Services\ConsumoBasico\ConsumoBasicoService;
 use App\Services\PagoProveedores\PreparacionEgresoPresenter;
 use App\Services\PagoProveedores\RevisionEgresoService;
 use Illuminate\Http\Request;
@@ -87,6 +88,12 @@ class CasoPagoProveedorResource extends JsonResource
             'facturas' => $this->whenLoaded(
                 'facturas',
                 fn () => $this->mapFacturas(),
+            ),
+            'es_candidato_consumo_basico' => $this->consumoBasico === null
+                && app(ConsumoBasicoService::class)->esCandidatoServicioBasico($this->resource),
+            'consumo_basico' => $this->whenLoaded(
+                'consumoBasico',
+                fn () => $this->consumoBasico === null ? null : ['id' => $this->consumoBasico->id],
             ),
         ];
     }
@@ -187,6 +194,7 @@ class CasoPagoProveedorResource extends JsonResource
                 'folio' => $factura->folio,
                 'monto' => $factura->monto,
                 'fecha_emision' => $factura->fecha_emision,
+                'tiene_detalle' => $factura->detalle !== null,
             ])
             ->all());
     }

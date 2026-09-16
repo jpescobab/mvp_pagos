@@ -1,6 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ClienteMedidorStatusBadge } from '@/components/maestros/cliente-medidor-status-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Monto } from '@/components/ui/monto';
 import clientesMedidores from '@/routes/maestros/clientes-medidores';
 import type { ClienteMedidor } from '@/types/maestros';
 
@@ -71,6 +73,74 @@ export default function ClientesMedidoresShow() {
                         <dd>{clienteMedidor.direccion_suministro ?? '—'}</dd>
                     </div>
                 </dl>
+
+                <div className="rounded-xl border p-4">
+                    <h2 className="mb-3 text-sm font-semibold tracking-tight">
+                        Historial de consumo
+                    </h2>
+
+                    {!clienteMedidor.consumos ||
+                    clienteMedidor.consumos.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            Este medidor todavía no tiene consumos registrados.
+                        </p>
+                    ) : (
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b text-left text-xs text-muted-foreground">
+                                    <th className="py-2 font-medium">
+                                        Período
+                                    </th>
+                                    <th className="py-2 font-medium">
+                                        Documento
+                                    </th>
+                                    <th className="py-2 font-medium">
+                                        Consumo
+                                    </th>
+                                    <th className="py-2 font-medium">
+                                        Monto total
+                                    </th>
+                                    <th className="py-2 font-medium">
+                                        Lectura
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clienteMedidor.consumos.map((consumo) => (
+                                    <tr key={consumo.id} className="border-b">
+                                        <td className="py-2">
+                                            {consumo.fecha_inicio_lectura} —{' '}
+                                            {consumo.fecha_fin_lectura}
+                                        </td>
+                                        <td className="py-2">
+                                            {consumo.numero_documento}
+                                        </td>
+                                        <td className="py-2">
+                                            <Monto
+                                                valor={consumo.consumo}
+                                                variante="numero"
+                                            />
+                                        </td>
+                                        <td className="py-2">
+                                            <Monto
+                                                valor={consumo.monto_total}
+                                            />
+                                        </td>
+                                        <td className="py-2">
+                                            {consumo.lectura_estimada ? (
+                                                <Badge variant="secondary">
+                                                    Estimada
+                                                </Badge>
+                                            ) : (
+                                                '—'
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             </div>
         </>
     );

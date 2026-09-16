@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Maestros;
 
 use App\Models\ClienteMedidor;
+use App\Models\ConsumoBasico;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -30,6 +31,28 @@ class ClienteMedidorResource extends JsonResource
             'tipo_suministro' => $this->tipo_suministro,
             'direccion_suministro' => $this->direccion_suministro,
             'activo' => $this->activo,
+            'consumos' => $this->whenLoaded(
+                'consumos',
+                fn () => $this->mapConsumos(),
+            ),
         ];
+    }
+
+    /**
+     * @return list<array{id: int, numero_documento: string, fecha_inicio_lectura: string, fecha_fin_lectura: string, consumo: float|null, lectura_estimada: bool, monto_total: float}>
+     */
+    private function mapConsumos(): array
+    {
+        return array_values($this->consumos
+            ->map(fn (ConsumoBasico $consumo) => [
+                'id' => $consumo->id,
+                'numero_documento' => $consumo->numero_documento,
+                'fecha_inicio_lectura' => $consumo->fecha_inicio_lectura,
+                'fecha_fin_lectura' => $consumo->fecha_fin_lectura,
+                'consumo' => $consumo->consumo,
+                'lectura_estimada' => $consumo->lectura_estimada,
+                'monto_total' => $consumo->monto_total,
+            ])
+            ->all());
     }
 }

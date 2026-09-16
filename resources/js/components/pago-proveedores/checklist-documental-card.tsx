@@ -9,6 +9,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type {
+    ArchivoSgfSuelto,
     CasoPagoProveedor,
     DocumentoRevinculable,
     DocumentoVinculado,
@@ -19,6 +20,7 @@ type ChecklistDocumentalCardProps = {
     errorDocumento: string | null;
     documentosHuerfanos: DocumentoVinculado[];
     documentosRevinculables: DocumentoRevinculable[];
+    archivosSueltosSgf: ArchivoSgfSuelto[];
     puedeGestionarDocumentos: boolean;
     subiendoDocumento: boolean;
     subirDocumento: (tipoDocumentoId: string, archivo: File) => void;
@@ -35,6 +37,10 @@ type ChecklistDocumentalCardProps = {
         tipoDocumentoId: number,
         documentoId: string | undefined,
     ) => void;
+    vincularArchivoSuelto: (
+        tipoDocumentoId: number,
+        rutaArchivo: string | undefined,
+    ) => void;
     documentoPreviewId: number | null;
     onVerDocumento: (documentoId: number) => void;
     desvincularDocumento: (vinculoId: number) => void;
@@ -45,6 +51,7 @@ export function ChecklistDocumentalCard({
     errorDocumento,
     documentosHuerfanos,
     documentosRevinculables,
+    archivosSueltosSgf,
     puedeGestionarDocumentos,
     subiendoDocumento,
     subirDocumento,
@@ -53,6 +60,7 @@ export function ChecklistDocumentalCard({
     vinculandoHuerfano,
     vincularHuerfano,
     reactivarDocumento,
+    vincularArchivoSuelto,
     documentoPreviewId,
     onVerDocumento,
     desvincularDocumento,
@@ -61,6 +69,11 @@ export function ChecklistDocumentalCard({
     // reactivar el vínculo en vez de reclasificar un huérfano activo.
     const idsRevinculables = new Set(
         documentosRevinculables.map((doc) => String(doc.documento_id)),
+    );
+    // Rutas de archivos sueltos SGF (nunca llegaron a crear un Documento):
+    // se identifican por ruta, no por id, para distinguirlos de los demás.
+    const rutasArchivosSueltos = new Set(
+        archivosSueltosSgf.map((archivo) => archivo.ruta_archivo),
     );
 
     return (
@@ -85,7 +98,8 @@ export function ChecklistDocumentalCard({
                             esPendiente &&
                             item.tipo_documento_id !== null &&
                             documentosHuerfanos.length +
-                                documentosRevinculables.length >
+                                documentosRevinculables.length +
+                                archivosSueltosSgf.length >
                                 0;
 
                         return (
@@ -250,6 +264,21 @@ export function ChecklistDocumentalCard({
                                                         </SelectItem>
                                                     ),
                                                 )}
+                                                {archivosSueltosSgf.map(
+                                                    (archivo) => (
+                                                        <SelectItem
+                                                            key={`suelto-${archivo.ruta_archivo}`}
+                                                            value={
+                                                                archivo.ruta_archivo
+                                                            }
+                                                        >
+                                                            {
+                                                                archivo.nombre_archivo
+                                                            }{' '}
+                                                            (archivo suelto)
+                                                        </SelectItem>
+                                                    ),
+                                                )}
                                             </SelectContent>
                                         </Select>
                                         <Button
@@ -270,11 +299,33 @@ export function ChecklistDocumentalCard({
                                                 const tipoId =
                                                     item.tipo_documento_id as number;
 
-                                                // Un documento desvinculado se
-                                                // reactiva; un huérfano activo se
+                                                // Un archivo suelto (nunca
+                                                // tuvo Documento) se vincula
+                                                // desde cero; un documento
+                                                // desvinculado se reactiva; un
+                                                // huérfano activo se
                                                 // reclasifica (comportamiento
-                                                // previo).
+                                                // previo). Si el valor
+                                                // seleccionado quedó obsoleto
+                                                // (ya no corresponde a
+                                                // ninguna opción vigente, p.
+                                                // ej. justo después de
+                                                // vincular un archivo suelto)
+                                                // no se hace nada, en vez de
+                                                // mandar un id inválido al
+                                                // backend.
                                                 if (
+                                                    seleccionado !==
+                                                        undefined &&
+                                                    rutasArchivosSueltos.has(
+                                                        seleccionado,
+                                                    )
+                                                ) {
+                                                    vincularArchivoSuelto(
+                                                        tipoId,
+                                                        seleccionado,
+                                                    );
+                                                } else if (
                                                     seleccionado !==
                                                         undefined &&
                                                     idsRevinculables.has(
@@ -285,7 +336,11 @@ export function ChecklistDocumentalCard({
                                                         tipoId,
                                                         seleccionado,
                                                     );
-                                                } else {
+                                                } else if (
+                                                    seleccionado !==
+                                                        undefined &&
+                                                    /^\d+$/.test(seleccionado)
+                                                ) {
                                                     vincularHuerfano(
                                                         tipoId,
                                                         seleccionado,

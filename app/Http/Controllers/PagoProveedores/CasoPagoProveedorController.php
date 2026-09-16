@@ -12,6 +12,7 @@ use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
 use App\Services\Documentos\ResolutorChecklistDocumentalProceso;
 use App\Services\PagoProveedores\ListadoCasoPagoProveedorService;
+use App\Services\Sgf\ArchivosSgfSueltosResolver;
 use App\Services\Sgf\ConectorSgfPlaywrightService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class CasoPagoProveedorController extends Controller
         private readonly ResolutorChecklistDocumentalProceso $resolutorChecklist,
         private readonly ConectorSgfPlaywrightService $conectorSgf,
         private readonly ListadoCasoPagoProveedorService $listadoCasos,
+        private readonly ArchivosSgfSueltosResolver $archivosSueltosResolver,
     ) {}
 
     public function index(Request $request): Response
@@ -57,6 +59,7 @@ class CasoPagoProveedorController extends Controller
             'caso' => (new CasoPagoProveedorResource($caso))->withPreparacionEgreso(),
             'tiposDocumento' => TipoDocumento::where('activo', true)->get(['id', 'nombre']),
             'tiposProcesoPago' => TipoProcesoPago::where('activo', true)->get(['id', 'codigo', 'nombre']),
+            'archivosSueltosSgf' => $this->archivosSueltosResolver->disponibles($caso),
         ]);
     }
 
@@ -95,7 +98,8 @@ class CasoPagoProveedorController extends Controller
             'registrosPagoBancario.registradoPor',
             'snapshotsSgf',
             'egresoCguItems.egreso',
-            'facturas',
+            'facturas.detalle',
+            'consumoBasico',
         ]);
 
         $conjuntoRequisitos = ConjuntoRequisitosDocumentales::where('codigo', 'pago_proveedores')->first();

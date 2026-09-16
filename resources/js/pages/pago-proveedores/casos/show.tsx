@@ -5,6 +5,7 @@ import { ChecklistDocumentalCard } from '@/components/pago-proveedores/checklist
 import { EstadoBadge } from '@/components/pago-proveedores/estado-badge';
 import { PreparacionEgresoCard } from '@/components/pago-proveedores/preparacion-egreso-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +18,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { formatFecha, formatFechaHora } from '@/lib/format';
+import consumoBasico from '@/routes/consumo-basico';
 import casos from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
+import detalleFactura from '@/routes/pago-proveedores/facturas/detalle-factura';
 import revision from '@/routes/pago-proveedores/revision';
 import documentos from '@/routes/procesos/documentos';
 import type {
+    ArchivoSgfSuelto,
     CasoPagoProveedor,
     RegistroContableCgu,
     TipoDocumentoSeleccionable,
@@ -32,6 +36,7 @@ type PageProps = {
     caso: CasoPagoProveedor;
     tiposDocumento: TipoDocumentoSeleccionable[];
     tiposProcesoPago: TipoProcesoPagoSeleccionable[];
+    archivosSueltosSgf: ArchivoSgfSuelto[];
 };
 
 const ESTADOS_EN_REVISION = new Set([
@@ -46,7 +51,7 @@ const NOMBRE_INSTANCIA: Record<string, string> = {
 
 export default function CasoShow() {
     const page = usePage<PageProps>();
-    const { caso, tiposProcesoPago, auth } = page.props;
+    const { caso, tiposProcesoPago, auth, archivosSueltosSgf } = page.props;
     const { verificacionSgf } = page.flash;
 
     const enRevision = ESTADOS_EN_REVISION.has(
@@ -222,11 +227,51 @@ export default function CasoShow() {
         );
     }
 
+    function vincularArchivoSuelto(
+        tipoDocumentoId: number,
+        rutaArchivo: string | undefined,
+    ) {
+        if (!rutaArchivo) {
+            return;
+        }
+
+        setVinculandoHuerfano(true);
+        setErrorDocumento(null);
+
+        router.post(
+            documentos.vincularExistente({ proceso: caso.proceso.id }).url,
+            { ruta_archivo: rutaArchivo, tipo_documento_id: tipoDocumentoId },
+            {
+                preserveScroll: true,
+                onSuccess: () =>
+                    setHuerfanoSeleccionado((actual) => ({
+                        ...actual,
+                        [tipoDocumentoId]: undefined,
+                    })),
+                onError: (errors) =>
+                    setErrorDocumento(
+                        (errors as Record<string, string>).ruta_archivo ??
+                            (errors as Record<string, string>)
+                                .tipo_documento_id ??
+                            null,
+                    ),
+                onFinish: () => setVinculandoHuerfano(false),
+            },
+        );
+    }
+
     function desvincularDocumento(vinculoId: number) {
         router.delete(
             documentos.destroy({ proceso: caso.proceso.id, vinculo: vinculoId })
                 .url,
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                // Las opciones del selector "vincula uno ya importado" cambian
+                // tras desvincular (el documento pasa a "revinculable"); se
+                // limpia cualquier selección pendiente para que no quede
+                // apuntando a un valor que ya no corresponde a ninguna opción.
+                onSuccess: () => setHuerfanoSeleccionado({}),
+            },
         );
     }
 
@@ -377,6 +422,45 @@ export default function CasoShow() {
                 </div>
 
                 <PreparacionEgresoCard caso={caso} />
+
+                {caso.es_candidato_consumo_basico && (
+                    <Alert className="border-transparent bg-warning-soft text-warning">
+                        <AlertTitle>
+                            Este caso corresponde a un proveedor con medidores
+                            registrados
+                        </AlertTitle>
+                        <AlertDescription className="text-warning/80">
+                            <span>
+                                Puedes completar el detalle de consumo (medidor,
+                                período, consumo, tarifa) de esta
+                                boleta/factura.
+                            </span>
+                            <Link
+                                href={consumoBasico.create(caso.id).url}
+                                className="font-medium underline"
+                            >
+                                Completar detalle de consumo →
+                            </Link>
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {caso.consumo_basico && (
+                    <Alert>
+                        <AlertTitle>Detalle de consumo registrado</AlertTitle>
+                        <AlertDescription>
+                            <Link
+                                href={
+                                    consumoBasico.show(caso.consumo_basico.id)
+                                        .url
+                                }
+                                className="font-medium underline"
+                            >
+                                Ver detalle de consumo →
+                            </Link>
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 {enRevision && (
                     <Alert className="border-transparent bg-warning-soft text-warning">
@@ -644,6 +728,76 @@ export default function CasoShow() {
                                     </div>
                                 )}
                             </section>
+
+                            <section className="space-y-3 rounded-xl border p-4">
+                                <h2 className="text-base font-medium">
+                                    Facturas
+                                </h2>
+
+                                {(caso.facturas ?? []).length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        Sin facturas registradas todavía.
+                                    </p>
+                                ) : (
+                                    <ul className="divide-y text-sm">
+                                        {(caso.facturas ?? []).map(
+                                            (factura) => (
+                                                <li
+                                                    key={factura.id}
+                                                    className="flex items-center justify-between py-2"
+                                                >
+                                                    <div>
+                                                        <span className="font-mono">
+                                                            {factura.folio}
+                                                        </span>
+                                                        <span className="ml-2 text-muted-foreground">
+                                                            {formatFecha(
+                                                                factura.fecha_emision,
+                                                            )}{' '}
+                                                            ·{' '}
+                                                            <Monto
+                                                                valor={
+                                                                    factura.monto
+                                                                }
+                                                            />
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {factura.tiene_detalle ? (
+                                                            <Badge variant="outline">
+                                                                Con detalle
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="text-muted-foreground"
+                                                            >
+                                                                Sin detalle
+                                                            </Badge>
+                                                        )}
+                                                        <Link
+                                                            href={
+                                                                factura.tiene_detalle
+                                                                    ? detalleFactura.edit(
+                                                                          factura.id,
+                                                                      ).url
+                                                                    : detalleFactura.create(
+                                                                          factura.id,
+                                                                      ).url
+                                                            }
+                                                            className="text-xs underline"
+                                                        >
+                                                            {factura.tiene_detalle
+                                                                ? 'Editar detalle'
+                                                                : 'Completar detalle'}
+                                                        </Link>
+                                                    </div>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                )}
+                            </section>
                         </SeccionGrupo>
                     </div>
 
@@ -653,6 +807,7 @@ export default function CasoShow() {
                             errorDocumento={errorDocumento}
                             documentosHuerfanos={documentosHuerfanos}
                             documentosRevinculables={documentosRevinculables}
+                            archivosSueltosSgf={archivosSueltosSgf}
                             puedeGestionarDocumentos={puedeGestionarDocumentos}
                             subiendoDocumento={subiendoDocumento}
                             subirDocumento={subirDocumento}
@@ -661,6 +816,7 @@ export default function CasoShow() {
                             vinculandoHuerfano={vinculandoHuerfano}
                             vincularHuerfano={vincularHuerfano}
                             reactivarDocumento={reactivarDocumento}
+                            vincularArchivoSuelto={vincularArchivoSuelto}
                             documentoPreviewId={documentoPreviewIdVigente}
                             onVerDocumento={setDocumentoPreviewId}
                             desvincularDocumento={desvincularDocumento}
