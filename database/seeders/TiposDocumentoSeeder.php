@@ -26,6 +26,7 @@ class TiposDocumentoSeeder extends Seeder
             ['codigo' => 'INFORME_JUSTIFICACION_TRATO_DIRECTO', 'nombre' => 'Informe de Justificación de Trato Directo', 'descripcion' => 'Informe que justifica no usar el Convenio Marco disponible', 'es_obligatorio' => false],
             ['codigo' => 'PRESUPUESTO_CGU', 'nombre' => 'Presupuesto CGU',         'descripcion' => 'Excel de presupuesto asignado exportado desde CGU',          'es_obligatorio' => false],
             ['codigo' => 'CDP',           'nombre' => 'Certificado de Disponibilidad Presupuestaria', 'descripcion' => 'PDF del CDP generado al firmar',            'es_obligatorio' => false],
+            ['codigo' => 'BOLETA_CONSUMO_BASICO', 'nombre' => 'Boleta/Factura de Consumo Básico', 'descripcion' => 'PDF de la boleta/factura de un servicio básico (electricidad, agua, gas)', 'es_obligatorio' => false],
         ];
 
         foreach ($tipos as $tipo) {

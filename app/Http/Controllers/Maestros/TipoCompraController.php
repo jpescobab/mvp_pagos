@@ -8,20 +8,32 @@ use App\Http\Requests\Maestros\UpdateTipoCompraRequest;
 use App\Http\Resources\Maestros\TipoCompraResource;
 use App\Models\TipoCompra;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TipoCompraController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         Gate::authorize('viewAny', TipoCompra::class);
 
-        $tiposCompra = TipoCompra::query()->orderBy('nombre')->get();
+        $q = $request->string('q')->toString();
+
+        $tiposCompra = TipoCompra::query()
+            ->when($q !== '', fn ($query) => $query->where(
+                fn ($sub) => $sub
+                    ->where('codigo', 'like', "%{$q}%")
+                    ->orWhere('nombre', 'like', "%{$q}%"),
+            ))
+            ->orderBy('nombre')
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('maestros/tipos-compra/index', [
             'tiposCompra' => TipoCompraResource::collection($tiposCompra),
+            'q' => $q !== '' ? $q : null,
         ]);
     }
 

@@ -59,10 +59,10 @@ class ConsumoBasicoService
     public function adjuntarDocumento(ConsumoBasico $consumoBasico, UploadedFile $archivo, User $usuario): VinculoDocumento
     {
         return DB::transaction(function () use ($consumoBasico, $archivo, $usuario) {
-            $tipoDocumento = TipoDocumento::firstOrCreate(
-                ['codigo' => 'BOLETA_CONSUMO_BASICO'],
-                ['nombre' => 'Boleta/Factura de Consumo Básico'],
-            );
+            // Sembrado en TiposDocumentoSeeder (igual que el resto del
+            // catálogo de tipos_documento) — no se crea al vuelo acá para
+            // que el id sea estable entre entornos.
+            $tipoDocumento = TipoDocumento::where('codigo', 'BOLETA_CONSUMO_BASICO')->firstOrFail();
 
             $documento = Documento::create([
                 'tipo_documento_id' => $tipoDocumento->id,

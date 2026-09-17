@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\ConsumoBasico\ConsumoBasicoService;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use Database\Seeders\ConsumoBasicoSeeder;
+use Database\Seeders\TiposDocumentoSeeder;
 use Database\Seeders\WorkflowPagoProveedoresSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -86,6 +87,7 @@ function crearConsumoBasicoDePrueba(?string $sufijo = null): ConsumoBasico
 beforeEach(function () {
     $this->seed(WorkflowPagoProveedoresSeeder::class);
     $this->seed(ConsumoBasicoSeeder::class);
+    $this->seed(TiposDocumentoSeeder::class);
 });
 
 test('subir el PDF de la boleta crea Documento, VersionDocumento y VinculoDocumento', function () {

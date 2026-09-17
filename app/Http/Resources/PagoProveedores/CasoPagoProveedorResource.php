@@ -89,8 +89,16 @@ class CasoPagoProveedorResource extends JsonResource
                 'facturas',
                 fn () => $this->mapFacturas(),
             ),
-            'es_candidato_consumo_basico' => $this->consumoBasico === null
-                && app(ConsumoBasicoService::class)->esCandidatoServicioBasico($this->resource),
+            // Gateado por whenLoaded (igual que preparacion_egreso más
+            // arriba): el listado paginado de casos no carga 'consumoBasico',
+            // y esCandidatoServicioBasico() hace su propia query — calcularlo
+            // sin querer ahí introduciría un N+1 por fila.
+            'es_candidato_consumo_basico' => $this->whenLoaded(
+                'consumoBasico',
+                fn () => $this->consumoBasico === null
+                    && app(ConsumoBasicoService::class)->esCandidatoServicioBasico($this->resource),
+                false,
+            ),
             'consumo_basico' => $this->whenLoaded(
                 'consumoBasico',
                 fn () => $this->consumoBasico === null ? null : ['id' => $this->consumoBasico->id],
