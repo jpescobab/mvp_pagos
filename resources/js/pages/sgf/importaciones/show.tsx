@@ -2,6 +2,7 @@ import { Head, Link, usePage, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { formatFechaHora, formatMonto, formatNumero } from '@/lib/format';
 import { show as mostrarCaso } from '@/routes/pago-proveedores/casos';
 import egresosCgu from '@/routes/pago-proveedores/egresos-cgu';
@@ -34,8 +35,14 @@ export default function ImportacionSgfShow() {
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 <div>
-                    <h1 className="text-xl font-semibold tracking-tight">
+                    <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
                         Importación SGF
+                        {enProgreso && (
+                            <span className="inline-flex items-center gap-1.5 text-sm font-normal text-muted-foreground">
+                                <Spinner className="size-4" />
+                                En curso
+                            </span>
+                        )}
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Tipo: {importacion.tipo} · Iniciado por:{' '}
@@ -130,16 +137,28 @@ export default function ImportacionSgfShow() {
                 )}
 
                 <section className="space-y-3 rounded-xl border p-4">
-                    <h2 className="text-base font-medium">
+                    <h2 className="flex items-center gap-2 text-base font-medium">
                         Snapshots producidos (
                         {formatNumero(importacion.total_elementos)})
+                        {enProgreso &&
+                            (importacion.snapshots ?? []).length > 0 && (
+                                <span className="inline-flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                                    <Spinner className="size-3.5" />
+                                    siguen llegando…
+                                </span>
+                            )}
                     </h2>
 
                     {(importacion.snapshots ?? []).length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                            {importacion.estado === 'en_progreso'
-                                ? 'Importación en curso…'
-                                : 'Sin snapshots producidos todavía.'}
+                        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                            {importacion.estado === 'en_progreso' ? (
+                                <>
+                                    <Spinner className="size-4" />
+                                    Importación en curso…
+                                </>
+                            ) : (
+                                'Sin snapshots producidos todavía.'
+                            )}
                         </p>
                     ) : (
                         <ul className="divide-y text-sm">

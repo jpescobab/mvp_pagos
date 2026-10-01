@@ -315,6 +315,12 @@ export default function CasoShow() {
     const [errorRegistroCgu, setErrorRegistroCgu] = useState<string | null>(
         null,
     );
+    // El formulario parte oculto cuando ya hay un traspaso (típicamente
+    // importado desde SGF): mostrarlo siempre ocupa espacio para una
+    // corrección que rara vez hace falta. Sin traspaso todavía, se muestra
+    // de entrada porque ES la acción principal de la sección.
+    const [mostrarFormularioCgu, setMostrarFormularioCgu] =
+        useState(!hayTraspaso);
 
     function registrarContableCgu() {
         setRegistrandoCgu(true);
@@ -330,6 +336,7 @@ export default function CasoShow() {
             },
             {
                 preserveScroll: true,
+                onSuccess: () => setMostrarFormularioCgu(false),
                 onError: (errors) =>
                     setErrorRegistroCgu(
                         Object.values(errors as Record<string, string>)[0] ??
@@ -552,9 +559,27 @@ export default function CasoShow() {
 
                         <SeccionGrupo titulo="Financiero">
                             <section className="space-y-3 rounded-xl border p-4">
-                                <h2 className="text-base font-medium">
-                                    Registro contable CGU (Traspaso)
-                                </h2>
+                                <div className="flex items-center justify-between gap-2">
+                                    <h2 className="text-base font-medium">
+                                        Registro contable CGU (Traspaso)
+                                    </h2>
+                                    {puedeRegistrarCgu &&
+                                        requiereTraspasoCgu &&
+                                        hayTraspaso &&
+                                        !mostrarFormularioCgu && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setMostrarFormularioCgu(
+                                                        true,
+                                                    )
+                                                }
+                                            >
+                                                Corregir
+                                            </Button>
+                                        )}
+                                </div>
 
                                 {errorRegistroCgu && (
                                     <p className="text-sm text-destructive">
@@ -634,99 +659,125 @@ export default function CasoShow() {
                                     </ul>
                                 )}
 
-                                {puedeRegistrarCgu && requiereTraspasoCgu && (
-                                    <div className="flex flex-wrap items-end gap-2">
-                                        {caso.sgf_numero_traspaso !== null && (
-                                            <p className="basis-full text-xs text-muted-foreground">
-                                                El traspaso se importa desde
-                                                SGF. Usa este formulario solo
-                                                para registrar una corrección
-                                                manual; el valor de SGF se
-                                                conserva como referencia.
-                                            </p>
-                                        )}
-                                        <div className="space-y-1">
-                                            <Label htmlFor="numero-registro-cgu">
-                                                N.º de Traspaso
-                                            </Label>
-                                            <Input
-                                                id="numero-registro-cgu"
-                                                value={numeroRegistroCgu}
-                                                onChange={(e) =>
-                                                    setNumeroRegistroCgu(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="fecha-registro-cgu">
-                                                Fecha
-                                            </Label>
-                                            <Input
-                                                id="fecha-registro-cgu"
-                                                type="date"
-                                                value={fechaRegistroCgu}
-                                                onChange={(e) =>
-                                                    setFechaRegistroCgu(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="monto-registro-cgu">
-                                                Monto
-                                            </Label>
-                                            <Input
-                                                id="monto-registro-cgu"
-                                                type="number"
-                                                value={montoRegistroCgu}
-                                                onChange={(e) =>
-                                                    setMontoRegistroCgu(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="observaciones-registro-cgu">
-                                                Observaciones
-                                            </Label>
-                                            <Input
-                                                id="observaciones-registro-cgu"
-                                                value={observacionesRegistroCgu}
-                                                onChange={(e) =>
-                                                    setObservacionesRegistroCgu(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Button
-                                                disabled={
-                                                    registrandoCgu ||
-                                                    numeroRegistroCgu === '' ||
-                                                    fechaRegistroCgu === '' ||
-                                                    montoRegistroCgu === '' ||
-                                                    registroCguSinCambios
-                                                }
-                                                onClick={registrarContableCgu}
-                                            >
-                                                {hayTraspaso
-                                                    ? 'Corregir traspaso'
-                                                    : 'Registrar Traspaso'}
-                                            </Button>
-                                            {registroCguSinCambios && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    Sin cambios respecto al
-                                                    último registro.
+                                {puedeRegistrarCgu &&
+                                    requiereTraspasoCgu &&
+                                    mostrarFormularioCgu && (
+                                        <div className="flex flex-wrap items-end gap-2">
+                                            {caso.sgf_numero_traspaso !==
+                                                null && (
+                                                <p className="basis-full text-xs text-muted-foreground">
+                                                    El traspaso se importa desde
+                                                    SGF. Usa este formulario
+                                                    solo para registrar una
+                                                    corrección manual; el valor
+                                                    de SGF se conserva como
+                                                    referencia.
                                                 </p>
                                             )}
+                                            <div className="space-y-1">
+                                                <Label htmlFor="numero-registro-cgu">
+                                                    N.º de Traspaso
+                                                </Label>
+                                                <Input
+                                                    id="numero-registro-cgu"
+                                                    value={numeroRegistroCgu}
+                                                    onChange={(e) =>
+                                                        setNumeroRegistroCgu(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="fecha-registro-cgu">
+                                                    Fecha
+                                                </Label>
+                                                <Input
+                                                    id="fecha-registro-cgu"
+                                                    type="date"
+                                                    value={fechaRegistroCgu}
+                                                    onChange={(e) =>
+                                                        setFechaRegistroCgu(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="monto-registro-cgu">
+                                                    Monto
+                                                </Label>
+                                                <Input
+                                                    id="monto-registro-cgu"
+                                                    type="number"
+                                                    value={montoRegistroCgu}
+                                                    onChange={(e) =>
+                                                        setMontoRegistroCgu(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="observaciones-registro-cgu">
+                                                    Observaciones
+                                                </Label>
+                                                <Input
+                                                    id="observaciones-registro-cgu"
+                                                    value={
+                                                        observacionesRegistroCgu
+                                                    }
+                                                    onChange={(e) =>
+                                                        setObservacionesRegistroCgu(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Button
+                                                    disabled={
+                                                        registrandoCgu ||
+                                                        numeroRegistroCgu ===
+                                                            '' ||
+                                                        fechaRegistroCgu ===
+                                                            '' ||
+                                                        montoRegistroCgu ===
+                                                            '' ||
+                                                        registroCguSinCambios
+                                                    }
+                                                    onClick={
+                                                        registrarContableCgu
+                                                    }
+                                                >
+                                                    {hayTraspaso
+                                                        ? 'Corregir traspaso'
+                                                        : 'Registrar Traspaso'}
+                                                </Button>
+                                                {registroCguSinCambios && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Sin cambios respecto al
+                                                        último registro.
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {hayTraspaso && (
+                                                <div className="space-y-1">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        onClick={() =>
+                                                            setMostrarFormularioCgu(
+                                                                false,
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                             </section>
 
                             <section className="space-y-3 rounded-xl border p-4">
