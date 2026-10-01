@@ -4,8 +4,7 @@ required=(
   "AGENTS.md"
   "CLAUDE.md"
   "HARNESS_IA.md"
-  "openspec/project.md"
-  "openspec/principles.md"
+  "openspec/config.yaml"
   "docs/DECISIONES_TOMADAS_v9.md"
 )
 for f in "${required[@]}"; do
