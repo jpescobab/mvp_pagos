@@ -1,11 +1,11 @@
 // Scraper Playwright real de SGF.
 //
-// TODO-VERIFICAR: este módulo es un andamiaje construido a partir de
-// capturas de pantalla y descripciones del flujo real (no del HTML real).
-// Antes de confiar en él en cualquier entorno hay que calibrarlo — ver
-// CALIBRACION.md en esta misma carpeta. Quien lo calibre debe ser una
-// persona ejecutando el primer login real: este código nunca debe correr
-// sin supervisión la primera vez, y SGF_PASSWORD nunca debe aparecer en un
+// Estado de calibración: ver CALIBRACION.md en esta misma carpeta
+// (calibración básica exitosa el 2026-07-09 con corridas reales
+// supervisadas). Un cambio en el HTML de SGF puede romper los selectores:
+// recalibrar siguiendo ese documento. La primera corrida en un entorno nuevo
+// debe hacerla una persona supervisando — este código nunca debe correr
+// desatendido la primera vez, y SGF_PASSWORD nunca debe aparecer en un
 // console.log, error, o respuesta.
 //
 // Flujo real confirmado por el usuario (2026-07-07):
@@ -348,10 +348,10 @@ async function manejarSeleccionUnidadIngreso(page, pasos) {
         return;
     }
 
-    // TODO-VERIFICAR: en una calibración estos dropdowns ya venían con un
-    // valor por defecto (no había que tocarlos); en otra aparecieron vacíos.
-    // Se seleccionan solo si están vacíos, para no pisar un valor correcto
-    // ya precargado.
+    // NOTA: en una calibración estos dropdowns ya venían con un valor por
+    // defecto (no había que tocarlos); en otra aparecieron vacíos. Se
+    // seleccionan solo si están vacíos, para no pisar un valor correcto ya
+    // precargado.
     if (!(await dropdownTieneValor(page, SELECCION_UNIDAD_INGRESO.etiquetaFuenteFinanciamiento))) {
         await seleccionarDropdownPorTexto(
             page,
@@ -360,10 +360,10 @@ async function manejarSeleccionUnidadIngreso(page, pasos) {
             'Fuente Financiamiento',
         );
 
-        // TODO-VERIFICAR: se asume que "Centro Financiero" es un dropdown
-        // dependiente que recién carga sus opciones después de elegir
-        // Fuente Financiamiento (patrón común de selects en cascada). Si no
-        // lo es, este wait simplemente no tiene efecto negativo.
+        // Se asume que "Centro Financiero" es un dropdown dependiente que
+        // recién carga sus opciones después de elegir Fuente Financiamiento
+        // (patrón común de selects en cascada). Si no lo es, este wait
+        // simplemente no tiene efecto negativo.
         await page.waitForLoadState('networkidle');
     }
 
@@ -475,9 +475,9 @@ async function navegarABandeja(page, pasos) {
 /**
  * Avanza a la siguiente página de la tabla de la Bandeja, si existe.
  *
- * TODO-VERIFICAR: el selector exacto del botón "Siguiente" y de su estado
- * deshabilitado en la última página (PAGINACION_BANDEJA en selectors.js)
- * están descritos por el usuario pero no calibrados contra el DOM real.
+ * VERIFICADO (2026-07-09, dos corridas reales): los selectores de
+ * PAGINACION_BANDEJA (selectors.js) avanzan por todas las páginas y se
+ * detienen correctamente en la última.
  *
  * @returns {Promise<boolean>} true si avanzó de página, false si ya no hay más.
  */
@@ -968,9 +968,9 @@ export async function importarPendientes() {
  * Fecha (mismo día del mes, un mes atrás) en formato "YYYY-MM-DD" — el
  * formato que espera .fill() en un <input type="date"> nativo,
  * independientemente del formato que el navegador muestre visualmente al
- * usuario. TODO-VERIFICAR: se asume que "Fecha inicial" es un input nativo;
- * si el DOM real resulta ser un datepicker de terceros con otro formato de
- * entrada, hay que ajustar este helper.
+ * usuario. VERIFICADO (2026-07-09, corrida real supervisada): "Fecha
+ * inicial" acepta este formato. Si SGF cambiara a un datepicker con otro
+ * formato de entrada, hay que ajustar este helper.
  */
 function fechaHaceUnMes() {
     const hoy = new Date();
@@ -995,10 +995,9 @@ function fechaHaceUnMes() {
  *
  * Reutiliza localizarDropdownPorEtiqueta()/seleccionarDropdownPorTexto() tal
  * cual (su xpath "siguiente campo" es genérico, no específico de
- * "unidad de ingreso"). TODO-VERIFICAR: el selector exacto del multiselect
- * "Grupo" y del input "Fecha inicial" no está calibrado contra el DOM real
- * (la captura aportada es visual, no HTML) — ver tarea 1.5 del change
- * importar-casos-grupo-pago-operaciones-sgf.
+ * "unidad de ingreso"). VERIFICADO (2026-07-09, corrida real supervisada):
+ * el multiselect "Grupo" y el input "Fecha inicial" funcionan con estos
+ * selectores (ver FILTRO_BANDEJA en selectors.js).
  */
 async function filtrarBandejaPorGrupoPagoOperaciones(page, pasos) {
     await seleccionarDropdownPorTexto(

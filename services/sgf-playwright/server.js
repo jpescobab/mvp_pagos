@@ -6,11 +6,12 @@
 //     Es el modo seguro para ejercitar ConectorSgfPlaywrightService (Laravel)
 //     de punta a punta en desarrollo.
 //   - "real": usa sgf-scraper.js (Playwright) para iniciar sesión de verdad
-//     en SGF y extraer datos reales. TODO-VERIFICAR: los selectores de
-//     sgf-scraper.js/selectors.js son una suposición no calibrada contra el
-//     sitio real — ver CALIBRACION.md antes de usar este modo. La primera
-//     corrida en modo real debe hacerla una persona supervisando
-//     (SGF_HEADLESS=false), nunca desatendida.
+//     en SGF y extraer datos reales. Los selectores de
+//     sgf-scraper.js/selectors.js están calibrados contra el sitio real
+//     (ver CALIBRACION.md, que también explica cómo recalibrar si SGF
+//     cambia su HTML). La primera corrida en modo real en un entorno nuevo
+//     debe hacerla una persona supervisando (SGF_HEADLESS=false), nunca
+//     desatendida.
 //
 // Uso: SGF_PLAYWRIGHT_API_KEY=<clave> PORT=4100 SGF_MODO=stub node server.js
 

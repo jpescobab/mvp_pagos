@@ -10,10 +10,11 @@
 //     2026-07-07 (con los selectores genéricos ya definidos).
 //   - SELECCION_UNIDAD_INGRESO: verificado (pantalla real confirmada).
 //   - NAVEGACION_REDFLOW, BANDEJA_PROCESOS, MENU_ACCIONES_PROCESO,
-//     VER_DOCUMENTOS: descritos por el usuario a partir de uso real del
-//     sistema, pero los selectores CSS/texto exactos siguen sin calibrar
-//     contra el DOM (se construyeron a partir de capturas de pantalla, no
-//     del HTML real) — marcados TODO-VERIFICAR.
+//     VER_DOCUMENTOS, PAGINACION_BANDEJA, FILTRO_BANDEJA: verificados o
+//     recalibrados contra el DOM real en corridas supervisadas entre el
+//     2026-07-08 y el 2026-07-21 (el detalle de cada uno está en su propio
+//     comentario VERIFICADO/RECALIBRADO más abajo). Si SGF cambia su HTML,
+//     recalibrar con CALIBRACION.md.
 
 export const LOGIN = {
     usuario: [
@@ -42,8 +43,8 @@ export const LOGIN = {
 // VERIFICADO (2026-07-07, calibración real): tras un login correcto, SGF
 // muestra una pantalla intermedia "Seleccionar unidad de ingreso" con dos
 // selects (Fuente Financiamiento, Centro Financiero) y un botón "Continuar".
-// TODO-VERIFICAR: en una calibración aparecieron ya precargados con un valor
-// por defecto; en otra aparecieron vacíos y hubo que seleccionarlos. El
+// NOTA: en una calibración aparecieron ya precargados con un valor por
+// defecto; en otra aparecieron vacíos y hubo que seleccionarlos. El
 // código maneja ambos casos: si ya tienen valor, no toca nada; si están
 // vacíos, selecciona estos valores (institución CAPJ / zonal Coyhaique, ver
 // HARNESS_IA.md — coincide con el subtítulo del login "Sección Finanzas y
@@ -110,11 +111,10 @@ export const BANDEJA_PROCESOS = {
     filaProceso: 'table:visible tbody tr',
 };
 
-// TODO-VERIFICAR: descrito por el usuario (2026-07-08) como un paginador
-// clásico (números de página + flecha "Siguiente"), pero el selector exacto
-// del botón/link "Siguiente" y de su estado deshabilitado en la última
-// página no están calibrados contra el DOM real todavía — candidatos
-// cubren tanto un patrón Bootstrap típico (<ul class="pagination">) como
+// VERIFICADO (2026-07-09, dos corridas reales): paginador clásico (números
+// de página + flecha "Siguiente", descrito por el usuario el 2026-07-08);
+// estos candidatos avanzan por todas las páginas y se detienen en la última.
+// Cubren tanto un patrón Bootstrap típico (<ul class="pagination">) como
 // atributos ARIA genéricos.
 export const PAGINACION_BANDEJA = {
     botonSiguiente: [
