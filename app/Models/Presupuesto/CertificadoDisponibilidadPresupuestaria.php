@@ -8,6 +8,7 @@ use App\Models\ProcesoAdquisicion;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class CertificadoDisponibilidadPresupuestaria extends Model
@@ -108,5 +109,26 @@ class CertificadoDisponibilidadPresupuestaria extends Model
     public function proceso(): MorphOne
     {
         return $this->morphOne(Proceso::class, 'sujeto');
+    }
+
+    /**
+     * CDP de anulación que referencian a este como original.
+     *
+     * @return HasMany<self, $this>
+     */
+    public function anulaciones(): HasMany
+    {
+        return $this->hasMany(self::class, 'cdp_original_id');
+    }
+
+    /**
+     * Ejecuciones presupuestarias imputadas a este CDP por pagos concretados.
+     *
+     * @return HasMany<MovimientoPresupuestario, $this>
+     */
+    public function movimientosEjecucion(): HasMany
+    {
+        return $this->hasMany(MovimientoPresupuestario::class, 'certificado_disponibilidad_presupuestaria_id')
+            ->where('tipo', 'ejecucion');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Workflow;
 
+use App\Events\TransicionWorkflowEjecutada;
 use App\Exceptions\TransicionWorkflowException;
 use App\Models\AsignacionTareaWorkflow;
 use App\Models\EstadoWorkflow;
@@ -14,6 +15,7 @@ use App\Services\Documentos\ResolutorValidacionDocumental;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class TransicionWorkflowService
 {
@@ -108,7 +110,26 @@ class TransicionWorkflowService
 
             $this->notificarResponsables($proceso, $estadoAnterior, $estadoNuevo);
 
+            $this->emitirEventoTrasConfirmar($proceso, $transicion->codigo, $user);
+
             return $proceso->refresh();
+        });
+    }
+
+    /**
+     * Emite TransicionWorkflowEjecutada recién cuando la transacción más
+     * externa se confirma (el llamador puede haber envuelto execute() en la
+     * suya). Una falla en un listener se reporta pero nunca revierte ni
+     * rompe una transición ya confirmada.
+     */
+    private function emitirEventoTrasConfirmar(Proceso $proceso, string $transicionCodigo, ?User $user): void
+    {
+        DB::afterCommit(function () use ($proceso, $transicionCodigo, $user): void {
+            try {
+                TransicionWorkflowEjecutada::dispatch($proceso, $transicionCodigo, $user);
+            } catch (Throwable $e) {
+                report($e);
+            }
         });
     }
 

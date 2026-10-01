@@ -13,6 +13,7 @@ class MovimientoPresupuestario extends Model
 
     protected $fillable = [
         'presupuesto_id',
+        'certificado_disponibilidad_presupuestaria_id',
         'tipo',
         'monto',
         'origen_type',
@@ -34,6 +35,14 @@ class MovimientoPresupuestario extends Model
     public function presupuesto(): BelongsTo
     {
         return $this->belongsTo(Presupuesto::class);
+    }
+
+    /**
+     * @return BelongsTo<CertificadoDisponibilidadPresupuestaria, $this>
+     */
+    public function certificadoDisponibilidad(): BelongsTo
+    {
+        return $this->belongsTo(CertificadoDisponibilidadPresupuestaria::class, 'certificado_disponibilidad_presupuestaria_id');
     }
 
     /**

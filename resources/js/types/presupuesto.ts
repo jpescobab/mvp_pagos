@@ -73,4 +73,17 @@ export type CertificadoDisponibilidadPresupuestaria = {
     firmado_por?: string | null;
     firmado_en: string | null;
     proceso?: Proceso;
+    ejecucion?: EjecucionCdp | null;
+};
+
+export type EjecucionCdp = {
+    pagos: {
+        caso_id: number;
+        sgf_id: string | null;
+        monto: number;
+        registrado_en: string | null;
+    }[];
+    monto_ejecutado: number;
+    compromiso_remanente: number;
+    sobre_ejecutado: boolean;
 };

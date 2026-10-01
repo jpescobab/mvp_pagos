@@ -52,6 +52,7 @@ class CertificadoDisponibilidadPresupuestariaController extends Controller
             'procesoAdquisicion',
             'cdpOriginal',
             'firmadoPor',
+            'movimientosEjecucion.origen',
             'proceso.estadoActual',
             'proceso.definicionWorkflow.transiciones',
             'proceso.vinculosDocumento.documento.tipoDocumento',

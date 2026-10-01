@@ -14,6 +14,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Monto } from '@/components/ui/monto';
 import { formatFechaHora } from '@/lib/format';
+import casos from '@/routes/pago-proveedores/casos';
 import cdps from '@/routes/presupuesto/cdps';
 import documentos from '@/routes/procesos/documentos';
 import type { CertificadoDisponibilidadPresupuestaria } from '@/types/presupuesto';
@@ -256,6 +257,66 @@ export default function CdpShow() {
                             </p>
                         )}
                 </section>
+
+                {cdp.ejecucion && (
+                    <section className="space-y-3 rounded-xl border p-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <h2 className="text-base font-medium">
+                                Ejecución presupuestaria
+                            </h2>
+                            {cdp.ejecucion.sobre_ejecutado && (
+                                <Badge className="text-danger border-transparent bg-danger-soft">
+                                    Sobre-ejecutado
+                                </Badge>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span className="text-muted-foreground">
+                                    Ejecutado:{' '}
+                                </span>
+                                <Monto valor={cdp.ejecucion.monto_ejecutado} />
+                            </div>
+                            <div>
+                                <span className="text-muted-foreground">
+                                    Compromiso remanente:{' '}
+                                </span>
+                                <Monto
+                                    valor={cdp.ejecucion.compromiso_remanente}
+                                />
+                            </div>
+                        </div>
+
+                        {cdp.ejecucion.pagos.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Aún no hay pagos ejecutados contra este CDP.
+                            </p>
+                        ) : (
+                            <ul className="divide-y text-sm">
+                                {cdp.ejecucion.pagos.map((pago) => (
+                                    <li
+                                        key={pago.caso_id}
+                                        className="flex items-center justify-between gap-2 py-2"
+                                    >
+                                        <Link
+                                            href={casos.show(pago.caso_id).url}
+                                            className="underline"
+                                        >
+                                            Caso {pago.sgf_id ?? pago.caso_id}
+                                        </Link>
+                                        <span className="text-muted-foreground">
+                                            {formatFechaHora(
+                                                pago.registrado_en,
+                                            )}
+                                        </span>
+                                        <Monto valor={pago.monto} />
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+                )}
 
                 <section className="space-y-3 rounded-xl border p-4">
                     <h2 className="text-base font-medium">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\TransicionWorkflowEjecutada;
 use App\Exceptions\TransicionWorkflowException;
 use App\Models\AsignacionTareaWorkflow;
 use App\Models\AuditLog;
@@ -13,6 +14,8 @@ use App\Models\TipoDocumento;
 use App\Models\User;
 use App\Notifications\TransicionWorkflowNotification;
 use App\Services\Workflow\TransicionWorkflowService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -226,4 +229,65 @@ test('permite la transición que exige comentario cuando se proporciona', functi
 
     expect($resultado->estadoActual->codigo)->toBe('rechazado');
     expect($resultado->cerrado_en)->not->toBeNull();
+});
+
+test('una transición exitosa emite TransicionWorkflowEjecutada con proceso, transición y usuario', function () {
+    Event::fake([TransicionWorkflowEjecutada::class]);
+
+    ['definicion' => $definicion, 'borrador' => $borrador] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $borrador);
+    $usuario = User::factory()->create();
+
+    app(TransicionWorkflowService::class)->execute($proceso, 'enviar_revision', user: $usuario);
+
+    Event::assertDispatched(
+        TransicionWorkflowEjecutada::class,
+        fn (TransicionWorkflowEjecutada $evento) => $evento->proceso->is($proceso)
+            && $evento->transicionCodigo === 'enviar_revision'
+            && $evento->user?->is($usuario),
+    );
+});
+
+test('una transición rechazada no emite TransicionWorkflowEjecutada', function () {
+    Event::fake([TransicionWorkflowEjecutada::class]);
+
+    ['definicion' => $definicion, 'borrador' => $borrador] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $borrador);
+
+    expect(fn () => app(TransicionWorkflowService::class)->execute($proceso, 'aprobar'))
+        ->toThrow(TransicionWorkflowException::class);
+
+    Event::assertNotDispatched(TransicionWorkflowEjecutada::class);
+});
+
+test('el evento se emite solo al confirmar la transacción externa del llamador', function () {
+    $emitido = false;
+    Event::listen(TransicionWorkflowEjecutada::class, function () use (&$emitido) {
+        $emitido = true;
+    });
+
+    ['definicion' => $definicion, 'borrador' => $borrador] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $borrador);
+
+    DB::transaction(function () use ($proceso, &$emitido) {
+        app(TransicionWorkflowService::class)->execute($proceso, 'enviar_revision');
+
+        expect($emitido)->toBeFalse();
+    });
+
+    expect($emitido)->toBeTrue();
+});
+
+test('un listener que falla no revierte la transición ni rompe a quien la ejecuta', function () {
+    Event::listen(TransicionWorkflowEjecutada::class, function () {
+        throw new RuntimeException('listener roto');
+    });
+
+    ['definicion' => $definicion, 'borrador' => $borrador] = crearWorkflowDePrueba();
+    $proceso = crearProcesoDePrueba($definicion, $borrador);
+
+    $resultado = app(TransicionWorkflowService::class)->execute($proceso, 'enviar_revision');
+
+    expect($resultado->estadoActual->codigo)->toBe('revision');
+    expect($proceso->refresh()->estadoActual->codigo)->toBe('revision');
 });

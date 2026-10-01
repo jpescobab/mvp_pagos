@@ -4,6 +4,7 @@ namespace App\Http\Resources\Presupuesto;
 
 use App\Http\Resources\PagoProveedores\ProcesoResource;
 use App\Models\Presupuesto\CertificadoDisponibilidadPresupuestaria;
+use App\Services\Presupuesto\EjecucionCdpPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -57,6 +58,10 @@ class CertificadoDisponibilidadPresupuestariaResource extends JsonResource
             'firmado_por' => $this->whenLoaded('firmadoPor', fn () => $this->firmadoPor?->name),
             'firmado_en' => $this->firmado_en,
             'proceso' => $this->whenLoaded('proceso', fn () => new ProcesoResource($this->proceso)),
+            'ejecucion' => $this->whenLoaded(
+                'movimientosEjecucion',
+                fn () => app(EjecucionCdpPresenter::class)->presentar($this->resource),
+            ),
         ];
     }
 }

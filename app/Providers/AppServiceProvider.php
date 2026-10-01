@@ -193,5 +193,8 @@ class AppServiceProvider extends ServiceProvider
     protected function configureEventListeners(): void
     {
         Event::listen(Login::class, RegistrarUltimoAcceso::class);
+        // RegistrarEjecucionPresupuestariaAlPagar se registra sola por
+        // auto-descubrimiento de app/Listeners (handle tipado con el evento);
+        // registrarla acá también la ejecutaría dos veces.
     }
 }
