@@ -93,12 +93,12 @@ class CasoPagoProveedorResource extends JsonResource
             // arriba): el listado paginado de casos no carga 'consumoBasico',
             // y esCandidatoServicioBasico() hace su propia query — calcularlo
             // sin querer ahí introduciría un N+1 por fila.
-            'es_candidato_consumo_basico' => $this->whenLoaded(
-                'consumoBasico',
-                fn () => $this->consumoBasico === null
-                    && app(ConsumoBasicoService::class)->esCandidatoServicioBasico($this->resource),
-                false,
-            ),
+            // No usar whenLoaded() con closure: si la relación está cargada
+            // pero es null (caso sin consumo, justo el candidato) devuelve
+            // null sin ejecutar el closure.
+            'es_candidato_consumo_basico' => $this->resource->relationLoaded('consumoBasico')
+                && $this->consumoBasico === null
+                && app(ConsumoBasicoService::class)->esCandidatoServicioBasico($this->resource),
             'consumo_basico' => $this->whenLoaded(
                 'consumoBasico',
                 fn () => $this->consumoBasico === null ? null : ['id' => $this->consumoBasico->id],

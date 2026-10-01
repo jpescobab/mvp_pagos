@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Resources\PagoProveedores\CasoPagoProveedorResource;
 use App\Models\CasoPagoProveedor;
 use App\Models\Ccosto;
 use App\Models\ClienteMedidor;
@@ -60,4 +61,27 @@ test('un caso sin proveedor resuelto no se marca candidato', function () {
     ]);
 
     expect(app(ConsumoBasicoService::class)->esCandidatoServicioBasico($caso))->toBeFalse();
+});
+
+test('el recurso expone es_candidato_consumo_basico true para un caso candidato sin consumo registrado', function () {
+    $proveedor = Proveedor::create(['rutproveedor' => '76700004-4', 'nombre' => 'EDELAYSEN']);
+    $ccosto = crearCcostoDePruebaParaCandidatoServicioBasico();
+    ClienteMedidor::create([
+        'numero_cliente' => '8888004',
+        'proveedor_id' => $proveedor->id,
+        'ccosto_id' => $ccosto->id,
+        'tipo_suministro' => 'Electricidad',
+        'activo' => true,
+    ]);
+
+    $caso = CasoPagoProveedor::create([
+        'sgf_id' => 'sgf-candidato-recurso',
+        'proveedor_id' => $proveedor->id,
+        'rut_proveedor' => $proveedor->rutproveedor,
+        'monto' => 10000,
+    ])->load('consumoBasico');
+
+    $datos = (new CasoPagoProveedorResource($caso))->resolve(request());
+
+    expect($datos['es_candidato_consumo_basico'])->toBeTrue();
 });
