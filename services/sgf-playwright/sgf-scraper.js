@@ -18,6 +18,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
+import { repararMojibake } from './nombre-archivo.js';
 import { BANDEJA_PROCESOS, FILTRO_BANDEJA, LOGIN, MAPEO_COLUMNAS_BANDEJA, MENU_ACCIONES_PROCESO, NAVEGACION_REDFLOW, PAGINACION_BANDEJA, SELECCION_UNIDAD_INGRESO, VER_DOCUMENTOS } from './selectors.js';
 
 // Tope defensivo de páginas a recorrer en la Bandeja: evita un bucle
@@ -715,7 +716,10 @@ async function descargarDocumentosDeFila(page, filaLocator, sgfId, pasos) {
     for (let i = 0; i < total; i++) {
         const fila = filas.nth(i);
         const celdas = await fila.locator('td').allTextContents();
-        const nombreArchivo = (celdas[VER_DOCUMENTOS.columnaNombre] ?? `documento-${i + 1}.pdf`).trim();
+        // repararMojibake: SGF/la lectura de la tabla entrega algunos nombres
+        // con UTF-8 leído como Latin-1 ("NÂ°"); se repara antes de usarlo como
+        // archivo en disco y en ruta_archivo para que queden consistentes.
+        const nombreArchivo = repararMojibake((celdas[VER_DOCUMENTOS.columnaNombre] ?? `documento-${i + 1}.pdf`).trim());
 
         // Cada documento se procesa de forma aislada: si uno falla (ícono no
         // encontrado, descarga fallida, contenido inesperado), se registra el

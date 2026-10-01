@@ -15,6 +15,7 @@ use App\Services\Integraciones\AutomatizacionNavegadorService;
 use App\Services\Integraciones\IntegracionExternaService;
 use App\Services\PagoProveedores\CasoPagoProveedorImporter;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class ConectorSgfPlaywrightService
@@ -26,6 +27,7 @@ class ConectorSgfPlaywrightService
         private readonly AutomatizacionNavegadorService $automatizacionNavegador,
         private readonly NormalizadorSgf $normalizadorSgf,
         private readonly CasoPagoProveedorImporter $casoPagoProveedorImporter,
+        private readonly ReparadorNombreArchivoSgf $reparadorNombreArchivo,
     ) {}
 
     /**
@@ -226,6 +228,33 @@ class ConectorSgfPlaywrightService
     }
 
     /**
+     * Devuelve la ruta con la que debe registrarse el documento. Si el
+     * nombre se reparó y el archivo físico sigue con el nombre corrupto, lo
+     * mueve a la ruta reparada. Nunca sobrescribe: si ambos archivos existen
+     * se conserva la ruta cruda, que es donde vive realmente el archivo.
+     */
+    private function moverArchivoARutaReparada(string $rutaCruda, string $rutaReparada): string
+    {
+        if ($rutaCruda === $rutaReparada) {
+            return $rutaCruda;
+        }
+
+        $disco = Storage::disk('local');
+
+        if (! $disco->exists($rutaCruda)) {
+            return $rutaReparada;
+        }
+
+        if ($disco->exists($rutaReparada)) {
+            return $rutaCruda;
+        }
+
+        $disco->move($rutaCruda, $rutaReparada);
+
+        return $rutaReparada;
+    }
+
+    /**
      * @param  array<string, mixed>  $documentoSgf
      */
     private function vincularDocumento(SnapshotDatosExterno $snapshot, CasoPagoProveedor $caso, array $documentoSgf): void
@@ -237,17 +266,28 @@ class ConectorSgfPlaywrightService
         // en disco en cada corrida, ver sgf-scraper.js), así que ya existir
         // un vínculo activo del Proceso a un Documento con esa misma ruta
         // significa que es el mismo archivo, no uno nuevo.
+        //
+        // Los nombres con mojibake (UTF-8 leído como Latin-1) se reparan acá
+        // (el payload crudo del snapshot queda intacto). Un registro previo
+        // puede tener la ruta corrupta o la reparada, así que la búsqueda de
+        // duplicados cubre ambas.
+        $nombreArchivo = $this->reparadorNombreArchivo->reparar($documentoSgf['nombre_archivo']);
+        $rutaCruda = $documentoSgf['ruta_archivo'];
+        $rutaReparada = $this->reparadorNombreArchivo->repararRuta($rutaCruda);
+
         $yaVinculado = $caso->proceso?->vinculosDocumento()
             ->where('activo', true)
             ->whereHas(
                 'documento.versiones',
-                fn ($query) => $query->where('ruta_archivo', $documentoSgf['ruta_archivo']),
+                fn ($query) => $query->whereIn('ruta_archivo', array_unique([$rutaCruda, $rutaReparada])),
             )
             ->exists() ?? false;
 
         if ($yaVinculado) {
             return;
         }
+
+        $rutaArchivo = $this->moverArchivoARutaReparada($rutaCruda, $rutaReparada);
 
         $tipo = TipoDocumento::firstOrCreate(
             ['codigo' => $documentoSgf['tipo_documento_codigo']],
@@ -256,13 +296,13 @@ class ConectorSgfPlaywrightService
 
         $documento = Documento::create([
             'tipo_documento_id' => $tipo->id,
-            'titulo' => $documentoSgf['nombre_archivo'],
+            'titulo' => $nombreArchivo,
         ]);
 
         $documento->versiones()->create([
             'numero_version' => 1,
-            'ruta_archivo' => $documentoSgf['ruta_archivo'],
-            'nombre_archivo' => $documentoSgf['nombre_archivo'],
+            'ruta_archivo' => $rutaArchivo,
+            'nombre_archivo' => $nombreArchivo,
         ]);
 
         $snapshot->documentos()->create(['documento_id' => $documento->id]);

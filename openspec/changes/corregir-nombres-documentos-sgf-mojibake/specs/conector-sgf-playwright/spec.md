@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Nombres de archivo de documentos SGF con codificación correcta
-El sistema SHALL reparar el mojibake (UTF-8 interpretado como Latin-1) en los nombres de archivo de los documentos descargados desde SGF antes de usarlos como nombre en disco, `ruta_archivo`, `nombre_archivo` y título del documento. La reparación SHALL aplicarse solo cuando el nombre contenga secuencias de mojibake y su re-decodificación produzca UTF-8 válido; en cualquier otro caso el nombre SHALL conservarse intacto. El payload crudo del snapshot SGF SHALL permanecer sin modificar.
+El sistema SHALL reparar el mojibake (UTF-8 interpretado como Latin-1) en los nombres de archivo de los documentos descargados desde SGF antes de usarlos como nombre en disco, `ruta_archivo`, `nombre_archivo` y título del documento. La reparación SHALL aplicarse solo cuando el nombre contenga secuencias de mojibake y su re-decodificación produzca UTF-8 válido y no contenga bytes ya degradados (secuencias `Ã¿` o `Â¿`, cuyo carácter original no es recuperable); en cualquier otro caso el nombre SHALL conservarse intacto. El payload crudo del snapshot SGF SHALL permanecer sin modificar.
 
 #### Scenario: Nombre con mojibake en la tabla de documentos de SGF
 - **WHEN** el conector descarga un documento cuyo nombre llega como `CT NÂ°957_433 CONST.EHG.pdf`
@@ -11,6 +11,11 @@ El sistema SHALL reparar el mojibake (UTF-8 interpretado como Latin-1) en los no
 #### Scenario: Nombre legítimo sin mojibake
 - **WHEN** el conector descarga un documento cuyo nombre no contiene secuencias de mojibake (por ejemplo `Garantía.pdf`)
 - **THEN** el nombre se conserva exactamente igual
+
+#### Scenario: Nombre con bytes ya degradados
+- **WHEN** el conector descarga un documento cuyo nombre contiene `Ã¿` (por ejemplo `PASAJES_AÃ¿REOS.pdf`, donde el carácter original ya llegó degradado)
+- **THEN** el nombre se conserva intacto en lugar de reemplazarlo por un carácter equivocado
+- **AND** el comando de reparación lo reporta como irreparable automáticamente para revisión humana
 
 #### Scenario: El payload crudo del snapshot no se altera
 - **WHEN** el backend repara el nombre de un documento al registrarlo

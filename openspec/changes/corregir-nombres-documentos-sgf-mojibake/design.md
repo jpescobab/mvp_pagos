@@ -26,7 +26,7 @@ Los nombres corruptos son mojibake clásico: bytes UTF-8 interpretados como Lati
 
 **4. Reparación de datos existentes con comando Artisan, no migración.** Toca archivos físicos, no solo filas; debe poder simularse. `--dry-run` lista cambios sin aplicar. Cada registro se procesa en transacción; el archivo se renombra solo si existe y el destino no existe (si el destino existe, se reporta conflicto y se omite). Es idempotente: sin mojibake no hace nada. Registra auditoría con `AuditLogger::log` (antes/después) por documento.
 
-**5. Limitación conocida.** Algunos nombres (`JAÃ¿A`) pueden no ser reversibles a la letra original (p. ej. una `Ñ` ya degradada antes de llegar acá); la reparación solo aplica cuando el roundtrip produce UTF-8 válido y se reporta lo que no pudo repararse para revisión humana.
+**5. Bytes ya degradados: no se adivinan.** Descubierto con el `--dry-run` sobre datos reales: `AÃ¿REOS` (original `AÉREOS`) y `JAÃ¿A` (original `JAÑA`) llegaron con el byte de continuación (0x89/0x91) ya degradado a `¿`. El roundtrip produciría `ÿ`, un carácter válido pero equivocado. Por eso `Ã¿`/`Â¿` se tratan como irreparables: el nombre se deja intacto y el comando los lista aparte para corrección humana. Hoy afecta a 3 de los 6 documentos (ids 241, 251, 252).
 
 ## Risks / Trade-offs
 

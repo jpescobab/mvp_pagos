@@ -230,6 +230,23 @@ diagnóstico en ese caso), igual que ya hacía `primerSelectorExistente` desde
    periódicamente que SGF no haya cambiado su HTML (este scraper no tiene
    detección automática de cambios de layout).
 
+## Nombres de documentos con mojibake (pendiente de confirmar en corrida real)
+
+Algunos nombres de archivo de la tabla "Lista documentos" llegan con UTF-8
+leído como Latin-1 (`NÂ°` en vez de `N°`, `aÃ©reo` en vez de `aéreo`).
+`nombre-archivo.js` (`repararMojibake`) los repara antes de guardar el archivo
+y la ruta; el backend repara lo mismo al registrar el documento
+(`ReparadorNombreArchivoSgf`) y `php artisan sgf:reparar-nombres-documentos`
+corrige lo ya importado. Los nombres con `Ã¿` (carácter original ya degradado a
+`¿`, p. ej. `AÉREOS`, `JAÑA`) NO se adivinan: el comando los lista para
+corrección manual.
+
+**Sin confirmar:** si el mojibake lo sirve SGF tal cual o lo introduce la
+lectura de la tabla. Se verifica con una corrida real que ejecuta el usuario
+(no el asistente): al leer el nombre de un documento con tilde/`°`, comparar el
+texto crudo de la celda con lo que muestra la UI de SGF. Si la celda ya trae
+texto correcto, el origen está en otra capa y conviene reabrir este punto.
+
 ## Seguridad
 
 - `SGF_PASSWORD` nunca debe aparecer en un `console.log`, mensaje de error, ni
