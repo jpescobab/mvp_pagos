@@ -3,9 +3,7 @@
 ## Purpose
 
 Motor de workflow propio que gobierna todo cambio de estado de cualquier proceso de negocio futuro, exclusivamente a través de `TransicionWorkflowService::execute()`.
-
 ## Requirements
-
 ### Requirement: Controlar transiciones mediante servicio central
 Todo cambio de estado de un proceso SHALL pasar por `TransicionWorkflowService::execute()`. Ningún controlador, job, seeder o componente React SHALL cambiar el estado de un proceso directamente.
 
@@ -42,3 +40,19 @@ Un `Proceso` SHALL poder asociarse a cualquier entidad de negocio futura mediant
 - **WHEN** se crea un proceso para una entidad de negocio en el estado inicial de un workflow activo
 - **THEN** el proceso queda asociado a esa entidad mediante `sujeto_type`/`sujeto_id`
 - **AND** queda en el estado marcado como `es_inicial` de su workflow
+
+### Requirement: Emitir un evento tras cada transición confirmada
+`TransicionWorkflowService::execute()` SHALL emitir un evento `TransicionWorkflowEjecutada` (con el proceso, el código de la transición y el usuario) una vez confirmada la transacción de la transición, de modo que los dominios funcionales puedan reaccionar sin que el core de workflow los conozca. Una falla en un listener SHALL NOT revertir ni impedir la transición ya confirmada.
+
+#### Scenario: Transición confirmada
+- **WHEN** una transición se ejecuta correctamente a través del servicio central
+- **THEN** se emite `TransicionWorkflowEjecutada` con el proceso, el código de la transición y el usuario, después de confirmar la transacción
+
+#### Scenario: Transición rechazada
+- **WHEN** una transición es rechazada (no permitida, sin permiso, documentos faltantes o proceso cerrado)
+- **THEN** no se emite el evento
+
+#### Scenario: Un listener falla
+- **WHEN** un listener de `TransicionWorkflowEjecutada` lanza una excepción
+- **THEN** la transición permanece confirmada y el estado del proceso no se revierte
+

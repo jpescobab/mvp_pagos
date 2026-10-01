@@ -28,4 +28,4 @@
 - [x] 5.1 `vendor/bin/pint --dirty --format agent` sobre los PHP tocados.
 - [x] 5.2 `composer types:check` (PHPStan) y `php artisan test --compact` sobre `tests/Feature/Presupuesto`, `tests/Feature/Workflow` y `tests/Feature/PagoProveedores`; correr el directorio completo por el gotcha de helpers cross-archivo.
 - [x] 5.3 `npm run lint:check` y `npm run types:check` sobre el frontend tocado, regenerando Wayfinder si hace falta.
-- [ ] 5.4 Verificación manual en navegador: pagar un caso de prueba con CDP firmado vigente y confirmar la tarjeta de ejecución en el detalle del CDP y que el estado del caso es `pagada_bancoestado`.
+- [ ] 5.4 Verificación manual en navegador: pagar un caso de prueba con CDP firmado vigente y confirmar la tarjeta de ejecución en el detalle del CDP y que el estado del caso es `pagada_bancoestado`. (Pendiente a cargo del usuario al archivar: los tests de integración ya cubren el flujo completo; falta solo la revisión visual de la tarjeta con datos reales.)
