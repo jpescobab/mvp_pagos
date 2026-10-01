@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
+import { formatFecha } from '@/lib/format';
 import consumoBasico from '@/routes/consumo-basico';
 import casos from '@/routes/pago-proveedores/casos';
 import type { ConsumoBasico } from '@/types/consumo-basico';
@@ -93,8 +94,8 @@ export default function ConsumoBasicoShow() {
                             Período de lectura
                         </dt>
                         <dd>
-                            {detalle.fecha_inicio_lectura} —{' '}
-                            {detalle.fecha_fin_lectura}
+                            {formatFecha(detalle.fecha_inicio_lectura)} —{' '}
+                            {formatFecha(detalle.fecha_fin_lectura)}
                         </dd>
                     </div>
                     <div>
@@ -116,13 +117,13 @@ export default function ConsumoBasicoShow() {
                         <dt className="text-muted-foreground">
                             Fecha de emisión
                         </dt>
-                        <dd>{detalle.fecha_emision}</dd>
+                        <dd>{formatFecha(detalle.fecha_emision)}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">
                             Fecha de vencimiento
                         </dt>
-                        <dd>{detalle.fecha_vencimiento}</dd>
+                        <dd>{formatFecha(detalle.fecha_vencimiento)}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">Monto neto</dt>

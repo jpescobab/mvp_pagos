@@ -3,6 +3,7 @@ import { ClienteMedidorStatusBadge } from '@/components/maestros/cliente-medidor
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Monto } from '@/components/ui/monto';
+import { formatFecha } from '@/lib/format';
 import clientesMedidores from '@/routes/maestros/clientes-medidores';
 import type { ClienteMedidor } from '@/types/maestros';
 
@@ -109,8 +110,13 @@ export default function ClientesMedidoresShow() {
                                 {clienteMedidor.consumos.map((consumo) => (
                                     <tr key={consumo.id} className="border-b">
                                         <td className="py-2">
-                                            {consumo.fecha_inicio_lectura} —{' '}
-                                            {consumo.fecha_fin_lectura}
+                                            {formatFecha(
+                                                consumo.fecha_inicio_lectura,
+                                            )}{' '}
+                                            —{' '}
+                                            {formatFecha(
+                                                consumo.fecha_fin_lectura,
+                                            )}
                                         </td>
                                         <td className="py-2">
                                             {consumo.numero_documento}
