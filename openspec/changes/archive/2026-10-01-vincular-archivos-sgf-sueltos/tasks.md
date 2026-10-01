@@ -34,4 +34,4 @@
 - [x] 7.1 `vendor/bin/pint --dirty --format agent` sobre los archivos PHP tocados.
 - [x] 7.2 `composer test` (lint:check + types:check + suite Pest completa).
 - [x] 7.3 `npm run lint:check` y `npm run types:check` sobre el frontend tocado.
-- [ ] 7.4 Verificación manual: crear un archivo de prueba dentro de `storage/app/private/sgf-documentos/{sgfId}/` de un caso real sin registrar como `Documento`, confirmar que aparece en el selector del checklist, vincularlo, y confirmar que aparece como documento del ítem sin alterar el estado del caso.
+- [x] 7.4 Verificación manual: crear un archivo de prueba dentro de `storage/app/private/sgf-documentos/{sgfId}/` de un caso real sin registrar como `Documento`, confirmar que aparece en el selector del checklist, vincularlo, y confirmar que aparece como documento del ítem sin alterar el estado del caso.

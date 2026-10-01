@@ -54,4 +54,4 @@
 - [x] 10.1 `vendor/bin/pint --dirty --format agent` sobre los archivos PHP tocados.
 - [x] 10.2 `composer test` (lint:check + types:check + suite Pest completa).
 - [x] 10.3 `npm run lint:check` y `npm run types:check` sobre el frontend tocado.
-- [ ] 10.4 Verificación manual en navegador: desde el detalle de un `CasoPagoProveedor` candidato, completar el detalle de consumo (creando un `ClienteMedidor` nuevo al vuelo), adjuntar un PDF, y confirmar que aparece en el historial del medidor sin alterar el estado del caso de pago.
+- [x] 10.4 Verificación manual en navegador: desde el detalle de un `CasoPagoProveedor` candidato, completar el detalle de consumo (creando un `ClienteMedidor` nuevo al vuelo), adjuntar un PDF, y confirmar que aparece en el historial del medidor sin alterar el estado del caso de pago.

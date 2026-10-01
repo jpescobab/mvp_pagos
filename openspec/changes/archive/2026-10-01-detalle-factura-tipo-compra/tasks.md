@@ -62,4 +62,4 @@
 - [x] 10.1 `vendor/bin/pint --dirty --format agent` sobre los archivos PHP tocados.
 - [x] 10.2 `composer test` (lint:check + types:check + suite Pest completa).
 - [x] 10.3 `npm run lint:check` y `npm run types:check` sobre el frontend tocado.
-- [ ] 10.4 Verificación manual en navegador: desde el detalle de un `CasoPagoProveedor` con al menos una `Factura`, registrar su detalle (tipo de compra, centro de costo, cantidad, monto), confirmar el badge "Con detalle", y confirmar que el estado del caso/workflow no cambió; crear/editar un `TipoCompra` desde Maestros y confirmar que aparece en el select del formulario de detalle.
+- [x] 10.4 Verificación manual en navegador: desde el detalle de un `CasoPagoProveedor` con al menos una `Factura`, registrar su detalle (tipo de compra, centro de costo, cantidad, monto), confirmar el badge "Con detalle", y confirmar que el estado del caso/workflow no cambió; crear/editar un `TipoCompra` desde Maestros y confirmar que aparece en el select del formulario de detalle.
