@@ -1,7 +1,7 @@
 # tipos-compra Specification
 
 ## Purpose
-TBD - created by archiving change detalle-factura-tipo-compra. Update Purpose after archive.
+Catálogo administrable de tipos de compra, sembrado con una base genérica.
 ## Requirements
 ### Requirement: Catálogo administrable de tipos de compra
 El sistema SHALL mantener un catálogo `TipoCompra` (código, nombre, activo) que un usuario con el permiso `pago_proveedores.administrar_tipos_compra` pueda crear, editar y desactivar desde la interfaz, sin requerir cambios de código.

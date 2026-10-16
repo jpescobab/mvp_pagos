@@ -1,7 +1,7 @@
 # vincular-archivos-sgf-sueltos Specification
 
 ## Purpose
-TBD - created by archiving change vincular-archivos-sgf-sueltos. Update Purpose after archive.
+Detectar archivos descargados de SGF sin vincular y asociarlos a un ítem del checklist sin volver a subirlos, sin alterar el workflow del caso.
 ## Requirements
 ### Requirement: Detectar archivos sueltos de un caso importado desde SGF
 El sistema SHALL, para un `CasoPagoProveedor` (siempre tiene `sgf_id`, es la vía de importación desde SGF), identificar los archivos presentes en `storage/app/private/sgf-documentos/{sgfId}/` que no tienen ninguna fila `VersionDocumento` con esa misma ruta relativa.

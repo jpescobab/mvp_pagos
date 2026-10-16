@@ -1,7 +1,7 @@
 # crear-usuario-institucional Specification
 
 ## Purpose
-TBD - created by archiving change crear-usuario-institucional. Update Purpose after archive.
+Alta de usuarios institucionales con funcionario asociado, contraseña temporal de un solo uso y unicidad de email y RUT.
 ## Requirements
 ### Requirement: Autorización para crear usuarios
 El sistema SHALL restringir el acceso al formulario de alta (`GET /usuarios/create`) y a la creación (`POST /usuarios`) a usuarios con el permiso `usuarios.crear`.

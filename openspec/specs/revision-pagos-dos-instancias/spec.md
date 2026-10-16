@@ -1,7 +1,7 @@
 # revision-pagos-dos-instancias Specification
 
 ## Purpose
-TBD - created by archiving change revision-pagos-dos-instancias. Update Purpose after archive.
+Revisión de pagos en dos instancias secuenciales con devolución a la instancia anterior, revisión documental por instancia y verificación de totales.
 ## Requirements
 ### Requirement: Revisión de pagos en dos instancias secuenciales
 Los pagos (`casos_pago_proveedor`) agrupados en un Egreso SHALL revisarse en dos instancias secuenciales antes de avanzar al registro CGU: primero la instancia de Finanzas (Jefe de Finanzas) y luego la instancia Zonal (Administrador Zonal). El caso SHALL pasar de la instancia de Finanzas a la instancia Zonal únicamente cuando la instancia de Finanzas lo apruebe, y solo puede quedar aprobado para registro CGU cuando la instancia Zonal lo apruebe. Todo cambio de estado del caso SHALL ejecutarse exclusivamente a través de `TransicionWorkflowService::execute()`.

@@ -1,7 +1,7 @@
 # detalle-factura Specification
 
 ## Purpose
-TBD - created by archiving change detalle-factura-tipo-compra. Update Purpose after archive.
+Registrar y editar el detalle opcional de una Factura asociada a un caso de pago. Es informativo: no gobierna el pago.
 ## Requirements
 ### Requirement: Registrar el detalle de una Factura existente
 El sistema SHALL permitir, a un usuario con el permiso `pago_proveedores.registrar_detalle_factura`, registrar un `DetalleFactura` (tipo de compra, centro de costo, cantidad, unidad de medida, monto) para una `Factura` existente. Una `Factura` SHALL tener a lo sumo un `DetalleFactura` asociado.

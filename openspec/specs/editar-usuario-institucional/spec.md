@@ -1,7 +1,7 @@
 # editar-usuario-institucional Specification
 
 ## Purpose
-TBD - created by archiving change editar-usuario-institucional. Update Purpose after archive.
+Edición transaccional de usuarios institucionales y su funcionario, con formulario precargado y unicidad de email y RUT.
 ## Requirements
 ### Requirement: Autorización para editar usuarios
 El sistema SHALL restringir el acceso al formulario de edición (`GET /usuarios/{usuario}/editar`) y a la actualización (`PATCH /usuarios/{usuario}`) a usuarios con el permiso `usuarios.editar`.

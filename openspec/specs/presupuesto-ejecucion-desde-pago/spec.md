@@ -1,7 +1,7 @@
 # presupuesto-ejecucion-desde-pago Specification
 
 ## Purpose
-TBD - created by archiving change presupuesto-ejecucion-desde-pago. Update Purpose after archive.
+Reflejar en Presupuesto la ejecución de un CDP cuando un caso se paga, liberando el compromiso, con idempotencia y alerta de sobre-ejecución. CGU gobierna el presupuesto: el sistema solo refleja y alerta, nunca bloquea el pago.
 ## Requirements
 ### Requirement: Registrar ejecución y liberación de compromiso al pagar un caso
 El sistema SHALL registrar automáticamente, cuando un `CasoPagoProveedor` ejecuta la transición `marcar_pagada_bancoestado`, un movimiento presupuestario `ejecucion` y un movimiento `liberacion_compromiso`, ambos por el monto del caso, contra el CDP firmado vigente de la adquisición vinculada al caso. Ambos movimientos SHALL tener como origen el `CasoPagoProveedor` y SHALL quedar vinculados al CDP. El registro SHALL ocurrir solo si el módulo Presupuesto está activo.

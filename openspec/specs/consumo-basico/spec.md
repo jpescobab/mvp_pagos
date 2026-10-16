@@ -1,7 +1,7 @@
 # consumo-basico Specification
 
 ## Purpose
-TBD - created by archiving change modulo-consumo-basico. Update Purpose after archive.
+Registrar el detalle de consumo (medidor, período, consumo, tarifa, montos) de un caso de pago de servicios básicos, con reconocimiento automático de candidatos y PDF de boleta como evidencia. Es informativo: no gobierna el pago.
 ## Requirements
 ### Requirement: Registrar el detalle de consumo vinculado a un caso de pago existente
 El sistema SHALL permitir, a un usuario con el permiso `consumo_basico.crear`, registrar un `ConsumoBasico` (medidor, período de lectura, consumo, tarifa, montos) para un `CasoPagoProveedor` existente, exigiendo `cliente_medidor_id` y `caso_pago_proveedor_id`. Un `CasoPagoProveedor` SHALL tener a lo sumo un `ConsumoBasico` asociado.
