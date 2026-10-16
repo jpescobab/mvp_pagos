@@ -97,10 +97,11 @@ function enmascararUrl(url) {
 const REGEX_RUT = /\d{1,2}(?:\.\d{3}){2}-[\dkK]/;
 const REGEX_MONTO = /\$?\s?[\d.]{4,}(?:,\d+)?/;
 
-// TODO-VERIFICAR: mapeo heurístico de prefijo de nombre de archivo -> código
-// de tipos_documento (ver database/seeders/TiposDocumentoSeeder.php). "FAE"
-// (Factura Afecta Electrónica) se asume como FACTURA; el resto (BIT_,
-// FURBS-, etc.) cae en OTRO hasta confirmar qué representan institucionalmente.
+// Decisión (2026-10-16): solo "FAE" (Factura Afecta Electrónica) se clasifica
+// como FACTURA; el resto (FICHA, FURBS, BIT_, etc.) cae en OTRO y una persona
+// lo reclasifica a mano. No se auto-clasifica FICHA_INICIO porque es documento
+// obligatorio del checklist: un prefijo mal puesto en SGF cumpliría el
+// requisito sin revisión humana.
 function inferirTipoDocumento(nombreArchivo) {
     if (/^FAE[-_]/i.test(nombreArchivo)) {
         return 'FACTURA';
