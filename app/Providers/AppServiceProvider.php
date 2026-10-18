@@ -33,6 +33,7 @@ use App\Models\Proceso;
 use App\Models\ProcesoAdquisicion;
 use App\Models\Proveedor;
 use App\Models\SeccionInformeRazonado;
+use App\Models\ServicioContratado;
 use App\Models\TipoCompra;
 use App\Models\TipoDocumento;
 use App\Models\TipoProcesoPago;
@@ -69,6 +70,7 @@ use App\Policies\ProcesoPolicy;
 use App\Policies\ProveedorPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\SeccionInformeRazonadoPolicy;
+use App\Policies\ServicioContratadoPolicy;
 use App\Policies\TipoCompraPolicy;
 use App\Policies\TipoDocumentoPolicy;
 use App\Policies\TipoProcesoPagoPolicy;
@@ -172,6 +174,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CertificadoDisponibilidadPresupuestaria::class, CertificadoDisponibilidadPresupuestariaPolicy::class);
         Gate::policy(Contrato::class, ContratoPolicy::class);
         Gate::policy(ConsumoBasico::class, ConsumoBasicoPolicy::class);
+        Gate::policy(ServicioContratado::class, ServicioContratadoPolicy::class);
 
         Gate::before(fn (User $user, string $ability) => $user->hasRole('superadmin') ? true : null);
 

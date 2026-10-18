@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property-read Carbon $fecha_inicio_vigencia
+ * @property-read Carbon $fecha_fin_vigencia
+ */
 class Contrato extends Model
 {
     protected $table = 'contratos';

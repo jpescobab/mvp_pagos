@@ -25,3 +25,4 @@ require __DIR__.'/informes-razonados.php';
 require __DIR__.'/presupuesto.php';
 require __DIR__.'/contratos.php';
 require __DIR__.'/consumo-basico.php';
+require __DIR__.'/servicios-contratados.php';

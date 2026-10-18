@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Building2,
+    CalendarClock,
     ClipboardCheck,
     Coins,
     FileBarChart,
@@ -67,6 +68,7 @@ import { index as importacionesPresupuesto } from '@/routes/presupuesto/importac
 import { index as lineasPresupuesto } from '@/routes/presupuesto/lineas';
 import { index as periodosReportabilidad } from '@/routes/reportabilidad/periodos';
 import { index as roles } from '@/routes/roles';
+import { index as serviciosContratados } from '@/routes/servicios-contratados';
 import { index as importacionesSgf } from '@/routes/sgf/importaciones';
 import { index as usuarios } from '@/routes/usuarios';
 import { index as definicionesWorkflow } from '@/routes/workflow/definiciones';
@@ -195,6 +197,12 @@ const adquisicionesNavItems: NavItemConPermiso[] = [
         href: contratos(),
         icon: FileSignature,
         permiso: 'contratos.ver',
+    },
+    {
+        title: 'Servicios contratados',
+        href: serviciosContratados(),
+        icon: CalendarClock,
+        permiso: 'servicios_contratados.ver',
     },
     {
         title: 'Órdenes de Compra (Mercado Público)',

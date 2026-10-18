@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
         $this->call(WorkflowContratosSeeder::class);
         $this->call(RequisitosDocumentalesContratosSeeder::class);
         $this->call(ConsumoBasicoSeeder::class);
+        $this->call(ServiciosContratadosSeeder::class);
         $this->call(TipoCompraSeeder::class);
 
         // Snapshot de desarrollo (UF/USD/UTM/UTA/IPC ene-ago 2026) para no
